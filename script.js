@@ -145,7 +145,11 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-const handleLogout = () => auth.signOut();
+const handleLogout = () => {
+    DOMElements.emailInput.value = '';
+    DOMElements.passwordInput.value = '';
+    auth.signOut();
+};
 
 // --- DASHBOARD LOGIC ---
 async function renderDashboard() {
