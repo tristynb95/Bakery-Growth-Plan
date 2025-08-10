@@ -23,10 +23,10 @@
     --shadow-focus: 0 0 0 3px rgba(209, 10, 17, 0.2);
 }
 
-body { 
-    font-family: 'Inter', sans-serif; 
-    background-color: var(--gails-bg); 
-    color: var(--gails-text-primary); 
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--gails-bg);
+    color: var(--gails-text-primary);
 }
 .font-poppins { font-family: 'Poppins', sans-serif; letter-spacing: -0.02em; }
 .hidden { display: none !important; }
@@ -42,16 +42,16 @@ body {
 .auth-buttons { display: flex; gap: 1rem; margin-top: 1rem; }
 .auth-buttons > .btn { flex: 1; }
 
-.loading-overlay { 
-    position: fixed; 
-    top: 0; left: 0; right: 0; bottom: 0; 
-    background-color: rgba(249, 249, 248, 0.8); 
-    backdrop-filter: blur(4px); 
-    z-index: 1000; 
-    display: flex; 
+.loading-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(249, 249, 248, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
     flex-direction: column;
-    align-items: center; 
-    justify-content: center; 
+    align-items: center;
+    justify-content: center;
 }
 .loading-spinner {
     width: 50px;
@@ -70,16 +70,16 @@ body {
 -------------------------------------------------- */
 .dashboard-header { background-color: var(--gails-white); padding: 1rem 2rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; }
 .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
-.plan-card { 
-    background-color: var(--gails-white); 
-    border: 1px solid #E5E7EB; 
-    border-radius: 1rem; 
-    padding: 1.5rem; 
-    box-shadow: var(--shadow-sm); 
-    transition: all 0.2s ease; 
-    display: flex; 
-    flex-direction: column; 
-    position: relative; 
+.plan-card {
+    background-color: var(--gails-white);
+    border: 1px solid #E5E7EB;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
     min-height: 220px;
 }
 .plan-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--gails-red); }
@@ -189,4 +189,33 @@ main { grid-area: main; }
     border-radius: 0.5rem;
     font-size: 0.875rem;
     margin-bottom: 1rem;
+}
+
+/* 10. Input Validation Enhancements
+-------------------------------------------------- */
+.form-input.input-error {
+    border-color: var(--gails-red);
+    box-shadow: var(--shadow-focus);
+}
+
+.shake {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
 }
