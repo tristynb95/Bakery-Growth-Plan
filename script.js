@@ -91,10 +91,12 @@ function runApp(app) {
         vision: {
             html: `<div class="space-y-8">
                         <div class="content-card p-6 md:p-8"><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="managerName" class="font-semibold block mb-2">Manager:</label><input type="text" id="managerName" class="form-input" placeholder="e.g., Tristen Bayley"></div><div><label for="bakeryLocation" class="font-semibold block mb-2">Bakery:</label><input type="text" id="bakeryLocation" class="form-input" placeholder="e.g., Marlow"></div><div><label for="quarter" class="font-semibold block mb-2">Quarter:</label><input type="text" id="quarter" class="form-input" placeholder="e.g., Q3 FY26"></div></div></div>
-                        <div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-r-lg">
-                            <h3 class="font-bold text-lg gails-red-text mb-2">Our Mission</h3>
-                            <p class="text-xl font-semibold text-gray-700">"To make world-class, craft baking a part of every neighbourhood."</p>
+                        
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-sm">
+                            <h3 class="font-bold text-lg text-amber-900 mb-2">Our Mission</h3>
+                            <p class="text-xl font-semibold text-gray-800">"To make world-class, craft baking a part of every neighbourhood."</p>
                         </div>
+                        
                         <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">This Quarter's Central Theme (Narrative): <i class="bi bi-info-circle-fill info-icon" title="The big, overarching mission for the next 90 days."></i></label><textarea id="quarterlyTheme" class="form-input" rows="2" placeholder="e.g., Become the undisputed neighbourhood favourite by mastering our availability."></textarea></div>
                         <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1 Goal: <i class="bi bi-info-circle-fill info-icon" title="High-level goal for the first 30-day sprint."></i></label><textarea id="month1Goal" class="form-input text-sm" rows="3" placeholder="e.g., PRODUCT: Master afternoon availability and reduce waste."></textarea></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2 Goal: <i class="bi bi-info-circle-fill info-icon" title="High-level goal for the second 30-day sprint."></i></label><textarea id="month2Goal" class="form-input text-sm" rows="3" placeholder="e.g., PLACE: Embed new production processes and daily checks."></textarea></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3 Goal: <i class="bi bi-info-circle-fill info-icon" title="High-level goal for the third 30-day sprint."></i></label><textarea id="month3Goal" class="form-input text-sm" rows="3" placeholder="e.g., PEOPLE: Develop team skills for consistent execution."></textarea></div></div></div>
                    </div>`,
@@ -848,3 +850,4 @@ function runApp(app) {
 
 // This is the new, single line that starts your entire application.
 initializeFirebase();
+
