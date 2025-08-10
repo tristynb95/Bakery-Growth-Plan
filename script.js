@@ -56,6 +56,9 @@ function runApp(app) {
         headerSubtitle: document.getElementById('header-subtitle'),
         progressBarFill: document.getElementById('progress-bar-fill'),
         progressPercentage: document.getElementById('progress-percentage'),
+        // Mobile Menu
+        mobileMenuBtn: document.getElementById('mobile-menu-btn'),
+        sidebarOverlay: document.getElementById('sidebar-overlay'),
         // Modal elements
         modalOverlay: document.getElementById('modal-overlay'),
         modalBox: document.getElementById('modal-box'),
@@ -468,6 +471,9 @@ function runApp(app) {
         }
         document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
         document.querySelector(`#nav-${viewId}`)?.classList.add('active');
+        
+        // Close sidebar after navigation on mobile
+        DOMElements.appView.classList.remove('sidebar-open');
     }
 
     function renderStep(stepNum) {
@@ -837,6 +843,14 @@ function runApp(app) {
         }
     });
     DOMElements.modalActionBtn.addEventListener('click', handleModalAction);
+    
+    // Mobile Menu Listeners
+    DOMElements.mobileMenuBtn.addEventListener('click', () => {
+        DOMElements.appView.classList.toggle('sidebar-open');
+    });
+    DOMElements.sidebarOverlay.addEventListener('click', () => {
+        DOMElements.appView.classList.remove('sidebar-open');
+    });
 
     // --- INITIALIZE APP ---
     generateTemplates();
