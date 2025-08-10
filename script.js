@@ -139,12 +139,12 @@ function runApp(app) {
         DOMElements.loadingView.classList.add('hidden');
         if (user) {
             appState.currentUser = user;
-            // NEW: Check for a saved state in localStorage
+            // Check for a saved state in localStorage
             const lastPlanId = localStorage.getItem('lastPlanId');
             const lastViewId = localStorage.getItem('lastViewId');
 
             if (lastPlanId && lastViewId) {
-                // NEW: If a state exists, restore it instead of showing the dashboard
+                // If a state exists, restore it instead of showing the dashboard
                 DOMElements.loginView.classList.add('hidden');
                 DOMElements.resetView.classList.add('hidden');
                 DOMElements.dashboardView.classList.add('hidden');
@@ -169,7 +169,7 @@ function runApp(app) {
     });
 
     const handleLogout = () => {
-        // NEW: Clear the stored state on logout
+        // Clear the stored state on logout
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         
@@ -179,7 +179,7 @@ function runApp(app) {
     };
 
     // --- DASHBOARD LOGIC ---
-    // NEW: This function restores the user's last session
+    // This function restores the user's last session
     async function restoreLastView(planId, viewId) {
         appState.currentPlanId = planId;
         await loadPlanFromFirestore();
@@ -249,7 +249,7 @@ function runApp(app) {
     }
 
     function handleBackToDashboard() {
-        // NEW: Clear the stored state
+        // Clear the stored state
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         
@@ -426,7 +426,7 @@ function runApp(app) {
     function switchView(viewId) {
         appState.currentView = viewId;
         
-        // NEW: Save the current state to localStorage
+        // Save the current state to localStorage
         if (appState.currentPlanId) {
             localStorage.setItem('lastPlanId', appState.currentPlanId);
             localStorage.setItem('lastViewId', viewId);
@@ -598,6 +598,10 @@ function runApp(app) {
                 newPlanNameInput.addEventListener('keyup', handleEnterKey);
                 newPlanNameInput.addEventListener('input', () => {
                     newPlanNameInput.classList.remove('input-error');
+                    const existingError = newPlanNameInput.nextElementSibling;
+                    if (existingError && existingError.classList.contains('auth-error')) {
+                        existingError.remove();
+                    }
                 });
                 break;
             case 'edit':
@@ -629,32 +633,59 @@ function runApp(app) {
     async function handleModalAction() {
         const type = DOMElements.modalBox.dataset.type;
         const planId = DOMElements.modalBox.dataset.planId;
-        const newPlanNameInput = document.getElementById('newPlanName');
 
         switch(type) {
             case 'create':
+                const newPlanNameInput = document.getElementById('newPlanName');
                 const newPlanName = newPlanNameInput.value.trim();
+                const originalButtonText = DOMElements.modalActionBtn.textContent;
+
+                const existingError = newPlanNameInput.nextElementSibling;
+                if (existingError && existingError.classList.contains('auth-error')) {
+                    existingError.remove();
+                }
+                newPlanNameInput.classList.remove('input-error');
 
                 if (!newPlanName) {
                     newPlanNameInput.classList.add('input-error', 'shake');
-                    newPlanNameInput.focus();
-
-                    setTimeout(() => {
-                        newPlanNameInput.classList.remove('shake');
-                    }, 500);
+                    setTimeout(() => newPlanNameInput.classList.remove('shake'), 500);
                     return;
                 }
                 
+                DOMElements.modalActionBtn.disabled = true;
+                DOMElements.modalActionBtn.textContent = 'Checking...';
+
+                const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
+                const nameQuery = await plansRef.where('planName', '==', newPlanName).get();
+
+                if (!nameQuery.empty) {
+                    newPlanNameInput.classList.add('input-error', 'shake');
+                    const errorP = document.createElement('p');
+                    errorP.className = 'auth-error';
+                    errorP.style.display = 'block';
+                    errorP.style.marginTop = '0.5rem';
+                    errorP.textContent = "A plan with this name already exists. Please choose another.";
+                    newPlanNameInput.insertAdjacentElement('afterend', errorP);
+
+                    DOMElements.modalActionBtn.disabled = false;
+                    DOMElements.modalActionBtn.textContent = originalButtonText;
+                    setTimeout(() => newPlanNameInput.classList.remove('shake'), 500);
+                    return;
+                }
+                
+                DOMElements.modalActionBtn.disabled = false;
+                DOMElements.modalActionBtn.textContent = originalButtonText;
+
                 closeModal();
                 DOMElements.creationLoadingView.classList.remove('hidden');
 
-                if (!appState.currentUser) {
-                    DOMElements.creationLoadingView.classList.add('hidden');
-                    return;
-                }
                 try {
-                    const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
-                    const newPlan = await plansRef.add({ planName: newPlanName, createdAt: firebase.firestore.FieldValue.serverTimestamp(), lastEdited: firebase.firestore.FieldValue.serverTimestamp(), managerName: '' });
+                    const newPlan = await plansRef.add({ 
+                        planName: newPlanName, 
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(), 
+                        lastEdited: firebase.firestore.FieldValue.serverTimestamp(), 
+                        managerName: '' 
+                    });
                     await handleSelectPlan(newPlan.id);
                 } catch (error) {
                     console.error("Error creating new plan:", error);
