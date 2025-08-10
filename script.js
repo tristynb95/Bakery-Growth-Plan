@@ -185,14 +185,14 @@ function runApp(app) {
     // --- AUTHENTICATION & APP FLOW ---
     auth.onAuthStateChanged(async (user) => {
         if (user) {
-            // A user is authenticated. Keep the loading screen, hide login.
+            // A user is authenticated. Hide the login page and show the loader while we get their data.
             DOMElements.loginView.classList.add('hidden');
-            DOMElements.resetView.classList.add('hidden');
-            
+            DOMElements.initialLoadingView.classList.remove('hidden'); // Show loader
+
             appState.currentUser = user;
             setupActivityListeners();
             resetSessionTimeout();
-            
+
             const lastPlanId = localStorage.getItem('lastPlanId');
             const lastViewId = localStorage.getItem('lastViewId');
 
@@ -202,22 +202,23 @@ function runApp(app) {
                 DOMElements.dashboardView.classList.remove('hidden');
                 await renderDashboard();
             }
-            
-            // Hide the initial loading screen now that content is ready.
+
+            // Hide the initial loading screen now that the correct authed view is ready.
             DOMElements.initialLoadingView.classList.add('hidden');
 
         } else {
-            // No user is logged in. Hide loading and show the login page.
+            // No user is logged in. The login page is already visible from our HTML change.
+            // We just ensure all other views are hidden.
             appState.currentUser = null;
             appState.planData = {};
             appState.currentPlanId = null;
             clearActivityListeners();
-            
+
             DOMElements.initialLoadingView.classList.add('hidden');
             DOMElements.appView.classList.add('hidden');
             DOMElements.dashboardView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
-            DOMElements.loginView.classList.remove('hidden');
+            DOMElements.loginView.classList.remove('hidden'); // Explicitly ensure it's visible
         }
     });
 
