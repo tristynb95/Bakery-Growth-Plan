@@ -319,3 +319,14 @@ main { grid-area: main; }
     width: 100%;
     box-sizing: border-box;
 }
+
+/* 14. UI Polish */
+.info-icon {
+    color: var(--gails-text-secondary); /* Default to a subtle grey */
+    transition: color 0.2s ease-in-out;
+    cursor: help;
+}
+
+.info-icon:hover {
+    color: var(--gails-red); /* Brighten to brand red on hover */
+}
