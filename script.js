@@ -328,20 +328,19 @@ function runApp(app) {
     }
 
     function updateSidebarInfo() {
-        const managerName = appState.planData.managerName || '';
-        DOMElements.sidebarName.textContent = managerName || 'Your Name';
-        DOMElements.sidebarBakery.textContent = appState.planData.bakeryLocation || "Your Bakery";
+    const managerName = appState.planData.managerName || '';
+    DOMElements.sidebarName.textContent = managerName || 'Your Name';
+    DOMElements.sidebarBakery.textContent = appState.planData.bakeryLocation || "Your Bakery";
 
-        if (managerName) {
-            const names = managerName.trim().split(' ');
-            const firstInitial = names[0] ? names[0][0] : '';
-            const lastInitial = names.length > 1 ? names[names.length - 1][0] : '';
-            DOMElements.sidebarInitials.textContent = (firstInitial + lastInitial).toUpperCase();
-        } else {
-            const email = appState.currentUser ? appState.currentUser.email : '';
-            DOMElements.sidebarInitials.textContent = email ? email.substring(0, 2).toUpperCase() : '--';
-        }
+    if (managerName) {
+        const names = managerName.trim().split(' ');
+        const firstInitial = names[0] ? names[0][0] : '';
+        const lastInitial = names.length > 1 ? names[names.length - 1][0] : '';
+        DOMElements.sidebarInitials.textContent = (firstInitial + lastInitial).toUpperCase();
+    } else {
+        DOMElements.sidebarInitials.textContent = '--'; // Updated this line
     }
+}
 
     function isStepComplete(stepKey, data) {
         const planData = data || appState.planData;
@@ -888,4 +887,5 @@ function runApp(app) {
 
 // This is the new, single line that starts your entire application.
 initializeFirebase();
+
 
