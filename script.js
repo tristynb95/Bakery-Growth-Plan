@@ -557,7 +557,11 @@ function runApp(app) {
                 DOMElements.modalContent.innerHTML = `<label for="newPlanName" class="font-semibold block mb-2">Plan Name:</label><input type="text" id="newPlanName" class="form-input" placeholder="e.g., Q4 2025 Focus" value="New Plan ${new Date().toLocaleDateString('en-GB')}">`;
                 DOMElements.modalActionBtn.textContent = "Create Plan";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
-                document.getElementById('newPlanName').addEventListener('keyup', handleEnterKey);
+                const newPlanNameInput = document.getElementById('newPlanName');
+                newPlanNameInput.addEventListener('keyup', handleEnterKey);
+                newPlanNameInput.addEventListener('input', () => {
+                    newPlanNameInput.classList.remove('input-error');
+                });
                 break;
             case 'edit':
                 DOMElements.modalTitle.textContent = "Edit Plan Name";
@@ -592,11 +596,22 @@ function runApp(app) {
 
         switch(type) {
             case 'create':
+                const newPlanName = newPlanNameInput.value.trim();
+
+                if (!newPlanName) {
+                    newPlanNameInput.classList.add('input-error', 'shake');
+                    newPlanNameInput.focus();
+
+                    setTimeout(() => {
+                        newPlanNameInput.classList.remove('shake');
+                    }, 500);
+                    return;
+                }
+                
                 closeModal();
                 DOMElements.creationLoadingView.classList.remove('hidden');
-                const newPlanName = newPlanNameInput.value;
 
-                if (!newPlanName || !appState.currentUser) {
+                if (!appState.currentUser) {
                     DOMElements.creationLoadingView.classList.add('hidden');
                     return;
                 }
