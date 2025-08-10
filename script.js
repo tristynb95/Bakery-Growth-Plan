@@ -185,8 +185,12 @@ function runApp(app) {
     // --- AUTHENTICATION & APP FLOW ---
     auth.onAuthStateChanged(async (user) => {
         if (user) {
-            // User is authenticated. The initial-loading-view is currently visible.
-            // We will keep it visible while we fetch the user's data.
+            // A user is authenticated. Hide all auth screens and show a loading screen.
+            DOMElements.initialLoadingView.classList.add('hidden');
+            DOMElements.loginView.classList.add('hidden');
+            DOMElements.resetView.classList.add('hidden');
+            DOMElements.loadingView.classList.remove('hidden');
+
             appState.currentUser = user;
             setupActivityListeners();
             resetSessionTimeout();
@@ -201,23 +205,22 @@ function runApp(app) {
                 await renderDashboard();
             }
             
-            // Hide the initial loading screen now that the correct content is ready to be shown.
-            DOMElements.initialLoadingView.classList.add('hidden');
+            // Hide the loading screen now that content is ready.
+            DOMElements.loadingView.classList.add('hidden');
 
         } else {
-            // No user is logged in. Hide the initial loader and show the login page.
+            // No user is logged in. Hide irrelevant views and show the login page.
             appState.currentUser = null;
             appState.planData = {};
             appState.currentPlanId = null;
             clearActivityListeners();
             
             DOMElements.initialLoadingView.classList.add('hidden');
-            DOMElements.loginView.classList.remove('hidden');
-            
-            // Ensure other views are hidden as a safeguard
+            DOMElements.loadingView.classList.add('hidden');
             DOMElements.appView.classList.add('hidden');
             DOMElements.dashboardView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
+            DOMElements.loginView.classList.remove('hidden');
         }
     });
 
@@ -362,7 +365,6 @@ function runApp(app) {
             return saveToFirestore();
         } else {
             return new Promise(resolve => {
-                // CORRECTED THIS LINE: Removed the erroneous underscore character.
                 appState.saveTimeout = setTimeout(async () => {
                     await saveToFirestore();
                     resolve();
