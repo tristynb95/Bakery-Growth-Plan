@@ -302,3 +302,20 @@ main { grid-area: main; }
         align-items: flex-start;
     }
 }
+
+/* 13. Step Slider Animation */
+.steps-wrapper {
+    overflow: hidden;
+    position: relative;
+}
+
+.steps-slider {
+    display: flex;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step-content {
+    flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
