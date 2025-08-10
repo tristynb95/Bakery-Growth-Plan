@@ -362,7 +362,8 @@ function runApp(app) {
             return saveToFirestore();
         } else {
             return new Promise(resolve => {
-                appState.saveTimeout = setTimeout(async ()_ => {
+                // CORRECTED THIS LINE: Removed the erroneous underscore character.
+                appState.saveTimeout = setTimeout(async () => {
                     await saveToFirestore();
                     resolve();
                 }, 1000);
