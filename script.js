@@ -185,11 +185,10 @@ function runApp(app) {
     // --- AUTHENTICATION & APP FLOW ---
     auth.onAuthStateChanged(async (user) => {
         if (user) {
-            // A user is authenticated.
-            DOMElements.initialLoadingView.classList.add('hidden');
+            // A user is authenticated. Keep the loading screen, hide login.
             DOMElements.loginView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
-
+            
             appState.currentUser = user;
             setupActivityListeners();
             resetSessionTimeout();
@@ -204,17 +203,17 @@ function runApp(app) {
                 await renderDashboard();
             }
             
-            DOMElements.loadingView.classList.add('hidden');
+            // Hide the initial loading screen now that content is ready.
+            DOMElements.initialLoadingView.classList.add('hidden');
 
         } else {
-            // No user is logged in. Hide irrelevant views and show the login page.
+            // No user is logged in. Hide loading and show the login page.
             appState.currentUser = null;
             appState.planData = {};
             appState.currentPlanId = null;
             clearActivityListeners();
             
             DOMElements.initialLoadingView.classList.add('hidden');
-            DOMElements.loadingView.classList.add('hidden');
             DOMElements.appView.classList.add('hidden');
             DOMElements.dashboardView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
