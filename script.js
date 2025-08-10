@@ -94,16 +94,16 @@ function runApp(app) {
         },
         month: (monthNum) => `<div class="grid grid-cols-1 lg:grid-cols-4 gap-8"><div class="lg:col-span-1 no-print"><nav id="month-${monthNum}-stepper" class="space-y-4"></nav></div><div class="lg:col-span-3"><div id="step-content-container"></div><div class="mt-8 flex justify-between no-print"><button id="prev-step-btn" class="btn btn-secondary">Previous</button><button id="next-step-btn" class="btn btn-primary">Next Step</button></div></div></div>`,
         step: {
-            'm1s1':{title:"Must-Win Battle", requiredFields:['m1s1_battle'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 1: The Must-Win Battle</h3><p class="text-gray-600 mb-4">What is the single most important, measurable outcome for this month?</p><textarea id="m1s1_battle" class="form-input" rows="3" placeholder="Example: 'Achieve >75% availability by implementing the production matrix correctly.'"></textarea></div>`},
-            'm1s2':{title:"Levers & Power-Up", requiredFields:['m1s2_levers', 'm1s2_powerup_q', 'm1s2_powerup_a'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3><p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="flex flex-col"><label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label><textarea id="m1s2_levers" class="form-input flex-grow" rows="4" placeholder="1. Review ordering report daily.\n2. Coach the team on the 'why' behind the production matrix."></textarea></div><div class="space-y-4"><div><label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label><textarea id="m1s2_powerup_q" class="form-input" rows="2" placeholder="e.g., 'What is one thing that slows us down before 8am?'"></textarea></div><div><label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label><textarea id="m1s2_powerup_a" class="form-input" rows="2" placeholder="e.g., Pre-portioning key ingredients the night before."></textarea></div></div></div></div>`},
+            'm1s1':{title:"Must-Win Battle", requiredFields:['m1s1_battle'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 1: The Must-Win Battle</h3><p class="text-gray-600 mb-4">What is the single most important, measurable outcome for this month?</p><textarea id="m1s1_battle" class="form-input" rows="3" placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly and placing smart orders.'"></textarea></div>`},
+            'm1s2':{title:"Levers & Power-Up", requiredFields:['m1s2_levers', 'm1s2_powerup_q', 'm1s2_powerup_a'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3><p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="flex flex-col"><label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label><textarea id="m1s2_levers" class="form-input flex-grow" rows="4" placeholder="1. Review ordering report with daily.\n2. Coach the team on the 'why' behind the production matrix."></textarea></div><div class="space-y-4"><div><label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label><textarea id="m1s2_powerup_q" class="form-input" rows="2" placeholder="e.g., 'What is one thing that slows us down before 8am?'"></textarea></div><div><label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label><textarea id="m1s2_powerup_a" class="form-input" rows="2" placeholder="e.g., Pre-portioning key ingredients the night before."></textarea></div></div></div></div>`},
             'm1s3':{title:"People Growth", requiredFields:['m1s3_people'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 3: People Growth</h3><p class="text-gray-600 mb-4">Who will I invest in this month to help us win our battle, and how?</p><textarea id="m1s3_people" class="form-input" rows="4" placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'"></textarea></div>`},
             'm1s4':{
                 title:"Protect the Core",
                 requiredFields:['m1s4_people', 'm1s4_product', 'm1s4_customer', 'm1s4_place'],
                 html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 4: Protect the Core</h3><p class="text-gray-600 mb-6">One key behaviour you will protect for each pillar to ensure standards don't slip.</p><div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                    <div><label for="m1s4_people" class="font-semibold block mb-2">PEOPLE 👥</label><textarea id="m1s4_people" class="form-input" rows="2" placeholder="e.g., Hold Meaningful 1-2-1s with my two new starters."></textarea></div>
-                    <div><label for="m1s4_product" class="font-semibold block mb-2">PRODUCT 🥐</label><textarea id="m1s4_product" class="form-input" rows="2" placeholder="e.g., Daily quality checks of proving products."></textarea></div>
-                    <div><label for="m1s4_customer" class="font-semibold block mb-2">CUSTOMER ❤️</label><textarea id="m1s4_customer" class="form-input" rows="2" placeholder="e.g., Action all customer feedback weekly."></textarea></div>
+                    <div><label for="m1s4_people" class="font-semibold block mb-2">PEOPLE 👥</label><textarea id="m1s4_people" class="form-input" rows="2" placeholder="e.g., Meaningful 1-2-1s with my two keyholders."></textarea></div>
+                    <div><label for="m1s4_product" class="font-semibold block mb-2">PRODUCT 🥐</label><textarea id="m1s4_product" class="form-input" rows="2" placeholder="e.g., Daily quality checks of the first bake."></textarea></div>
+                    <div><label for="m1s4_customer" class="font-semibold block mb-2">CUSTOMER ❤️</label><textarea id="m1s4_customer" class="form-input" rows="2" placeholder="e.g., Action all customer feedback within 24 hours."></textarea></div>
                     <div><label for="m1s4_place" class="font-semibold block mb-2">PLACE 🏡</label><textarea id="m1s4_place" class="form-input" rows="2" placeholder="e.g., Complete a bakery travel path twice a day."></textarea></div>
                 </div></div>`
             },
@@ -139,11 +139,24 @@ function runApp(app) {
         DOMElements.loadingView.classList.add('hidden');
         if (user) {
             appState.currentUser = user;
-            DOMElements.loginView.classList.add('hidden');
-            DOMElements.resetView.classList.add('hidden');
-            DOMElements.appView.classList.add('hidden');
-            DOMElements.dashboardView.classList.remove('hidden');
-            await renderDashboard();
+            // NEW: Check for a saved state in localStorage
+            const lastPlanId = localStorage.getItem('lastPlanId');
+            const lastViewId = localStorage.getItem('lastViewId');
+
+            if (lastPlanId && lastViewId) {
+                // NEW: If a state exists, restore it instead of showing the dashboard
+                DOMElements.loginView.classList.add('hidden');
+                DOMElements.resetView.classList.add('hidden');
+                DOMElements.dashboardView.classList.add('hidden');
+                await restoreLastView(lastPlanId, lastViewId);
+            } else {
+                // Original behavior: show the dashboard
+                DOMElements.loginView.classList.add('hidden');
+                DOMElements.resetView.classList.add('hidden');
+                DOMElements.appView.classList.add('hidden');
+                DOMElements.dashboardView.classList.remove('hidden');
+                await renderDashboard();
+            }
         } else {
             appState.currentUser = null;
             appState.planData = {};
@@ -156,12 +169,25 @@ function runApp(app) {
     });
 
     const handleLogout = () => {
+        // NEW: Clear the stored state on logout
+        localStorage.removeItem('lastPlanId');
+        localStorage.removeItem('lastViewId');
+        
         DOMElements.emailInput.value = '';
         DOMElements.passwordInput.value = '';
         auth.signOut();
     };
 
     // --- DASHBOARD LOGIC ---
+    // NEW: This function restores the user's last session
+    async function restoreLastView(planId, viewId) {
+        appState.currentPlanId = planId;
+        await loadPlanFromFirestore();
+        DOMElements.appView.classList.remove('hidden');
+        switchView(viewId);
+        updateUI();
+    }
+    
     async function renderDashboard() {
         if (!appState.currentUser) return;
 
@@ -223,6 +249,10 @@ function runApp(app) {
     }
 
     function handleBackToDashboard() {
+        // NEW: Clear the stored state
+        localStorage.removeItem('lastPlanId');
+        localStorage.removeItem('lastViewId');
+        
         appState.planData = {};
         appState.currentPlanId = null;
         DOMElements.appView.classList.add('hidden');
@@ -395,6 +425,13 @@ function runApp(app) {
 
     function switchView(viewId) {
         appState.currentView = viewId;
+        
+        // NEW: Save the current state to localStorage
+        if (appState.currentPlanId) {
+            localStorage.setItem('lastPlanId', appState.currentPlanId);
+            localStorage.setItem('lastViewId', viewId);
+        }
+
         const titles = {
             vision: { title: 'Bakery Growth Plan', subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.'},
             'month-1': { title: 'Month 1 Sprint', subtitle: 'Lay the foundations for success.'},
@@ -761,4 +798,3 @@ function runApp(app) {
 
 // This is the new, single line that starts your entire application.
 initializeFirebase();
-
