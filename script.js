@@ -37,6 +37,8 @@ function runApp(app) {
         dashboardView: document.getElementById('dashboard-view'),
         dashboardContent: document.getElementById('dashboard-content'),
         appView: document.getElementById('app-view'),
+        mainContent: document.querySelector('#app-view main'),
+        sidebar: document.getElementById('sidebar'),
         emailInput: document.getElementById('email'),
         passwordInput: document.getElementById('password'),
         loginBtn: document.getElementById('login-btn'),
@@ -850,6 +852,33 @@ function runApp(app) {
     });
     DOMElements.sidebarOverlay.addEventListener('click', () => {
         DOMElements.appView.classList.remove('sidebar-open');
+    });
+    
+    // Swipe Gesture Listeners
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const swipeThreshold = 50; // Minimum distance for a swipe
+
+    DOMElements.mainContent.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    DOMElements.mainContent.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchEndX > touchStartX + swipeThreshold) {
+            DOMElements.appView.classList.add('sidebar-open');
+        }
+    });
+    
+    DOMElements.sidebar.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    DOMElements.sidebar.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchEndX < touchStartX - swipeThreshold) {
+            DOMElements.appView.classList.remove('sidebar-open');
+        }
     });
 
     // --- INITIALIZE APP ---
