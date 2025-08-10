@@ -97,7 +97,7 @@ function runApp(app) {
                             <p class="text-xl font-semibold text-gray-800">"To make world-class, craft baking a part of every neighbourhood."</p>
                         </div>
                         
-                        <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">This Quarter's Narrative: <i class="bi bi-info-circle-fill info-icon" title="The big, overarching mission for the next 90 days."></i></label><textarea id="quarterlyTheme" class="form-input" rows="2" placeholder="e.g., Become the undisputed neighbourhood favourite by mastering our availability."></textarea></div>
+                        <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">This Quarter's Central Theme (Narrative): <i class="bi bi-info-circle-fill info-icon" title="The big, overarching mission for the next 90 days."></i></label><textarea id="quarterlyTheme" class="form-input" rows="2" placeholder="e.g., Become the undisputed neighbourhood favourite by mastering our availability."></textarea></div>
                         <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1 Goal: <i class="bi bi-info-circle-fill info-icon" title="High-level goal for the first 30-day sprint."></i></label><textarea id="month1Goal" class="form-input text-sm" rows="3" placeholder="e.g., PRODUCT: Master afternoon availability and reduce waste."></textarea></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2 Goal: <i class="bi bi-info-circle-fill info-icon" title="High-level goal for the second 30-day sprint."></i></label><textarea id="month2Goal" class="form-input text-sm" rows="3" placeholder="e.g., PLACE: Embed new production processes and daily checks."></textarea></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3 Goal: <i class="bi bi-info-circle-fill info-icon" title="High-level goal for the third 30-day sprint."></i></label><textarea id="month3Goal" class="form-input text-sm" rows="3" placeholder="e.g., PEOPLE: Develop team skills for consistent execution."></textarea></div></div></div>
                    </div>`,
             requiredFields: ['managerName', 'bakeryLocation', 'quarter', 'quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
@@ -488,12 +488,8 @@ function runApp(app) {
         nextBtn.onclick = () => changeStep(1);
         
         // Conditionally hide buttons
-        if (stepNum === 1) {
-            prevBtn.classList.add('hidden');
-        }
-        if (stepNum === appState.monthContext[monthKey].totalSteps) {
-            nextBtn.classList.add('hidden');
-        }
+        prevBtn.classList.toggle('hidden', stepNum === 1);
+        nextBtn.classList.toggle('hidden', stepNum === appState.monthContext[monthKey].totalSteps);
     }
 
     function changeStep(direction) {
@@ -612,16 +608,20 @@ function runApp(app) {
         switch (type) {
             case 'create':
                 DOMElements.modalTitle.textContent = "Create New Plan";
-                DOMElements.modalContent.innerHTML = `<label for="newPlanName" class="font-semibold block mb-2">Plan Name:</label><input type="text" id="newPlanName" class="form-input" placeholder="e.g., Q4 2025 Focus" value="New Plan ${new Date().toLocaleDateString('en-GB')}">`;
+                DOMElements.modalContent.innerHTML = `
+                    <label for="newPlanName" class="font-semibold block mb-2">Plan Name:</label>
+                    <input type="text" id="newPlanName" class="form-input" placeholder="e.g., Q4 2025 Focus" value="New Plan ${new Date().toLocaleDateString('en-GB')}">
+                    <div id="modal-error-container" class="modal-error-container"></div>
+                `;
                 DOMElements.modalActionBtn.textContent = "Create Plan";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
                 const newPlanNameInput = document.getElementById('newPlanName');
                 newPlanNameInput.addEventListener('keyup', handleEnterKey);
                 newPlanNameInput.addEventListener('input', () => {
                     newPlanNameInput.classList.remove('input-error');
-                    const existingError = newPlanNameInput.nextElementSibling;
-                    if (existingError && existingError.classList.contains('auth-error')) {
-                        existingError.remove();
+                    const errorContainer = document.getElementById('modal-error-container');
+                    if (errorContainer) {
+                        errorContainer.innerHTML = '';
                     }
                 });
                 break;
@@ -660,11 +660,9 @@ function runApp(app) {
                 const newPlanNameInput = document.getElementById('newPlanName');
                 const newPlanName = newPlanNameInput.value.trim();
                 const originalButtonText = DOMElements.modalActionBtn.textContent;
+                const errorContainer = document.getElementById('modal-error-container');
 
-                const existingError = newPlanNameInput.nextElementSibling;
-                if (existingError && existingError.classList.contains('auth-error')) {
-                    existingError.remove();
-                }
+                if(errorContainer) errorContainer.innerHTML = '';
                 newPlanNameInput.classList.remove('input-error');
 
                 if (!newPlanName) {
@@ -681,13 +679,10 @@ function runApp(app) {
 
                 if (!nameQuery.empty) {
                     newPlanNameInput.classList.add('input-error', 'shake');
-                    const errorP = document.createElement('p');
-                    errorP.className = 'auth-error';
-                    errorP.style.display = 'block';
-                    errorP.style.marginTop = '0.5rem';
-                    errorP.textContent = "A plan with this name already exists. Please choose another.";
-                    newPlanNameInput.insertAdjacentElement('afterend', errorP);
-
+                    if(errorContainer) {
+                       errorContainer.innerHTML = `<p class="auth-error" style="display:block; margin: 0; width: 100%;">A plan with this name already exists. Please choose another.</p>`;
+                    }
+                    
                     DOMElements.modalActionBtn.disabled = false;
                     DOMElements.modalActionBtn.textContent = originalButtonText;
                     setTimeout(() => newPlanNameInput.classList.remove('shake'), 500);
@@ -850,5 +845,3 @@ function runApp(app) {
 
 // This is the new, single line that starts your entire application.
 initializeFirebase();
-
-
