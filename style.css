@@ -32,7 +32,7 @@ body {
 .hidden { display: none !important; }
 .gails-red-text { color: var(--gails-red); }
 
-/* 2. Auth View
+/* 2. Auth View & Loading States
 -------------------------------------------------- */
 .auth-container { display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh; padding: 1rem; }
 .auth-box { width: 100%; max-width: 400px; background: var(--gails-white); padding: 2.5rem; border-radius: 1rem; box-shadow: var(--shadow-md); border: 1px solid #E5E7EB; display: flex; flex-direction: column; gap: 1rem; }
@@ -42,17 +42,52 @@ body {
 .auth-buttons { display: flex; gap: 1rem; margin-top: 1rem; }
 .auth-buttons > .btn { flex: 1; }
 
+.loading-overlay { 
+    position: fixed; 
+    top: 0; left: 0; right: 0; bottom: 0; 
+    background-color: rgba(249, 249, 248, 0.8); 
+    backdrop-filter: blur(4px); 
+    z-index: 1000; 
+    display: flex; 
+    flex-direction: column;
+    align-items: center; 
+    justify-content: center; 
+}
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid var(--gails-grey-mid);
+    border-top-color: var(--gails-red);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+
 /* 3. Dashboard view
 -------------------------------------------------- */
 .dashboard-header { background-color: var(--gails-white); padding: 1rem 2rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; }
 .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
-.plan-card { background-color: var(--gails-white); border: 1px solid #E5E7EB; border-radius: 1rem; padding: 1.5rem; box-shadow: var(--shadow-sm); transition: all 0.2s ease; display: flex; flex-direction: column; position: relative; }
+.plan-card { 
+    background-color: var(--gails-white); 
+    border: 1px solid #E5E7EB; 
+    border-radius: 1rem; 
+    padding: 1.5rem; 
+    box-shadow: var(--shadow-sm); 
+    transition: all 0.2s ease; 
+    display: flex; 
+    flex-direction: column; 
+    position: relative; 
+    min-height: 220px;
+}
 .plan-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--gails-red); }
 .plan-card-actions { position: absolute; top: 0.75rem; right: 0.75rem; display: flex; gap: 0.5rem; opacity: 0; transition: opacity 0.2s ease-in-out; }
 .plan-card:hover .plan-card-actions { opacity: 1; }
 .plan-action-btn { background-color: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px); border: 1px solid var(--gails-grey-mid); color: var(--gails-text-secondary); border-radius: 9999px; width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
 .plan-action-btn:hover { color: var(--gails-text-primary); border-color: #4B5563; }
-.plan-card-main { cursor: pointer; }
+.plan-card-main { cursor: pointer; flex-grow: 1; display: flex; flex-direction: column;}
 .plan-card.new-plan-card { border-style: dashed; border-width: 2px; color: var(--gails-text-secondary); align-items: center; justify-content: center; cursor: pointer; }
 .plan-card.new-plan-card:hover { color: var(--gails-red); background-color: #FFF1F2; }
 
