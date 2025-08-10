@@ -219,3 +219,11 @@ main { grid-area: main; }
     transform: translate3d(4px, 0, 0);
   }
 }
+
+/* 11. Modal Enhancements */
+.modal-error-container {
+    min-height: 24px; /* Reserves space for one line of text */
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+}
