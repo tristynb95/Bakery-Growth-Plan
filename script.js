@@ -89,7 +89,39 @@ function runApp(app) {
             'month-3': { currentStep: 1, totalSteps: 7 },
         },
         saveTimeout: null,
+        sessionTimeout: null, // To hold the timeout ID
     };
+
+    // --- SESSION TIMEOUT ---
+    const SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
+
+    function resetSessionTimeout() {
+        clearTimeout(appState.sessionTimeout);
+        appState.sessionTimeout = setTimeout(async () => {
+            if (appState.currentUser) {
+                await saveData(true); // Force immediate save
+                handleLogout(true); // Pass true to indicate timeout
+            }
+        }, SESSION_DURATION);
+    }
+
+    function setupActivityListeners() {
+        window.addEventListener('mousemove', resetSessionTimeout);
+        window.addEventListener('mousedown', resetSessionTimeout);
+        window.addEventListener('keypress', resetSessionTimeout);
+        window.addEventListener('touchmove', resetSessionTimeout);
+        window.addEventListener('scroll', resetSessionTimeout, true);
+    }
+
+    function clearActivityListeners() {
+        window.removeEventListener('mousemove', resetSessionTimeout);
+        window.removeEventListener('mousedown', resetSessionTimeout);
+        window.removeEventListener('keypress', resetSessionTimeout);
+        window.removeEventListener('touchmove', resetSessionTimeout);
+        window.removeEventListener('scroll', resetSessionTimeout, true);
+        clearTimeout(appState.sessionTimeout);
+    }
+
 
     // --- HTML TEMPLATES ---
     const templates = {
@@ -154,18 +186,18 @@ function runApp(app) {
         DOMElements.loadingView.classList.add('hidden');
         if (user) {
             appState.currentUser = user;
-            // Check for a saved state in localStorage
+            setupActivityListeners();
+            resetSessionTimeout();
+            
             const lastPlanId = localStorage.getItem('lastPlanId');
             const lastViewId = localStorage.getItem('lastViewId');
 
             if (lastPlanId && lastViewId) {
-                // If a state exists, restore it instead of showing the dashboard
                 DOMElements.loginView.classList.add('hidden');
                 DOMElements.resetView.classList.add('hidden');
                 DOMElements.dashboardView.classList.add('hidden');
                 await restoreLastView(lastPlanId, lastViewId);
             } else {
-                // Original behavior: show the dashboard
                 DOMElements.loginView.classList.add('hidden');
                 DOMElements.resetView.classList.add('hidden');
                 DOMElements.appView.classList.add('hidden');
@@ -176,6 +208,7 @@ function runApp(app) {
             appState.currentUser = null;
             appState.planData = {};
             appState.currentPlanId = null;
+            clearActivityListeners();
             DOMElements.loginView.classList.remove('hidden');
             DOMElements.appView.classList.add('hidden');
             DOMElements.dashboardView.classList.add('hidden');
@@ -183,8 +216,11 @@ function runApp(app) {
         }
     });
 
-    const handleLogout = () => {
-        // Clear the stored state on logout
+    const handleLogout = (isTimeout = false) => {
+        if (isTimeout) {
+            openModal('timeout');
+        }
+        
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         
@@ -194,7 +230,6 @@ function runApp(app) {
     };
 
     // --- DASHBOARD LOGIC ---
-    // This function restores the user's last session
     async function restoreLastView(planId, viewId) {
         appState.currentPlanId = planId;
         await loadPlanFromFirestore();
@@ -264,7 +299,6 @@ function runApp(app) {
     }
 
     function handleBackToDashboard() {
-        // Clear the stored state
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         
@@ -286,13 +320,13 @@ function runApp(app) {
         appState.planData = docSnap.exists ? docSnap.data() : {};
     }
 
-    function saveData() {
-        if (!appState.currentUser || !appState.currentPlanId) return;
-
+    function saveData(forceImmediate = false) {
+        if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
+    
         document.querySelectorAll('#app-view input, #app-view textarea').forEach(el => {
             if(el.id) appState.planData[el.id] = el.value;
         });
-
+    
         if (appState.currentView.startsWith('month-')) {
             const monthNum = appState.currentView.split('-')[1];
             document.querySelectorAll('.status-buttons').forEach(group => {
@@ -303,17 +337,29 @@ function runApp(app) {
                 else { delete appState.planData[key]; }
             });
         }
-
+    
         updateUI();
-
+    
         clearTimeout(appState.saveTimeout);
-        appState.saveTimeout = setTimeout(async () => {
+    
+        const saveToFirestore = async () => {
             const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
             await docRef.set({ ...appState.planData, lastEdited: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-
+            
             DOMElements.saveIndicator.classList.remove('opacity-0');
             setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
-        }, 1000);
+        };
+    
+        if (forceImmediate) {
+            return saveToFirestore();
+        } else {
+            return new Promise(resolve => {
+                appState.saveTimeout = setTimeout(async () => {
+                    await saveToFirestore();
+                    resolve();
+                }, 1000);
+            });
+        }
     }
 
 
@@ -440,7 +486,6 @@ function runApp(app) {
     function switchView(viewId) {
         appState.currentView = viewId;
         
-        // Save the current state to localStorage
         if (appState.currentPlanId) {
             localStorage.setItem('lastPlanId', appState.currentPlanId);
             localStorage.setItem('lastViewId', viewId);
@@ -473,7 +518,6 @@ function runApp(app) {
         document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
         document.querySelector(`#nav-${viewId}`)?.classList.add('active');
         
-        // Close sidebar after navigation on mobile
         DOMElements.appView.classList.remove('sidebar-open');
     }
 
@@ -494,7 +538,6 @@ function runApp(app) {
         prevBtn.onclick = () => changeStep(-1);
         nextBtn.onclick = () => changeStep(1);
         
-        // Conditionally hide buttons
         prevBtn.classList.toggle('hidden', stepNum === 1);
         nextBtn.classList.toggle('hidden', stepNum === appState.monthContext[monthKey].totalSteps);
     }
@@ -628,6 +671,7 @@ function runApp(app) {
                 `;
                 DOMElements.modalActionBtn.textContent = "Create Plan";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
+                DOMElements.modalCancelBtn.style.display = 'inline-flex';
                 const newPlanNameInput = document.getElementById('newPlanName');
                 newPlanNameInput.addEventListener('keyup', handleEnterKey);
                 newPlanNameInput.addEventListener('input', () => {
@@ -643,6 +687,7 @@ function runApp(app) {
                 DOMElements.modalContent.innerHTML = `<label for="editPlanName" class="font-semibold block mb-2">Plan Name:</label><input type="text" id="editPlanName" class="form-input" value="${currentName}">`;
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
+                DOMElements.modalCancelBtn.style.display = 'inline-flex';
                 document.getElementById('editPlanName').addEventListener('keyup', handleEnterKey);
                 break;
             case 'delete':
@@ -650,6 +695,14 @@ function runApp(app) {
                 DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete the plan: <strong class="font-bold">${planName}</strong>?</p><p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action is final and cannot be undone.</p>`;
                 DOMElements.modalActionBtn.textContent = "Confirm Delete";
                 DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+                DOMElements.modalCancelBtn.style.display = 'inline-flex';
+                break;
+            case 'timeout':
+                DOMElements.modalTitle.textContent = "Session Timed Out";
+                DOMElements.modalContent.innerHTML = `<p>For your security, you have been logged out due to inactivity. All of your progress has been saved.</p>`;
+                DOMElements.modalActionBtn.textContent = "OK";
+                DOMElements.modalActionBtn.className = 'btn btn-primary';
+                DOMElements.modalCancelBtn.style.display = 'none'; // Hide cancel button
                 break;
         }
         DOMElements.modalOverlay.classList.remove('hidden');
@@ -662,13 +715,25 @@ function runApp(app) {
     }
 
     function closeModal() {
-        DOMElements.modalOverlay.classList.add('hidden');
-        window.removeEventListener('keydown', handleEscKey);
+        if (DOMElements.modalBox.dataset.type === 'timeout') {
+            DOMElements.modalOverlay.classList.add('hidden');
+            window.removeEventListener('keydown', handleEscKey);
+            // The user is already logged out, so no further action is needed.
+            // The auth state change will handle showing the login screen.
+        } else {
+            DOMElements.modalOverlay.classList.add('hidden');
+            window.removeEventListener('keydown', handleEscKey);
+        }
     }
 
     async function handleModalAction() {
         const type = DOMElements.modalBox.dataset.type;
         const planId = DOMElements.modalBox.dataset.planId;
+
+        if (type === 'timeout') {
+            closeModal();
+            return;
+        }
 
         switch(type) {
             case 'create':
@@ -822,8 +887,8 @@ function runApp(app) {
     });
 
 
-    DOMElements.logoutBtn.addEventListener('click', handleLogout);
-    DOMElements.dashboardLogoutBtn.addEventListener('click', handleLogout);
+    DOMElements.logoutBtn.addEventListener('click', () => handleLogout(false));
+    DOMElements.dashboardLogoutBtn.addEventListener('click', () => handleLogout(false));
     DOMElements.backToDashboardBtn.addEventListener('click', handleBackToDashboard);
 
     DOMElements.dashboardContent.addEventListener('click', (e) => {
@@ -843,7 +908,6 @@ function runApp(app) {
     DOMElements.contentArea.addEventListener('click', (e) => { const target = e.target; if (target.closest('.status-button')) { const button = target.closest('.status-button'); const alreadySelected = button.classList.contains('selected'); button.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected')); if (!alreadySelected) button.classList.add('selected'); saveData(); }});
     DOMElements.printBtn.addEventListener('click', () => window.print());
 
-    // Modal listeners
     DOMElements.modalCloseBtn.addEventListener('click', closeModal);
     DOMElements.modalCancelBtn.addEventListener('click', closeModal);
     DOMElements.modalOverlay.addEventListener('mousedown', (e) => {
@@ -853,7 +917,6 @@ function runApp(app) {
     });
     DOMElements.modalActionBtn.addEventListener('click', handleModalAction);
     
-    // Mobile Menu Listeners
     DOMElements.mobileMenuBtn.addEventListener('click', () => {
         DOMElements.appView.classList.toggle('sidebar-open');
     });
@@ -861,10 +924,9 @@ function runApp(app) {
         DOMElements.appView.classList.remove('sidebar-open');
     });
     
-    // Swipe Gesture Listeners
     let touchStartX = 0;
     let touchEndX = 0;
-    const swipeThreshold = 50; // Minimum distance for a swipe
+    const swipeThreshold = 50; 
 
     DOMElements.mainContent.addEventListener('touchstart', e => {
         touchStartX = e.changedTouches[0].screenX;
@@ -891,8 +953,7 @@ function runApp(app) {
     // --- INITIALIZE APP ---
     generateTemplates();
 
-} // This curly brace closes the new runApp() function.
+} 
 
 // This is the new, single line that starts your entire application.
 initializeFirebase();
-
