@@ -328,19 +328,19 @@ function runApp(app) {
     }
 
     function updateSidebarInfo() {
-    const managerName = appState.planData.managerName || '';
-    DOMElements.sidebarName.textContent = managerName || 'Your Name';
-    DOMElements.sidebarBakery.textContent = appState.planData.bakeryLocation || "Your Bakery";
+        const managerName = appState.planData.managerName || '';
+        DOMElements.sidebarName.textContent = managerName || 'Your Name';
+        DOMElements.sidebarBakery.textContent = appState.planData.bakeryLocation || "Your Bakery";
 
-    if (managerName) {
-        const names = managerName.trim().split(' ');
-        const firstInitial = names[0] ? names[0][0] : '';
-        const lastInitial = names.length > 1 ? names[names.length - 1][0] : '';
-        DOMElements.sidebarInitials.textContent = (firstInitial + lastInitial).toUpperCase();
-    } else {
-        DOMElements.sidebarInitials.textContent = '--'; // Updated this line
+        if (managerName) {
+            const names = managerName.trim().split(' ');
+            const firstInitial = names[0] ? names[0][0] : '';
+            const lastInitial = names.length > 1 ? names[names.length - 1][0] : '';
+            DOMElements.sidebarInitials.textContent = (firstInitial + lastInitial).toUpperCase();
+        } else {
+            DOMElements.sidebarInitials.textContent = '--';
+        }
     }
-}
 
     function isStepComplete(stepKey, data) {
         const planData = data || appState.planData;
@@ -600,6 +600,12 @@ function runApp(app) {
     }
 
     // --- Modal Management ---
+    const handleEscKey = (event) => {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    };
+    
     function openModal(type, context = {}) {
         const { planId, currentName, planName } = context;
         DOMElements.modalBox.dataset.type = type;
@@ -647,6 +653,7 @@ function runApp(app) {
                 break;
         }
         DOMElements.modalOverlay.classList.remove('hidden');
+        window.addEventListener('keydown', handleEscKey);
         const input = DOMElements.modalBox.querySelector('input');
         if(input) {
             input.focus();
@@ -656,6 +663,7 @@ function runApp(app) {
 
     function closeModal() {
         DOMElements.modalOverlay.classList.add('hidden');
+        window.removeEventListener('keydown', handleEscKey);
     }
 
     async function handleModalAction() {
@@ -887,5 +895,3 @@ function runApp(app) {
 
 // This is the new, single line that starts your entire application.
 initializeFirebase();
-
-
