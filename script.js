@@ -185,11 +185,10 @@ function runApp(app) {
     // --- AUTHENTICATION & APP FLOW ---
     auth.onAuthStateChanged(async (user) => {
         if (user) {
-            // A user is authenticated. Hide all auth screens and show a loading screen.
+            // A user is authenticated.
             DOMElements.initialLoadingView.classList.add('hidden');
             DOMElements.loginView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
-            DOMElements.loadingView.classList.remove('hidden');
 
             appState.currentUser = user;
             setupActivityListeners();
@@ -205,7 +204,6 @@ function runApp(app) {
                 await renderDashboard();
             }
             
-            // Hide the loading screen now that content is ready.
             DOMElements.loadingView.classList.add('hidden');
 
         } else {
