@@ -31,6 +31,7 @@ function runApp(app) {
 
     // --- GLOBAL STATE & DOM REFERENCES ---
     const DOMElements = {
+        initialLoadingView: document.getElementById('initial-loading-view'), // NEW
         loadingView: document.getElementById('loading-view'),
         creationLoadingView: document.getElementById('creation-loading-view'),
         loginView: document.getElementById('login-view'),
@@ -184,11 +185,8 @@ function runApp(app) {
     // --- AUTHENTICATION & APP FLOW ---
     auth.onAuthStateChanged(async (user) => {
         if (user) {
-            // A user is logged in. Hide login view, show main loading screen.
-            DOMElements.loginView.classList.add('hidden');
-            DOMElements.resetView.classList.add('hidden');
-            DOMElements.loadingView.classList.remove('hidden');
-
+            // User is authenticated. The initial-loading-view is currently visible.
+            // We will keep it visible while we fetch the user's data.
             appState.currentUser = user;
             setupActivityListeners();
             resetSessionTimeout();
@@ -199,36 +197,38 @@ function runApp(app) {
             if (lastPlanId && lastViewId) {
                 await restoreLastView(lastPlanId, lastViewId);
             } else {
-                DOMElements.appView.classList.add('hidden');
                 DOMElements.dashboardView.classList.remove('hidden');
                 await renderDashboard();
             }
             
-            // Hide the main loading screen now that content is ready.
-            DOMElements.loadingView.classList.add('hidden');
+            // Hide the initial loading screen now that the correct content is ready to be shown.
+            DOMElements.initialLoadingView.classList.add('hidden');
 
         } else {
-            // No user is logged in. Ensure login view is visible and others are hidden.
+            // No user is logged in. Hide the initial loader and show the login page.
             appState.currentUser = null;
             appState.planData = {};
             appState.currentPlanId = null;
             clearActivityListeners();
             
-            DOMElements.loadingView.classList.add('hidden');
+            DOMElements.initialLoadingView.classList.add('hidden');
+            DOMElements.loginView.classList.remove('hidden');
+            
+            // Ensure other views are hidden as a safeguard
             DOMElements.appView.classList.add('hidden');
             DOMElements.dashboardView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
-            DOMElements.loginView.classList.remove('hidden');
         }
     });
 
     const handleLogout = (isTimeout = false) => {
+        // When logging out, clear the saved plan from localStorage
+        localStorage.removeItem('lastPlanId');
+        localStorage.removeItem('lastViewId');
+        
         if (isTimeout) {
             openModal('timeout');
         }
-        
-        localStorage.removeItem('lastPlanId');
-        localStorage.removeItem('lastViewId');
         
         DOMElements.emailInput.value = '';
         DOMElements.passwordInput.value = '';
@@ -239,6 +239,7 @@ function runApp(app) {
     async function restoreLastView(planId, viewId) {
         appState.currentPlanId = planId;
         await loadPlanFromFirestore();
+        DOMElements.dashboardView.classList.add('hidden');
         DOMElements.appView.classList.remove('hidden');
         switchView(viewId);
         updateUI();
@@ -305,6 +306,7 @@ function runApp(app) {
     }
 
     function handleBackToDashboard() {
+        // When going back to dashboard, clear the saved plan from localStorage
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         
@@ -360,7 +362,7 @@ function runApp(app) {
             return saveToFirestore();
         } else {
             return new Promise(resolve => {
-                appState.saveTimeout = setTimeout(async () => {
+                appState.saveTimeout = setTimeout(async ()_ => {
                     await saveToFirestore();
                     resolve();
                 }, 1000);
@@ -492,6 +494,7 @@ function runApp(app) {
     function switchView(viewId) {
         appState.currentView = viewId;
         
+        // Persist the user's location in the app
         if (appState.currentPlanId) {
             localStorage.setItem('lastPlanId', appState.currentPlanId);
             localStorage.setItem('lastViewId', viewId);
