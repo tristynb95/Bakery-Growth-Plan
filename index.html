@@ -37,7 +37,7 @@
     <div id="login-view" class="auth-container hidden">
         <div class="auth-box">
             <img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/92/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo" class="auth-logo">
-            <h2 class="auth-title">Bakery Growth Plan Login</h2>
+            <h2 class="auth-title">Manager Login</h2>
             <p id="auth-error" class="auth-error"></p>
             <input type="email" id="email" class="form-input" placeholder="Your Email Address">
             <input type="password" id="password" class="form-input" placeholder="Your Password">
@@ -119,19 +119,21 @@
         <main class="w-full overflow-y-auto">
             <div class="p-6 sm:p-8 lg:p-12 printable-area">
                 <header class="flex justify-between items-start mb-8 main-header">
-                    <div>
-                        <h1 id="header-title" class="text-4xl font-black text-gray-900 font-poppins">Bakery Growth Plan</h1>
-                        <p id="header-subtitle" class="mt-1 text-lg text-gray-500">Your 90-Day Sprint to a Better Bakery.</p>
+                    <div class="flex items-center gap-4">
+                        <button id="mobile-menu-btn" class="btn btn-secondary !p-2 lg:hidden"><i class="bi bi-list text-xl"></i></button>
+                        <div>
+                            <h1 id="header-title" class="text-4xl font-black text-gray-900 font-poppins">Bakery Growth Plan</h1>
+                            <p id="header-subtitle" class="mt-1 text-lg text-gray-500">Your 90-Day Sprint to a Better Bakery.</p>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-4 no-print">
-                        <div class="hidden sm:flex items-center gap-2">
+                    <div class="text-right no-print">
+                        <div class="flex items-center gap-2">
                              <div id="save-indicator" class="flex items-center gap-2 text-sm text-gray-500 transition-opacity duration-300 opacity-0">
                                 <i class="bi bi-check-circle-fill text-green-500"></i>
                                 <span>Saved to Cloud</span>
                             </div>
                             <button id="print-btn" class="btn btn-secondary hidden"><i class="bi bi-printer-fill"></i><span>Print</span></button>
                         </div>
-                        <button id="mobile-menu-btn" class="btn btn-secondary !p-2 lg:hidden"><i class="bi bi-list text-xl"></i></button>
                     </div>
                 </header>
                 <div id="content-area">
@@ -165,4 +167,3 @@
 </body>
 
 </html>
-
