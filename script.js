@@ -183,8 +183,12 @@ function runApp(app) {
 
     // --- AUTHENTICATION & APP FLOW ---
     auth.onAuthStateChanged(async (user) => {
-        DOMElements.loadingView.classList.add('hidden');
         if (user) {
+            // A user is logged in. Hide login view, show main loading screen.
+            DOMElements.loginView.classList.add('hidden');
+            DOMElements.resetView.classList.add('hidden');
+            DOMElements.loadingView.classList.remove('hidden');
+
             appState.currentUser = user;
             setupActivityListeners();
             resetSessionTimeout();
@@ -193,26 +197,28 @@ function runApp(app) {
             const lastViewId = localStorage.getItem('lastViewId');
 
             if (lastPlanId && lastViewId) {
-                DOMElements.loginView.classList.add('hidden');
-                DOMElements.resetView.classList.add('hidden');
-                DOMElements.dashboardView.classList.add('hidden');
                 await restoreLastView(lastPlanId, lastViewId);
             } else {
-                DOMElements.loginView.classList.add('hidden');
-                DOMElements.resetView.classList.add('hidden');
                 DOMElements.appView.classList.add('hidden');
                 DOMElements.dashboardView.classList.remove('hidden');
                 await renderDashboard();
             }
+            
+            // Hide the main loading screen now that content is ready.
+            DOMElements.loadingView.classList.add('hidden');
+
         } else {
+            // No user is logged in. Ensure login view is visible and others are hidden.
             appState.currentUser = null;
             appState.planData = {};
             appState.currentPlanId = null;
             clearActivityListeners();
-            DOMElements.loginView.classList.remove('hidden');
+            
+            DOMElements.loadingView.classList.add('hidden');
             DOMElements.appView.classList.add('hidden');
             DOMElements.dashboardView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
+            DOMElements.loginView.classList.remove('hidden');
         }
     });
 
