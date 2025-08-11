@@ -1045,6 +1045,24 @@ const DOMElements = {
         }
     });
 
+    // --- COOKIE CONSENT ---
+    const cookieBanner = document.getElementById('cookie-consent-banner');
+    const acceptBtn = document.getElementById('cookie-accept-btn');
+    const declineBtn = document.getElementById('cookie-decline-btn');
+
+    if (localStorage.getItem('gails_cookie_consent') !== 'true') {
+        cookieBanner.classList.remove('hidden');
+    }
+
+    acceptBtn.addEventListener('click', () => {
+        localStorage.setItem('gails_cookie_consent', 'true');
+        cookieBanner.classList.add('hidden');
+    });
+
+    declineBtn.addEventListener('click', () => {
+        cookieBanner.classList.add('hidden');
+    });
+
     // --- INITIALIZE APP ---
     generateTemplates();
 
@@ -1054,6 +1072,7 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
