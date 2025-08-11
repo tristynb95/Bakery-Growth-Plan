@@ -494,45 +494,45 @@ function runApp(app) {
     }
 
     function switchView(viewId) {
-        appState.currentView = viewId;
-        
-        // Persist the user's location in the app
-        if (appState.currentPlanId) {
-            localStorage.setItem('lastPlanId', appState.currentPlanId);
-            localStorage.setItem('lastViewId', viewId);
-        }
-
-        const titles = {
-            vision: { title: 'Bakery Growth Plan', subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.'},
-            'month-1': { title: 'Month 1 Sprint', subtitle: 'Lay the foundations for success.'},
-            'month-2': { title: 'Month 2 Sprint', subtitle: 'Build momentum and embed processes.'},
-            'month-3': { title: 'Month 3 Sprint', subtitle: 'Refine execution and review the quarter.'},
-            summary: { title: '90-Day Plan Summary', subtitle: 'A complete overview of your quarterly plan.'}
-        };
-        DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
-        DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
-
-        if (viewId === 'summary') {
-            DOMElements.printBtn.classList.remove('hidden');
-            DOMElements.shareBtn.classList.remove('hidden');
-            renderSummary();
-        } else {
-            DOMElements.printBtn.classList.add('hidden');
-            DOMElements.shareBtn.classList.add('hidden');
-            const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
-            DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
-
-            if (monthNum) {
-                renderStep(appState.monthContext[viewId].currentStep);
-            } else {
-                populateViewWithData();
-            }
-        }
-        document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
-        document.querySelector(`#nav-${viewId}`)?.classList.add('active');
-        
-        DOMElements.appView.classList.remove('sidebar-open');
+    appState.currentView = viewId;
+    
+    // Persist the user's location in the app
+    if (appState.currentPlanId) {
+        localStorage.setItem('lastPlanId', appState.currentPlanId);
+        localStorage.setItem('lastViewId', viewId);
     }
+
+    const titles = {
+        vision: { title: 'Bakery Growth Plan', subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.'},
+        'month-1': { title: 'Month 1 Sprint', subtitle: 'Lay the foundations for success.'},
+        'month-2': { title: 'Month 2 Sprint', subtitle: 'Build momentum and embed processes.'},
+        'month-3': { title: 'Month 3 Sprint', subtitle: 'Refine execution and review the quarter.'},
+        summary: { title: '90-Day Plan Summary', subtitle: 'A complete overview of your quarterly plan.'}
+    };
+    DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
+    DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
+
+    if (viewId === 'summary') {
+        DOMElements.printBtn.classList.remove('hidden');
+        DOMElements.shareBtn.classList.remove('hidden');
+        renderSummary();
+    } else {
+        DOMElements.printBtn.classList.add('hidden');
+        DOMElements.shareBtn.classList.add('hidden');
+        const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
+        DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
+
+        if (monthNum) {
+            renderStep(appState.monthContext[viewId].currentStep);
+        } else {
+            populateViewWithData();
+        }
+    }
+    document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
+    document.querySelector(`#nav-${viewId}`)?.classList.add('active');
+    
+    DOMElements.appView.classList.remove('sidebar-open');
+}
 
     function renderStep(stepNum) {
         const monthKey = appState.currentView;
@@ -1031,3 +1031,4 @@ function runApp(app) {
 
 // This is the new, single line that starts your entire application.
 initializeFirebase();
+
