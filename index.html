@@ -51,8 +51,37 @@
             <a href="#" id="forgot-password-btn" class="forgot-password-link">Forgot Password?</a>
 
             <div class="auth-buttons">
-                <button id="login-btn" class="btn btn-secondary">Login</button>
-                <button id="register-btn" class="btn btn-primary">Register Account</button>
+                <button id="login-btn" class="btn btn-primary w-full">Login</button>
+            </div>
+             <p class="text-sm text-center text-gray-600 mt-6">
+                Don't have an account? 
+                <a href="#" id="show-register-view-btn" class="font-medium text-red-600 hover:underline">Create one</a>
+            </p>
+        </div>
+    </div>
+
+    <div id="register-view" class="auth-container hidden">
+        <div class="auth-box">
+            <h2 class="auth-title">Create Account</h2>
+            <p id="register-error" class="auth-error"></p>
+            
+            <input type="email" id="register-email" class="form-input" placeholder="Your Email Address">
+            <input type="password" id="register-password" class="form-input" placeholder="Choose a Password">
+            
+            <div class="flex items-start mt-4">
+                <div class="flex items-center h-5">
+                    <input id="terms-agree" name="terms" type="checkbox" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-red-300">
+                </div>
+                <div class="ml-3 text-sm">
+                    <label for="terms-agree" class="text-gray-600">I agree to the <a href="/terms-and-conditions.html" target="_blank" class="font-medium text-red-600 hover:underline">Terms & Conditions</a> and <a href="/privacy-policy.html" target="_blank" class="font-medium text-red-600 hover:underline">Privacy Policy</a>.</label>
+                </div>
+            </div>
+
+            <div class="auth-buttons mt-4">
+                <button id="create-account-btn" class="btn btn-primary w-full">Create Account</button>
+            </div>
+             <div class="mt-6 text-center">
+                <a href="#" id="back-to-login-from-register-btn" class="forgot-password-link !text-center !mt-0">Back to Login</a>
             </div>
         </div>
     </div>
