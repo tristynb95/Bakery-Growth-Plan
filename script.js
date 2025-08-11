@@ -54,6 +54,7 @@ function runApp(app) {
         contentArea: document.getElementById('content-area'),
         mainNav: document.getElementById('main-nav'),
         printBtn: document.getElementById('print-btn'),
+        shareBtn: document.getElementById('share-btn'),
         saveIndicator: document.getElementById('save-indicator'),
         headerTitle: document.getElementById('header-title'),
         headerSubtitle: document.getElementById('header-subtitle'),
@@ -513,9 +514,11 @@ function runApp(app) {
 
         if (viewId === 'summary') {
             DOMElements.printBtn.classList.remove('hidden');
+            DOMElements.shareBtn.classList.remove('hidden');
             renderSummary();
         } else {
             DOMElements.printBtn.classList.add('hidden');
+            DOMElements.shareBtn.classList.add('hidden');
             const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
             DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
 
@@ -652,6 +655,50 @@ function runApp(app) {
             </div>`;
     }
 
+    async function handleShare() {
+        openModal('sharing');
+    
+        try {
+            const sharedDocRef = db.collection('sharedPlans').doc();
+            const planToShare = {
+                ...appState.planData,
+                sharedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                sharerId: appState.currentUser.uid,
+            };
+            await sharedDocRef.set(planToShare);
+            const shareableLink = `${window.location.origin}/view.html?id=${sharedDocRef.id}`;
+            
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = `
+                <p class="text-sm text-gray-600 mb-4">Anyone with this link can view a read-only version of your plan summary. The link is active indefinitely.</p>
+                <label for="shareable-link" class="font-semibold block mb-2">Shareable Link:</label>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="shareable-link" class="form-input" value="${shareableLink}" readonly>
+                    <button id="copy-link-btn" class="btn btn-secondary"><i class="bi bi-clipboard"></i></button>
+                </div>
+                <p id="copy-success-msg" class="text-green-600 text-sm mt-2 hidden">Link copied to clipboard!</p>
+            `;
+    
+            document.getElementById('copy-link-btn').addEventListener('click', () => {
+                const linkInput = document.getElementById('shareable-link');
+                linkInput.select();
+                document.execCommand('copy');
+                document.getElementById('copy-success-msg').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('copy-success-msg').classList.add('hidden');
+                }, 2000);
+            });
+            
+            DOMElements.modalActionBtn.style.display = 'none';
+            DOMElements.modalCancelBtn.textContent = 'Done';
+            
+        } catch (error) {
+            console.error("Error creating shareable link:", error);
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = `<p class="text-red-600">Could not create a shareable link. Please try again later.</p>`;
+        }
+    }
+
     // --- Modal Management ---
     const handleEscKey = (event) => {
         if (event.key === 'Escape') {
@@ -682,6 +729,7 @@ function runApp(app) {
                 DOMElements.modalActionBtn.textContent = "Create Plan";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
                 DOMElements.modalCancelBtn.style.display = 'inline-flex';
+                DOMElements.modalActionBtn.style.display = 'inline-flex';
                 const newPlanNameInput = document.getElementById('newPlanName');
                 newPlanNameInput.addEventListener('keyup', handleEnterKey);
                 newPlanNameInput.addEventListener('input', () => {
@@ -698,6 +746,7 @@ function runApp(app) {
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
                 DOMElements.modalCancelBtn.style.display = 'inline-flex';
+                DOMElements.modalActionBtn.style.display = 'inline-flex';
                 document.getElementById('editPlanName').addEventListener('keyup', handleEnterKey);
                 break;
             case 'delete':
@@ -706,13 +755,27 @@ function runApp(app) {
                 DOMElements.modalActionBtn.textContent = "Confirm Delete";
                 DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
                 DOMElements.modalCancelBtn.style.display = 'inline-flex';
+                DOMElements.modalActionBtn.style.display = 'inline-flex';
                 break;
             case 'timeout':
                 DOMElements.modalTitle.textContent = "Session Timed Out";
                 DOMElements.modalContent.innerHTML = `<p>For your security, you have been logged out due to inactivity. All of your progress has been saved.</p>`;
                 DOMElements.modalActionBtn.textContent = "OK";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
+                DOMElements.modalActionBtn.style.display = 'inline-flex';
                 DOMElements.modalCancelBtn.style.display = 'none'; // Hide cancel button
+                break;
+            case 'sharing':
+                DOMElements.modalTitle.textContent = "Share Your Plan";
+                DOMElements.modalContent.innerHTML = `
+                    <div class="flex items-center justify-center p-8">
+                        <div class="loading-spinner"></div>
+                        <p class="ml-4 text-gray-600">Generating secure shareable link...</p>
+                    </div>
+                `;
+                DOMElements.modalActionBtn.style.display = 'none';
+                DOMElements.modalCancelBtn.textContent = 'Cancel';
+                DOMElements.modalCancelBtn.style.display = 'inline-flex';
                 break;
         }
         DOMElements.modalOverlay.classList.remove('hidden');
@@ -917,6 +980,7 @@ function runApp(app) {
     DOMElements.contentArea.addEventListener('input', (e) => { if (e.target.matches('input, textarea')) { saveData(); }});
     DOMElements.contentArea.addEventListener('click', (e) => { const target = e.target; if (target.closest('.status-button')) { const button = target.closest('.status-button'); const alreadySelected = button.classList.contains('selected'); button.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected')); if (!alreadySelected) button.classList.add('selected'); saveData(); }});
     DOMElements.printBtn.addEventListener('click', () => window.print());
+    DOMElements.shareBtn.addEventListener('click', handleShare);
 
     DOMElements.modalCloseBtn.addEventListener('click', closeModal);
     DOMElements.modalCancelBtn.addEventListener('click', closeModal);
