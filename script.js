@@ -135,36 +135,59 @@ const DOMElements = {
 
     // --- CHARACTER COUNTER ---
     function initializeCharCounters() {
-        // Remove existing counters to avoid duplication
-        document.querySelectorAll('.char-counter').forEach(counter => counter.remove());
-
-        document.querySelectorAll('textarea[maxlength]').forEach(textarea => {
-            const counter = document.createElement('div');
-            counter.className = 'char-counter';
+    document.querySelectorAll('textarea[maxlength]').forEach(textarea => {
+        // If the wrapper already exists, skip
+        if (textarea.parentNode.classList.contains('textarea-wrapper')) {
+            // But we still need to find the counter and update its listener
+            const wrapper = textarea.parentNode;
+            const counter = wrapper.querySelector('.char-counter');
             
-            // Insert counter after textarea
-            textarea.parentNode.insertBefore(counter, textarea.nextSibling);
-
-            const updateCounter = () => {
+            const updateFn = () => {
                 const remaining = textarea.maxLength - textarea.value.length;
-                counter.textContent = `${remaining} characters remaining`;
+                counter.textContent = `${remaining}`;
                 if (remaining < 0) {
                     counter.style.color = 'var(--gails-red)';
-                    counter.style.fontWeight = 'bold';
                 } else if (remaining < 20) {
-                    counter.style.color = '#D97706'; // Amber 600
-                    counter.style.fontWeight = 'normal';
+                    counter.style.color = '#D97706'; // Amber
                 } else {
                     counter.style.color = 'var(--gails-text-secondary)';
-                    counter.style.fontWeight = 'normal';
                 }
             };
+            
+            textarea.addEventListener('input', updateFn);
+            updateFn(); // Initial call
+            return;
+        }
 
-            updateCounter();
-            textarea.addEventListener('input', updateCounter);
-        });
-    }
+        // 1. Create a wrapper and move the textarea inside it
+        const wrapper = document.createElement('div');
+        wrapper.className = 'textarea-wrapper';
+        textarea.parentNode.insertBefore(wrapper, textarea);
+        wrapper.appendChild(textarea);
 
+        // 2. Create the counter element
+        const counter = document.createElement('div');
+        counter.className = 'char-counter';
+        wrapper.appendChild(counter);
+
+        // 3. Update counter function
+        const updateCounter = () => {
+            const remaining = textarea.maxLength - textarea.value.length;
+            counter.textContent = `${remaining}`; // Just the number for a cleaner look
+            if (remaining < 0) {
+                counter.style.color = 'var(--gails-red)';
+            } else if (remaining < 20) {
+                counter.style.color = '#D97706'; // Amber
+            } else {
+                counter.style.color = 'var(--gails-text-secondary)';
+            }
+        };
+
+        // 4. Initial update and event listener
+        updateCounter();
+        textarea.addEventListener('input', updateCounter);
+    });
+}
     // --- HTML TEMPLATES ---
     const templates = {
         vision: {
@@ -1142,3 +1165,4 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
