@@ -484,7 +484,7 @@ const DOMElements = {
             const monthNum = stepKey.charAt(1);
             for (let w = 1; w <= 4; w++) {
                 const winFilled = planData[`m${monthNum}s5_w${w}_win`] && planData[`m${monthNum}s5_w${w}_win`].trim() !== '';
-                const spotlightFilled = planData[`m${monthNum}s5_w${w}_spotlight`] && plan-data[`m${monthNum}s5_w${w}_spotlight`].trim() !== '';
+                const spotlightFilled = planData[`m${monthNum}s5_w${w}_spotlight`] && planData[`m${monthNum}s5_w${w}_spotlight`].trim() !== '';
                 const statusSelected = !!planData[`m${monthNum}s5_w${w}_status`];
                 if (!winFilled || !spotlightFilled || !statusSelected) return false;
             }
@@ -655,6 +655,10 @@ const DOMElements = {
         const monthNum = monthKey.split('-')[1];
         const stepperNav = document.getElementById(`${monthKey}-stepper`);
         if (!stepperNav) return;
+
+        // The SVG for our new checkmark icon
+        const checkmarkSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg>`;
+
         stepperNav.innerHTML = '';
         for (let i = 1; i <= totalSteps; i++) {
             const stepKey = `m${monthNum}s${i}`;
@@ -662,9 +666,24 @@ const DOMElements = {
             const item = document.createElement('div');
             item.className = 'stepper-item flex items-start cursor-pointer';
             item.dataset.step = i;
+            
+            // Determine the content of the circle
+            const circleContent = isComplete ? checkmarkSVG : `<span class="step-number">${i}</span>`;
+
             if (isComplete) item.classList.add('completed');
             if (i === activeStep) item.classList.add('active');
-            item.innerHTML = `<div class="flex flex-col items-center mr-4"><div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"><span class="step-number">${i}</span></div>${i < totalSteps ? '<div class="step-line w-0.5 h-16 mt-2"></div>' : ''}</div><div><p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}</p></div>`;
+
+            item.innerHTML = `
+                <div class="flex flex-col items-center mr-4">
+                    <div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                        ${circleContent}
+                    </div>
+                    ${i < totalSteps ? '<div class="step-line w-0.5 h-16 mt-2"></div>' : ''}
+                </div>
+                <div>
+                    <p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}</p>
+                </div>`;
+            
             item.addEventListener('click', () => renderStep(i));
             stepperNav.appendChild(item);
         }
