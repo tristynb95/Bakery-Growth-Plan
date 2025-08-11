@@ -29,57 +29,57 @@ function runApp(app) {
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // --- GLOBAL STATE & DOM REFERENCES ---
-    const DOMElements = {
-        initialLoadingView: document.getElementById('initial-loading-view'), // NEW
-        loadingView: document.getElementById('loading-view'),
-        creationLoadingView: document.getElementById('creation-loading-view'),
-        loginView: document.getElementById('login-view'),
-        dashboardView: document.getElementById('dashboard-view'),
-        dashboardContent: document.getElementById('dashboard-content'),
-        appView: document.getElementById('app-view'),
-        mainContent: document.querySelector('#app-view main'),
-        sidebar: document.getElementById('sidebar'),
-        emailInput: document.getElementById('email'),
-        passwordInput: document.getElementById('password'),
-        loginBtn: document.getElementById('login-btn'),
-        registerBtn: document.getElementById('register-btn'),
-        logoutBtn: document.getElementById('logout-btn'),
-        dashboardLogoutBtn: document.getElementById('dashboard-logout-btn'),
-        backToDashboardBtn: document.getElementById('back-to-dashboard-btn'),
-        authError: document.getElementById('auth-error'),
-        sidebarName: document.getElementById('sidebar-name'),
-        sidebarBakery: document.getElementById('sidebar-bakery'),
-        sidebarInitials: document.getElementById('sidebar-initials'),
-        contentArea: document.getElementById('content-area'),
-        mainNav: document.getElementById('main-nav'),
-        printBtn: document.getElementById('print-btn'),
-        shareBtn: document.getElementById('share-btn'),
-        saveIndicator: document.getElementById('save-indicator'),
-        headerTitle: document.getElementById('header-title'),
-        headerSubtitle: document.getElementById('header-subtitle'),
-        progressBarFill: document.getElementById('progress-bar-fill'),
-        progressPercentage: document.getElementById('progress-percentage'),
-        desktopHeaderButtons: document.getElementById('desktop-header-buttons')
-        // Mobile Menu
-        mobileMenuBtn: document.getElementById('mobile-menu-btn'),
-        sidebarOverlay: document.getElementById('sidebar-overlay'),
-        // Modal elements
-        modalOverlay: document.getElementById('modal-overlay'),
-        modalBox: document.getElementById('modal-box'),
-        modalTitle: document.getElementById('modal-title'),
-        modalContent: document.getElementById('modal-content'),
-        modalActionBtn: document.getElementById('modal-action-btn'),
-        modalCancelBtn: document.getElementById('modal-cancel-btn'),
-        modalCloseBtn: document.getElementById('modal-close-btn'),
-        // Password Reset elements
-        resetView: document.getElementById('reset-view'),
-        forgotPasswordBtn: document.getElementById('forgot-password-btn'),
-        resetEmail: document.getElementById('reset-email'),
-        sendResetBtn: document.getElementById('send-reset-btn'),
-        resetMessageContainer: document.getElementById('reset-message-container'),
-        backToLoginBtn: document.getElementById('back-to-login-btn'),
-    };
+   // --- GLOBAL STATE & DOM REFERENCES ---
+const DOMElements = {
+    initialLoadingView: document.getElementById('initial-loading-view'), // NEW
+    loadingView: document.getElementById('loading-view'),
+    creationLoadingView: document.getElementById('creation-loading-view'),
+    loginView: document.getElementById('login-view'),
+    dashboardView: document.getElementById('dashboard-view'),
+    dashboardContent: document.getElementById('dashboard-content'),
+    appView: document.getElementById('app-view'),
+    mainContent: document.querySelector('#app-view main'),
+    sidebar: document.getElementById('sidebar'),
+    emailInput: document.getElementById('email'),
+    passwordInput: document.getElementById('password'),
+    loginBtn: document.getElementById('login-btn'),
+    registerBtn: document.getElementById('register-btn'),
+    logoutBtn: document.getElementById('logout-btn'),
+    dashboardLogoutBtn: document.getElementById('dashboard-logout-btn'),
+    backToDashboardBtn: document.getElementById('back-to-dashboard-btn'),
+    authError: document.getElementById('auth-error'),
+    sidebarName: document.getElementById('sidebar-name'),
+    sidebarBakery: document.getElementById('sidebar-bakery'),
+    sidebarInitials: document.getElementById('sidebar-initials'),
+    contentArea: document.getElementById('content-area'),
+    mainNav: document.getElementById('main-nav'),
+    printBtn: document.getElementById('print-btn'),
+    shareBtn: document.getElementById('share-btn'),
+    saveIndicator: document.getElementById('save-indicator'),
+    headerTitle: document.getElementById('header-title'),
+    headerSubtitle: document.getElementById('header-subtitle'),
+    progressBarFill: document.getElementById('progress-bar-fill'),
+    progressPercentage: document.getElementById('progress-percentage'),
+    desktopHeaderButtons: document.getElementById('desktop-header-buttons'), // Comma added here
+    // Mobile Menu
+    mobileMenuBtn: document.getElementById('mobile-menu-btn'),
+    sidebarOverlay: document.getElementById('sidebar-overlay'),
+    // Modal elements
+    modalOverlay: document.getElementById('modal-overlay'),
+    modalBox: document.getElementById('modal-box'),
+    modalTitle: document.getElementById('modal-title'),
+    modalContent: document.getElementById('modal-content'),
+    modalActionBtn: document.getElementById('modal-action-btn'),
+    modalCancelBtn: document.getElementById('modal-cancel-btn'),
+    modalCloseBtn: document.getElementById('modal-close-btn'),
+    // Password Reset elements
+    resetView: document.getElementById('reset-view'),
+    forgotPasswordBtn: document.getElementById('forgot-password-btn'),
+    resetEmail: document.getElementById('reset-email'),
+    sendResetBtn: document.getElementById('send-reset-btn'),
+    resetMessageContainer: document.getElementById('reset-message-container'),
+    backToLoginBtn: document.getElementById('back-to-login-btn'),
+};
 
     const appState = {
         planData: {},
@@ -1038,6 +1038,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
