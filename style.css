@@ -182,15 +182,46 @@ main { grid-area: main; }
 /* 8. Print-Specific Styles
 -------------------------------------------------- */
 @media print {
-    body { background-color: var(--gails-white); }
-    .no-print { display: none !important; }
-    .printable-area { padding: 0 !important; }
-    .main-layout, #dashboard-view { display: block; }
-    main { overflow: visible; height: auto; }
-    header, .dashboard-header { display: none; }
-    .content-card { box-shadow: none; border: 1px solid var(--gails-grey-mid); margin-top: 1.5rem; page-break-inside: avoid; }
-    .summary-content { font-size: 10pt; }
-    h1, h2, h3, h4, h5 { page-break-after: avoid; }
+    body {
+        background-color: var(--gails-white);
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .printable-area {
+        padding: 0 !important;
+    }
+
+    .main-layout, #dashboard-view {
+        display: block;
+        height: auto !important; /* This allows the container to grow */
+    }
+
+    main {
+        overflow: visible !important; /* This ensures no content is clipped */
+        height: auto !important;
+    }
+
+    header, .dashboard-header {
+        display: none;
+    }
+
+    .content-card {
+        box-shadow: none;
+        border: 1px solid var(--gails-grey-mid);
+        margin-top: 1.5rem;
+        page-break-inside: avoid; /* This prevents cards from splitting across pages */
+    }
+
+    .summary-content {
+        font-size: 10pt;
+    }
+
+    h1, h2, h3, h4, h5 {
+        page-break-after: avoid; /* This prevents page breaks right after a heading */
+    }
 }
 
 /* 9. Auth Enhancements
@@ -323,3 +354,4 @@ main { grid-area: main; }
         align-items: flex-start;
     }
 }
+
