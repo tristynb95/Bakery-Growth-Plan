@@ -63,26 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 }
             
-            // Fetch plan data from the 'sharedPlans' collection
-            const docRef = db.collection("sharedPlans").doc(planId);
-            const docSnap = await docRef.get();
-
-            if (docSnap.exists()) {
-                const planData = docSnap.data();
-                renderSummary(planData);
-                DOMElements.loadingView.classList.add('hidden');
-                DOMElements.appView.classList.remove('hidden');
-            } else {
-                // This is triggered if the document ID isn't found in the database.
-                showError();
-            }
-
-        } catch (error) {
-            console.error("Failed to load shared plan:", error);
-            showError();
-        }
-    }
-    
     function showError() {
         DOMElements.loadingView.classList.add('hidden');
         DOMElements.errorView.classList.remove('hidden');
