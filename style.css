@@ -356,16 +356,16 @@ main { grid-area: main; }
 }
 
 /* 13. Cookie Consent Banner */
-    .cookie-consent-banner {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background-color: var(--gails-white);
-        padding: 1rem;
-        box-shadow: var(--shadow-lg);
-        z-index: 1002;
-        border-top: 1px solid #E5E7EB;
+.cookie-consent-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--gails-white);
+    padding: 1rem;
+    box-shadow: var(--shadow-lg);
+    z-index: 1002;
+    border-top: 1px solid #E5E7EB;
 }
 
 .cookie-consent-content {
@@ -385,45 +385,4 @@ main { grid-area: main; }
 .cookie-consent-buttons {
     display: flex;
     gap: 0.75rem;
-}
-
-/* 14. Profile Menu */
-.profile-menu {
-    position: relative;
-}
-
-.profile-menu-dropdown {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    right: 0;
-    background-color: var(--gails-white);
-    border-radius: 0.5rem;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid #E5E7EB;
-    width: 200px;
-    z-index: 1003;
-    overflow: hidden;
-}
-
-.profile-menu-item {
-    display: block;
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
-    color: var(--gails-text-primary);
-    text-decoration: none;
-    transition: background-color 0.2s ease;
-}
-
-.profile-menu-item:hover {
-    background-color: var(--gails-grey-light);
-}
-
-.profile-menu-item.text-red-600:hover {
-    background-color: #FEE2E2;
-}
-
-.profile-menu-divider {
-    height: 1px;
-    background-color: #E5E7EB;
-    margin: 0.5rem 0;
 }
