@@ -1,5 +1,5 @@
 /* Gail's Bakery 30-60-90 Plan Stylesheet */
-/* v10.1 - UX & Visual Enhancement with SVG Icons */
+/* v10.2 - UX & Visual Enhancement with SVG Icons */
 
 /* 1. Root Variables & Base Styles
 -------------------------------------------------- */
@@ -229,9 +229,6 @@ main { grid-area: main; }
     padding: 0.5rem;
     border-radius: 0.75rem;
     transition: background-color 0.2s ease;
-}
-.stepper-item:hover {
-    background-color: var(--gails-grey-light);
 }
 .stepper-item .step-circle { position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background-color: var(--gails-grey-mid); color: var(--gails-white); }
 .stepper-item.active .step-circle { background-color: var(--gails-red); transform: scale(1.1); }
