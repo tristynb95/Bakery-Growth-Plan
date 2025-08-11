@@ -660,49 +660,65 @@ const DOMElements = {
             </div>`;
     }
 
-    async function handleShare() {
-        openModal('sharing');
+   async function handleShare() {
+    openModal('sharing');
     
-        try {
-            const sharedDocRef = db.collection('sharedPlans').doc();
-            const planToShare = {
-                ...appState.planData,
-                sharedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                sharerId: appState.currentUser.uid,
+    try {
+        let shareableLink;
+        
+        // First, check if a share link already exists for this plan
+        const pointerQuery = db.collection('sharedPlans').where('originalPlanId', '==', appState.currentPlanId);
+        const querySnapshot = await pointerQuery.get();
+
+        if (!querySnapshot.empty) {
+            // A link already exists, just use that one.
+            const existingPointer = querySnapshot.docs[0];
+            shareableLink = `${window.location.origin}/view.html?id=${existingPointer.id}`;
+        } else {
+            // No link exists, so we'll create one.
+            // 1. Mark the original plan as "shared"
+            const originalPlanRef = db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(appState.currentPlanId);
+            await originalPlanRef.update({ isShared: true });
+
+            // 2. Create a new pointer document in the sharedPlans collection
+            const pointerDoc = {
+                originalUserId: appState.currentUser.uid,
+                originalPlanId: appState.currentPlanId,
+                sharedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
-            await sharedDocRef.set(planToShare);
-            const shareableLink = `${window.location.origin}/view.html?id=${sharedDocRef.id}`;
-            
-            const modalContent = document.getElementById('modal-content');
-            modalContent.innerHTML = `
-                <p class="text-sm text-gray-600 mb-4">Anyone with this link can view a read-only version of your plan summary. The link is active indefinitely.</p>
-                <label for="shareable-link" class="font-semibold block mb-2">Shareable Link:</label>
-                <div class="flex items-center gap-2">
-                    <input type="text" id="shareable-link" class="form-input" value="${shareableLink}" readonly>
-                    <button id="copy-link-btn" class="btn btn-secondary"><i class="bi bi-clipboard"></i></button>
-                </div>
-                <p id="copy-success-msg" class="text-green-600 text-sm mt-2 hidden">Link copied to clipboard!</p>
-            `;
-    
-            document.getElementById('copy-link-btn').addEventListener('click', () => {
-                const linkInput = document.getElementById('shareable-link');
-                linkInput.select();
-                document.execCommand('copy');
-                document.getElementById('copy-success-msg').classList.remove('hidden');
-                setTimeout(() => {
-                    document.getElementById('copy-success-msg').classList.add('hidden');
-                }, 2000);
-            });
-            
-            DOMElements.modalActionBtn.style.display = 'none';
-            DOMElements.modalCancelBtn.textContent = 'Done';
-            
-        } catch (error) {
-            console.error("Error creating shareable link:", error);
-            const modalContent = document.getElementById('modal-content');
-            modalContent.innerHTML = `<p class="text-red-600">Could not create a shareable link. Please try again later.</p>`;
+            const newPointerRef = await db.collection('sharedPlans').add(pointerDoc);
+            shareableLink = `${window.location.origin}/view.html?id=${newPointerRef.id}`;
         }
+        
+        // This part is the same as before, it just displays the link
+        const modalContent = document.getElementById('modal-content');
+        modalContent.innerHTML = `
+            <p class="text-sm text-gray-600 mb-4">This is a live link that will update as you make changes to your plan.</p>
+            <label for="shareable-link" class="font-semibold block mb-2">Shareable Link:</label>
+            <div class="flex items-center gap-2">
+                <input type="text" id="shareable-link" class="form-input" value="${shareableLink}" readonly>
+                <button id="copy-link-btn" class="btn btn-secondary"><i class="bi bi-clipboard"></i></button>
+            </div>
+            <p id="copy-success-msg" class="text-green-600 text-sm mt-2 hidden">Link copied to clipboard!</p>
+        `;
+
+        document.getElementById('copy-link-btn').addEventListener('click', () => {
+            const linkInput = document.getElementById('shareable-link');
+            linkInput.select();
+            document.execCommand('copy');
+            document.getElementById('copy-success-msg').classList.remove('hidden');
+            setTimeout(() => document.getElementById('copy-success-msg').classList.add('hidden'), 2000);
+        });
+        
+        DOMElements.modalActionBtn.style.display = 'none';
+        DOMElements.modalCancelBtn.textContent = 'Done';
+        
+    } catch (error) {
+        console.error("Error creating shareable link:", error);
+        const modalContent = document.getElementById('modal-content');
+        modalContent.innerHTML = `<p class="text-red-600">Could not create a shareable link. Please try again later.</p>`;
     }
+}
 
     // --- Modal Management ---
     const handleEscKey = (event) => {
@@ -1038,6 +1054,7 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
