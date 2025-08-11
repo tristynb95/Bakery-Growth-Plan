@@ -386,9 +386,9 @@ const DOMElements = {
     }
 
     function handleBackToDashboard() {
-        // **THIS IS THE FIX**
-        // Clear the last viewed plan and section from memory
-        localStorage.removeItem('lastPlanId');
+        // This is the fix: By removing only the lastViewId, we prevent the app from
+        // automatically navigating to a specific section on the next load,
+        // which stops the UI "flash".
         localStorage.removeItem('lastViewId');
         
         appState.planData = {};
