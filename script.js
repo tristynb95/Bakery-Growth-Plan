@@ -1045,12 +1045,13 @@ const DOMElements = {
         }
     });
 
-    // --- COOKIE CONSENT ---
+// --- COOKIE CONSENT ---
     const cookieBanner = document.getElementById('cookie-consent-banner');
     const acceptBtn = document.getElementById('cookie-accept-btn');
     const declineBtn = document.getElementById('cookie-decline-btn');
 
-    if (localStorage.getItem('gails_cookie_consent') !== 'true') {
+    // Only show the banner if no choice has been recorded yet
+    if (localStorage.getItem('gails_cookie_consent') === null) {
         cookieBanner.classList.remove('hidden');
     }
 
@@ -1060,6 +1061,8 @@ const DOMElements = {
     });
 
     declineBtn.addEventListener('click', () => {
+        // Record that the user has declined, so we don't ask again.
+        localStorage.setItem('gails_cookie_consent', 'false');
         cookieBanner.classList.add('hidden');
     });
 
