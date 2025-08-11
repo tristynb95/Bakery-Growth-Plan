@@ -75,7 +75,18 @@
     <div id="dashboard-view" class="hidden">
         <header class="dashboard-header">
             <img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/92/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo" class="h-9">
-            <button id="dashboard-logout-btn" class="btn btn-secondary"><i class="bi bi-box-arrow-right"></i> Logout</button>
+            <div class="flex items-center gap-4">
+                <div class="profile-menu">
+                    <button id="profile-menu-btn" class="btn btn-secondary !p-2"><i class="bi bi-person-circle text-xl"></i></button>
+                    <div id="profile-menu-dropdown" class="profile-menu-dropdown hidden">
+                        <a href="#" id="update-info-btn" class="profile-menu-item">Update Info</a>
+                        <a href="#" id="download-data-btn" class="profile-menu-item">Download My Data</a>
+                        <div class="profile-menu-divider"></div>
+                        <a href="#" id="delete-account-btn" class="profile-menu-item text-red-600">Delete Account</a>
+                    </div>
+                </div>
+                <button id="dashboard-logout-btn" class="btn btn-secondary"><i class="bi bi-box-arrow-right"></i> Logout</button>
+            </div>
         </header>
         <main id="dashboard-content" class="p-6 sm:p-8 lg:p-12">
             </main>
