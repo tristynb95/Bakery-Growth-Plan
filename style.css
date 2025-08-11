@@ -1,7 +1,6 @@
 /* Gail's Bakery 30-60-90 Plan Stylesheet */
 /* v9.2 - Security Update */
 
-
 /* 1. Root Variables & Base Styles
 -------------------------------------------------- */
 :root {
@@ -37,10 +36,11 @@ body {
     font-weight: 900; /* Bolder headings */
     letter-spacing: -0.02em; 
 }
-
-/* Remove red text from all headers */
+.hidden { display: none !important; }
 .gails-red-text { color: var(--gails-red); }
+/* Remove red text from all headers */
 h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
+
 
 /* 2. Auth View & Loading States
 -------------------------------------------------- */
@@ -136,6 +136,30 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 }
 .plan-card.new-plan-card:hover { color: var(--gails-red); background-color: #FFF1F2; }
 
+/* Dashboard Progress Circle */
+.progress-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(var(--gails-red) calc(var(--progress, 0) * 3.6deg), var(--gails-grey-light) 0deg);
+    transition: background 0.5s;
+}
+.progress-circle-inner {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--gails-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--gails-red);
+}
+
 /* 4. Main App Layout & Sidebar
 -------------------------------------------------- */
 .main-layout { display: grid; grid-template-columns: 280px 1fr; height: 100vh; grid-template-areas: "sidebar main"; }
@@ -162,6 +186,14 @@ main { grid-area: main; }
 .form-input { width: 100%; padding: 0.75rem 1rem; border-radius: 0.5rem; border: 1px solid var(--gails-grey-mid); background-color: var(--gails-white); transition: all 0.2s; font-size: 1rem; }
 .form-input:focus { outline: none; border-color: var(--gails-red); box-shadow: var(--shadow-focus); }
 .content-card { background-color: var(--gails-white); border-radius: 1rem; box-shadow: var(--shadow-sm); border: 1px solid #E5E7EB; }
+
+.char-counter {
+    font-size: 0.75rem;
+    color: var(--gails-text-secondary);
+    text-align: right;
+    margin-top: 0.25rem;
+    height: 1rem; /* Reserve space to prevent layout shift */
+}
 
 /* 6. Interactive Elements & Enhancements
 -------------------------------------------------- */
@@ -432,4 +464,3 @@ main { grid-area: main; }
     background-color: var(--gails-grey-light);
     color: var(--gails-text-primary);
 }
-
