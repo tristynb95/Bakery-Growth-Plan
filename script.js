@@ -288,7 +288,12 @@ const DOMElements = {
                         </div>
                         <div class="mt-6 pt-4 border-t text-sm space-y-2">
                             <div class="flex justify-between"><span class="font-semibold text-gray-600">Last Edited:</span><span>${editedDate}</span></div>
-                            <div class="flex justify-between items-center"><span class="font-semibold text-gray-600">Completion:</span><span class="font-bold gails-red-text">${completion}%</span></div>
+                            <div class="flex justify-between items-center">
+    <span class="font-semibold text-gray-600">Completion:</span>
+    <div class="progress-circle" data-progress="${completion}">
+        <div class="progress-circle-inner">${completion}%</div>
+    </div>
+</div>
                         </div>
                     </div>
                 </div>`;
@@ -1097,3 +1102,4 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
