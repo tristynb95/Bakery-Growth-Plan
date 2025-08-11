@@ -156,12 +156,6 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 }
 .plan-card.new-plan-card .bi-plus-circle-dotted { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .plan-card.new-plan-card:hover .bi-plus-circle-dotted { transform: scale(1.15) rotate(90deg); }
-.plan-card.new-plan-card.empty-state {
-    grid-column: 1 / -1; /* Makes the card span the full width of the grid */
-    text-align: center;
-    padding: 4rem;
-}
-
 
 /* Dashboard Progress Circle */
 .progress-circle {
