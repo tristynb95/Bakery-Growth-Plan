@@ -43,7 +43,6 @@ const DOMElements = {
     emailInput: document.getElementById('email'),
     passwordInput: document.getElementById('password'),
     loginBtn: document.getElementById('login-btn'),
-    registerBtn: document.getElementById('register-btn'),
     logoutBtn: document.getElementById('logout-btn'),
     dashboardLogoutBtn: document.getElementById('dashboard-logout-btn'),
     backToDashboardBtn: document.getElementById('back-to-dashboard-btn'),
@@ -60,7 +59,7 @@ const DOMElements = {
     headerSubtitle: document.getElementById('header-subtitle'),
     progressBarFill: document.getElementById('progress-bar-fill'),
     progressPercentage: document.getElementById('progress-percentage'),
-    desktopHeaderButtons: document.getElementById('desktop-header-buttons'), // Comma added here
+    desktopHeaderButtons: document.getElementById('desktop-header-buttons'),
     // Mobile Menu
     mobileMenuBtn: document.getElementById('mobile-menu-btn'),
     sidebarOverlay: document.getElementById('sidebar-overlay'),
@@ -79,6 +78,15 @@ const DOMElements = {
     sendResetBtn: document.getElementById('send-reset-btn'),
     resetMessageContainer: document.getElementById('reset-message-container'),
     backToLoginBtn: document.getElementById('back-to-login-btn'),
+    // Registration elements
+    registerView: document.getElementById('register-view'),
+    showRegisterViewBtn: document.getElementById('show-register-view-btn'),
+    backToLoginFromRegisterBtn: document.getElementById('back-to-login-from-register-btn'),
+    registerEmail: document.getElementById('register-email'),
+    registerPassword: document.getElementById('register-password'),
+    termsAgreeCheckbox: document.getElementById('terms-agree'),
+    createAccountBtn: document.getElementById('create-account-btn'),
+    registerError: document.getElementById('register-error'),
 };
 
     const appState = {
@@ -187,9 +195,11 @@ const DOMElements = {
     // --- AUTHENTICATION & APP FLOW ---
     auth.onAuthStateChanged(async (user) => {
         if (user) {
-            // A user is authenticated. Hide the login page and show the loader while we get their data.
+            // A user is authenticated. Hide all auth pages and show the loader.
             DOMElements.loginView.classList.add('hidden');
-            DOMElements.initialLoadingView.classList.remove('hidden'); // Show loader
+            DOMElements.registerView.classList.add('hidden');
+            DOMElements.resetView.classList.add('hidden');
+            DOMElements.initialLoadingView.classList.remove('hidden');
 
             appState.currentUser = user;
             setupActivityListeners();
@@ -205,27 +215,28 @@ const DOMElements = {
                 await renderDashboard();
             }
 
-            // Hide the initial loading screen now that the correct authed view is ready.
             DOMElements.initialLoadingView.classList.add('hidden');
 
         } else {
-            // No user is logged in. The login page is already visible from our HTML change.
-            // We just ensure all other views are hidden.
+            // No user is logged in. 
             appState.currentUser = null;
             appState.planData = {};
             appState.currentPlanId = null;
             clearActivityListeners();
 
+            // Hide all authed views
             DOMElements.initialLoadingView.classList.add('hidden');
             DOMElements.appView.classList.add('hidden');
             DOMElements.dashboardView.classList.add('hidden');
+            DOMElements.registerView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
-            DOMElements.loginView.classList.remove('hidden'); // Explicitly ensure it's visible
+            
+            // Show the login view by default
+            DOMElements.loginView.classList.remove('hidden');
         }
     });
 
     const handleLogout = (isTimeout = false) => {
-        // When logging out, clear the saved plan from localStorage
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         
@@ -309,7 +320,6 @@ const DOMElements = {
     }
 
     function handleBackToDashboard() {
-        // When going back to dashboard, clear the saved plan from localStorage
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         
@@ -497,7 +507,6 @@ const DOMElements = {
     function switchView(viewId) {
     appState.currentView = viewId;
     
-    // Persist the user's location in the app
     if (appState.currentPlanId) {
         localStorage.setItem('lastPlanId', appState.currentPlanId);
         localStorage.setItem('lastViewId', viewId);
@@ -514,13 +523,11 @@ const DOMElements = {
     DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
 
     if (viewId === 'summary') {
-        // This is the corrected block
-        DOMElements.desktopHeaderButtons.classList.remove('hidden'); // Makes the container visible
+        DOMElements.desktopHeaderButtons.classList.remove('hidden');
         DOMElements.printBtn.classList.remove('hidden');
         DOMElements.shareBtn.classList.remove('hidden');
         renderSummary();
     } else {
-        // This block hides the buttons again when leaving the summary view
         DOMElements.desktopHeaderButtons.classList.add('hidden');
         DOMElements.printBtn.classList.add('hidden');
         DOMElements.shareBtn.classList.add('hidden');
@@ -666,21 +673,16 @@ const DOMElements = {
     try {
         let shareableLink;
         
-        // First, check if a share link already exists for this plan
         const pointerQuery = db.collection('sharedPlans').where('originalPlanId', '==', appState.currentPlanId);
         const querySnapshot = await pointerQuery.get();
 
         if (!querySnapshot.empty) {
-            // A link already exists, just use that one.
             const existingPointer = querySnapshot.docs[0];
             shareableLink = `${window.location.origin}/view.html?id=${existingPointer.id}`;
         } else {
-            // No link exists, so we'll create one.
-            // 1. Mark the original plan as "shared"
             const originalPlanRef = db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(appState.currentPlanId);
             await originalPlanRef.update({ isShared: true });
 
-            // 2. Create a new pointer document in the sharedPlans collection
             const pointerDoc = {
                 originalUserId: appState.currentUser.uid,
                 originalPlanId: appState.currentPlanId,
@@ -690,7 +692,6 @@ const DOMElements = {
             shareableLink = `${window.location.origin}/view.html?id=${newPointerRef.id}`;
         }
         
-        // This part is the same as before, it just displays the link
         const modalContent = document.getElementById('modal-content');
         modalContent.innerHTML = `
             <p class="text-sm text-gray-600 mb-4">This is a live link that will update as you make changes to your plan.</p>
@@ -784,7 +785,7 @@ const DOMElements = {
                 DOMElements.modalActionBtn.textContent = "OK";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
                 DOMElements.modalActionBtn.style.display = 'inline-flex';
-                DOMElements.modalCancelBtn.style.display = 'none'; // Hide cancel button
+                DOMElements.modalCancelBtn.style.display = 'none';
                 break;
             case 'sharing':
                 DOMElements.modalTitle.textContent = "Share Your Plan";
@@ -812,8 +813,6 @@ const DOMElements = {
         if (DOMElements.modalBox.dataset.type === 'timeout') {
             DOMElements.modalOverlay.classList.add('hidden');
             window.removeEventListener('keydown', handleEscKey);
-            // The user is already logged out, so no further action is needed.
-            // The auth state change will handle showing the login screen.
         } else {
             DOMElements.modalOverlay.classList.add('hidden');
             window.removeEventListener('keydown', handleEscKey);
@@ -927,19 +926,44 @@ const DOMElements = {
     DOMElements.emailInput.addEventListener('keyup', loginOnEnter);
     DOMElements.passwordInput.addEventListener('keyup', loginOnEnter);
 
+    DOMElements.createAccountBtn.addEventListener('click', () => {
+        const email = DOMElements.registerEmail.value;
+        const password = DOMElements.registerPassword.value;
+        const errorContainer = DOMElements.registerError;
+        
+        errorContainer.style.display = 'none';
 
-    DOMElements.registerBtn.addEventListener('click', () => {
-        DOMElements.authError.style.display = 'none';
-        auth.createUserWithEmailAndPassword(DOMElements.emailInput.value, DOMElements.passwordInput.value)
+        if (!DOMElements.termsAgreeCheckbox.checked) {
+            errorContainer.textContent = 'You must agree to the Terms and Conditions and Privacy Policy.';
+            errorContainer.style.display = 'block';
+            return;
+        }
+
+        auth.createUserWithEmailAndPassword(email, password)
             .catch(error => {
-                DOMElements.authError.textContent = error.message;
-                DOMElements.authError.style.display = 'block';
+                errorContainer.textContent = error.message;
+                errorContainer.style.display = 'block';
             });
+    });
+
+    DOMElements.showRegisterViewBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        DOMElements.loginView.classList.add('hidden');
+        DOMElements.resetView.classList.add('hidden');
+        DOMElements.registerView.classList.remove('hidden');
+        DOMElements.authError.style.display = 'none';
+    });
+
+    DOMElements.backToLoginFromRegisterBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        DOMElements.registerView.classList.add('hidden');
+        DOMElements.loginView.classList.remove('hidden');
     });
 
     DOMElements.forgotPasswordBtn.addEventListener('click', (e) => {
         e.preventDefault();
         DOMElements.loginView.classList.add('hidden');
+        DOMElements.registerView.classList.add('hidden');
         DOMElements.resetView.classList.remove('hidden');
         DOMElements.authError.style.display = 'none';
         DOMElements.resetMessageContainer.innerHTML = '';
@@ -1050,7 +1074,6 @@ const DOMElements = {
     const acceptBtn = document.getElementById('cookie-accept-btn');
     const declineBtn = document.getElementById('cookie-decline-btn');
 
-    // Only show the banner if no choice has been recorded yet
     if (localStorage.getItem('gails_cookie_consent') === null) {
         cookieBanner.classList.remove('hidden');
     }
@@ -1061,7 +1084,6 @@ const DOMElements = {
     });
 
     declineBtn.addEventListener('click', () => {
-        // Record that the user has declined, so we don't ask again.
         localStorage.setItem('gails_cookie_consent', 'false');
         cookieBanner.classList.add('hidden');
     });
