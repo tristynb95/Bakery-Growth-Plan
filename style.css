@@ -355,3 +355,35 @@ main { grid-area: main; }
     }
 }
 
+/* 13. Cookie Consent Banner */
+    .cookie-consent-banner {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: var(--gails-white);
+        padding: 1rem;
+        box-shadow: var(--shadow-lg);
+        z-index: 1002;
+        border-top: 1px solid #E5E7EB;
+}
+
+.cookie-consent-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.cookie-consent-link {
+    text-decoration: underline;
+    color: var(--gails-red);
+}
+
+.cookie-consent-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+
