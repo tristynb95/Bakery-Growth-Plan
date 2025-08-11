@@ -12,50 +12,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function initializeFirebaseAndLoadPlan() {
     try {
-        // Fetch Firebase config from the Netlify function
         const response = await fetch('/.netlify/functions/config');
         if (!response.ok) throw new Error('Could not fetch Firebase configuration.');
         const firebaseConfig = await response.json();
 
-        // A more robust way to initialize Firebase
         let app;
         if (!firebase.apps.length) {
             app = firebase.initializeApp(firebaseConfig);
         } else {
-            app = firebase.app(); // Get the default app if it already exists
+            app = firebase.app();
         }
-
-        const db = firebase.firestore(app); // Explicitly use the initialized app
+        const db = firebase.firestore(app);
         
-        // Get plan ID from URL
         const urlParams = new URLSearchParams(window.location.search);
-        const planId = urlParams.get('id');
+        const pointerId = urlParams.get('id');
         
-        if (!planId) {
+        if (!pointerId) {
             showError();
             return;
         }
         
-        // Fetch plan data from the 'sharedPlans' collection
-        const docRef = db.collection("sharedPlans").doc(planId);
-        const docSnap = await docRef.get();
+        // 1. Get the pointer document from sharedPlans
+        const pointerDocRef = db.collection("sharedPlans").doc(pointerId);
+        const pointerDocSnap = await pointerDocRef.get();
 
-        // This new block handles all Firebase SDK versions
-        let docExists = false;
-        if (typeof docSnap.exists === 'function') {
-            docExists = docSnap.exists(); // Modern v9 SDK syntax
-        } else if (typeof docSnap.exists === 'boolean') {
-            docExists = docSnap.exists; // Older v8 SDK syntax
-        }
-
-        if (docExists) {
-            const planData = docSnap.data();
-            renderSummary(planData);
-            DOMElements.loadingView.classList.add('hidden');
-            DOMElements.appView.classList.remove('hidden');
-        } else {
+        if (!pointerDocSnap.exists) {
             showError();
+            return;
         }
+
+        const pointerData = pointerDocSnap.data();
+        const { originalUserId, originalPlanId } = pointerData;
+
+        // 2. Now, listen for real-time updates on the original plan document
+        const originalPlanRef = db.collection("users").doc(originalUserId).collection("plans").doc(originalPlanId);
+        
+        originalPlanRef.onSnapshot(doc => {
+            if (doc.exists) {
+                const planData = doc.data();
+                renderSummary(planData);
+                DOMElements.loadingView.classList.add('hidden');
+                DOMElements.appView.classList.remove('hidden');
+            } else {
+                showError();
+            }
+        }, err => {
+            console.error("Error listening to plan updates:", err);
+            showError();
+        });
 
     } catch (error) {
         console.error("Failed to load shared plan:", error);
