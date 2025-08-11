@@ -31,7 +31,7 @@ function runApp(app) {
 
    // --- GLOBAL STATE & DOM REFERENCES ---
 const DOMElements = {
-    initialLoadingView: document.getElementById('initial-loading-view'),
+    initialLoadingView: document.getElementById('initial-loading-view'), // NEW
     loadingView: document.getElementById('loading-view'),
     creationLoadingView: document.getElementById('creation-loading-view'),
     loginView: document.getElementById('login-view'),
@@ -316,55 +316,45 @@ const DOMElements = {
     
     async function renderDashboard() {
         if (!appState.currentUser) return;
-    
+
         let plans = [];
         try {
             const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
             const snapshot = await plansRef.orderBy('lastEdited', 'desc').get();
             plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         } catch (error) { console.error("Error fetching user plans:", error); }
-    
-        let dashboardHTML = `<div class="flex justify-between items-center"><h1 class="text-4xl font-black text-gray-900 font-poppins">Your Growth Plans</h1></div>`;
-    
-        if (plans.length === 0) {
+
+        let dashboardHTML = `<div class="flex justify-between items-center"><h1 class="text-4xl font-black text-gray-900 font-poppins">Your Growth Plans</h1></div><div class="dashboard-grid">`;
+
+        plans.forEach(plan => {
+            const completion = calculatePlanCompletion(plan);
+            const editedDate = plan.lastEdited?.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || 'N/A';
+            const planName = plan.planName || 'Untitled Plan';
             dashboardHTML += `
-                <div class="plan-card new-plan-card empty-state" id="create-new-plan-btn">
-                    <i class="bi bi-plus-circle-dotted text-6xl"></i>
-                    <h2 class="text-2xl font-bold mt-4">Create Your First Growth Plan</h2>
-                    <p class="text-gray-600 mt-2">Let's get started on your journey to success.</p>
-                </div>`;
-        } else {
-            dashboardHTML += `<div class="dashboard-grid">`;
-            plans.forEach(plan => {
-                const completion = calculatePlanCompletion(plan);
-                const editedDate = plan.lastEdited?.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || 'N/A';
-                const planName = plan.planName || 'Untitled Plan';
-                dashboardHTML += `
-                    <div class="plan-card">
-                        <div class="plan-card-actions">
-                            <button class="plan-action-btn edit-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Edit Name"><i class="bi bi-pencil-square"></i></button>
-                            <button class="plan-action-btn delete-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Delete Plan"><i class="bi bi-trash3-fill"></i></button>
+                <div class="plan-card">
+                    <div class="plan-card-actions">
+                        <button class="plan-action-btn edit-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Edit Name"><i class="bi bi-pencil-square"></i></button>
+                        <button class="plan-action-btn delete-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Delete Plan"><i class="bi bi-trash3-fill"></i></button>
+                    </div>
+                    <div class="plan-card-main" data-plan-id="${plan.id}">
+                        <div class="flex-grow">
+                            <h3 class="text-xl font-bold font-poppins">${planName}</h3>
+                            <p class="text-sm text-gray-500 mt-1">${plan.quarter || 'No quarter set'}</p>
                         </div>
-                        <div class="plan-card-main" data-plan-id="${plan.id}">
-                            <div class="flex-grow">
-                                <h3 class="text-xl font-bold font-poppins">${planName}</h3>
-                                <p class="text-sm text-gray-500 mt-1">${plan.quarter || 'No quarter set'}</p>
-                            </div>
-                            <div class="mt-6 pt-4 border-t text-sm space-y-2">
-                                <div class="flex justify-between"><span class="font-semibold text-gray-600">Last Edited:</span><span>${editedDate}</span></div>
-                                <div class="flex justify-between items-center">
-                                    <span class="font-semibold text-gray-600">Completion:</span>
-                                    <div class="progress-circle" data-progress="${completion}">
-                                        <div class="progress-circle-inner">${completion}%</div>
-                                    </div>
+                        <div class="mt-6 pt-4 border-t text-sm space-y-2">
+                            <div class="flex justify-between"><span class="font-semibold text-gray-600">Last Edited:</span><span>${editedDate}</span></div>
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-gray-600">Completion:</span>
+                                <div class="progress-circle" data-progress="${completion}">
+                                    <div class="progress-circle-inner">${completion}%</div>
                                 </div>
                             </div>
                         </div>
-                    </div>`;
-            });
-            dashboardHTML += `<div class="plan-card new-plan-card" id="create-new-plan-btn"><i class="bi bi-plus-circle-dotted text-4xl"></i><p class="mt-2 font-semibold">Create New Plan</p></div></div>`;
-        }
-    
+                    </div>
+                </div>`;
+        });
+
+        dashboardHTML += `<div class="plan-card new-plan-card" id="create-new-plan-btn"><i class="bi bi-plus-circle-dotted text-4xl"></i><p class="mt-2 font-semibold">Create New Plan</p></div></div>`;
         DOMElements.dashboardContent.innerHTML = dashboardHTML;
         
         // Set progress for the new circles
@@ -396,9 +386,7 @@ const DOMElements = {
     }
 
     function handleBackToDashboard() {
-        // This is the fix: By removing only the lastViewId, we prevent the app from
-        // automatically navigating to a specific section on the next load,
-        // which stops the UI "flash".
+        localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         
         appState.planData = {};
@@ -445,8 +433,8 @@ const DOMElements = {
             const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
             await docRef.set({ ...appState.planData, lastEdited: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
             
-            DOMElements.saveIndicator.classList.add('visible');
-            setTimeout(() => DOMElements.saveIndicator.classList.remove('visible'), 2500);
+            DOMElements.saveIndicator.classList.remove('opacity-0');
+            setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
         };
     
         if (forceImmediate) {
@@ -456,7 +444,7 @@ const DOMElements = {
                 appState.saveTimeout = setTimeout(async () => {
                     await saveToFirestore();
                     resolve();
-                }, 1200);
+                }, 1000);
             });
         }
     }
@@ -582,12 +570,7 @@ const DOMElements = {
         }
     }
 
-    async function switchView(viewId) {
-        // Force an immediate save of any pending changes before switching views
-        if (appState.currentPlanId) {
-            await saveData(true);
-        }
-
+    function switchView(viewId) {
         appState.currentView = viewId;
         
         if (appState.currentPlanId) {
@@ -667,10 +650,6 @@ const DOMElements = {
         const monthNum = monthKey.split('-')[1];
         const stepperNav = document.getElementById(`${monthKey}-stepper`);
         if (!stepperNav) return;
-
-        // The SVG for our new checkmark icon
-        const checkmarkSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg>`;
-
         stepperNav.innerHTML = '';
         for (let i = 1; i <= totalSteps; i++) {
             const stepKey = `m${monthNum}s${i}`;
@@ -678,24 +657,9 @@ const DOMElements = {
             const item = document.createElement('div');
             item.className = 'stepper-item flex items-start cursor-pointer';
             item.dataset.step = i;
-            
-            // Determine the content of the circle
-            const circleContent = isComplete ? checkmarkSVG : `<span class="step-number">${i}</span>`;
-
             if (isComplete) item.classList.add('completed');
             if (i === activeStep) item.classList.add('active');
-
-            item.innerHTML = `
-                <div class="flex flex-col items-center mr-4">
-                    <div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
-                        ${circleContent}
-                    </div>
-                    ${i < totalSteps ? '<div class="step-line w-0.5 h-16 mt-2"></div>' : ''}
-                </div>
-                <div>
-                    <p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}</p>
-                </div>`;
-            
+            item.innerHTML = `<div class="flex flex-col items-center mr-4"><div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"><span class="step-number">${i}</span></div>${i < totalSteps ? '<div class="step-line w-0.5 h-16 mt-2"></div>' : ''}</div><div><p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}</p></div>`;
             item.addEventListener('click', () => renderStep(i));
             stepperNav.appendChild(item);
         }
@@ -903,27 +867,6 @@ const DOMElements = {
                 DOMElements.modalCancelBtn.textContent = 'Cancel';
                 DOMElements.modalCancelBtn.style.display = 'inline-flex';
                 break;
-            case 'creating': // New modal type for the loader
-                DOMElements.modalTitle.textContent = "Creating Your New Plan";
-                DOMElements.modalContent.innerHTML = `
-                    <div class="space-y-4 py-4">
-                        <div id="loader-step-1" class="creation-loader-step" style="animation-delay: 0.1s;">
-                            <div class="icon"><div class="spinner"></div></div>
-                            <span>Structuring plan...</span>
-                        </div>
-                        <div id="loader-step-2" class="creation-loader-step" style="animation-delay: 0.8s;">
-                            <div class="icon"></div>
-                            <span>Saving to cloud...</span>
-                        </div>
-                        <div id="loader-step-3" class="creation-loader-step" style="animation-delay: 1.5s;">
-                            <div class="icon"></div>
-                            <span>All set! Opening now...</span>
-                        </div>
-                    </div>
-                `;
-                DOMElements.modalActionBtn.style.display = 'none';
-                DOMElements.modalCancelBtn.style.display = 'none';
-                break;
         }
         DOMElements.modalOverlay.classList.remove('hidden');
         window.addEventListener('keydown', handleEscKey);
@@ -987,46 +930,24 @@ const DOMElements = {
                     return;
                 }
                 
+                DOMElements.modalActionBtn.disabled = false;
+                DOMElements.modalActionBtn.textContent = originalButtonText;
+
                 closeModal();
-                openModal('creating'); // Open the new loading modal
+                DOMElements.creationLoadingView.classList.remove('hidden');
 
                 try {
-
-                    // Simulate loader steps
-                    const step1 = document.getElementById('loader-step-1');
-                    const step2 = document.getElementById('loader-step-2');
-                    const step3 = document.getElementById('loader-step-3');
-
-                    // Step 1 is already spinning
-                    await new Promise(res => setTimeout(res, 700));
-                    step1.querySelector('.icon').innerHTML = '<div class="checkmark">✓</div>';
-                    step2.querySelector('.icon').innerHTML = '<div class="spinner"></div>';
-                    
-                    // Actual creation
                     const newPlan = await plansRef.add({ 
                         planName: newPlanName, 
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(), 
                         lastEdited: firebase.firestore.FieldValue.serverTimestamp(), 
                         managerName: '' 
                     });
-
-                    // Step 2 completes
-                    await new Promise(res => setTimeout(res, 700));
-                    step2.querySelector('.icon').innerHTML = '<div class="checkmark">✓</div>';
-                    step3.querySelector('.icon').innerHTML = '<div class="spinner"></div>';
-                    
-                    // Step 3 completes
-                    await new Promise(res => setTimeout(res, 600));
-                    step3.querySelector('.icon').innerHTML = '<div class="checkmark">✓</div>';
-
-                    // Final delay before closing and opening the plan
-                    await new Promise(res => setTimeout(res, 500));
-                    closeModal();
                     await handleSelectPlan(newPlan.id);
-
                 } catch (error) {
                     console.error("Error creating new plan:", error);
-                    closeModal(); // Close the loader on error
+                } finally {
+                    DOMElements.creationLoadingView.classList.add('hidden');
                 }
                 break;
 
