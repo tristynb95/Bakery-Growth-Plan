@@ -386,6 +386,8 @@ const DOMElements = {
     }
 
     function handleBackToDashboard() {
+        // **THIS IS THE FIX**
+        // Clear the last viewed plan and section from memory
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         
