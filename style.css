@@ -397,3 +397,23 @@ main { grid-area: main; }
 #dashboard-content {
     flex-grow: 1;
 }
+
+/* 15. Subtle Button Style */
+.btn-subtle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0.5rem 1rem;
+    color: var(--gails-text-secondary);
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.btn-subtle:hover {
+    background-color: var(--gails-grey-light);
+    color: var(--gails-text-primary);
+}
