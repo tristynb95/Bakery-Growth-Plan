@@ -11,33 +11,57 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     async function initializeFirebaseAndLoadPlan() {
-        try {
-            // Fetch Firebase config from the Netlify function
-            const response = await fetch('/.netlify/functions/config');
-            if (!response.ok) throw new Error('Could not fetch Firebase configuration.');
-            const firebaseConfig = await response.json();
+    try {
+        // Fetch Firebase config from the Netlify function
+        const response = await fetch('/.netlify/functions/config');
+        if (!response.ok) throw new Error('Could not fetch Firebase configuration.');
+        const firebaseConfig = await response.json();
 
-            // This is our diagnostic line to see which project is being used.
-            console.log("Connecting to Firebase project:", firebaseConfig.projectId);
+        // A more robust way to initialize Firebase
+        let app;
+        if (!firebase.apps.length) {
+            app = firebase.initializeApp(firebaseConfig);
+        } else {
+            app = firebase.app(); // Get the default app if it already exists
+        }
 
-            // A more robust way to initialize Firebase
-            let app;
-            if (!firebase.apps.length) {
-                app = firebase.initializeApp(firebaseConfig);
-            } else {
-                app = firebase.app(); // Get the default app if it already exists
-            }
+        const db = firebase.firestore(app); // Explicitly use the initialized app
+        
+        // Get plan ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const planId = urlParams.get('id');
+        
+        if (!planId) {
+            showError();
+            return;
+        }
+        
+        // Fetch plan data from the 'sharedPlans' collection
+        const docRef = db.collection("sharedPlans").doc(planId);
+        const docSnap = await docRef.get();
 
-            const db = firebase.firestore(app); // Explicitly use the initialized app
-            
-            // Get plan ID from URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const planId = urlParams.get('id');
-            
-            if (!planId) {
-                showError();
-                return;
-            }
+        // This new block handles all Firebase SDK versions
+        let docExists = false;
+        if (typeof docSnap.exists === 'function') {
+            docExists = docSnap.exists(); // Modern v9 SDK syntax
+        } else if (typeof docSnap.exists === 'boolean') {
+            docExists = docSnap.exists; // Older v8 SDK syntax
+        }
+
+        if (docExists) {
+            const planData = docSnap.data();
+            renderSummary(planData);
+            DOMElements.loadingView.classList.add('hidden');
+            DOMElements.appView.classList.remove('hidden');
+        } else {
+            showError();
+        }
+
+    } catch (error) {
+        console.error("Failed to load shared plan:", error);
+        showError();
+    }
+}
             
             // Fetch plan data from the 'sharedPlans' collection
             const docRef = db.collection("sharedPlans").doc(planId);
