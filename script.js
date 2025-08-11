@@ -316,45 +316,55 @@ const DOMElements = {
     
     async function renderDashboard() {
         if (!appState.currentUser) return;
-
+    
         let plans = [];
         try {
             const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
             const snapshot = await plansRef.orderBy('lastEdited', 'desc').get();
             plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         } catch (error) { console.error("Error fetching user plans:", error); }
-
-        let dashboardHTML = `<div class="flex justify-between items-center"><h1 class="text-4xl font-black text-gray-900 font-poppins">Your Growth Plans</h1></div><div class="dashboard-grid">`;
-
-        plans.forEach(plan => {
-            const completion = calculatePlanCompletion(plan);
-            const editedDate = plan.lastEdited?.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || 'N/A';
-            const planName = plan.planName || 'Untitled Plan';
+    
+        let dashboardHTML = `<div class="flex justify-between items-center"><h1 class="text-4xl font-black text-gray-900 font-poppins">Your Growth Plans</h1></div>`;
+    
+        if (plans.length === 0) {
             dashboardHTML += `
-                <div class="plan-card">
-                    <div class="plan-card-actions">
-                        <button class="plan-action-btn edit-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Edit Name"><i class="bi bi-pencil-square"></i></button>
-                        <button class="plan-action-btn delete-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Delete Plan"><i class="bi bi-trash3-fill"></i></button>
-                    </div>
-                    <div class="plan-card-main" data-plan-id="${plan.id}">
-                        <div class="flex-grow">
-                            <h3 class="text-xl font-bold font-poppins">${planName}</h3>
-                            <p class="text-sm text-gray-500 mt-1">${plan.quarter || 'No quarter set'}</p>
+                <div class="plan-card new-plan-card empty-state" id="create-new-plan-btn">
+                    <i class="bi bi-plus-circle-dotted text-6xl"></i>
+                    <h2 class="text-2xl font-bold mt-4">Create Your First Growth Plan</h2>
+                    <p class="text-gray-600 mt-2">Let's get started on your journey to success.</p>
+                </div>`;
+        } else {
+            dashboardHTML += `<div class="dashboard-grid">`;
+            plans.forEach(plan => {
+                const completion = calculatePlanCompletion(plan);
+                const editedDate = plan.lastEdited?.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || 'N/A';
+                const planName = plan.planName || 'Untitled Plan';
+                dashboardHTML += `
+                    <div class="plan-card">
+                        <div class="plan-card-actions">
+                            <button class="plan-action-btn edit-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Edit Name"><i class="bi bi-pencil-square"></i></button>
+                            <button class="plan-action-btn delete-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Delete Plan"><i class="bi bi-trash3-fill"></i></button>
                         </div>
-                        <div class="mt-6 pt-4 border-t text-sm space-y-2">
-                            <div class="flex justify-between"><span class="font-semibold text-gray-600">Last Edited:</span><span>${editedDate}</span></div>
-                            <div class="flex justify-between items-center">
-                                <span class="font-semibold text-gray-600">Completion:</span>
-                                <div class="progress-circle" data-progress="${completion}">
-                                    <div class="progress-circle-inner">${completion}%</div>
+                        <div class="plan-card-main" data-plan-id="${plan.id}">
+                            <div class="flex-grow">
+                                <h3 class="text-xl font-bold font-poppins">${planName}</h3>
+                                <p class="text-sm text-gray-500 mt-1">${plan.quarter || 'No quarter set'}</p>
+                            </div>
+                            <div class="mt-6 pt-4 border-t text-sm space-y-2">
+                                <div class="flex justify-between"><span class="font-semibold text-gray-600">Last Edited:</span><span>${editedDate}</span></div>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-gray-600">Completion:</span>
+                                    <div class="progress-circle" data-progress="${completion}">
+                                        <div class="progress-circle-inner">${completion}%</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>`;
-        });
-
-        dashboardHTML += `<div class="plan-card new-plan-card" id="create-new-plan-btn"><i class="bi bi-plus-circle-dotted text-4xl"></i><p class="mt-2 font-semibold">Create New Plan</p></div></div>`;
+                    </div>`;
+            });
+            dashboardHTML += `<div class="plan-card new-plan-card" id="create-new-plan-btn"><i class="bi bi-plus-circle-dotted text-4xl"></i><p class="mt-2 font-semibold">Create New Plan</p></div></div>`;
+        }
+    
         DOMElements.dashboardContent.innerHTML = dashboardHTML;
         
         // Set progress for the new circles
