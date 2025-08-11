@@ -1,17 +1,19 @@
 /* Gail's Bakery 30-60-90 Plan Stylesheet */
 /* v9.2 - Security Update */
 
+
 /* 1. Root Variables & Base Styles
 -------------------------------------------------- */
 :root {
     --gails-red: #D10A11;
     --gails-red-dark: #A4080D;
+    --gails-red-light: #FFF1F2;
     --gails-green: #059669;
     --gails-white: #FFFFFF;
     --gails-bg: #F9F9F8;
     --gails-grey-light: #F3F4F6;
     --gails-grey-mid: #D1D5DB;
-    --gails-text-primary: #111827;
+    --gails-text-primary: #1F2937; /* Softer black for text */
     --gails-text-secondary: #6B7280;
     --status-on-track-bg: #D1FAE5; --status-on-track-text: #065F46; --status-on-track-border: #6EE7B7;
     --status-issues-bg: #FEF3C7; --status-issues-text: #92400E; --status-issues-border: #FBBF24;
@@ -20,17 +22,25 @@
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-focus: 0 0 0 3px rgba(209, 10, 17, 0.2);
+    --shadow-focus: 0 0 0 3px rgba(209, 10, 17, 0.3); /* Made focus shadow more visible */
 }
 
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--gails-bg);
     color: var(--gails-text-primary);
+    font-size: 16px; /* Increased base font size */
 }
-.font-poppins { font-family: 'Poppins', sans-serif; letter-spacing: -0.02em; }
-.hidden { display: none !important; }
+
+.font-poppins { 
+    font-family: 'Poppins', sans-serif; 
+    font-weight: 900; /* Bolder headings */
+    letter-spacing: -0.02em; 
+}
+
+/* Remove red text from all headers */
 .gails-red-text { color: var(--gails-red); }
+h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 
 /* 2. Auth View & Loading States
 -------------------------------------------------- */
@@ -92,7 +102,12 @@ body {
     position: relative;
     min-height: 220px;
 }
-.plan-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--gails-red); }
+.plan-card:hover { 
+    transform: translateY(-4px); 
+    box-shadow: var(--shadow-lg); /* More prominent shadow on hover */
+    border-color: var(--gails-red);
+    border-radius: 1.25rem; /* Animate the border radius */
+}
 .plan-card-actions { position: absolute; top: 0.75rem; right: 0.75rem; display: flex; gap: 0.5rem; opacity: 0; transition: opacity 0.2s ease-in-out; }
 .plan-card:hover .plan-card-actions { opacity: 1; }
 .plan-action-btn { background-color: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px); border: 1px solid var(--gails-grey-mid); color: var(--gails-text-secondary); border-radius: 9999px; width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
@@ -417,3 +432,4 @@ main { grid-area: main; }
     background-color: var(--gails-grey-light);
     color: var(--gails-text-primary);
 }
+
