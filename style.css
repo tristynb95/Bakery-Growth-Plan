@@ -1,5 +1,5 @@
 /* Gail's Bakery 30-60-90 Plan Stylesheet */
-/* v10.2 - Reverted Stepper Hover Animation */
+/* v10.4 - Uniform Dashboard Card Sizing */
 
 /* 1. Root Variables & Base Styles
 -------------------------------------------------- */
@@ -136,6 +136,7 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
     display: flex;
     flex-direction: column;
     position: relative;
+    min-height: 250px; /* This is the fix */
 }
 .plan-card:hover { 
     transform: translateY(-6px); 
