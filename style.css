@@ -1,5 +1,5 @@
 /* Gail's Bakery 30-60-90 Plan Stylesheet */
-/* v10.3 - UX & Visual Enhancement with Stepper Hover Animation */
+/* v10.2 - Reverted Stepper Hover Animation */
 
 /* 1. Root Variables & Base Styles
 -------------------------------------------------- */
@@ -228,10 +228,7 @@ main { grid-area: main; }
 .stepper-item {
     padding: 0.5rem;
     border-radius: 0.75rem;
-    transition: transform 0.2s ease-in-out; /* Changed for grow effect */
-}
-.stepper-item:hover {
-    transform: scale(1.03); /* New subtle grow effect */
+    transition: background-color 0.2s ease;
 }
 .stepper-item .step-circle { position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background-color: var(--gails-grey-mid); color: var(--gails-white); }
 .stepper-item.active .step-circle { background-color: var(--gails-red); transform: scale(1.1); }
