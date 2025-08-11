@@ -1,6 +1,6 @@
-// This is the new, single line that starts your entire application.
+// This ensures we don't run any code until the whole page is ready.
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     const DOMElements = {
         loadingView: document.getElementById('loading-view'),
         appView: document.getElementById('app-view'),
@@ -9,56 +9,55 @@ document.addEventListener('DOMContentLoaded', () => {
         headerSubtitle: document.getElementById('header-subtitle'),
         contentArea: document.getElementById('content-area'),
     };
-    
-   async function initializeFirebaseAndLoadPlan() {
-    try {
-        // Fetch Firebase config from the Netlify function
-        const response = await fetch('/.netlify/functions/config');
-        if (!response.ok) throw new Error('Could not fetch Firebase configuration.');
-        const firebaseConfig = await response.json();
 
-        // Add this line to debug:
-        console.log("Connecting to Firebase project:", firebaseConfig.projectId);
+    async function initializeFirebaseAndLoadPlan() {
+        try {
+            // Fetch Firebase config from the Netlify function
+            const response = await fetch('/.netlify/functions/config');
+            if (!response.ok) throw new Error('Could not fetch Firebase configuration.');
+            const firebaseConfig = await response.json();
 
-        // A more robust way to initialize Firebase
-        let app;
-        if (!firebase.apps.length) {
-            app = firebase.initializeApp(firebaseConfig);
-        } else {
-            app = firebase.app(); // Get the default app if it already exists
-        }
+            // This is our diagnostic line to see which project is being used.
+            console.log("Connecting to Firebase project:", firebaseConfig.projectId);
 
-        const db = firebase.firestore(app); // Explicitly use the initialized app
-        
-        // ... (the rest of the function remains the same) ...
-        
-        // Get plan ID from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const planId = urlParams.get('id');
-        
-        if (!planId) {
+            // A more robust way to initialize Firebase
+            let app;
+            if (!firebase.apps.length) {
+                app = firebase.initializeApp(firebaseConfig);
+            } else {
+                app = firebase.app(); // Get the default app if it already exists
+            }
+
+            const db = firebase.firestore(app); // Explicitly use the initialized app
+            
+            // Get plan ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const planId = urlParams.get('id');
+            
+            if (!planId) {
+                showError();
+                return;
+            }
+            
+            // Fetch plan data from the 'sharedPlans' collection
+            const docRef = db.collection("sharedPlans").doc(planId);
+            const docSnap = await docRef.get();
+
+            if (docSnap.exists()) {
+                const planData = docSnap.data();
+                renderSummary(planData);
+                DOMElements.loadingView.classList.add('hidden');
+                DOMElements.appView.classList.remove('hidden');
+            } else {
+                // This is triggered if the document ID isn't found in the database.
+                showError();
+            }
+
+        } catch (error) {
+            console.error("Failed to load shared plan:", error);
             showError();
-            return;
         }
-        
-        // Fetch plan data from the 'sharedPlans' collection
-        const docRef = db.collection("sharedPlans").doc(planId);
-        const docSnap = await docRef.get();
-
-        if (docSnap.exists()) {
-            const planData = docSnap.data();
-            renderSummary(planData);
-            DOMElements.loadingView.classList.add('hidden');
-            DOMElements.appView.classList.remove('hidden');
-        } else {
-            showError();
-        }
-
-    } catch (error) {
-        console.error("Failed to load shared plan:", error);
-        showError();
     }
-}
     
     function showError() {
         DOMElements.loadingView.classList.add('hidden');
@@ -67,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderSummary(formData) {
         DOMElements.headerTitle.textContent = formData.planName || 'Bakery Growth Plan';
-
         const e = (text) => (text || '...').replace(/\n/g, '<br>');
 
         const renderMonthSummary = (monthNum) => {
@@ -136,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`;
     }
 
+    // This starts the entire process for the view page.
     initializeFirebaseAndLoadPlan();
 
 });
