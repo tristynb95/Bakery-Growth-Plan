@@ -187,13 +187,32 @@ main { grid-area: main; }
 .form-input:focus { outline: none; border-color: var(--gails-red); box-shadow: var(--shadow-focus); }
 .content-card { background-color: var(--gails-white); border-radius: 1rem; box-shadow: var(--shadow-sm); border: 1px solid #E5E7EB; }
 
-.char-counter {
-    font-size: 0.75rem;
-    color: var(--gails-text-secondary);
-    text-align: right;
-    margin-top: 0.25rem;
-    height: 1rem; /* Reserve space to prevent layout shift */
+/* Character Counter Styles */
+.textarea-wrapper {
+    position: relative;
 }
+
+.char-counter {
+    position: absolute;
+    bottom: 8px;
+    right: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--gails-text-secondary);
+    background-color: rgba(249, 249, 248, 0.7); /* Use the --gails-bg color with transparency */
+    backdrop-filter: blur(2px);
+    padding: 2px 8px;
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    pointer-events: none; /* Ensures it doesn't interfere with the textarea */
+}
+
+/* Show counter when the textarea is focused */
+.textarea-wrapper textarea:focus + .char-counter {
+    opacity: 1;
+}
+
 
 /* 6. Interactive Elements & Enhancements
 -------------------------------------------------- */
