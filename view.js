@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!response.ok) throw new Error('Could not fetch Firebase configuration.');
         const firebaseConfig = await response.json();
 
+        // Add this line to debug:
+        console.log("Connecting to Firebase project:", firebaseConfig.projectId);
+
         // A more robust way to initialize Firebase
         let app;
         if (!firebase.apps.length) {
@@ -26,6 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const db = firebase.firestore(app); // Explicitly use the initialized app
+        
+        // ... (the rest of the function remains the same) ...
         
         // Get plan ID from URL
         const urlParams = new URLSearchParams(window.location.search);
