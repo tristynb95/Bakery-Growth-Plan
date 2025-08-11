@@ -60,6 +60,7 @@ function runApp(app) {
         headerSubtitle: document.getElementById('header-subtitle'),
         progressBarFill: document.getElementById('progress-bar-fill'),
         progressPercentage: document.getElementById('progress-percentage'),
+        desktopHeaderButtons: document.getElementById('desktop-header-buttons')
         // Mobile Menu
         mobileMenuBtn: document.getElementById('mobile-menu-btn'),
         sidebarOverlay: document.getElementById('sidebar-overlay'),
@@ -513,10 +514,14 @@ function runApp(app) {
     DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
 
     if (viewId === 'summary') {
+        // This is the corrected block
+        DOMElements.desktopHeaderButtons.classList.remove('hidden'); // Makes the container visible
         DOMElements.printBtn.classList.remove('hidden');
         DOMElements.shareBtn.classList.remove('hidden');
         renderSummary();
     } else {
+        // This block hides the buttons again when leaving the summary view
+        DOMElements.desktopHeaderButtons.classList.add('hidden');
         DOMElements.printBtn.classList.add('hidden');
         DOMElements.shareBtn.classList.add('hidden');
         const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
@@ -1031,4 +1036,5 @@ function runApp(app) {
 
 // This is the new, single line that starts your entire application.
 initializeFirebase();
+
 
