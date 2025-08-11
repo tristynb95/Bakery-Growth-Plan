@@ -386,3 +386,14 @@ main { grid-area: main; }
     display: flex;
     gap: 0.75rem;
 }
+
+/* 14. Dashboard Layout Fix */
+#dashboard-view {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+#dashboard-content {
+    flex-grow: 1;
+}
