@@ -1034,7 +1034,10 @@ function runApp(app) {
 
 } 
 
-// This is the new, single line that starts your entire application.
-initializeFirebase();
+// This ensures we don't run any code until the whole page is ready.
+document.addEventListener('DOMContentLoaded', () => {
+    initializeFirebase();
+});
+
 
 
