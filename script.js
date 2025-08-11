@@ -61,12 +61,6 @@ const DOMElements = {
     progressBarFill: document.getElementById('progress-bar-fill'),
     progressPercentage: document.getElementById('progress-percentage'),
     desktopHeaderButtons: document.getElementById('desktop-header-buttons'), // Comma added here
-    // Profile Menu
-    profileMenuBtn: document.getElementById('profile-menu-btn'),
-    profileMenuDropdown: document.getElementById('profile-menu-dropdown'),
-    updateInfoBtn: document.getElementById('update-info-btn'),
-    downloadDataBtn: document.getElementById('download-data-btn'),
-    deleteAccountBtn: document.getElementById('delete-account-btn'),
     // Mobile Menu
     mobileMenuBtn: document.getElementById('mobile-menu-btn'),
     sidebarOverlay: document.getElementById('sidebar-overlay'),
@@ -335,13 +329,6 @@ const DOMElements = {
         const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
         const docSnap = await docRef.get();
         appState.planData = docSnap.exists ? docSnap.data() : {};
-    }
-
-    async function loadUserFromFirestore() {
-        if (!appState.currentUser) return {};
-        const docRef = db.collection("users").doc(appState.currentUser.uid);
-        const docSnap = await docRef.get();
-        return docSnap.exists ? docSnap.data() : {};
     }
 
     function saveData(forceImmediate = false) {
@@ -740,7 +727,7 @@ const DOMElements = {
         }
     };
     
-    async function openModal(type, context = {}) {
+    function openModal(type, context = {}) {
         const { planId, currentName, planName } = context;
         DOMElements.modalBox.dataset.type = type;
         DOMElements.modalBox.dataset.planId = planId;
@@ -787,37 +774,6 @@ const DOMElements = {
                 DOMElements.modalTitle.textContent = "Confirm Deletion";
                 DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete the plan: <strong class="font-bold">${planName}</strong>?</p><p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action is final and cannot be undone.</p>`;
                 DOMElements.modalActionBtn.textContent = "Confirm Delete";
-                DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
-                DOMElements.modalCancelBtn.style.display = 'inline-flex';
-                DOMElements.modalActionBtn.style.display = 'inline-flex';
-                break;
-            case 'updateInfo':
-                const userData = await loadUserFromFirestore();
-                DOMElements.modalTitle.textContent = "Update Your Info";
-                DOMElements.modalContent.innerHTML = `
-                    <div class="space-y-4">
-                        <div>
-                            <label for="updateName" class="font-semibold block mb-2">Your Name:</label>
-                            <input type="text" id="updateName" class="form-input" value="${userData.displayName || ''}">
-                        </div>
-                        <div>
-                            <label for="updateBakery" class="font-semibold block mb-2">Your Bakery:</label>
-                            <input type="text" id="updateBakery" class="form-input" value="${userData.bakeryLocation || ''}">
-                        </div>
-                    </div>
-                `;
-                DOMElements.modalActionBtn.textContent = "Save Info";
-                DOMElements.modalActionBtn.className = 'btn btn-primary';
-                DOMElements.modalActionBtn.style.display = 'inline-flex';
-                DOMElements.modalCancelBtn.style.display = 'inline-flex';
-                break;
-            case 'deleteAccount':
-                DOMElements.modalTitle.textContent = "Delete Account";
-                DOMElements.modalContent.innerHTML = `
-                    <p class="font-bold text-red-600">This is a final, irreversible action.</p>
-                    <p class="mt-2">All of your growth plans and personal data will be permanently deleted. Are you absolutely sure you want to continue?</p>
-                `;
-                DOMElements.modalActionBtn.textContent = "Yes, Delete Everything";
                 DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
                 DOMElements.modalCancelBtn.style.display = 'inline-flex';
                 DOMElements.modalActionBtn.style.display = 'inline-flex';
@@ -938,29 +894,6 @@ const DOMElements = {
                 }
                 closeModal();
                 break;
-            
-            case 'updateInfo':
-                const updatedName = document.getElementById('updateName').value.trim();
-                const updatedBakery = document.getElementById('updateBakery').value.trim();
-                if(updatedName) {
-                    try {
-                        const userDocRef = db.collection('users').doc(appState.currentUser.uid);
-                        await userDocRef.set({
-                            displayName: updatedName,
-                            bakeryLocation: updatedBakery,
-                        }, { merge: true });
-                        // Also update the local state for immediate UI feedback if needed
-                        if (appState.currentPlanId) {
-                            appState.planData.managerName = updatedName;
-                            appState.planData.bakeryLocation = updatedBakery;
-                            updateUI();
-                        }
-                    } catch (error) {
-                        console.error("Error updating user info:", error);
-                    }
-                }
-                closeModal();
-                break;
 
             case 'delete':
                 try {
@@ -969,66 +902,6 @@ const DOMElements = {
                 } catch (error) { console.error("Error deleting plan:", error); }
                 closeModal();
                 break;
-            
-            case 'deleteAccount':
-                try {
-                    const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
-                    const plansSnapshot = await plansRef.get();
-                    const batch = db.batch();
-                    plansSnapshot.docs.forEach(doc => {
-                        batch.delete(doc.ref);
-                    });
-                    await batch.commit();
-
-                    await db.collection('users').doc(appState.currentUser.uid).delete();
-                    await appState.currentUser.delete();
-                    
-                    handleLogout();
-
-                } catch (error) {
-                    console.error("Error deleting account: ", error);
-                    alert("Error deleting account. You may need to log out and log back in to complete this action.");
-                }
-                closeModal();
-                break;
-        }
-    }
-
-    async function handleDownloadData() {
-        if (!appState.currentUser) return;
-        
-        try {
-            const userData = await loadUserFromFirestore();
-            const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
-            const plansSnapshot = await plansRef.get();
-            const plansData = plansSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-            const allData = {
-                userInfo: userData,
-                plans: plansData
-            };
-
-            const dataStr = JSON.stringify(allData, (key, value) => {
-                // Convert Firestore Timestamps to ISO strings
-                if (value && value.toDate) {
-                    return value.toDate().toISOString();
-                }
-                return value;
-            }, 2);
-            
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'bakery_growth_planner_data.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-        } catch (error) {
-            console.error("Error downloading data:", error);
-            alert("Could not download your data. Please try again.");
         }
     }
 
@@ -1123,36 +996,6 @@ const DOMElements = {
         else if (createBtn) { handleCreateNewPlan(); }
         else if (mainCard) { handleSelectPlan(mainCard.dataset.planId); }
     });
-
-    // Profile Menu listeners
-    DOMElements.profileMenuBtn.addEventListener('click', () => {
-        DOMElements.profileMenuDropdown.classList.toggle('hidden');
-    });
-
-    DOMElements.updateInfoBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        openModal('updateInfo');
-        DOMElements.profileMenuDropdown.classList.add('hidden');
-    });
-
-    DOMElements.downloadDataBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        handleDownloadData();
-        DOMElements.profileMenuDropdown.classList.add('hidden');
-    });
-    
-    DOMElements.deleteAccountBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        openModal('deleteAccount');
-        DOMElements.profileMenuDropdown.classList.add('hidden');
-    });
-
-    window.addEventListener('click', (e) => {
-        if (!DOMElements.profileMenuBtn.contains(e.target) && !DOMElements.profileMenuDropdown.contains(e.target)) {
-            DOMElements.profileMenuDropdown.classList.add('hidden');
-        }
-    });
-
 
     DOMElements.mainNav.addEventListener('click', (e) => { e.preventDefault(); const navLink = e.target.closest('a'); if (navLink) { switchView(navLink.id.replace('nav-', '')); }});
     DOMElements.contentArea.addEventListener('input', (e) => { if (e.target.matches('input, textarea')) { saveData(); }});
