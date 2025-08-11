@@ -1,5 +1,5 @@
 /* Gail's Bakery 30-60-90 Plan Stylesheet */
-/* v10.0 - UX & Visual Enhancement */
+/* v10.1 - UX & Visual Enhancement with SVG Icons */
 
 /* 1. Root Variables & Base Styles
 -------------------------------------------------- */
@@ -236,8 +236,7 @@ main { grid-area: main; }
 .stepper-item .step-circle { position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background-color: var(--gails-grey-mid); color: var(--gails-white); }
 .stepper-item.active .step-circle { background-color: var(--gails-red); transform: scale(1.1); }
 .stepper-item.completed .step-circle { background-color: var(--gails-green); }
-.stepper-item.completed .step-circle .step-number { display: none; }
-.stepper-item.completed .step-circle::after { content: '\\F26E'; font-family: 'bootstrap-icons'; position: absolute; font-size: 1.25rem; color: var(--gails-white); top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
 .stepper-item .step-line { background-color: var(--gails-grey-mid); transition: background-color 0.3s; }
 .stepper-item.completed .step-line { background-color: var(--gails-green); }
 .stepper-item .step-label { transition: color 0.3s, font-weight 0.3s; }
@@ -286,7 +285,6 @@ main { grid-area: main; }
     h1, h2, h3, h4, h5 { page-break-after: avoid; }
 }
 
-/* All other sections remain largely the same, but benefit from the global style changes */
 /* 9. Auth Enhancements */
 .forgot-password-link { display: block; font-size: 0.875rem; text-align: right; color: var(--gails-text-secondary); text-decoration: none; margin-top: -0.25rem; margin-bottom: 1rem; transition: color 0.2s ease-in-out; }
 .forgot-password-link:hover { color: var(--gails-red); text-decoration: underline; }
