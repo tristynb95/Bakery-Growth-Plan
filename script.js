@@ -514,6 +514,14 @@ const DOMElements = {
         const stepDefinition = templates.step[stepKey] || (stepKey === 'vision' ? templates.vision : null);
         if (!stepDefinition) return false;
 
+        // NEW: Special check for Must-Win Battle steps (m1s1, m2s1, etc.)
+        if (stepKey.endsWith('s1') && stepKey.startsWith('m')) {
+            const battleText = planData[`${stepKey}_battle`];
+            const pillarSelected = planData[`${stepKey}_pillar`];
+            // Both the text and a pillar selection are now required for completion.
+            return battleText && battleText.trim() !== '' && !!pillarSelected;
+        }
+
         if (stepKey.endsWith('s5')) {
             const monthNum = stepKey.charAt(1);
             for (let w = 1; w <= 4; w++) {
@@ -1254,3 +1262,4 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
