@@ -1,5 +1,5 @@
 /* Gail's Bakery 30-60-90 Plan Stylesheet */
-/* v10.5 - UI/UX Enhancement Update */
+/* v10.4 - Uniform Dashboard Card Sizing */
 
 /* 1. Root Variables & Base Styles
 -------------------------------------------------- */
@@ -7,12 +7,8 @@
     --gails-red: #D10A11;
     --gails-red-dark: #A4080D;
     --gails-red-light: #FFF1F2;
-    /* --- NEW ACCENT COLOURS --- */
-    --gails-blue: #3B82F6;       /* A vibrant blue for structure/review */
-    --gails-green: #10B981;      /* A welcoming green for relations/people */
-    --gails-gold: #F59E0B;       /* A warm gold for ideas/sprints */
-    --gails-gold-light: #FFFBEB;
-    /* --- END NEW ACCENT COLOURS --- */
+    --gails-gold: #FFC72C; /* New accent colour */
+    --gails-green: #059669;
     --gails-white: #FFFFFF;
     --gails-bg: #FDFDFC; /* Softer, warmer background */
     --gails-grey-light: #F3F4F6;
@@ -38,30 +34,14 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+.font-poppins { 
+    font-family: 'Poppins', sans-serif; 
+    font-weight: 700; 
+    letter-spacing: -0.02em; 
+}
 .hidden { display: none !important; }
 .gails-red-text { color: var(--gails-red); }
-
-/* --- ENHANCED TYPOGRAPHY --- */
-h1, .font-poppins {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 800; /* Bolder for more impact */
-    letter-spacing: -0.03em;
-}
-
-h2 {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-}
-
-h3 {
-    font-weight: 600; /* Semi-bold Inter for section heads */
-}
-
-p, .text-gray-500 {
-    color: var(--gails-text-secondary);
-}
-/* --- END ENHANCED TYPOGRAPHY --- */
+h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 
 
 /* 2. Auth View & Loading States
@@ -140,11 +120,11 @@ p, .text-gray-500 {
 /* 3. Dashboard view
 -------------------------------------------------- */
 .dashboard-header { background-color: var(--gails-white); padding: 1.25rem 2.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; }
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+.dashboard-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
     gap: 2rem; /* Increased gap */
-    margin-top: 2.5rem;
+    margin-top: 2.5rem; 
 }
 .plan-card {
     background-color: var(--gails-white);
@@ -158,8 +138,8 @@ p, .text-gray-500 {
     position: relative;
     min-height: 250px; /* This is the fix */
 }
-.plan-card:hover {
-    transform: translateY(-6px);
+.plan-card:hover { 
+    transform: translateY(-6px); 
     box-shadow: var(--shadow-lg);
     border-color: var(--gails-red);
 }
@@ -168,15 +148,15 @@ p, .text-gray-500 {
 .plan-action-btn { background-color: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px); border: 1px solid var(--gails-grey-mid); color: var(--gails-text-secondary); border-radius: 9999px; width: 2.25rem; height: 2.25rem; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
 .plan-action-btn:hover { color: var(--gails-text-primary); border-color: #4B5563; background-color: var(--gails-white); }
 .plan-card-main { cursor: pointer; flex-grow: 1; display: flex; flex-direction: column;}
-.plan-card.new-plan-card {
-    border-style: dashed; border-width: 2px; color: var(--gails-text-secondary);
-    align-items: center; justify-content: center; cursor: pointer;
+.plan-card.new-plan-card { 
+    border-style: dashed; border-width: 2px; color: var(--gails-text-secondary); 
+    align-items: center; justify-content: center; cursor: pointer; 
 }
-.plan-card.new-plan-card:hover {
+.plan-card.new-plan-card:hover { 
     color: var(--gails-red); background-color: var(--gails-red-light); border-color: var(--gails-red);
 }
-.plan-card.new-plan-card i[data-feather="plus-circle"] { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-.plan-card.new-plan-card:hover i[data-feather="plus-circle"] { transform: scale(1.15) rotate(90deg); }
+.plan-card.new-plan-card .bi-plus-circle-dotted { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.plan-card.new-plan-card:hover .bi-plus-circle-dotted { transform: scale(1.15) rotate(90deg); }
 
 /* Dashboard Progress Circle */
 .progress-circle {
@@ -196,29 +176,28 @@ p, .text-gray-500 {
 .main-layout { display: grid; grid-template-columns: 280px 1fr; height: 100vh; grid-template-areas: "sidebar main"; }
 #sidebar { grid-area: sidebar; }
 main { grid-area: main; }
-.sidebar-nav a {
-    display: flex; align-items: center; padding: 0.85rem 1rem; border-radius: 0.75rem;
+.sidebar-nav a { 
+    display: flex; align-items: center; padding: 0.85rem 1rem; border-radius: 0.75rem; 
     font-weight: 600; /* Bolder font */
-    color: var(--gails-text-secondary);
-    transition: all 0.25s ease; border-left: 4px solid transparent;
+    color: var(--gails-text-secondary); 
+    transition: all 0.25s ease; border-left: 4px solid transparent; 
     transform: perspective(1px) translateZ(0); /* Promotes to its own layer */
 }
-.sidebar-nav a:hover {
-    background-color: var(--gails-grey-light);
-    color: var(--gails-text-primary);
+.sidebar-nav a:hover { 
+    background-color: var(--gails-grey-light); 
+    color: var(--gails-text-primary); 
     transform: translateX(4px);
 }
-.sidebar-nav a.active {
-    background-color: var(--gails-red-light); color: var(--gails-red);
-    border-left-color: var(--gails-red);
+.sidebar-nav a.active { 
+    background-color: var(--gails-red-light); color: var(--gails-red); 
+    border-left-color: var(--gails-red); 
 }
-.sidebar-nav .nav-icon { margin-right: 0.85rem; }
-.nav-icon-completed { display: none; margin-right: 0.85rem; color: var(--gails-green); }
+.sidebar-nav .nav-icon { margin-right: 0.85rem; font-size: 1.35rem; }
+.nav-icon-completed { display: none; margin-right: 0.85rem; font-size: 1.35rem; color: var(--gails-green); }
 .sidebar-nav a.completed .nav-icon { display: none; }
 .sidebar-nav a.completed .nav-icon-completed { display: inline-block; }
 .sidebar-nav a.completed { color: var(--gails-green); }
 .sidebar-nav a.completed:not(.active) { background-color: #F0FDF4; }
-
 
 /* 5. Core Components
 -------------------------------------------------- */
@@ -363,7 +342,7 @@ main { grid-area: main; }
 }
 .btn-subtle:hover { background-color: var(--gails-grey-light); color: var(--gails-text-primary); }
 
-/* 16. Pillar Button Styles
+/* 16. Pillar Button Styles (Add to end of file)
 -------------------------------------------------- */
 .pillar-button {
     background-color: var(--gails-white);
@@ -383,17 +362,12 @@ main { grid-area: main; }
 }
 
 .pillar-button.selected {
+    background-color: var(--gails-red);
     color: var(--gails-white);
+    border-color: var(--gails-red);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
-
-/* --- NEW: Pillar button selected states --- */
-.pillar-button[data-pillar="people"].selected { background-color: var(--gails-green); border-color: var(--gails-green); }
-.pillar-button[data-pillar="product"].selected { background-color: var(--gails-blue); border-color: var(--gails-blue); }
-.pillar-button[data-pillar="customer"].selected { background-color: var(--gails-red); border-color: var(--gails-red); }
-.pillar-button[data-pillar="place"].selected { background-color: var(--gails-gold); border-color: var(--gails-gold); }
-
 
 .pillar-badge {
     display: inline-block;
@@ -401,16 +375,6 @@ main { grid-area: main; }
     border-radius: 9999px;
     font-size: 0.8rem;
     font-weight: 600;
-}
-
-/* --- NEW: Pillar badge states --- */
-.pillar-badge[data-pillar="people"] { background-color: var(--gails-green-light); color: var(--gails-green); }
-.pillar-badge[data-pillar="product"] { background-color: var(--gails-blue-light); color: var(--gails-blue); }
-.pillar-badge[data-pillar="customer"] { background-color: var(--gails-red-light); color: var(--gails-red); }
-.pillar-badge[data-pillar="place"] { background-color: var(--gails-gold-light); color: var(--gails-gold); }
-
-/* --- NEW: Feather Icon Sizing --- */
-i[data-feather] {
-    width: 20px;
-    height: 20px;
+    background-color: var(--gails-red-light);
+    color: var(--gails-red);
 }
