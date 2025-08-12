@@ -193,12 +193,7 @@ const DOMElements = {
         vision: {
             html: `<div class="space-y-8">
                         <div class="content-card p-6 md:p-8"><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="managerName" class="font-semibold block mb-2">Manager:</label><input type="text" id="managerName" class="form-input" placeholder="e.g., Tristen Bayley"></div><div><label for="bakeryLocation" class="font-semibold block mb-2">Bakery:</label><input type="text" id="bakeryLocation" class="form-input" placeholder="e.g., Marlow"></div><div><label for="quarter" class="font-semibold block mb-2">Quarter:</label><input type="text" id="quarter" class="form-input" placeholder="e.g., Q3 FY26"></div></div></div>
-                        
-                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-sm">
-                            <h3 class="font-bold text-lg text-amber-900 mb-2">Our Mission</h3>
-                            <p class="text-xl font-semibold text-gray-800">"To make world-class, craft baking a part of every neighbourhood."</p>
-                        </div>
-                        
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-sm"><h3 class="font-bold text-lg text-amber-900 mb-2">Our Mission</h3><p class="text-xl font-semibold text-gray-800">"To make world-class, craft baking a part of every neighbourhood."</p></div>
                         <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">This Quarter's Narrative: <i class="bi bi-info-circle info-icon" title="The big, overarching mission for the next 90 days."></i></label><textarea id="quarterlyTheme" class="form-input" rows="2" placeholder="e.g., Become the undisputed neighbourhood favourite by mastering our availability." maxlength="200"></textarea></div>
                         <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the first 30-day sprint."></i></label><textarea id="month1Goal" class="form-input text-sm" rows="3" placeholder="e.g., PRODUCT: Master afternoon availability and reduce waste." maxlength="150"></textarea></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the second 30-day sprint."></i></label><textarea id="month2Goal" class="form-input text-sm" rows="3" placeholder="e.g., PLACE: Embed new production processes and daily checks." maxlength="150"></textarea></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the third 30-day sprint."></i></label><textarea id="month3Goal" class="form-input text-sm" rows="3" placeholder="e.g., PEOPLE: Develop team skills for consistent execution." maxlength="150"></textarea></div></div></div>
                    </div>`,
@@ -206,26 +201,48 @@ const DOMElements = {
         },
         month: (monthNum) => `<div class="grid grid-cols-1 lg:grid-cols-4 gap-8"><div class="lg:col-span-1 no-print"><nav id="month-${monthNum}-stepper" class="space-y-4"></nav></div><div class="lg:col-span-3"><div id="step-content-container"></div><div class="mt-8 flex justify-between no-print"><button id="prev-step-btn" class="btn btn-secondary">Previous</button><button id="next-step-btn" class="btn btn-primary">Next Step</button></div></div></div>`,
         step: {
-
             'm1s1': {
-    title: "Must-Win Battle",
-    requiredFields: ['m1s1_battle'],
-    html: `<div class="content-card p-8">
-               <h3 class="text-xl font-bold mb-1 gails-red-text">Step 1: The Must-Win Battle</h3>
-               <p class="text-gray-600 mb-4">What is the single most important, measurable outcome for this month?</p>
-               <textarea id="m1s1_battle" class="form-input" rows="3" placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly and placing smart orders.'" maxlength="250"></textarea>
-               
-               <div class="mt-6">
-                   <label class="font-semibold block mb-3 text-gray-700">Monthly Focus Pillar:</label>
-                   <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m1s1">
-                       <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
-                       <button class="btn pillar-button" data-pillar="product"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi pillar-icon-svg" viewBox="0 0 16 16"><path d="M12.854 5.242a3.5 3.5 0 0 0-4.04-3.955 3.5 3.5 0 0 0-4.575 2.518 1.5 1.5 0 0 0-1.489 1.489 1.5 1.5 0 0 0 1.291 1.472c.038.01.077.018.115.024a1.5 1.5 0 0 1 1.233.953c.273.62.915 1.047 1.63 1.047.715 0 1.357-.428 1.63-1.047a1.5 1.5 0 0 1 1.233-.953c.038-.006.077-.014.115-.024a1.5 1.5 0 0 0 1.291-1.472 3.5 3.5 0 0 0 .546-1.044z"/></svg> Product</button>
-                       <button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button>
-                       <button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button>
-                   </div>
-               </div>
-               </div>`
-},
+                title: "Must-Win Battle",
+                requiredFields: ['m1s1_battle'],
+                html: `<div class="content-card p-8">
+                           <h3 class="text-xl font-bold mb-1 gails-red-text">Step 1: The Must-Win Battle</h3>
+                           <p class="text-gray-600 mb-4">What is the single most important, measurable outcome for this month?</p>
+                           <textarea id="m1s1_battle" class="form-input" rows="3" placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly and placing smart orders.'" maxlength="250"></textarea>
+                           <div class="mt-6">
+                               <label class="font-semibold block mb-3 text-gray-700">Monthly Focus Pillar:</label>
+                               <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m1s1">
+                                   <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
+                                   <button class="btn pillar-button" data-pillar="product"><i class="bi bi-cake2-fill"></i> Product</button>
+                                   <button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button>
+                                   <button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button>
+                               </div>
+                           </div>
+                       </div>`
+            },
+            'm1s2': {
+                title: "Levers & Power-Up",
+                requiredFields: ['m1s2_levers', 'm1s2_powerup_q', 'm1s2_powerup_a'],
+                html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3><p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="flex flex-col h-full"><label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label><textarea id="m1s2_levers" class="form-input flex-grow" rows="4" placeholder="1. Review ordering report with daily.&#10;2. Coach the team on the 'why' behind the production matrix." maxlength="300"></textarea></div><div class="space-y-4"><div><label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label><textarea id="m1s2_powerup_q" class="form-input" rows="2" placeholder="e.g., 'What is one thing that slows us down before 8am?'" maxlength="150"></textarea></div><div><label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label><textarea id="m1s2_powerup_a" class="form-input" rows="2" placeholder="e.g., Pre-portioning key ingredients the night before." maxlength="150"></textarea></div></div></div></div>`
+            },
+            'm1s3':{title:"People Growth", requiredFields:['m1s3_people'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 3: People Growth</h3><p class="text-gray-600 mb-4">Who will I invest in this month to help us win our battle, and how?</p><textarea id="m1s3_people" class="form-input" rows="4" placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" maxlength="300"></textarea></div>`},
+            'm1s4':{
+                title:"Protect the Core",
+                requiredFields:['m1s4_people', 'm1s4_product', 'm1s4_customer', 'm1s4_place'],
+                html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 4: Protect the Core</h3><p class="text-gray-600 mb-6">One key behaviour you will protect for each pillar to ensure standards don't slip.</p><div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4"><div><label for="m1s4_people" class="font-semibold block mb-2">PEOPLE 👥</label><textarea id="m1s4_people" class="form-input" rows="2" placeholder="e.g., Meaningful 1-2-1s with my two keyholders." maxlength="150"></textarea></div><div><label for="m1s4_product" class="font-semibold block mb-2">PRODUCT 🥐</label><textarea id="m1s4_product" class="form-input" rows="2" placeholder="e.g., Daily quality checks of the first bake." maxlength="150"></textarea></div><div><label for="m1s4_customer" class="font-semibold block mb-2">CUSTOMER ❤️</label><textarea id="m1s4_customer" class="form-input" rows="2" placeholder="e.g., Action all customer feedback within 24 hours." maxlength="150"></textarea></div><div><label for="m1s4_place" class="font-semibold block mb-2">PLACE 🏡</label><textarea id="m1s4_place" class="form-input" rows="2" placeholder="e.g., Complete a bakery travel path twice a day." maxlength="150"></textarea></div></div></div>`
+            },
+            'm1s5':{
+                title:"Weekly Check-in",
+                requiredFields:[],
+                html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 5: Weekly Momentum Check</h3><p class="text-gray-600 mb-6">A 5-minute pulse check each Friday to maintain focus and celebrate wins.</p><div class="space-y-6">
+                    ${[1,2,3,4].map(w => `<div class="border-t border-gray-200 pt-4"><h4 class="font-bold text-lg mb-4">Week ${w}</h4><div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4"><div><label class="font-semibold block mb-2 text-sm">Progress:</label><div class="flex items-center space-x-2 status-buttons" data-week="${w}"><button class="status-button" data-status="on-track">ON TRACK</button><button class="status-button" data-status="issues">ISSUES</button><button class="status-button" data-status="off-track">OFF TRACK</button></div></div><div><label for="m1s5_w${w}_win" class="font-semibold block mb-2 text-sm">A Win or Learning:</label><textarea id="m1s5_w${w}_win" class="form-input text-sm" rows="2" placeholder="e.g., The team hit 80% availability on Thursday!" maxlength="200"></textarea></div><div class="md:col-span-2"><label for="m1s5_w${w}_spotlight" class="font-semibold block mb-2 text-sm">Team Member Spotlight:</label><textarea id="m1s5_w${w}_spotlight" class="form-input text-sm" rows="2" placeholder="e.g., Sarah for her excellent attention to detail during the bake." maxlength="200"></textarea></div></div></div>`).join("")}
+                </div></div>`
+            },
+            'm1s6':{title:"End of Month Review", requiredFields:['m1s6_win', 'm1s6_challenge', 'm1s6_next'], html:`<div class="content-card p-8 bg-red-50 border border-red-100"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 6: End of Month Review</h3><p class="text-gray-600 mb-6">Reflect on the month to prepare for your conversation with your line manager.</p><div class="space-y-6"><div><label for="m1s6_win" class="font-semibold block mb-1 text-lg gails-red-text">🎉 Biggest Win:</label><textarea id="m1s6_win" class="form-input" rows="2" maxlength="250"></textarea></div><div><label for="m1s6_challenge" class="font-semibold block mb-1 text-lg gails-red-text">🤔 Toughest Challenge & What I Learned:</label><textarea id="m1s6_challenge" class="form-input" rows="2" maxlength="250"></textarea></div><div><label for="m1s6_next" class="font-semibold block mb-1 text-lg gails-red-text">🚀 What's Next (Focus for Next Month):</label><textarea id="m1s6_next" class="form-input" rows="2" maxlength="250"></textarea></div></div></div>`},
+            'm2s1':{},'m2s2':{},'m2s3':{},'m2s4':{},'m2s5':{},'m2s6':{},
+            'm3s1':{},'m3s2':{},'m3s3':{},'m3s4':{},'m3s5':{},'m3s6':{},
+            'm3s7':{title:"Quarterly Reflection", requiredFields:['m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter'], html:`<div class="content-card p-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);"><h3 class="text-xl font-bold mb-1" style="color: var(--review-blue-text);">Step 7: Final Quarterly Reflection</h3><p class="text-gray-600 mb-6">A deep dive into the whole quarter's performance to prepare for your review with your line manager.</p><div class="space-y-6"><div><label for="m3s7_achievements" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);">🏆 What were the quarter's biggest achievements?</label><textarea id="m3s7_achievements" class="form-input" rows="3" placeholder="Consider financial results, team growth, customer feedback, and process improvements." maxlength="400"></textarea></div><div><label for="m3s7_challenges" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);">🧗 What were the biggest challenges and what did you learn?</label><textarea id="m3s7_challenges" class="form-input" rows="3" placeholder="What didn't go to plan? What were the key takeaways?" maxlength="400"></textarea></div><div><label for="m3s7_narrative" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);">🎯 How did you perform against the quarterly narrative?</label><textarea id="m3s7_narrative" class="form-input" rows="3" placeholder="Review the 'Central Theme' you set in the Vision section. How well did you deliver on it?" maxlength="400"></textarea></div><div><label for="m3s7_next_quarter" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);">🚀 What is the primary focus for next quarter?</label><textarea id="m3s7_next_quarter" class="form-input" rows="3" placeholder="Based on your learnings, what is the 'must-win battle' for the next 90 days?" maxlength="400"></textarea></div></div></div>`}
+        }
+    };
             'm1s2':{title:"Levers & Power-Up", requiredFields:['m1s2_levers', 'm1s2_powerup_q', 'm1s2_powerup_a'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3><p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="flex flex-col"><label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label><textarea id="m1s2_levers" class="form-input flex-grow" rows="4" placeholder="1. Review ordering report with daily.
 2. Coach the team on the 'why' behind the production matrix." maxlength="300"></textarea></div><div class="space-y-4"><div><label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label><textarea id="m1s2_powerup_q" class="form-input" rows="2" placeholder="e.g., 'What is one thing that slows us down before 8am?'" maxlength="150"></textarea></div><div><label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label><textarea id="m1s2_powerup_a" class="form-input" rows="2" placeholder="e.g., Pre-portioning key ingredients the night before." maxlength="150"></textarea></div></div></div></div>`},
             'm1s3':{title:"People Growth", requiredFields:['m1s3_people'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 3: People Growth</h3><p class="text-gray-600 mb-4">Who will I invest in this month to help us win our battle, and how?</p><textarea id="m1s3_people" class="form-input" rows="4" placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" maxlength="300"></textarea></div>`},
@@ -1269,6 +1286,7 @@ const pillarIcons = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
