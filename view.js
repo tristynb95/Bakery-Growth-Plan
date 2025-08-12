@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div><h3 class="font-bold border-b pb-2 mb-2">Protect the Core Behaviours</h3><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
                         <div><strong class="text-gray-600 block"><i class="bi bi-people-fill"></i> People</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_people`])}</span></div>
-                        <div><strong class="text-gray-600 block"><i class="bi bi-stack"></i> Product</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_product`])}</span></div>
+                        <div><strong class="text-gray-600 block"><i class="bi bi-cup-hot-fill"></i> Product</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_product`])}</span></div>
                         <div><strong class="text-gray-600 block"><i class="bi bi-heart-fill"></i> Customer</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_customer`])}</span></div>
                         <div><strong class="text-gray-600 block"><i class="bi bi-shop"></i> Place</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_place`])}</span></div>
                     </div></div>
