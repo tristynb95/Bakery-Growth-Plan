@@ -206,25 +206,28 @@ const DOMElements = {
         },
         month: (monthNum) => `<div class="grid grid-cols-1 lg:grid-cols-4 gap-8"><div class="lg:col-span-1 no-print"><nav id="month-${monthNum}-stepper" class="space-y-4"></nav></div><div class="lg:col-span-3"><div id="step-content-container"></div><div class="mt-8 flex justify-between no-print"><button id="prev-step-btn" class="btn btn-secondary">Previous</button><button id="next-step-btn" class="btn btn-primary">Next Step</button></div></div></div>`,
         step: {
-            'm1s1': {
-                title: "Must-Win Battle",
-                requiredFields: ['m1s1_battle'],
-                html: `<div class="content-card p-8">
-                           <h3 class="text-xl font-bold mb-1 gails-red-text">Step 1: The Must-Win Battle</h3>
-                           <p class="text-gray-600 mb-4">What is the single most important, measurable outcome for this month?</p>
-                           <textarea id="m1s1_battle" class="form-input" rows="3" placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly and placing smart orders.'" maxlength="250"></textarea>
-                           
-                           <div class="mt-6">
-                               <label class="font-semibold block mb-3 text-gray-700">Monthly Focus Pillar:</label>
-                               <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m1s1">
-                                   <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
-                                   <button class="btn pillar-button" data-pillar="product"><i class="bi bi-box-seam"></i> Product</button>
-                                   <button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button>
-                                   <button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button>
-                               </div>
-                           </div>
-                           </div>`
-            },
+            // ...
+'m1s1': {
+    title: "Must-Win Battle",
+    requiredFields: ['m1s1_battle'],
+    html: `<div class="content-card p-8">
+               <h3 class="text-xl font-bold mb-1 gails-red-text">Step 1: The Must-Win Battle</h3>
+               <p class="text-gray-600 mb-4">What is the single most important, measurable outcome for this month?</p>
+               <textarea id="m1s1_battle" class="form-input" rows="3" placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly and placing smart orders.'" maxlength="250"></textarea>
+               
+               <div class="mt-6">
+                   <label class="font-semibold block mb-3 text-gray-700">Monthly Focus Pillar:</label>
+                   <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m1s1">
+                       <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
+                       <button class="btn pillar-button" data-pillar="product"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.284.816a3.5 3.5 0 0 0-4.248 1.153 3.5 3.5 0 0 0-4.062-1.14A3.5 3.5 0 0 0 2.75 3.532l-.22.219a1.5 1.5 0 0 0 .043 2.164 1.5 1.5 0 0 0 2.121.083l.262-.218a1.5 1.5 0 0 1 1.949-.134l.32.203a1.5 1.5 0 0 0 1.82-.164l.117-.091a1.5 1.5 0 0 1 1.805-.153l.366.218a1.5 1.5 0 0 0 1.858-.164l.09-.074A3.5 3.5 0 0 0 15.5 3.5a3.5 3.5 0 0 0-2.216-2.684zM1.902 6.543a2.5 2.5 0 0 1-.072-3.596 2.5 2.5 0 0 1 3.536-.072l.244.204a2.5 2.5 0 0 0 3.25.223l.32-.203a2.5 2.5 0 0 1 3.033.272l.117.091a2.5 2.5 0 0 0 3.01.256l.366.218a2.5 2.5 0 0 1 3.096.273c.922.922.922 2.41 0 3.332l-.301.249a1.5 1.5 0 0 1-1.93.125l-.39-.234a1.5 1.5 0 0 0-1.815.195l-.262.218a1.5 1.5 0 0 1-2.028.062l-.295-.236a1.5 1.5 0 0 0-1.92-.09l-.42.278a1.5 1.5 0 0 1-1.85-.05l-.262-.218a1.5 1.5 0 0 0-1.949.134l-1.127.902a2.5 2.5 0 0 1-3.332.001z"/></svg> Product</button>
+                       <button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button>
+                       <button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button>
+                   </div>
+               </div>
+               </div>`
+},
+//...
+//...
             'm1s2':{title:"Levers & Power-Up", requiredFields:['m1s2_levers', 'm1s2_powerup_q', 'm1s2_powerup_a'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3><p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="flex flex-col"><label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label><textarea id="m1s2_levers" class="form-input flex-grow" rows="4" placeholder="1. Review ordering report with daily.
 2. Coach the team on the 'why' behind the production matrix." maxlength="300"></textarea></div><div class="space-y-4"><div><label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label><textarea id="m1s2_powerup_q" class="form-input" rows="2" placeholder="e.g., 'What is one thing that slows us down before 8am?'" maxlength="150"></textarea></div><div><label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label><textarea id="m1s2_powerup_a" class="form-input" rows="2" placeholder="e.g., Pre-portioning key ingredients the night before." maxlength="150"></textarea></div></div></div></div>`},
             'm1s3':{title:"People Growth", requiredFields:['m1s3_people'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 3: People Growth</h3><p class="text-gray-600 mb-4">Who will I invest in this month to help us win our battle, and how?</p><textarea id="m1s3_people" class="form-input" rows="4" placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" maxlength="300"></textarea></div>`},
@@ -737,7 +740,13 @@ const DOMElements = {
     
             // START: Logic to get pillar data for the summary
             const pillar = formData[`m${monthNum}s1_pillar`];
-            const pillarIcons = { 'people': '👥', 'product': '🥐', 'customer': '❤️', 'place': '🏡' };
+            const croissantSVG = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi inline-block" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.284.816a3.5 3.5 0 0 0-4.248 1.153 3.5 3.5 0 0 0-4.062-1.14A3.5 3.5 0 0 0 2.75 3.532l-.22.219a1.5 1.5 0 0 0 .043 2.164 1.5 1.5 0 0 0 2.121.083l.262-.218a1.5 1.5 0 0 1 1.949-.134l.32.203a1.5 1.5 0 0 0 1.82-.164l.117-.091a1.5 1.5 0 0 1 1.805-.153l.366.218a1.5 1.5 0 0 0 1.858-.164l.09-.074A3.5 3.5 0 0 0 15.5 3.5a3.5 3.5 0 0 0-2.216-2.684zM1.902 6.543a2.5 2.5 0 0 1-.072-3.596 2.5 2.5 0 0 1 3.536-.072l.244.204a2.5 2.5 0 0 0 3.25.223l.32-.203a2.5 2.5 0 0 1 3.033.272l.117.091a2.5 2.5 0 0 0 3.01.256l.366.218a2.5 2.5 0 0 1 3.096.273c.922.922.922 2.41 0 3.332l-.301.249a1.5 1.5 0 0 1-1.93.125l-.39-.234a1.5 1.5 0 0 0-1.815.195l-.262.218a1.5 1.5 0 0 1-2.028.062l-.295-.236a1.5 1.5 0 0 0-1.92-.09l-.42.278a1.5 1.5 0 0 1-1.85-.05l-.262-.218a1.5 1.5 0 0 0-1.949.134l-1.127.902a2.5 2.5 0 0 1-3.332.001z"/></svg>';
+const pillarIcons = { 
+    'people': '<i class="bi bi-people-fill"></i>', 
+    'product': croissantSVG, 
+    'customer': '<i class="bi bi-heart-fill"></i>', 
+    'place': '<i class="bi bi-shop"></i>'
+};
             let pillarHTML = '';
             if (pillar) {
                 const pillarIcon = pillarIcons[pillar] || '';
@@ -1262,3 +1271,4 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
