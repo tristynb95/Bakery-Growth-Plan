@@ -789,7 +789,7 @@ const DOMElements = {
                             <div><h3 class="font-bold border-b pb-2 mb-2">Weekly Momentum Check</h3>${weeklyCheckinHTML}</div>
                             <div><h3 class="font-bold border-b pb-2 mb-2">End of Month Review</h3><div class="text-sm mt-2 space-y-2">
                                 <p><strong class="font-medium text-gray-600">Biggest Win 脂:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_win`])}</span></p>
-                                <p><strong class="font-medium text-gray-600">Toughest Challenge ､</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p>
+                                <p><strong class="font-medium text-gray-600">Toughest Challenge ､:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p>
                                 <p><strong class="font-medium text-gray-600">What's Next 噫:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_next`])}</span></p>
                             </div></div>
                         </div>
@@ -1070,7 +1070,19 @@ const DOMElements = {
         DOMElements.authError.style.display = 'none';
         auth.signInWithEmailAndPassword(DOMElements.emailInput.value, DOMElements.passwordInput.value)
             .catch(error => {
-                DOMElements.authError.textContent = error.message;
+                let friendlyMessage = 'An unexpected error occurred. Please try again.';
+                switch (error.code) {
+                    case 'auth/invalid-login-credentials':
+                    case 'auth/invalid-credential':
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                        friendlyMessage = 'Incorrect email or password. Please check your details and try again.';
+                        break;
+                    case 'auth/invalid-email':
+                        friendlyMessage = 'The email address is not valid. Please enter a valid email.';
+                        break;
+                }
+                DOMElements.authError.textContent = friendlyMessage;
                 DOMElements.authError.style.display = 'block';
             });
     };
