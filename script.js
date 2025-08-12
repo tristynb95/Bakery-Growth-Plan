@@ -444,7 +444,7 @@ const DOMElements = {
             if (el.id) appState.planData[el.id] = el.value;
         });
     
-        // START: New logic to save pillar button state
+        // START: Restored logic to save pillar button state
         document.querySelectorAll('.pillar-buttons').forEach(group => {
             const stepKey = group.dataset.stepKey;
             const selected = group.querySelector('.selected');
@@ -455,7 +455,7 @@ const DOMElements = {
                 delete appState.planData[dataKey]; // Remove if nothing is selected
             }
         });
-        // END: New logic
+        // END: Restored logic
     
         if (appState.currentView.startsWith('month-')) {
             const monthNum = appState.currentView.split('-')[1];
@@ -526,7 +526,7 @@ const DOMElements = {
         const stepDefinition = templates.step[stepKey] || (stepKey === 'vision' ? templates.vision : null);
         if (!stepDefinition) return false;
 
-        // NEW: Special check for Must-Win Battle steps (m1s1, m2s1, etc.)
+        // RESTORED: Special check for Must-Win Battle steps (m1s1, m2s1, etc.)
         if (stepKey.endsWith('s1') && stepKey.startsWith('m')) {
             const battleText = planData[`${stepKey}_battle`];
             const pillarSelected = planData[`${stepKey}_pillar`];
@@ -610,7 +610,7 @@ const DOMElements = {
             el.value = appState.planData[el.id] || '';
         });
     
-        // START: New logic to load pillar button state
+        // START: Restored logic to load pillar button state
         document.querySelectorAll('.pillar-buttons').forEach(group => {
             const stepKey = group.dataset.stepKey;
             const dataKey = `${stepKey}_pillar`;
@@ -621,7 +621,7 @@ const DOMElements = {
                 if (buttonToSelect) buttonToSelect.classList.add('selected');
             }
         });
-        // END: New logic
+        // END: Restored logic
     
         if (appState.currentView.startsWith('month-')) {
             const monthNum = appState.currentView.split('-')[1];
@@ -788,9 +788,9 @@ const DOMElements = {
                             </div></div>
                             <div><h3 class="font-bold border-b pb-2 mb-2">Weekly Momentum Check</h3>${weeklyCheckinHTML}</div>
                             <div><h3 class="font-bold border-b pb-2 mb-2">End of Month Review</h3><div class="text-sm mt-2 space-y-2">
-                                <p><strong class="font-medium text-gray-600">Biggest Win 🎉:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_win`])}</span></p>
-                                <p><strong class="font-medium text-gray-600">Toughest Challenge 🤔:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p>
-                                <p><strong class="font-medium text-gray-600">What's Next 🚀:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_next`])}</span></p>
+                                <p><strong class="font-medium text-gray-600">Biggest Win 脂:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_win`])}</span></p>
+                                <p><strong class="font-medium text-gray-600">Toughest Challenge ､</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p>
+                                <p><strong class="font-medium text-gray-600">What's Next 噫:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_next`])}</span></p>
                             </div></div>
                         </div>
                     </div>`;
@@ -818,10 +818,10 @@ const DOMElements = {
                 <div class="content-card p-6 mt-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);">
                     <h2 class="text-2xl font-bold mb-4" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2>
                     <div class="space-y-4">
-                        <div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">🏆 Biggest Achievements</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_achievements)}</p></div>
-                        <div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">🧗 Biggest Challenges & Learnings</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_challenges)}</p></div>
-                        <div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">🎯 Performance vs Narrative</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_narrative)}</p></div>
-                        <div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">🚀 Focus For Next Quarter</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_next_quarter)}</p></div>
+                        <div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">醇 Biggest Achievements</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_achievements)}</p></div>
+                        <div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">ｧBiggest Challenges & Learnings</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_challenges)}</p></div>
+                        <div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">識 Performance vs Narrative</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_narrative)}</p></div>
+                        <div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">噫 Focus For Next Quarter</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_next_quarter)}</p></div>
                     </div>
                 </div>
             </div>`;
@@ -1189,10 +1189,11 @@ const DOMElements = {
         // Handle Pillar Button Clicks
         const pillarButton = target.closest('.pillar-button');
         if (pillarButton) {
-            // Remove 'selected' from all buttons in the same group
+            const alreadySelected = pillarButton.classList.contains('selected');
             pillarButton.parentElement.querySelectorAll('.pillar-button').forEach(btn => btn.classList.remove('selected'));
-            // Add 'selected' to the clicked button
-            pillarButton.classList.add('selected');
+            if (!alreadySelected) {
+                pillarButton.classList.add('selected');
+            }
             saveData(); // Save the new state
             return; // Stop further execution
         }
