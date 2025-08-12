@@ -224,8 +224,7 @@ const DOMElements = {
             'm1s2': {
                 title: "Levers & Power-Up",
                 requiredFields: ['m1s2_levers', 'm1s2_powerup_q', 'm1s2_powerup_a'],
-                html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3><p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="flex flex-col"><label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label><textarea id="m1s2_levers" class="form-input flex-grow" rows="4" placeholder="1. Review ordering report with daily.
-2. Coach the team on the 'why' behind the production matrix." maxlength="300"></textarea></div><div class="space-y-4"><div><label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label><textarea id="m1s2_powerup_q" class="form-input" rows="2" placeholder="e.g., 'What is one thing that slows us down before 8am?'" maxlength="150"></textarea></div><div><label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label><textarea id="m1s2_powerup_a" class="form-input" rows="2" placeholder="e.g., Pre-portioning key ingredients the night before." maxlength="150"></textarea></div></div></div></div>`
+                html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3><p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="flex flex-col h-full"><label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label><textarea id="m1s2_levers" class="form-input flex-grow" rows="4" placeholder="1. Review ordering report with daily.&#10;2. Coach the team on the 'why' behind the production matrix." maxlength="300"></textarea></div><div class="space-y-4"><div><label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label><textarea id="m1s2_powerup_q" class="form-input" rows="2" placeholder="e.g., 'What is one thing that slows us down before 8am?'" maxlength="150"></textarea></div><div><label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label><textarea id="m1s2_powerup_a" class="form-input" rows="2" placeholder="e.g., Pre-portioning key ingredients the night before." maxlength="150"></textarea></div></div></div></div>`
             },
             'm1s3': {
                 title: "People Growth",
@@ -1281,3 +1280,4 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
