@@ -214,7 +214,7 @@ const DOMElements = {
                                <label class="font-semibold block mb-3 text-gray-700">Monthly Focus Pillar:</label>
                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m1s1">
                                    <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
-                                   <button class="btn pillar-button" data-pillar="product"><i class="bi bi-stack"></i> Product</button>
+                                   <button class="btn pillar-button" data-pillar="product"><i class="bi bi-cup-hot-fill"></i> Product</button>
                                    <button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button>
                                    <button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button>
                                </div>
@@ -237,7 +237,7 @@ const DOMElements = {
                 requiredFields: ['m1s4_people', 'm1s4_product', 'm1s4_customer', 'm1s4_place'],
                 html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 4: Protect the Core</h3><p class="text-gray-600 mb-6">One key behaviour you will protect for each pillar to ensure standards don't slip.</p><div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     <div><label for="m1s4_people" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-people-fill"></i> PEOPLE</label><textarea id="m1s4_people" class="form-input" rows="2" placeholder="e.g., Meaningful 1-2-1s with my two keyholders." maxlength="150"></textarea></div>
-                    <div><label for="m1s4_product" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-stack"></i> PRODUCT</label><textarea id="m1s4_product" class="form-input" rows="2" placeholder="e.g., Daily quality checks of the first bake." maxlength="150"></textarea></div>
+                    <div><label for="m1s4_product" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-cup-hot-fill"></i> PRODUCT</label><textarea id="m1s4_product" class="form-input" rows="2" placeholder="e.g., Daily quality checks of the first bake." maxlength="150"></textarea></div>
                     <div><label for="m1s4_customer" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-heart-fill"></i> CUSTOMER</label><textarea id="m1s4_customer" class="form-input" rows="2" placeholder="e.g., Action all customer feedback within 24 hours." maxlength="150"></textarea></div>
                     <div><label for="m1s4_place" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-shop"></i> PLACE</label><textarea id="m1s4_place" class="form-input" rows="2" placeholder="e.g., Complete a bakery travel path twice a day." maxlength="150"></textarea></div>
                 </div></div>`
@@ -751,7 +751,7 @@ const DOMElements = {
             const pillar = formData[`m${monthNum}s1_pillar`];
             const pillarIcons = { 
                 'people': '<i class="bi bi-people-fill"></i>', 
-                'product': '<i class="bi bi-stack"></i>', 
+                'product': '<i class="bi bi-cup-hot-fill"></i>', 
                 'customer': '<i class="bi bi-heart-fill"></i>', 
                 'place': '<i class="bi bi-shop"></i>'
             };
@@ -782,7 +782,7 @@ const DOMElements = {
                             </div>
                             <div><h3 class="font-bold border-b pb-2 mb-2">Protect the Core Behaviours</h3><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
                                 <div><strong class="text-gray-600 block"><i class="bi bi-people-fill"></i> People</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_people`])}</span></div>
-                                <div><strong class="text-gray-600 block"><i class="bi bi-stack"></i> Product</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_product`])}</span></div>
+                                <div><strong class="text-gray-600 block"><i class="bi bi-cup-hot-fill"></i> Product</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_product`])}</span></div>
                                 <div><strong class="text-gray-600 block"><i class="bi bi-heart-fill"></i> Customer</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_customer`])}</span></div>
                                 <div><strong class="text-gray-600 block"><i class="bi bi-shop"></i> Place</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_place`])}</span></div>
                             </div></div>
