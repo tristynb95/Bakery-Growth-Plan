@@ -639,6 +639,7 @@ const DOMElements = {
     }
 
     function switchView(viewId) {
+        DOMElements.mainContent.scrollTop = 0; // Scroll to top on view switch
         appState.currentView = viewId;
         
         if (appState.currentPlanId) {
