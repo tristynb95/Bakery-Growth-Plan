@@ -221,7 +221,7 @@ const DOMElements = {
                            </div>
                        </div>`
             },
-            'm1s2': {
+             'm1s2': {
                 title: "Levers & Power-Up",
                 requiredFields: ['m1s2_levers', 'm1s2_powerup_q', 'm1s2_powerup_a'],
                 html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3><p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p><div class="flex flex-col md:flex-row gap-6"><div class="levers-col w-full md:w-1/2 flex flex-col"><label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label><textarea id="m1s2_levers" class="form-input flex-grow" placeholder="1. Review ordering report with daily.&#10;2. Coach the team on the 'why' behind the production matrix." maxlength="300"></textarea></div><div class="powerup-col w-full md:w-1/2 flex flex-col gap-y-4"><div><label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label><textarea id="m1s2_powerup_q" class="form-input" rows="2" placeholder="e.g., 'What is one thing that slows us down before 8am?'" maxlength="150"></textarea></div><div><label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label><textarea id="m1s2_powerup_a" class="form-input" rows="2" placeholder="e.g., Pre-portioning key ingredients the night before." maxlength="150"></textarea></div></div></div></div>`
@@ -701,6 +701,8 @@ const DOMElements = {
         
         prevBtn.classList.toggle('hidden', stepNum === 1);
         nextBtn.classList.toggle('hidden', stepNum === appState.monthContext[monthKey].totalSteps);
+
+        adjustTextareaHeight();
     }
 
     function changeStep(direction) {
@@ -746,34 +748,7 @@ const DOMElements = {
                 const statusBadge = `<span class="text-xs font-semibold ml-2 px-2 py-0.5 rounded-full capitalize ${statusColors[status] || statusColors['N/A']}">${status.replace('-', ' ')}</span>`;
                 weeklyCheckinHTML += `<div class="border-t pt-3 mt-3"><h5 class="font-bold text-sm">Week ${w}${statusBadge}</h5><div class="text-sm mt-2"><strong class="text-gray-600">Win/Learning:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s5_w${w}_win`])}</span></div><div class="text-sm mt-1"><strong class="text-gray-600">Spotlight:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s5_w${w}_spotlight`])}</span></div></div>`;
             }
-    function adjustTextareaHeight() {
-        const leversCol = document.querySelector('.levers-col');
-        const powerupCol = document.querySelector('.powerup-col');
-
-        // Only run if both columns are on the page
-        if (leversCol && powerupCol) {
-            // Use a small timeout to ensure the browser has calculated the layout
-            setTimeout(() => {
-                const targetHeight = powerupCol.offsetHeight;
-                const leversTextarea = leversCol.querySelector('textarea');
-                const leversLabel = leversCol.querySelector('label');
-
-                if (leversTextarea && leversLabel) {
-                    const labelHeight = leversLabel.offsetHeight;
-                    const labelStyles = window.getComputedStyle(leversLabel);
-                    const labelMarginBottom = parseFloat(labelStyles.marginBottom);
-                    
-                    // Calculate the new height for the textarea
-                    const newHeight = targetHeight - labelHeight - labelMarginBottom;
-                    
-                    if (newHeight > 50) { // Prevents it from becoming too small
-                         leversTextarea.style.height = `${newHeight}px`;
-                    }
-                }
-            }, 50);
-        }
-    }
-            
+    
             // START: Logic to get pillar data for the summary
             const pillar = formData[`m${monthNum}s1_pillar`];
             const pillarIcons = { 
@@ -852,6 +827,34 @@ const DOMElements = {
                     </div>
                 </div>
             </div>`;
+    }
+
+    function adjustTextareaHeight() {
+        const leversCol = document.querySelector('.levers-col');
+        const powerupCol = document.querySelector('.powerup-col');
+
+        // Only run if both columns are on the page
+        if (leversCol && powerupCol) {
+            // Use a small timeout to ensure the browser has calculated the layout
+            setTimeout(() => {
+                const targetHeight = powerupCol.offsetHeight;
+                const leversTextarea = leversCol.querySelector('textarea');
+                const leversLabel = leversCol.querySelector('label');
+
+                if (leversTextarea && leversLabel) {
+                    const labelHeight = leversLabel.offsetHeight;
+                    const labelStyles = window.getComputedStyle(leversLabel);
+                    const labelMarginBottom = parseFloat(labelStyles.marginBottom);
+                    
+                    // Calculate the new height for the textarea
+                    const newHeight = targetHeight - labelHeight - labelMarginBottom;
+                    
+                    if (newHeight > 50) { // Prevents it from becoming too small
+                         leversTextarea.style.height = `${newHeight}px`;
+                    }
+                }
+            }, 50);
+        }
     }
 
    async function handleShare() {
@@ -1245,6 +1248,8 @@ const DOMElements = {
         }
     });
     DOMElements.modalActionBtn.addEventListener('click', handleModalAction);
+
+    window.addEventListener('resize', adjustTextareaHeight);
     
     DOMElements.mobileMenuBtn.addEventListener('click', () => {
         DOMElements.appView.classList.toggle('sidebar-open');
@@ -1307,8 +1312,3 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
-
