@@ -341,3 +341,40 @@ main { grid-area: main; }
     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 .btn-subtle:hover { background-color: var(--gails-grey-light); color: var(--gails-text-primary); }
+
+/* 16. Pillar Button Styles (Add to end of file)
+-------------------------------------------------- */
+.pillar-button {
+    background-color: var(--gails-white);
+    color: var(--gails-text-secondary);
+    border: 1px solid var(--gails-grey-mid);
+    justify-content: center;
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+}
+
+.pillar-button:hover {
+    border-color: var(--gails-text-primary);
+    color: var(--gails-text-primary);
+    background-color: var(--gails-grey-light);
+}
+
+.pillar-button.selected {
+    background-color: var(--gails-red);
+    color: var(--gails-white);
+    border-color: var(--gails-red);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.pillar-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background-color: var(--gails-red-light);
+    color: var(--gails-red);
+}
