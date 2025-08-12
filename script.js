@@ -192,7 +192,7 @@ const DOMElements = {
     // --- HTML TEMPLATES ---
 
     // Define the custom croissant SVG icon for reusability
-    const croissantIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi pillar-icon-svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M13.284.816a3.5 3.5 0 0 0-4.248 1.153 3.5 3.5 0 0 0-4.062-1.14A3.5 3.5 0 0 0 2.75 3.532l-.22.219a1.5 1.5 0 0 0 .043 2.164 1.5 1.5 0 0 0 2.121.083l.262-.218a1.5 1.5 0 0 1 1.949-.134l.32.203a1.5 1.5 0 0 0 1.82-.164l.117-.091a1.5 1.5 0 0 1 1.805-.153l.366.218a1.5 1.5 0 0 0 1.858-.164l.09-.074A3.5 3.5 0 0 0 15.5 3.5a3.5 3.5 0 0 0-2.216-2.684zM1.902 6.543a2.5 2.5 0 0 1-.072-3.596 2.5 2.5 0 0 1 3.536-.072l.244.204a2.5 2.5 0 0 0 3.25.223l.32-.203a2.5 2.5 0 0 1 3.033.272l.117.091a2.5 2.5 0 0 0 3.01.256l.366.218a2.5 2.5 0 0 1 3.096.273c.922.922.922 2.41 0 3.332l-.301.249a1.5 1.5 0 0 1-1.93.125l-.39-.234a1.5 1.5 0 0 0-1.815.195l-.262.218a1.5 1.5 0 0 1-2.028.062l-.295-.236a1.5 1.5 0 0 0-1.92-.09l-.42.278a1.5 1.5 0 0 1-1.85-.05l-.262-.218a1.5 1.5 0 0 0-1.949.134l-1.127.902a2.5 2.5 0 0 1-3.332.001z"/></svg>`;
+    const croissantIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi pillar-icon-svg" viewBox="0 0 16 16"><path d="M12.854 5.242a3.5 3.5 0 0 0-4.04-3.955 3.5 3.5 0 0 0-4.575 2.518 1.5 1.5 0 0 0-1.489 1.489 1.5 1.5 0 0 0 1.291 1.472c.038.01.077.018.115.024a1.5 1.5 0 0 1 1.233.953c.273.62.915 1.047 1.63 1.047.715 0 1.357-.428 1.63-1.047a1.5 1.5 0 0 1 1.233-.953c.038-.006.077-.014.115-.024a1.5 1.5 0 0 0 1.291-1.472 3.5 3.5 0 0 0 .546-1.044zM3.463 3.513a2.5 2.5 0 0 1 3.265-1.783 2.5 2.5 0 0 1 3.217 1.434 2.5 2.5 0 0 1-1.12 3.126 1.5 1.5 0 0 0-.756 1.082 2.49 2.49 0 0 1-1.63 1.047c-.715 0-1.357-.428-1.63-1.047a1.5 1.5 0 0 0-.756-1.082 2.5 2.5 0 0 1-1.12-3.126 2.502 2.502 0 0 1 .459-.652z"/></svg>`;
 
     const templates = {
         vision: {
@@ -752,13 +752,12 @@ const DOMElements = {
     
             // START: Logic to get pillar data for the summary
             const pillar = formData[`m${monthNum}s1_pillar`];
-            const croissantSVG = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi pillar-icon-svg inline-block" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.284.816a3.5 3.5 0 0 0-4.248 1.153 3.5 3.5 0 0 0-4.062-1.14A3.5 3.5 0 0 0 2.75 3.532l-.22.219a1.5 1.5 0 0 0 .043 2.164 1.5 1.5 0 0 0 2.121.083l.262-.218a1.5 1.5 0 0 1 1.949-.134l.32.203a1.5 1.5 0 0 0 1.82-.164l.117-.091a1.5 1.5 0 0 1 1.805-.153l.366.218a1.5 1.5 0 0 0 1.858-.164l.09-.074A3.5 3.5 0 0 0 15.5 3.5a3.5 3.5 0 0 0-2.216-2.684zM1.902 6.543a2.5 2.5 0 0 1-.072-3.596 2.5 2.5 0 0 1 3.536-.072l.244.204a2.5 2.5 0 0 0 3.25.223l.32-.203a2.5 2.5 0 0 1 3.033.272l.117.091a2.5 2.5 0 0 0 3.01.256l.366.218a2.5 2.5 0 0 1 3.096.273c.922.922.922 2.41 0 3.332l-.301.249a1.5 1.5 0 0 1-1.93.125l-.39-.234a1.5 1.5 0 0 0-1.815.195l-.262.218a1.5 1.5 0 0 1-2.028.062l-.295-.236a1.5 1.5 0 0 0-1.92-.09l-.42.278a1.5 1.5 0 0 1-1.85-.05l-.262-.218a1.5 1.5 0 0 0-1.949.134l-1.127.902a2.5 2.5 0 0 1-3.332.001z"/></svg>';
-const pillarIcons = { 
-    'people': '<i class="bi bi-people-fill"></i>', 
-    'product': croissantSVG, 
-    'customer': '<i class="bi bi-heart-fill"></i>', 
-    'place': '<i class="bi bi-shop"></i>'
-};
+            const pillarIcons = { 
+                'people': '<i class="bi bi-people-fill"></i>', 
+                'product': croissantIconSVG, 
+                'customer': '<i class="bi bi-heart-fill"></i>', 
+                'place': '<i class="bi bi-shop"></i>'
+            };
             let pillarHTML = '';
             if (pillar) {
                 const pillarIcon = pillarIcons[pillar] || '';
@@ -786,7 +785,7 @@ const pillarIcons = {
                             </div>
                             <div><h3 class="font-bold border-b pb-2 mb-2">Protect the Core Behaviours</h3><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
                                 <div><strong class="text-gray-600 block">👥 People</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_people`])}</span></div>
-                                <div><strong class="text-gray-600 block">🥐 Product</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_product`])}</span></div>
+                                <div><strong class="text-gray-600 block">${croissantIconSVG} Product</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_product`])}</span></div>
                                 <div><strong class="text-gray-600 block">❤️ Customer</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_customer`])}</span></div>
                                 <div><strong class="text-gray-600 block">🏡 Place</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_place`])}</span></div>
                             </div></div>
@@ -1283,11 +1282,3 @@ const pillarIcons = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
-
-
-
-
