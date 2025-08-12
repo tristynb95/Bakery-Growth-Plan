@@ -40,27 +40,77 @@
         <h2 class="auth-title mt-4">Creating new plan...</h2>
     </div>
 
-    <div id="login-view" class="auth-container hidden">
-        <div class="auth-box">
-            <img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/92/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo" class="auth-logo">
-            <h2 class="auth-title">Bakery Growth Plans</h2>
-            <p class="text-center text-gray-500 -mt-2 mb-4">Please sign in to continue.</p>
-            <p id="auth-error" class="auth-error"></p>
-            <input type="email" id="email" class="form-input" placeholder="Your Email Address">
-            <input type="password" id="password" class="form-input" placeholder="Your Password">
-            
-            <a href="#" id="forgot-password-btn" class="forgot-password-link">Forgot Password?</a>
+    <div id="login-view" class="hidden">
+        <div class="min-h-screen bg-gray-50 flex">
 
-            <div class="auth-buttons">
-                <button id="login-btn" class="btn btn-primary w-full">Login</button>
+            <div class="hidden lg:block relative w-0 flex-1">
+                <img class="absolute inset-0 h-full w-full object-cover" src="https://images.unsplash.com/photo-1555951015-6da899d5b740?q=80&w=3087&auto=format&fit=crop" alt="Freshly baked bread and pastries from GAIL's Bakery">
             </div>
-             <p class="text-sm text-center text-gray-600 mt-6">
-                Don't have an account? 
-                <a href="#" id="show-register-view-btn" class="font-medium text-red-600 hover:underline">Create one</a>
-            </p>
+
+            <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+                <div class="mx-auto w-full max-w-sm lg:w-96">
+                    <div>
+                        <img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/92/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo" class="h-12 w-auto">
+                        <h2 class="mt-6 text-3xl font-extrabold text-gray-900 font-poppins">
+                            Sign in to your plan
+                        </h2>
+                        <p class="mt-2 text-sm text-gray-600">
+                            Or
+                            <a href="#" id="show-register-view-btn" class="font-medium text-red-600 hover:text-red-500">
+                                create a new account
+                            </a>
+                        </p>
+                    </div>
+
+                    <div class="mt-8">
+                        <div class="mt-6">
+                            <form action="#" method="POST" class="space-y-6">
+                                <p id="auth-error" class="auth-error"></p>
+
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700">
+                                        Email address
+                                    </label>
+                                    <div class="mt-1 relative">
+                                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                            <i class="bi bi-envelope text-gray-400"></i>
+                                        </span>
+                                        <input type="email" id="email" class="form-input !pl-10" placeholder="you@gailsbread.co.uk" required>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-1">
+                                    <label for="password" class="block text-sm font-medium text-gray-700">
+                                        Password
+                                    </label>
+                                    <div class="mt-1 relative">
+                                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                            <i class="bi bi-lock text-gray-400"></i>
+                                        </span>
+                                        <input type="password" id="password" class="form-input !pl-10" placeholder="Your Password" required>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-end">
+                                    <div class="text-sm">
+                                        <a href="#" id="forgot-password-btn" class="font-medium text-red-600 hover:text-red-500">
+                                            Forgot your password?
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <button id="login-btn" type="button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                        Sign in
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
     <div id="register-view" class="auth-container hidden">
         <div class="auth-box">
             <h2 class="auth-title">Create Account</h2>
