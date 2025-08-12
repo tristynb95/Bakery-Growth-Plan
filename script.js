@@ -199,8 +199,8 @@ const DOMElements = {
                             <p class="text-xl font-semibold text-gray-800">"To make world-class, craft baking a part of every neighbourhood."</p>
                         </div>
                         
-                        <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">This Quarter's Narrative: <i class="bi bi-info-circle info-icon" title="The big, overarching mission for the next 90 days."></i></label><textarea id="quarterlyTheme" class="form-input" rows="2" placeholder="e.g., Become the undisputed neighbourhood favourite by mastering our availability." maxlength="200"></textarea></div>
-                        <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the first 30-day sprint."></i></label><textarea id="month1Goal" class="form-input text-sm" rows="3" placeholder="e.g., PRODUCT: Master afternoon availability and reduce waste." maxlength="150"></textarea></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the second 30-day sprint."></i></label><textarea id="month2Goal" class="form-input text-sm" rows="3" placeholder="e.g., PLACE: Embed new production processes and daily checks." maxlength="150"></textarea></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the third 30-day sprint."></i></label><textarea id="month3Goal" class="form-input text-sm" rows="3" placeholder="e.g., PEOPLE: Develop team skills for consistent execution." maxlength="150"></textarea></div></div></div>
+                        <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">This Quarter's Narrative: <i data-feather="info" class="inline-block w-4 h-4"></i></label><textarea id="quarterlyTheme" class="form-input" rows="2" placeholder="e.g., Become the undisputed neighbourhood favourite by mastering our availability." maxlength="200"></textarea></div>
+                        <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1 Goal: <i data-feather="info" class="inline-block w-4 h-4"></i></label><textarea id="month1Goal" class="form-input text-sm" rows="3" placeholder="e.g., PRODUCT: Master afternoon availability and reduce waste." maxlength="150"></textarea></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2 Goal: <i data-feather="info" class="inline-block w-4 h-4"></i></label><textarea id="month2Goal" class="form-input text-sm" rows="3" placeholder="e.g., PLACE: Embed new production processes and daily checks." maxlength="150"></textarea></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3 Goal: <i data-feather="info" class="inline-block w-4 h-4"></i></label><textarea id="month3Goal" class="form-input text-sm" rows="3" placeholder="e.g., PEOPLE: Develop team skills for consistent execution." maxlength="150"></textarea></div></div></div>
                    </div>`,
             requiredFields: ['managerName', 'bakeryLocation', 'quarter', 'quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
         },
@@ -217,38 +217,18 @@ const DOMElements = {
                            <div class="mt-6">
                                <label class="font-semibold block mb-3 text-gray-700">Monthly Focus Pillar:</label>
                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m1s1">
-                                   <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
-                                   <button class="btn pillar-button" data-pillar="product"><i class="bi bi-box-seam"></i> Product</button>
-                                   <button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button>
-                                   <button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button>
+                                   <button class="btn pillar-button" data-pillar="people"><i data-feather="users"></i> People</button>
+                                   <button class="btn pillar-button" data-pillar="product"><i data-feather="package"></i> Product</button>
+                                   <button class="btn pillar-button" data-pillar="customer"><i data-feather="heart"></i> Customer</button>
+                                   <button class="btn pillar-button" data-pillar="place"><i data-feather="home"></i> Place</button>
                                </div>
                            </div>
                            </div>`
             },
             'm1s2': {
-    title: "Levers & Power-Up",
-    requiredFields: ['m1s2_levers', 'm1s2_powerup_q', 'm1s2_powerup_a'],
-    html: `<div class="content-card p-8">
-               <h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3>
-               <p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p>
-               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   <div class="flex flex-col h-full">
-                       <label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label>
-                       <textarea id="m1s2_levers" class="form-input flex-grow" rows="4" placeholder="1. Review ordering report with daily.&#10;2. Coach the team on the 'why' behind the production matrix." maxlength="300"></textarea>
-                   </div>
-                   <div class="space-y-4">
-                       <div>
-                           <label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label>
-                           <textarea id="m1s2_powerup_q" class="form-input" rows="2" placeholder="e.g., 'What is one thing that slows us down before 8am?'" maxlength="150"></textarea>
-                       </div>
-                       <div>
-                           <label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label>
-                           <textarea id="m1s2_powerup_a" class="form-input" rows="2" placeholder="e.g., Pre-portioning key ingredients the night before." maxlength="150"></textarea>
-                       </div>
-                   </div>
-               </div>
-           </div>`
-},
+                title: "Levers & Power-Up",
+                requiredFields: ['m1s2_levers', 'm1s2_powerup_q', 'm1s2_powerup_a'],
+                html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3><p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="flex flex-col h-full"><label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label><textarea id="m1s2_levers" class="form-input flex-grow" rows="4" placeholder="1. Review ordering report with daily.
 2. Coach the team on the 'why' behind the production matrix." maxlength="300"></textarea></div><div class="space-y-4"><div><label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label><textarea id="m1s2_powerup_q" class="form-input" rows="2" placeholder="e.g., 'What is one thing that slows us down before 8am?'" maxlength="150"></textarea></div><div><label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label><textarea id="m1s2_powerup_a" class="form-input" rows="2" placeholder="e.g., Pre-portioning key ingredients the night before." maxlength="150"></textarea></div></div></div></div>`},
             'm1s3':{title:"People Growth", requiredFields:['m1s3_people'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 3: People Growth</h3><p class="text-gray-600 mb-4">Who will I invest in this month to help us win our battle, and how?</p><textarea id="m1s3_people" class="form-input" rows="4" placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" maxlength="300"></textarea></div>`},
             'm1s4':{
@@ -314,7 +294,7 @@ const DOMElements = {
             DOMElements.initialLoadingView.classList.add('hidden');
 
         } else {
-            // No user is logged in. 
+            // No user is logged in.
             appState.currentUser = null;
             appState.planData = {};
             appState.currentPlanId = null;
@@ -374,8 +354,8 @@ const DOMElements = {
             dashboardHTML += `
                 <div class="plan-card">
                     <div class="plan-card-actions">
-                        <button class="plan-action-btn edit-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Edit Name"><i class="bi bi-pencil-square"></i></button>
-                        <button class="plan-action-btn delete-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Delete Plan"><i class="bi bi-trash3-fill"></i></button>
+                        <button class="plan-action-btn edit-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Edit Name"><i data-feather="edit"></i></button>
+                        <button class="plan-action-btn delete-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Delete Plan"><i data-feather="trash-2"></i></button>
                     </div>
                     <div class="plan-card-main" data-plan-id="${plan.id}">
                         <div class="flex-grow">
@@ -386,7 +366,7 @@ const DOMElements = {
                             <div class="flex justify-between"><span class="font-semibold text-gray-600">Last Edited:</span><span>${editedDate}</span></div>
                             <div class="flex justify-between items-center">
                                 <span class="font-semibold text-gray-600">Completion:</span>
-                                <div class="progress-circle" data-progress="${completion}">
+                                <div class="progress-circle" style="--progress: ${completion}">
                                     <div class="progress-circle-inner">${completion}%</div>
                                 </div>
                             </div>
@@ -395,14 +375,9 @@ const DOMElements = {
                 </div>`;
         });
 
-        dashboardHTML += `<div class="plan-card new-plan-card" id="create-new-plan-btn"><i class="bi bi-plus-circle-dotted text-4xl"></i><p class="mt-2 font-semibold">Create New Plan</p></div></div>`;
+        dashboardHTML += `<div class="plan-card new-plan-card" id="create-new-plan-btn"><i data-feather="plus-circle" class="w-12 h-12"></i><p class="mt-2 font-semibold">Create New Plan</p></div></div>`;
         DOMElements.dashboardContent.innerHTML = dashboardHTML;
-        
-        // Set progress for the new circles
-        document.querySelectorAll('.progress-circle').forEach(circle => {
-            const progress = circle.dataset.progress;
-            circle.style.setProperty('--progress', progress);
-        });
+        feather.replace();
     }
 
     function handleCreateNewPlan() {
@@ -487,11 +462,15 @@ const DOMElements = {
         clearTimeout(appState.saveTimeout);
     
         const saveToFirestore = async () => {
-            const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
-            await docRef.set({ ...appState.planData, lastEdited: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-    
-            DOMElements.saveIndicator.classList.remove('opacity-0');
-            setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
+            try {
+                const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
+                await docRef.set({ ...appState.planData, lastEdited: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+        
+                DOMElements.saveIndicator.classList.add('visible');
+                setTimeout(() => DOMElements.saveIndicator.classList.remove('visible'), 2000);
+            } catch(e) {
+                console.error("Error saving to firestore: ", e);
+            }
         };
     
         if (forceImmediate) {
@@ -515,6 +494,7 @@ const DOMElements = {
         if (appState.currentView.startsWith('month-')) {
             renderStepper(appState.monthContext[appState.currentView].currentStep);
         }
+        feather.replace();
     }
 
     function updateSidebarInfo() {
@@ -690,6 +670,7 @@ const DOMElements = {
         
         DOMElements.appView.classList.remove('sidebar-open');
         initializeCharCounters(); // Initialize counters on view switch
+        feather.replace();
     }
 
     function renderStep(stepNum) {
@@ -712,6 +693,7 @@ const DOMElements = {
         
         prevBtn.classList.toggle('hidden', stepNum === 1);
         nextBtn.classList.toggle('hidden', stepNum === appState.monthContext[monthKey].totalSteps);
+        feather.replace();
     }
 
     function changeStep(direction) {
@@ -758,20 +740,18 @@ const DOMElements = {
                 weeklyCheckinHTML += `<div class="border-t pt-3 mt-3"><h5 class="font-bold text-sm">Week ${w}${statusBadge}</h5><div class="text-sm mt-2"><strong class="text-gray-600">Win/Learning:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s5_w${w}_win`])}</span></div><div class="text-sm mt-1"><strong class="text-gray-600">Spotlight:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s5_w${w}_spotlight`])}</span></div></div>`;
             }
     
-            // START: Logic to get pillar data for the summary
             const pillar = formData[`m${monthNum}s1_pillar`];
-            const pillarIcons = { 'people': '👥', 'product': '🥐', 'customer': '❤️', 'place': '🏡' };
             let pillarHTML = '';
             if (pillar) {
+                const pillarIcons = { 'people': '👥', 'product': '🥐', 'customer': '❤️', 'place': '🏡' };
                 const pillarIcon = pillarIcons[pillar] || '';
                 const pillarText = pillar.charAt(0).toUpperCase() + pillar.slice(1);
                 pillarHTML = `
                     <div class="flex items-center gap-2 mb-3">
                         <span class="font-semibold text-sm text-gray-500">Focus Pillar:</span>
-                        <span class="pillar-badge">${pillarIcon} ${pillarText}</span>
+                        <span class="pillar-badge" data-pillar="${pillar}">${pillarIcon} ${pillarText}</span>
                     </div>`;
             }
-            // END: Logic to get pillar data
     
             return `<div class="content-card p-6 mt-8">
                         <h2 class="text-2xl font-bold font-poppins mb-4">Month ${monthNum} Sprint</h2>
@@ -831,6 +811,7 @@ const DOMElements = {
                     </div>
                 </div>
             </div>`;
+        feather.replace();
     }
 
    async function handleShare() {
@@ -864,7 +845,7 @@ const DOMElements = {
             <label for="shareable-link" class="font-semibold block mb-2">Shareable Link:</label>
             <div class="flex items-center gap-2">
                 <input type="text" id="shareable-link" class="form-input" value="${shareableLink}" readonly>
-                <button id="copy-link-btn" class="btn btn-secondary"><i class="bi bi-clipboard"></i></button>
+                <button id="copy-link-btn" class="btn btn-secondary"><i data-feather="clipboard"></i></button>
             </div>
             <p id="copy-success-msg" class="text-green-600 text-sm mt-2 hidden">Link copied to clipboard!</p>
         `;
@@ -879,6 +860,7 @@ const DOMElements = {
         
         DOMElements.modalActionBtn.style.display = 'none';
         DOMElements.modalCancelBtn.textContent = 'Done';
+        feather.replace();
         
     } catch (error) {
         console.error("Error creating shareable link:", error);
@@ -1285,5 +1267,3 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
