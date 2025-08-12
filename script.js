@@ -206,7 +206,25 @@ const DOMElements = {
         },
         month: (monthNum) => `<div class="grid grid-cols-1 lg:grid-cols-4 gap-8"><div class="lg:col-span-1 no-print"><nav id="month-${monthNum}-stepper" class="space-y-4"></nav></div><div class="lg:col-span-3"><div id="step-content-container"></div><div class="mt-8 flex justify-between no-print"><button id="prev-step-btn" class="btn btn-secondary">Previous</button><button id="next-step-btn" class="btn btn-primary">Next Step</button></div></div></div>`,
         step: {
-            'm1s1':{title:"Must-Win Battle", requiredFields:['m1s1_battle'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 1: The Must-Win Battle</h3><p class="text-gray-600 mb-4">What is the single most important, measurable outcome for this month?</p><textarea id="m1s1_battle" class="form-input" rows="3" placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly and placing smart orders.'" maxlength="250"></textarea></div>`},
+            'm1s1': {
+                title: "Must-Win Battle",
+                requiredFields: ['m1s1_battle'],
+                html: `<div class="content-card p-8">
+                           <h3 class="text-xl font-bold mb-1 gails-red-text">Step 1: The Must-Win Battle</h3>
+                           <p class="text-gray-600 mb-4">What is the single most important, measurable outcome for this month?</p>
+                           <textarea id="m1s1_battle" class="form-input" rows="3" placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly and placing smart orders.'" maxlength="250"></textarea>
+                           
+                           <div class="mt-6">
+                               <label class="font-semibold block mb-3 text-gray-700">Monthly Focus Pillar:</label>
+                               <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m1s1">
+                                   <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
+                                   <button class="btn pillar-button" data-pillar="product"><i class="bi bi-box-seam"></i> Product</button>
+                                   <button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button>
+                                   <button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button>
+                               </div>
+                           </div>
+                           </div>`
+            },
             'm1s2':{title:"Levers & Power-Up", requiredFields:['m1s2_levers', 'm1s2_powerup_q', 'm1s2_powerup_a'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3><p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="flex flex-col"><label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label><textarea id="m1s2_levers" class="form-input flex-grow" rows="4" placeholder="1. Review ordering report with daily.
 2. Coach the team on the 'why' behind the production matrix." maxlength="300"></textarea></div><div class="space-y-4"><div><label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label><textarea id="m1s2_powerup_q" class="form-input" rows="2" placeholder="e.g., 'What is one thing that slows us down before 8am?'" maxlength="150"></textarea></div><div><label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label><textarea id="m1s2_powerup_a" class="form-input" rows="2" placeholder="e.g., Pre-portioning key ingredients the night before." maxlength="150"></textarea></div></div></div></div>`},
             'm1s3':{title:"People Growth", requiredFields:['m1s3_people'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 3: People Growth</h3><p class="text-gray-600 mb-4">Who will I invest in this month to help us win our battle, and how?</p><textarea id="m1s3_people" class="form-input" rows="4" placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" maxlength="300"></textarea></div>`},
@@ -411,8 +429,21 @@ const DOMElements = {
         if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
     
         document.querySelectorAll('#app-view input, #app-view textarea').forEach(el => {
-            if(el.id) appState.planData[el.id] = el.value;
+            if (el.id) appState.planData[el.id] = el.value;
         });
+    
+        // START: New logic to save pillar button state
+        document.querySelectorAll('.pillar-buttons').forEach(group => {
+            const stepKey = group.dataset.stepKey;
+            const selected = group.querySelector('.selected');
+            const dataKey = `${stepKey}_pillar`;
+            if (selected) {
+                appState.planData[dataKey] = selected.dataset.pillar;
+            } else {
+                delete appState.planData[dataKey]; // Remove if nothing is selected
+            }
+        });
+        // END: New logic
     
         if (appState.currentView.startsWith('month-')) {
             const monthNum = appState.currentView.split('-')[1];
@@ -420,8 +451,11 @@ const DOMElements = {
                 const week = group.dataset.week;
                 const selected = group.querySelector('.selected');
                 const key = `m${monthNum}s5_w${week}_status`;
-                if (selected) { appState.planData[key] = selected.dataset.status; }
-                else { delete appState.planData[key]; }
+                if (selected) {
+                    appState.planData[key] = selected.dataset.status;
+                } else {
+                    delete appState.planData[key];
+                }
             });
         }
     
@@ -432,7 +466,7 @@ const DOMElements = {
         const saveToFirestore = async () => {
             const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
             await docRef.set({ ...appState.planData, lastEdited: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-            
+    
             DOMElements.saveIndicator.classList.remove('opacity-0');
             setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
         };
@@ -537,10 +571,11 @@ const DOMElements = {
                 const targetStepKey = `m${m}s${s}`;
                 const sourceStep = templates.step[sourceStepKey];
                 if (!sourceStep.html) continue;
-                const replacementRegex = new RegExp(`id="${sourceStepKey}`, 'g');
-                const replacementRegexFor = new RegExp(`for="${sourceStepKey}`, 'g');
-                let newHtml = sourceStep.html.replace(replacementRegex, `id="${targetStepKey}`);
-                newHtml = newHtml.replace(replacementRegexFor, `for="${targetStepKey}`);
+                
+                let newHtml = sourceStep.html.replace(new RegExp(`id="${sourceStepKey}`, 'g'), `id="${targetStepKey}`);
+                newHtml = newHtml.replace(new RegExp(`for="${sourceStepKey}`, 'g'), `for="${targetStepKey}`);
+                newHtml = newHtml.replace(new RegExp(`data-step-key="${sourceStepKey}"`, 'g'), `data-step-key="${targetStepKey}"`);
+
                 templates.step[targetStepKey] = {
                     ...sourceStep,
                     html: newHtml,
@@ -549,12 +584,25 @@ const DOMElements = {
             }
         }
     }
-
+    
     function populateViewWithData() {
         document.querySelectorAll('#app-view input, #app-view textarea').forEach(el => {
             el.value = appState.planData[el.id] || '';
         });
-
+    
+        // START: New logic to load pillar button state
+        document.querySelectorAll('.pillar-buttons').forEach(group => {
+            const stepKey = group.dataset.stepKey;
+            const dataKey = `${stepKey}_pillar`;
+            const pillar = appState.planData[dataKey];
+            group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected')); // Clear existing
+            if (pillar) {
+                const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
+                if (buttonToSelect) buttonToSelect.classList.add('selected');
+            }
+        });
+        // END: New logic
+    
         if (appState.currentView.startsWith('month-')) {
             const monthNum = appState.currentView.split('-')[1];
             document.querySelectorAll('.status-buttons').forEach(group => {
@@ -668,40 +716,59 @@ const DOMElements = {
     function renderSummary() {
         const formData = appState.planData;
         const e = (text) => (text || '...').replace(/\n/g, '<br>');
-
+    
         const renderMonthSummary = (monthNum) => {
             let weeklyCheckinHTML = '';
             for (let w = 1; w <= 4; w++) {
                 const statusKey = `m${monthNum}s5_w${w}_status`;
                 const status = formData[statusKey] || 'N/A';
-                const statusColors = { 'on-track': 'bg-green-100 text-green-800', 'issues': 'bg-yellow-100 text-yellow-800', 'off-track': 'bg-red-100 text-red-800', 'N/A': 'bg-gray-100 text-gray-800'};
+                const statusColors = { 'on-track': 'bg-green-100 text-green-800', 'issues': 'bg-yellow-100 text-yellow-800', 'off-track': 'bg-red-100 text-red-800', 'N/A': 'bg-gray-100 text-gray-800' };
                 const statusBadge = `<span class="text-xs font-semibold ml-2 px-2 py-0.5 rounded-full capitalize ${statusColors[status] || statusColors['N/A']}">${status.replace('-', ' ')}</span>`;
                 weeklyCheckinHTML += `<div class="border-t pt-3 mt-3"><h5 class="font-bold text-sm">Week ${w}${statusBadge}</h5><div class="text-sm mt-2"><strong class="text-gray-600">Win/Learning:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s5_w${w}_win`])}</span></div><div class="text-sm mt-1"><strong class="text-gray-600">Spotlight:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s5_w${w}_spotlight`])}</span></div></div>`;
             }
-
+    
+            // START: Logic to get pillar data for the summary
+            const pillar = formData[`m${monthNum}s1_pillar`];
+            const pillarIcons = { 'people': '👥', 'product': '🥐', 'customer': '❤️', 'place': '🏡' };
+            let pillarHTML = '';
+            if (pillar) {
+                const pillarIcon = pillarIcons[pillar] || '';
+                const pillarText = pillar.charAt(0).toUpperCase() + pillar.slice(1);
+                pillarHTML = `
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="font-semibold text-sm text-gray-500">Focus Pillar:</span>
+                        <span class="pillar-badge">${pillarIcon} ${pillarText}</span>
+                    </div>`;
+            }
+            // END: Logic to get pillar data
+    
             return `<div class="content-card p-6 mt-8">
-                <h2 class="text-2xl font-bold font-poppins mb-4">Month ${monthNum} Sprint</h2>
-                <div class="space-y-6">
-                    <div><h3 class="font-bold border-b pb-2 mb-2 gails-red-text">Must-Win Battle</h3><p class="text-gray-700 whitespace-pre-wrap">${e(formData[`m${monthNum}s1_battle`])}</p></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                        <div><h4 class="font-semibold text-gray-800">Key Levers</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s2_levers`])}</p></div>
-                        <div><h4 class="font-semibold text-gray-800">People Growth</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s3_people`])}</p></div>
-                        <div class="col-span-1"><h4 class="font-semibold text-gray-800">Team Power-Up Question</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s2_powerup_q`])}</p></div>
-                        <div class="col-span-1"><h4 class="font-semibold text-gray-800">Team's Winning Idea</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s2_powerup_a`])}</p></div>
-                    </div>
-                    <div><h3 class="font-bold border-b pb-2 mb-2">Protect the Core Behaviours</h3><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
-                        <div><strong class="text-gray-600 block">👥 People</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_people`])}</span></div>
-                        <div><strong class="text-gray-600 block">🥐 Product</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_product`])}</span></div>
-                        <div><strong class="text-gray-600 block">❤️ Customer</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_customer`])}</span></div>
-                        <div><strong class="text-gray-600 block">🏡 Place</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_place`])}</span></div>
-                    </div></div>
-                    <div><h3 class="font-bold border-b pb-2 mb-2">Weekly Momentum Check</h3>${weeklyCheckinHTML}</div>
-                    <div><h3 class="font-bold border-b pb-2 mb-2">End of Month Review</h3><div class="text-sm mt-2 space-y-2">
-                        <p><strong class="font-medium text-gray-600">Biggest Win 🎉:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_win`])}</span></p>
-                        <p><strong class="font-medium text-gray-600">Toughest Challenge 🤔:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p>
-                        <p><strong class="font-medium text-gray-600">What's Next 🚀:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_next`])}</span></p>
-                    </div></div>
-                </div></div>`;
+                        <h2 class="text-2xl font-bold font-poppins mb-4">Month ${monthNum} Sprint</h2>
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="font-bold border-b pb-2 mb-2 gails-red-text">Must-Win Battle</h3>
+                                ${pillarHTML} <p class="text-gray-700 whitespace-pre-wrap">${e(formData[`m${monthNum}s1_battle`])}</p>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                                <div><h4 class="font-semibold text-gray-800">Key Levers</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s2_levers`])}</p></div>
+                                <div><h4 class="font-semibold text-gray-800">People Growth</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s3_people`])}</p></div>
+                                <div class="col-span-1"><h4 class="font-semibold text-gray-800">Team Power-Up Question</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s2_powerup_q`])}</p></div>
+                                <div class="col-span-1"><h4 class="font-semibold text-gray-800">Team's Winning Idea</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s2_powerup_a`])}</p></div>
+                            </div>
+                            <div><h3 class="font-bold border-b pb-2 mb-2">Protect the Core Behaviours</h3><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
+                                <div><strong class="text-gray-600 block">👥 People</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_people`])}</span></div>
+                                <div><strong class="text-gray-600 block">🥐 Product</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_product`])}</span></div>
+                                <div><strong class="text-gray-600 block">❤️ Customer</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_customer`])}</span></div>
+                                <div><strong class="text-gray-600 block">🏡 Place</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_place`])}</span></div>
+                            </div></div>
+                            <div><h3 class="font-bold border-b pb-2 mb-2">Weekly Momentum Check</h3>${weeklyCheckinHTML}</div>
+                            <div><h3 class="font-bold border-b pb-2 mb-2">End of Month Review</h3><div class="text-sm mt-2 space-y-2">
+                                <p><strong class="font-medium text-gray-600">Biggest Win 🎉:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_win`])}</span></p>
+                                <p><strong class="font-medium text-gray-600">Toughest Challenge 🤔:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p>
+                                <p><strong class="font-medium text-gray-600">What's Next 🚀:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_next`])}</span></p>
+                            </div></div>
+                        </div>
+                    </div>`;
         };
 
         DOMElements.contentArea.innerHTML = `
@@ -1091,7 +1158,29 @@ const DOMElements = {
 
     DOMElements.mainNav.addEventListener('click', (e) => { e.preventDefault(); const navLink = e.target.closest('a'); if (navLink) { switchView(navLink.id.replace('nav-', '')); }});
     DOMElements.contentArea.addEventListener('input', (e) => { if (e.target.matches('input, textarea')) { saveData(); }});
-    DOMElements.contentArea.addEventListener('click', (e) => { const target = e.target; if (target.closest('.status-button')) { const button = target.closest('.status-button'); const alreadySelected = button.classList.contains('selected'); button.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected')); if (!alreadySelected) button.classList.add('selected'); saveData(); }});
+    DOMElements.contentArea.addEventListener('click', (e) => {
+        const target = e.target;
+    
+        // Handle Pillar Button Clicks
+        const pillarButton = target.closest('.pillar-button');
+        if (pillarButton) {
+            // Remove 'selected' from all buttons in the same group
+            pillarButton.parentElement.querySelectorAll('.pillar-button').forEach(btn => btn.classList.remove('selected'));
+            // Add 'selected' to the clicked button
+            pillarButton.classList.add('selected');
+            saveData(); // Save the new state
+            return; // Stop further execution
+        }
+    
+        // Handle Status Button Clicks
+        if (target.closest('.status-button')) {
+            const button = target.closest('.status-button');
+            const alreadySelected = button.classList.contains('selected');
+            button.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
+            if (!alreadySelected) button.classList.add('selected');
+            saveData();
+        }
+    });
     DOMElements.printBtn.addEventListener('click', () => window.print());
     DOMElements.shareBtn.addEventListener('click', handleShare);
 
