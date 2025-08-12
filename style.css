@@ -355,20 +355,6 @@ main { grid-area: main; }
     font-weight: 600;
 }
 
-.pillar-button:hover {
-    border-color: var(--gails-text-primary);
-    color: var(--gails-text-primary);
-    background-color: var(--gails-grey-light);
-}
-
-.pillar-button.selected {
-    background-color: var(--gails-red);
-    color: var(--gails-white);
-    border-color: var(--gails-red);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
 .pillar-badge {
     display: inline-block;
     padding: 0.25rem 0.75rem;
@@ -384,4 +370,3 @@ main { grid-area: main; }
 .pillar-icon-svg {
     vertical-align: -0.125em; /* Aligns custom SVG with text baseline like Bootstrap Icons */
 }
-
