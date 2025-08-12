@@ -1,386 +1,130 @@
-/* Gail's Bakery 30-60-90 Plan Stylesheet */
-/* v10.4 - Uniform Dashboard Card Sizing */
+// ====================================================================
+// SECURELY INITIALIZE FIREBASE
+// ====================================================================
 
-/* 1. Root Variables & Base Styles
--------------------------------------------------- */
-:root {
-    --gails-red: #D10A11;
-    --gails-red-dark: #A4080D;
-    --gails-red-light: #FFF1F2;
-    --gails-gold: #FFC72C; /* New accent colour */
-    --gails-green: #059669;
-    --gails-white: #FFFFFF;
-    --gails-bg: #FDFDFC; /* Softer, warmer background */
-    --gails-grey-light: #F3F4F6;
-    --gails-grey-mid: #D1D5DB;
-    --gails-text-primary: #1F2937;
-    --gails-text-secondary: #6B7280;
-    --status-on-track-bg: #D1FAE5; --status-on-track-text: #065F46; --status-on-track-border: #6EE7B7;
-    --status-issues-bg: #FEF3C7; --status-issues-text: #92400E; --status-issues-border: #FBBF24;
-    --status-off-track-bg: #FEE2E2; --status-off-track-text: #991B1B; --status-off-track-border: #FCA5A5;
-    --review-blue-bg: #EFF6FF; --review-blue-text: #1E40AF; --review-blue-border: #93C5FD;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-focus: 0 0 0 3px rgba(209, 10, 17, 0.4); /* Enhanced focus shadow */
-}
-
-body {
-    font-family: 'DM Sans', sans-serif;
-    background-color: var(--gails-bg);
-    color: var(--gails-text-primary);
-    font-size: 16px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-.font-poppins { 
-    font-family: 'Poppins', sans-serif; 
-    font-weight: 700; 
-    letter-spacing: -0.02em; 
-}
-.hidden { display: none !important; }
-.gails-red-text { color: var(--gails-red); }
-h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
-
-
-/* 2. Auth View & Loading States
--------------------------------------------------- */
-.auth-container { display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh; padding: 1rem; }
-.auth-box { width: 100%; max-width: 400px; background: var(--gails-white); padding: 2.5rem; border-radius: 1rem; box-shadow: var(--shadow-lg); border: 1px solid #E5E7EB; display: flex; flex-direction: column; gap: 1rem; }
-.auth-logo { height: 40px; width: auto; margin-bottom: 1rem; align-self: center; }
-.auth-title { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 700; text-align: center; color: var(--gails-text-primary); }
-.auth-error { background-color: var(--gails-red-light); color: var(--gails-red); border: 1px solid #FEE2E2; padding: 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; display: none; }
-.auth-buttons { display: flex; gap: 1rem; margin-top: 1rem; }
-.auth-buttons > .btn { flex: 1; }
-
-.loading-wrapper { display: flex; flex-direction: column; align-items: center; gap: 2rem; }
-.loading-wrapper .auth-logo { margin-bottom: 0; }
-.loading-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(253, 253, 252, 0.85); /* Updated to match new BG */
-    backdrop-filter: blur(5px); z-index: 1000;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-}
-.loading-spinner {
-    width: 50px; height: 50px;
-    border: 5px solid var(--gails-grey-mid);
-    border-top-color: var(--gails-red);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Enhanced Creation Loader */
-.creation-loader-step {
-    display: flex;
-    align-items: center;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--gails-text-secondary);
-    opacity: 0;
-    transform: translateY(10px);
-    animation: fadeInUp 0.5s ease forwards;
-}
-@keyframes fadeInUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-.creation-loader-step .icon {
-    width: 24px;
-    height: 24px;
-    margin-right: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.creation-loader-step .spinner {
-    width: 20px;
-    height: 20px;
-    border: 3px solid var(--gails-grey-mid);
-    border-top-color: var(--gails-red);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-.creation-loader-step .checkmark {
-    font-size: 1.5rem;
-    color: var(--gails-green);
-    transform: scale(0);
-    animation: popIn 0.3s ease forwards;
-}
-@keyframes popIn {
-    to {
-        transform: scale(1);
+async function initializeFirebase() {
+    try {
+        const response = await fetch('/.netlify/functions/config');
+        if (!response.ok) {
+            throw new Error('Could not fetch Firebase configuration.');
+        }
+        const firebaseConfig = await response.json();
+        const app = firebase.initializeApp(firebaseConfig);
+        runViewScript(app);
+    } catch (error) {
+        console.error("Failed to initialize Firebase:", error);
+        document.getElementById('header-title').textContent = 'Error';
+        document.getElementById('header-subtitle').textContent = 'Could not load application configuration. Please contact support.';
     }
 }
 
+function runViewScript(app) {
+    const db = firebase.firestore();
+    const DOMElements = {
+        headerTitle: document.getElementById('header-title'),
+        headerSubtitle: document.getElementById('header-subtitle'),
+        contentArea: document.getElementById('content-area'),
+    };
 
-/* 3. Dashboard view
--------------------------------------------------- */
-.dashboard-header { background-color: var(--gails-white); padding: 1.25rem 2.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; }
-.dashboard-grid { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
-    gap: 2rem; /* Increased gap */
-    margin-top: 2.5rem; 
-}
-.plan-card {
-    background-color: var(--gails-white);
-    border: 1px solid #E5E7EB;
-    border-radius: 1.25rem; /* Slightly more rounded */
-    padding: 2rem; /* Increased padding */
-    box-shadow: var(--shadow-md);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    min-height: 250px; /* This is the fix */
-}
-.plan-card:hover { 
-    transform: translateY(-6px); 
-    box-shadow: var(--shadow-lg);
-    border-color: var(--gails-red);
-}
-.plan-card-actions { position: absolute; top: 1rem; right: 1rem; display: flex; gap: 0.5rem; opacity: 0; transition: opacity 0.3s ease; }
-.plan-card:hover .plan-card-actions { opacity: 1; }
-.plan-action-btn { background-color: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px); border: 1px solid var(--gails-grey-mid); color: var(--gails-text-secondary); border-radius: 9999px; width: 2.25rem; height: 2.25rem; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
-.plan-action-btn:hover { color: var(--gails-text-primary); border-color: #4B5563; background-color: var(--gails-white); }
-.plan-card-main { cursor: pointer; flex-grow: 1; display: flex; flex-direction: column;}
-.plan-card.new-plan-card { 
-    border-style: dashed; border-width: 2px; color: var(--gails-text-secondary); 
-    align-items: center; justify-content: center; cursor: pointer; 
-}
-.plan-card.new-plan-card:hover { 
-    color: var(--gails-red); background-color: var(--gails-red-light); border-color: var(--gails-red);
-}
-.plan-card.new-plan-card .bi-plus-circle-dotted { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-.plan-card.new-plan-card:hover .bi-plus-circle-dotted { transform: scale(1.15) rotate(90deg); }
+    const renderSummary = (formData) => {
+        const e = (text) => (text || '...').replace(/\n/g, '<br>');
+        
+        const renderMonthSummary = (monthNum) => {
+            let weeklyCheckinHTML = '';
+            for (let w = 1; w <= 4; w++) {
+                const statusKey = `m${monthNum}s5_w${w}_status`;
+                const status = formData[statusKey] || 'N/A';
+                const statusColors = { 'on-track': 'bg-green-100 text-green-800', 'issues': 'bg-yellow-100 text-yellow-800', 'off-track': 'bg-red-100 text-red-800', 'N/A': 'bg-gray-100 text-gray-800' };
+                const statusBadge = `<span class="text-xs font-semibold ml-2 px-2 py-0.5 rounded-full capitalize ${statusColors[status] || statusColors['N/A']}">${status.replace('-', ' ')}</span>`;
+                weeklyCheckinHTML += `<div class="border-t pt-3 mt-3"><h5 class="font-bold text-sm">Week ${w}${statusBadge}</h5><div class="text-sm mt-2"><strong class="text-gray-600">Win/Learning:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s5_w${w}_win`])}</span></div><div class="text-sm mt-1"><strong class="text-gray-600">Spotlight:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s5_w${w}_spotlight`])}</span></div></div>`;
+            }
+    
+            const pillar = formData[`m${monthNum}s1_pillar`];
+            const pillarIcons = { 'people': '<i class="bi bi-people-fill"></i>', 'product': '<i class="bi bi-cup-hot-fill"></i>', 'customer': '<i class="bi bi-heart-fill"></i>', 'place': '<i class="bi bi-shop"></i>' };
+            let pillarHTML = '';
+            if (pillar) {
+                const pillarIcon = pillarIcons[pillar] || '';
+                const pillarText = pillar.charAt(0).toUpperCase() + pillar.slice(1);
+                pillarHTML = `<div class="flex items-center gap-2 mb-3"><span class="font-semibold text-sm text-gray-500">Focus Pillar:</span><span class="pillar-badge">${pillarIcon} ${pillarText}</span></div>`;
+            }
+    
+            return `<div class="content-card p-6 mt-8">
+                        <h2 class="text-2xl font-bold font-poppins mb-4">Month ${monthNum} Sprint</h2>
+                        <div class="space-y-6">
+                            <div><h3 class="font-bold border-b pb-2 mb-2 gails-red-text">Must-Win Battle</h3>${pillarHTML} <p class="text-gray-700 whitespace-pre-wrap">${e(formData[`m${monthNum}s1_battle`])}</p></div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                                <div><h4 class="font-semibold text-gray-800">Key Levers</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s2_levers`])}</p></div>
+                                <div><h4 class="font-semibold text-gray-800">People Growth</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s3_people`])}</p></div>
+                                <div class="col-span-1"><h4 class="font-semibold text-gray-800">Team Power-Up Question</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s2_powerup_q`])}</p></div>
+                                <div class="col-span-1"><h4 class="font-semibold text-gray-800">Team's Winning Idea</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s2_powerup_a`])}</p></div>
+                            </div>
+                            <div><h3 class="font-bold border-b pb-2 mb-2">Protect the Core Behaviours</h3><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
+                                <div><strong class="text-gray-600 block"><i class="bi bi-people-fill"></i> People</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_people`])}</span></div>
+                                <div><strong class="text-gray-600 block"><i class="bi bi-cup-hot-fill"></i> Product</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_product`])}</span></div>
+                                <div><strong class="text-gray-600 block"><i class="bi bi-heart-fill"></i> Customer</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_customer`])}</span></div>
+                                <div><strong class="text-gray-600 block"><i class="bi bi-shop"></i> Place</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_place`])}</span></div>
+                            </div></div>
+                            <div><h3 class="font-bold border-b pb-2 mb-2">Weekly Momentum Check</h3>${weeklyCheckinHTML}</div>
+                            <div><h3 class="font-bold border-b pb-2 mb-2">End of Month Review</h3><div class="text-sm mt-2 space-y-2"><p><strong class="font-medium text-gray-600">Biggest Win:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_win`])}</span></p><p><strong class="font-medium text-gray-600">Toughest Challenge:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p><p><strong class="font-medium text-gray-600">What's Next:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_next`])}</span></p></div></div>
+                        </div>
+                    </div>`;
+        };
+        
+        DOMElements.headerTitle.textContent = formData.planName || 'Growth Plan Summary';
+        DOMElements.headerSubtitle.textContent = `A read-only summary for ${formData.bakeryLocation || 'the bakery'}.`;
 
-/* Dashboard Progress Circle */
-.progress-circle {
-    width: 44px; height: 44px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    background: conic-gradient(var(--gails-red) calc(var(--progress, 0) * 3.6deg), var(--gails-grey-light) 0deg);
-    transition: background 0.6s ease-out;
-}
-.progress-circle-inner {
-    width: 36px; height: 36px; border-radius: 50%; background: var(--gails-white);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.75rem; font-weight: 700; color: var(--gails-red);
-}
+        DOMElements.contentArea.innerHTML = `
+            <div class="space-y-8 summary-content">
+                <div class="content-card p-6"><h2 class="text-2xl font-bold font-poppins mb-4">Quarterly Vision & Sprints</h2><div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4"><div><h4 class="font-semibold text-sm text-gray-500">Manager</h4><p class="text-gray-800 font-medium">${e(formData.managerName)}</p></div><div><h4 class="font-semibold text-sm text-gray-500">Bakery</h4><p class="text-gray-800 font-medium">${e(formData.bakeryLocation)}</p></div><div><h4 class="font-semibold text-sm text-gray-500">Quarter</h4><p class="text-gray-800 font-medium">${e(formData.quarter)}</p></div></div><div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Theme</h4><p class="text-gray-800 whitespace-pre-wrap">${e(formData.quarterlyTheme)}</p></div><div><h3 class="text-lg font-bold border-b pb-2 mb-3">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm"><div><strong class="font-semibold text-gray-600 block">Month 1 Goal:</strong><p class="text-gray-800 mt-1 whitespace-pre-wrap">${e(formData.month1Goal)}</p></div><div><strong class="font-semibold text-gray-600 block">Month 2 Goal:</strong><p class="text-gray-800 mt-1 whitespace-pre-wrap">${e(formData.month2Goal)}</p></div><div><strong class="font-semibold text-gray-600 block">Month 3 Goal:</strong><p class="text-gray-800 mt-1 whitespace-pre-wrap">${e(formData.month3Goal)}</p></div></div></div></div>
+                ${renderMonthSummary(1)}
+                ${renderMonthSummary(2)}
+                ${renderMonthSummary(3)}
+                <div class="content-card p-6 mt-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);"><h2 class="text-2xl font-bold mb-4" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2><div class="space-y-4"><div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">Biggest Achievements</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_achievements)}</p></div><div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">Biggest Challenges & Learnings</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_challenges)}</p></div><div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">Performance vs Narrative</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_narrative)}</p></div><div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">Focus For Next Quarter</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_next_quarter)}</p></div></div></div>
+            </div>`;
+    };
 
-/* 4. Main App Layout & Sidebar
--------------------------------------------------- */
-.main-layout { display: grid; grid-template-columns: 280px 1fr; height: 100vh; grid-template-areas: "sidebar main"; }
-#sidebar { grid-area: sidebar; }
-main { grid-area: main; }
-.sidebar-nav a { 
-    display: flex; align-items: center; padding: 0.85rem 1rem; border-radius: 0.75rem; 
-    font-weight: 600; /* Bolder font */
-    color: var(--gails-text-secondary); 
-    transition: all 0.25s ease; border-left: 4px solid transparent; 
-    transform: perspective(1px) translateZ(0); /* Promotes to its own layer */
-}
-.sidebar-nav a:hover { 
-    background-color: var(--gails-grey-light); 
-    color: var(--gails-text-primary); 
-    transform: translateX(4px);
-}
-.sidebar-nav a.active { 
-    background-color: var(--gails-red-light); color: var(--gails-red); 
-    border-left-color: var(--gails-red); 
-}
-.sidebar-nav .nav-icon { margin-right: 0.85rem; font-size: 1.35rem; }
-.nav-icon-completed { display: none; margin-right: 0.85rem; font-size: 1.35rem; color: var(--gails-green); }
-.sidebar-nav a.completed .nav-icon { display: none; }
-.sidebar-nav a.completed .nav-icon-completed { display: inline-block; }
-.sidebar-nav a.completed { color: var(--gails-green); }
-.sidebar-nav a.completed:not(.active) { background-color: #F0FDF4; }
+    const loadSharedPlan = async () => {
+        const params = new URLSearchParams(window.location.search);
+        const shareId = params.get('id');
 
-/* 5. Core Components
--------------------------------------------------- */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: 0.75rem; /* More rounded */ font-weight: 600; transition: all 0.2s ease-in-out; padding: 0.75rem 1.5rem; /* More padding */ border: 1px solid transparent; cursor: pointer; white-space: nowrap; }
-.btn-primary { background-color: var(--gails-red); color: var(--gails-white); box-shadow: var(--shadow-sm); }
-.btn-primary:hover { background-color: var(--gails-red-dark); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.btn-secondary { background-color: var(--gails-white); color: var(--gails-text-primary); border-color: var(--gails-grey-mid); }
-.btn-secondary:hover { border-color: #4B5563; background-color: var(--gails-grey-light); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
-.btn:active { transform: scale(0.98) translateY(0); box-shadow: none; }
-.form-input { width: 100%; padding: 0.85rem 1rem; border-radius: 0.5rem; border: 1px solid var(--gails-grey-mid); background-color: var(--gails-white); transition: all 0.2s; font-size: 1rem; }
-.form-input:focus { outline: none; border-color: var(--gails-red); box-shadow: var(--shadow-focus); }
-.content-card { background-color: var(--gails-white); border-radius: 1.25rem; box-shadow: var(--shadow-sm); border: 1px solid #E5E7EB; padding: 2rem; /* Increased padding */ }
+        if (!shareId) {
+            DOMElements.headerTitle.textContent = 'Invalid Link';
+            DOMElements.headerSubtitle.textContent = 'This share link is missing its ID.';
+            return;
+        }
 
-/* Character Counter Styles */
-.textarea-wrapper { position: relative; }
-.char-counter {
-    position: absolute; bottom: 8px; right: 12px;
-    font-size: 0.8rem; font-weight: 500; color: var(--gails-text-secondary);
-    background-color: rgba(253, 253, 252, 0.8); /* Updated to new BG color */
-    backdrop-filter: blur(2px); padding: 2px 8px; border-radius: 6px;
-    opacity: 0; transition: opacity 0.2s ease-in-out; pointer-events: none;
-}
-.textarea-wrapper textarea:focus + .char-counter { opacity: 1; }
+        try {
+            // 1. Get the pointer document from the 'sharedPlans' collection
+            const pointerRef = db.collection('sharedPlans').doc(shareId);
+            const pointerDoc = await pointerRef.get();
 
+            if (!pointerDoc.exists) {
+                throw new Error('This share link is invalid or has been deleted.');
+            }
 
-/* 6. Interactive Elements & Enhancements
--------------------------------------------------- */
-/* Enhanced Stepper */
-.stepper-item {
-    padding: 0.5rem;
-    border-radius: 0.75rem;
-    transition: background-color 0.2s ease;
-}
-.stepper-item .step-circle { position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background-color: var(--gails-grey-mid); color: var(--gails-white); }
-.stepper-item.active .step-circle { background-color: var(--gails-red); transform: scale(1.1); }
-.stepper-item.completed .step-circle { background-color: var(--gails-green); }
+            const { originalUserId, originalPlanId } = pointerDoc.data();
 
-.stepper-item .step-line { background-color: var(--gails-grey-mid); transition: background-color 0.3s; }
-.stepper-item.completed .step-line { background-color: var(--gails-green); }
-.stepper-item .step-label { transition: color 0.3s, font-weight 0.3s; }
-.stepper-item.active .step-label { color: var(--gails-red); font-weight: 600; }
+            // 2. Use the pointer to get the actual plan document
+            const planRef = db.collection('users').doc(originalUserId).collection('plans').doc(originalPlanId);
+            const planDoc = await planRef.get();
 
-.progress-bar-container { width: 100%; height: 10px; background-color: var(--gails-grey-light); border-radius: 5px; overflow: hidden; }
-.progress-bar-fill { width: 0%; height: 100%; background-color: var(--gails-red); border-radius: 5px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+            if (!planDoc.exists) {
+                throw new Error('The original plan could not be found.');
+            }
+            
+            // 3. Render the summary
+            renderSummary(planDoc.data());
 
-.status-button { padding: 0.375rem 0.85rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; line-height: 1; border: 1px solid var(--gails-grey-mid); background-color: var(--gails-white); color: #374151; cursor: pointer; transition: all 0.2s ease-in-out; }
-.status-button:hover { background-color: var(--gails-grey-light); transform: translateY(-1px); }
-.status-button[data-status="on-track"].selected { background-color: var(--status-on-track-bg); color: var(--status-on-track-text); border-color: var(--status-on-track-border); }
-.status-button[data-status="issues"].selected { background-color: var(--status-issues-bg); color: var(--status-issues-text); border-color: var(--status-issues-border); }
-.status-button[data-status="off-track"].selected { background-color: var(--status-off-track-bg); color: var(--status-off-track-text); border-color: var(--status-off-track-border); }
+        } catch (error) {
+            console.error("Error loading shared plan:", error);
+            DOMElements.headerTitle.textContent = 'Error';
+            DOMElements.headerSubtitle.textContent = error.message;
+        }
+    };
 
-/* Enhanced Save Indicator */
-#save-indicator {
-    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    transform: translateY(10px);
-}
-#save-indicator.visible {
-    opacity: 1 !important;
-    transform: translateY(0);
+    loadSharedPlan();
 }
 
-/* 7. Custom Modal Styles
--------------------------------------------------- */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(5px); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.modal-box { background-color: var(--gails-white); border-radius: 1.25rem; box-shadow: var(--shadow-lg); width: 100%; max-width: 500px; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.75rem; border-bottom: 1px solid #E5E7EB; }
-.modal-content { padding: 1.75rem; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1.25rem 1.75rem; background-color: var(--gails-bg); border-bottom-left-radius: 1.25rem; border-bottom-right-radius: 1.25rem; }
-.modal-close-btn { background: none; border: none; font-size: 1.75rem; line-height: 1; cursor: pointer; color: var(--gails-text-secondary); }
-.modal-close-btn:hover { color: var(--gails-text-primary); }
-
-/* 8. Print-Specific Styles
--------------------------------------------------- */
-@media print {
-    body { background-color: var(--gails-white); }
-    .no-print { display: none !important; }
-    .printable-area { padding: 0 !important; }
-    .main-layout, #dashboard-view { display: block; height: auto !important; }
-    main { overflow: visible !important; height: auto !important; }
-    header, .dashboard-header { display: none; }
-    .content-card { box-shadow: none; border: 1px solid var(--gails-grey-mid); margin-top: 1.5rem; page-break-inside: avoid; }
-    .summary-content { font-size: 10pt; }
-    h1, h2, h3, h4, h5 { page-break-after: avoid; }
-}
-
-/* 9. Auth Enhancements */
-.forgot-password-link { display: block; font-size: 0.875rem; text-align: right; color: var(--gails-text-secondary); text-decoration: none; margin-top: -0.25rem; margin-bottom: 1rem; transition: color 0.2s ease-in-out; }
-.forgot-password-link:hover { color: var(--gails-red); text-decoration: underline; }
-.auth-success { background-color: #F0FDF4; color: #065F46; border: 1px solid #A7F3D0; padding: 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; margin-bottom: 1rem; }
-
-/* 10. Input Validation Enhancements */
-.form-input.input-error { border-color: var(--gails-red); box-shadow: var(--shadow-focus); }
-.shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; transform: translate3d(0, 0, 0); backface-visibility: hidden; perspective: 1000px; }
-@keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
-
-/* 11. Modal Enhancements */
-.modal-error-container { min-height: 24px; margin-top: 0.5rem; display: flex; align-items: center; }
-
-/* 12. Mobile Responsive Styles */
-@media (max-width: 1024px) {
-    .main-layout { display: block; }
-    #sidebar {
-        position: fixed; top: 0; left: 0; bottom: 0;
-        transform: translateX(-100%);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 1001; width: 280px; box-shadow: var(--shadow-lg);
-    }
-    .sidebar-open #sidebar { transform: translateX(0); }
-    .sidebar-overlay {
-        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background-color: rgba(17, 24, 39, 0.6); z-index: 1000;
-        opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none;
-    }
-    .sidebar-open .sidebar-overlay { opacity: 1; pointer-events: auto; }
-    main { width: 100%; height: 100%; }
-    .main-header .mobile-menu-btn { display: inline-flex; }
-    .printable-area { padding: 1.5rem !important; }
-    .main-header h1 { font-size: 1.75rem; }
-    .main-header #header-subtitle { font-size: 1rem; }
-    .dashboard-grid { grid-template-columns: 1fr; }
-    .content-card .grid-cols-3, .content-card .grid-cols-2 { grid-template-columns: 1fr; }
-    .stepper-item { align-items: flex-start; }
-}
-
-/* 13. Cookie Consent Banner */
-.cookie-consent-banner { position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--gails-white); padding: 1.25rem; box-shadow: var(--shadow-lg); z-index: 1002; border-top: 1px solid #E5E7EB; }
-.cookie-consent-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-.cookie-consent-link { text-decoration: underline; color: var(--gails-red); }
-.cookie-consent-buttons { display: flex; gap: 0.75rem; }
-
-/* 14. Dashboard Layout Fix */
-#dashboard-view { display: flex; flex-direction: column; min-height: 100vh; }
-#dashboard-content { flex-grow: 1; }
-
-/* 15. Subtle Button Style */
-.btn-subtle {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    background-color: transparent; border: 1px solid transparent;
-    padding: 0.5rem 1rem; color: var(--gails-text-secondary);
-    font-weight: 500; cursor: pointer; border-radius: 0.5rem;
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-}
-.btn-subtle:hover { background-color: var(--gails-grey-light); color: var(--gails-text-primary); }
-
-/* 16. Pillar Button Styles (Add to end of file)
--------------------------------------------------- */
-.pillar-button {
-    background-color: var(--gails-white);
-    color: var(--gails-text-secondary);
-    border: 1px solid var(--gails-grey-mid);
-    justify-content: center;
-    text-align: center;
-    font-size: 0.9rem;
-    padding: 0.75rem 1rem;
-    font-weight: 600;
-}
-
-.pillar-button:hover {
-    border-color: var(--gails-text-primary);
-    color: var(--gails-text-primary);
-    background-color: var(--gails-grey-light);
-}
-
-.pillar-button.selected {
-    background-color: var(--gails-red);
-    color: var(--gails-white);
-    border-color: var(--gails-red);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.pillar-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background-color: var(--gails-red-light);
-    color: var(--gails-red);
-}
-
-/* 17. Icon & SVG Adjustments
--------------------------------------------------- */
-.pillar-icon-svg {
-    vertical-align: -0.125em; /* Aligns custom SVG with text baseline like Bootstrap Icons */
-}
+document.addEventListener('DOMContentLoaded', () => {
+    initializeFirebase();
+});
