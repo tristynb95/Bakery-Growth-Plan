@@ -121,8 +121,14 @@ function runViewScript(app) {
 
         } catch (error) {
             console.error("Error loading shared plan:", error);
-            DOMElements.headerTitle.textContent = 'Error';
-            DOMElements.headerSubtitle.textContent = error.message;
+            // This is the updated, user-friendly error handling
+            DOMElements.headerTitle.textContent = 'Plan Not Found';
+            
+            if (error.code === 'permission-denied') {
+                DOMElements.headerSubtitle.textContent = 'This growth plan may have been deleted or is no longer being shared.';
+            } else {
+                DOMElements.headerSubtitle.textContent = error.message;
+            }
         }
     };
 
