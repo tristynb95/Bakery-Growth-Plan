@@ -353,6 +353,21 @@ main { grid-area: main; }
     font-size: 0.9rem;
     padding: 0.75rem 1rem;
     font-weight: 600;
+    transition: all 0.2s ease-in-out;
+}
+
+.pillar-button:hover {
+    border-color: var(--gails-text-primary);
+    color: var(--gails-text-primary);
+    background-color: var(--gails-grey-light);
+}
+
+.pillar-button.selected {
+    background-color: var(--gails-red);
+    color: var(--gails-white);
+    border-color: var(--gails-red);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .pillar-badge {
