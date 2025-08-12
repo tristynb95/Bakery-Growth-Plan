@@ -75,9 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderSummary(formData) {
         DOMElements.headerTitle.textContent = formData.planName || 'Bakery Growth Plan';
         const e = (text) => (text || '...').replace(/\n/g, '<br>');
-        
-        // Define the new, improved croissant icon for use in the template
-        const newCroissantIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi pillar-icon-svg inline-block" viewBox="0 0 16 16"><path d="M12.854 5.242a3.5 3.5 0 0 0-4.04-3.955 3.5 3.5 0 0 0-4.575 2.518 1.5 1.5 0 0 0-1.489 1.489 1.5 1.5 0 0 0 1.291 1.472c.038.01.077.018.115.024a1.5 1.5 0 0 1 1.233.953c.273.62.915 1.047 1.63 1.047.715 0 1.357-.428 1.63-1.047a1.5 1.5 0 0 1 1.233-.953c.038-.006.077-.014.115-.024a1.5 1.5 0 0 0 1.291-1.472 3.5 3.5 0 0 0 .546-1.044zM3.463 3.513a2.5 2.5 0 0 1 3.265-1.783 2.5 2.5 0 0 1 3.217 1.434 2.5 2.5 0 0 1-1.12 3.126 1.5 1.5 0 0 0-.756 1.082 2.49 2.49 0 0 1-1.63 1.047c-.715 0-1.357-.428-1.63-1.047a1.5 1.5 0 0 0-.756-1.082 2.5 2.5 0 0 1-1.12-3.126 2.502 2.502 0 0 1 .459-.652z"/></svg>`;
 
         const renderMonthSummary = (monthNum) => {
             let weeklyCheckinHTML = '';
@@ -101,14 +98,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div><h3 class="font-bold border-b pb-2 mb-2">Protect the Core Behaviours</h3><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
                         <div><strong class="text-gray-600 block"><i class="bi bi-people-fill"></i> People</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_people`])}</span></div>
-                        <div><strong class="text-gray-600 block">${newCroissantIconSVG} Product</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_product`])}</span></div>
+                        <div><strong class="text-gray-600 block"><i class="bi bi-stack"></i> Product</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_product`])}</span></div>
                         <div><strong class="text-gray-600 block"><i class="bi bi-heart-fill"></i> Customer</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_customer`])}</span></div>
                         <div><strong class="text-gray-600 block"><i class="bi bi-shop"></i> Place</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_place`])}</span></div>
                     </div></div>
                     <div><h3 class="font-bold border-b pb-2 mb-2">Weekly Momentum Check</h3>${weeklyCheckinHTML}</div>
                     <div><h3 class="font-bold border-b pb-2 mb-2">End of Month Review</h3><div class="text-sm mt-2 space-y-2">
                         <p><strong class="font-medium text-gray-600">Biggest Win 脂:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_win`])}</span></p>
-                        <p><strong class="font-medium text-gray-600">Toughest Challenge ､</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p>
+                        <p><strong class="font-medium text-gray-600">Toughest Challenge ､:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p>
                         <p><strong class="font-medium text-gray-600">What's Next 噫:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_next`])}</span></p>
                     </div></div>
                 </div></div>`;
@@ -137,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h2 class="text-2xl font-bold mb-4" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2>
                     <div class="space-y-4">
                         <div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">醇 Biggest Achievements</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_achievements)}</p></div>
-                        <div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">ｧBiggest Challenges & Learnings</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_challenges)}</p></div>
+                        <div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">ｧ Biggest Challenges & Learnings</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_challenges)}</p></div>
                         <div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">識 Performance vs Narrative</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_narrative)}</p></div>
                         <div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">噫 Focus For Next Quarter</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_next_quarter)}</p></div>
                     </div>
