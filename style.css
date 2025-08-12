@@ -379,3 +379,9 @@ main { grid-area: main; }
     color: var(--gails-red);
 }
 
+/* 17. Icon & SVG Adjustments
+-------------------------------------------------- */
+.pillar-icon-svg {
+    vertical-align: -0.125em; /* Aligns custom SVG with text baseline like Bootstrap Icons */
+}
+
