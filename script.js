@@ -206,8 +206,8 @@ const DOMElements = {
         },
         month: (monthNum) => `<div class="grid grid-cols-1 lg:grid-cols-4 gap-8"><div class="lg:col-span-1 no-print"><nav id="month-${monthNum}-stepper" class="space-y-4"></nav></div><div class="lg:col-span-3"><div id="step-content-container"></div><div class="mt-8 flex justify-between no-print"><button id="prev-step-btn" class="btn btn-secondary">Previous</button><button id="next-step-btn" class="btn btn-primary">Next Step</button></div></div></div>`,
         step: {
-            // ...
-'m1s1': {
+
+            'm1s1': {
     title: "Must-Win Battle",
     requiredFields: ['m1s1_battle'],
     html: `<div class="content-card p-8">
@@ -219,15 +219,13 @@ const DOMElements = {
                    <label class="font-semibold block mb-3 text-gray-700">Monthly Focus Pillar:</label>
                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m1s1">
                        <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
-                       <button class="btn pillar-button" data-pillar="product"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi pillar-icon-svg" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.284.816a3.5 3.5 0 0 0-4.248 1.153 3.5 3.5 0 0 0-4.062-1.14A3.5 3.5 0 0 0 2.75 3.532l-.22.219a1.5 1.5 0 0 0 .043 2.164 1.5 1.5 0 0 0 2.121.083l.262-.218a1.5 1.5 0 0 1 1.949-.134l.32.203a1.5 1.5 0 0 0 1.82-.164l.117-.091a1.5 1.5 0 0 1 1.805-.153l.366.218a1.5 1.5 0 0 0 1.858-.164l.09-.074A3.5 3.5 0 0 0 15.5 3.5a3.5 3.5 0 0 0-2.216-2.684zM1.902 6.543a2.5 2.5 0 0 1-.072-3.596 2.5 2.5 0 0 1 3.536-.072l.244.204a2.5 2.5 0 0 0 3.25.223l.32-.203a2.5 2.5 0 0 1 3.033.272l.117.091a2.5 2.5 0 0 0 3.01.256l.366.218a2.5 2.5 0 0 1 3.096.273c.922.922.922 2.41 0 3.332l-.301.249a1.5 1.5 0 0 1-1.93.125l-.39-.234a1.5 1.5 0 0 0-1.815.195l-.262.218a1.5 1.5 0 0 1-2.028.062l-.295-.236a1.5 1.5 0 0 0-1.92-.09l-.42.278a1.5 1.5 0 0 1-1.85-.05l-.262-.218a1.5 1.5 0 0 0-1.949.134l-1.127.902a2.5 2.5 0 0 1-3.332.001z"/></svg> Product</button>
+                       <button class="btn pillar-button" data-pillar="product"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi pillar-icon-svg" viewBox="0 0 16 16"><path d="M6.716 1.418a3.177 3.177 0 0 0-4.053 1.1 3.177 3.177 0 0 0 .52 4.416c.376.324.873.468 1.353.468.21 0 .42-.034.627-.104.42-.143.788-.412 1.05-.765l.024-.033a.177.177 0 0 1 .29.022l.142.36a.177.177 0 0 0 .328.037l.142-.257a.177.177 0 0 1 .302-.02l.159.276a.177.177 0 0 0 .324.025l.169-.335a.177.177 0 0 1 .311.002l.163.385a.177.177 0 0 0 .332.008l.17-.428a2.91 2.91 0 0 0 1.054-.373 3.177 3.177 0 0 0 1.52-5.289 3.177 3.177 0 0 0-5.113-1.218.177.177 0 0 1-.301.034l-.13-.24a.177.177 0 0 0-.318-.013l-.15.32a.177.177 0 0 1-.305.01l-.16-.384a.177.177 0 0 0-.323-.004l-.16.42a.177.177 0 0 1-.303.001l-.148-.423a.177.177 0 0 0-.327-.002L6.716 1.418zm3.21 1.76a1.91 1.91 0 0 1 3.113.722 1.91 1.91 0 0 1-.914 3.178 1.65 1.65 0 0 1-1.7.062l-.17-.427a.177.177 0 0 0-.332-.008l-.163-.385a.177.177 0 0 1-.31-.002l-.17.335a.177.177 0 0 0-.323-.025l-.16-.276a.177.177 0 0 1-.301.02L9.2 7.02a.177.177 0 0 0-.328-.037l-.142-.36a.177.177 0 0 1-.29-.022l-.024.033c.482.69 1.275 1.077 2.14 1.077.29 0 .578-.052.856-.157.292-.108.56-.272.793-.49l.044-.036c.24-.204.444-.457.604-.748.22-.4.322-.84.298-1.282a1.65 1.65 0 0 0-.825-1.323 1.65 1.65 0 0 0-1.83-.03l-1.01 2.522a.177.177 0 0 1-.334.007L8.26 4.31a.177.177 0 0 0-.323.004l.16.384a.177.177 0 0 1 .305-.01l.15-.32a.177.177 0 0 0 .318.013l.13.24a.177.177 0 0 1 .3.033 1.91 1.91 0 0 1 1.028-.622zM2.87 3.618a1.91 1.91 0 0 1 2.434-.658 1.91 1.91 0 0 1 1.43 2.58 1.65 1.65 0 0 1-1.424.966c-.452 0-.88-.17-1.2-.472l-.024.033a.177.177 0 0 1-.29-.022l-.142-.36a.177.177 0 0 0-.328-.037L3.61 6.38a.177.177 0 0 1-.302.02l-.159-.276a.177.177 0 0 0-.324-.025l-.169.335a.177.177 0 0 1-.311-.002L2.01 4.05a.177.177 0 0 0-.332-.008L1.51 4.47a1.65 1.65 0 0 1-1.42-.895 1.65 1.65 0 0 1 .53-2.033l1.25-1.024zm-1.29 2.22a.38.38 0 0 0 .07-.52l-1.25 1.025a.38.38 0 0 0-.12.46l.169.423a.177.177 0 0 1 .332.008l.334-2.394z"/></svg> Product</button>
                        <button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button>
                        <button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button>
                    </div>
                </div>
                </div>`
 },
-//...
-//...
             'm1s2':{title:"Levers & Power-Up", requiredFields:['m1s2_levers', 'm1s2_powerup_q', 'm1s2_powerup_a'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3><p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="flex flex-col"><label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label><textarea id="m1s2_levers" class="form-input flex-grow" rows="4" placeholder="1. Review ordering report with daily.
 2. Coach the team on the 'why' behind the production matrix." maxlength="300"></textarea></div><div class="space-y-4"><div><label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label><textarea id="m1s2_powerup_q" class="form-input" rows="2" placeholder="e.g., 'What is one thing that slows us down before 8am?'" maxlength="150"></textarea></div><div><label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label><textarea id="m1s2_powerup_a" class="form-input" rows="2" placeholder="e.g., Pre-portioning key ingredients the night before." maxlength="150"></textarea></div></div></div></div>`},
             'm1s3':{title:"People Growth", requiredFields:['m1s3_people'], html:`<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 3: People Growth</h3><p class="text-gray-600 mb-4">Who will I invest in this month to help us win our battle, and how?</p><textarea id="m1s3_people" class="form-input" rows="4" placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" maxlength="300"></textarea></div>`},
@@ -1271,6 +1269,7 @@ const pillarIcons = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
