@@ -1113,7 +1113,19 @@ const DOMElements = {
 
         auth.createUserWithEmailAndPassword(email, password)
             .catch(error => {
-                errorContainer.textContent = error.message;
+                let friendlyMessage = 'An unexpected error occurred. Please try again.';
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        friendlyMessage = 'An account with this email address already exists. Please try logging in.';
+                        break;
+                    case 'auth/weak-password':
+                        friendlyMessage = 'The password is too weak. Please choose a stronger password.';
+                        break;
+                    case 'auth/invalid-email':
+                        friendlyMessage = 'The email address is not valid. Please enter a valid email.';
+                        break;
+                }
+                errorContainer.textContent = friendlyMessage;
                 errorContainer.style.display = 'block';
             });
     });
