@@ -8,8 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="/favicon.ico" sizes="any">
@@ -104,7 +105,7 @@
     <div id="dashboard-view" class="hidden">
         <header class="dashboard-header">
             <img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/92/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo" class="h-9">
-            <button id="dashboard-logout-btn" class="btn btn-secondary"><i class="bi bi-box-arrow-right"></i> Logout</button>
+            <button id="dashboard-logout-btn" class="btn btn-secondary"><i data-feather="log-out"></i> Logout</button>
         </header>
         <main id="dashboard-content" class="p-6 sm:p-8 lg:p-12">
             </main>
@@ -121,15 +122,15 @@
             </div>
             
             <div class="flex-grow">
-                <button id="back-to-dashboard-btn" class="btn btn-secondary w-full mb-6"><i class="bi bi-grid-1x2-fill"></i><span>Back to Dashboard</span></button>
+                <button id="back-to-dashboard-btn" class="btn btn-secondary w-full mb-6"><i data-feather="grid" class="nav-icon"></i><span>Back to Dashboard</span></button>
 
                 <h3 class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Your Plan</h3>
                 <nav class="space-y-1 sidebar-nav" id="main-nav">
-                    <a href="#" id="nav-vision" class="active"><i class="bi bi-binoculars-fill nav-icon"></i><i class="bi bi-check-circle-fill nav-icon-completed"></i><span class="nav-text">Vision & Sprints</span></a>
-                    <a href="#" id="nav-month-1"><i class="bi bi-1-circle nav-icon"></i><i class="bi bi-check-circle-fill nav-icon-completed"></i><span class="nav-text">Month 1 Sprint</span></a>
-                    <a href="#" id="nav-month-2"><i class="bi bi-2-circle nav-icon"></i><i class="bi bi-check-circle-fill nav-icon-completed"></i><span class="nav-text">Month 2 Sprint</span></a>
-                    <a href="#" id="nav-month-3"><i class="bi bi-3-circle nav-icon"></i><i class="bi bi-check-circle-fill nav-icon-completed"></i><span class="nav-text">Month 3 Sprint</span></a>
-                    <a href="#" id="nav-summary"><i class="bi bi-file-earmark-text-fill nav-icon"></i><span class="nav-text">Full Summary</span></a>
+                    <a href="#" id="nav-vision" class="active"><i data-feather="eye" class="nav-icon"></i><i data-feather="check-circle" class="nav-icon-completed"></i><span class="nav-text">Vision & Sprints</span></a>
+                    <a href="#" id="nav-month-1"><i data-feather="flag" class="nav-icon"></i><i data-feather="check-circle" class="nav-icon-completed"></i><span class="nav-text">Month 1 Sprint</span></a>
+                    <a href="#" id="nav-month-2"><i data-feather="flag" class="nav-icon"></i><i data-feather="check-circle" class="nav-icon-completed"></i><span class="nav-text">Month 2 Sprint</span></a>
+                    <a href="#" id="nav-month-3"><i data-feather="flag" class="nav-icon"></i><i data-feather="check-circle" class="nav-icon-completed"></i><span class="nav-text">Month 3 Sprint</span></a>
+                    <a href="#" id="nav-summary"><i data-feather="file-text" class="nav-icon"></i><span class="nav-text">Full Summary</span></a>
                 </nav>
             </div>
             
@@ -149,7 +150,7 @@
                         <p id="sidebar-name" class="font-semibold text-sm truncate">Your Name</p>
                         <p id="sidebar-bakery" class="text-xs text-gray-500">Your Bakery</p>
                     </div>
-                     <button id="logout-btn" title="Logout" class="btn btn-secondary !p-2"><i class="bi bi-box-arrow-right"></i></button>
+                     <button id="logout-btn" title="Logout" class="btn btn-secondary !p-2"><i data-feather="log-out"></i></button>
                 </div>
             </div>
         </aside>
@@ -164,13 +165,13 @@
                     <div class="flex items-center gap-4 no-print">
                         <div id="desktop-header-buttons" class="hidden sm:flex items-center gap-2">
                              <div id="save-indicator" class="flex items-center gap-2 text-sm text-gray-500 transition-opacity duration-300 opacity-0">
-                                <i class="bi bi-check-circle-fill text-green-500"></i>
+                                <i data-feather="check-circle" class="text-green-500"></i>
                                 <span>Saved to Cloud</span>
                             </div>
-                            <button id="print-btn" class="btn btn-secondary hidden"><i class="bi bi-printer-fill"></i><span>Print</span></button>
-                            <button id="share-btn" class="btn btn-secondary hidden"><i class="bi bi-share-fill"></i><span>Share</span></button>
+                            <button id="print-btn" class="btn btn-secondary hidden"><i data-feather="printer"></i><span>Print</span></button>
+                            <button id="share-btn" class="btn btn-secondary hidden"><i data-feather="share-2"></i><span>Share</span></button>
                         </div>
-                        <button id="mobile-menu-btn" class="btn btn-secondary !p-2 sm:hidden"><i class="bi bi-list text-xl"></i></button>
+                        <button id="mobile-menu-btn" class="btn btn-secondary !p-2 sm:hidden"><i data-feather="menu" class="text-xl"></i></button>
                     </div>
                 </header>
                 <div id="content-area">
@@ -214,6 +215,9 @@
     
     <script src="script.js"></script>
 
+    <script>
+      feather.replace();
+    </script>
 </body>
 
 </html>
