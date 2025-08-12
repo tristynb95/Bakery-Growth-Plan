@@ -7,8 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
@@ -18,7 +20,7 @@
         <header class="py-8 text-center relative">
             <div class="absolute top-20 left-0">
                 <button id="back-btn" class="btn-subtle">
-                    <i class="bi bi-arrow-left"></i>
+                    <i data-feather="arrow-left"></i>
                     <span>Go Back</span>
                 </button>
             </div>
@@ -60,7 +62,7 @@
                  <ul>
                     <li><strong>Google Firebase:</strong> I use Firebase for backend services, including secure user authentication and database hosting. Your data is stored on Firebase's secure servers in transit and at rest.</li>
                     <li><strong>Netlify:</strong> The application is hosted on Netlify, which also provides the serverless functions used for secure API key handling.</li>
-                    <li><strong>Google Fonts & Bootstrap Icons:</strong> These services are used to provide the fonts and icons you see in the application. They may receive your IP address in the course of providing their services.</li>
+                    <li><strong>Google Fonts & Feather Icons:</strong> These services are used to provide the fonts and icons you see in the application. They may receive your IP address in the course of providing their services.</li>
                 </ul>
                 <p>I will not sell, rent, or share your personal information with any other third parties without your explicit consent, unless required by law.</p>
 
@@ -109,6 +111,7 @@
         document.getElementById('back-btn').addEventListener('click', () => {
             history.back();
         });
+        feather.replace();
     </script>
 </body>
 </html>
