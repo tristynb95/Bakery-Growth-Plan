@@ -65,7 +65,11 @@ function runViewScript(app) {
                                 <div><strong class="text-gray-600 block"><i class="bi bi-shop"></i> Place</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_place`])}</span></div>
                             </div></div>
                             <div><h3 class="font-bold border-b pb-2 mb-2">Weekly Momentum Check</h3>${weeklyCheckinHTML}</div>
-                            <div><h3 class="font-bold border-b pb-2 mb-2">End of Month Review</h3><div class="text-sm mt-2 space-y-2"><p><strong class="font-medium text-gray-600">Biggest Win:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_win`])}</span></p><p><strong class="font-medium text-gray-600">Toughest Challenge:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p><p><strong class="font-medium text-gray-600">What's Next:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_next`])}</span></p></div></div>
+                            <div><h3 class="font-bold border-b pb-2 mb-2">End of Month Review</h3><div class="text-sm mt-2 space-y-2">
+                                <p><strong class="text-gray-600">Biggest Win:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_win`])}</span></p>
+                                <p><strong class="text-gray-600">Toughest Challenge:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p>
+                                <p><strong class="text-gray-600">What's Next:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_next`])}</span></p>
+                            </div></div>
                         </div>
                     </div>`;
         };
