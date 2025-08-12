@@ -188,7 +188,12 @@ const DOMElements = {
         textarea.addEventListener('input', updateCounter);
     });
 }
+   
     // --- HTML TEMPLATES ---
+
+    // Define the custom croissant SVG icon for reusability
+    const croissantIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi pillar-icon-svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M13.284.816a3.5 3.5 0 0 0-4.248 1.153 3.5 3.5 0 0 0-4.062-1.14A3.5 3.5 0 0 0 2.75 3.532l-.22.219a1.5 1.5 0 0 0 .043 2.164 1.5 1.5 0 0 0 2.121.083l.262-.218a1.5 1.5 0 0 1 1.949-.134l.32.203a1.5 1.5 0 0 0 1.82-.164l.117-.091a1.5 1.5 0 0 1 1.805-.153l.366.218a1.5 1.5 0 0 0 1.858-.164l.09-.074A3.5 3.5 0 0 0 15.5 3.5a3.5 3.5 0 0 0-2.216-2.684zM1.902 6.543a2.5 2.5 0 0 1-.072-3.596 2.5 2.5 0 0 1 3.536-.072l.244.204a2.5 2.5 0 0 0 3.25.223l.32-.203a2.5 2.5 0 0 1 3.033.272l.117.091a2.5 2.5 0 0 0 3.01.256l.366.218a2.5 2.5 0 0 1 3.096.273c.922.922.922 2.41 0 3.332l-.301.249a1.5 1.5 0 0 1-1.93.125l-.39-.234a1.5 1.5 0 0 0-1.815.195l-.262.218a1.5 1.5 0 0 1-2.028.062l-.295-.236a1.5 1.5 0 0 0-1.92-.09l-.42.278a1.5 1.5 0 0 1-1.85-.05l-.262-.218a1.5 1.5 0 0 0-1.949.134l-1.127.902a2.5 2.5 0 0 1-3.332.001z"/></svg>`;
+
     const templates = {
         vision: {
             html: `<div class="space-y-8">
@@ -212,7 +217,7 @@ const DOMElements = {
                                <label class="font-semibold block mb-3 text-gray-700">Monthly Focus Pillar:</label>
                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m1s1">
                                    <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
-                                   <button class="btn pillar-button" data-pillar="product"><i class="bi bi-cake2-fill"></i> Product</button>
+                                   <button class="btn pillar-button" data-pillar="product">${croissantIconSVG} Product</button>
                                    <button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button>
                                    <button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button>
                                </div>
@@ -235,7 +240,7 @@ const DOMElements = {
                 requiredFields: ['m1s4_people', 'm1s4_product', 'm1s4_customer', 'm1s4_place'],
                 html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 4: Protect the Core</h3><p class="text-gray-600 mb-6">One key behaviour you will protect for each pillar to ensure standards don't slip.</p><div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     <div><label for="m1s4_people" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-people-fill"></i> PEOPLE</label><textarea id="m1s4_people" class="form-input" rows="2" placeholder="e.g., Meaningful 1-2-1s with my two keyholders." maxlength="150"></textarea></div>
-                    <div><label for="m1s4_product" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-cake2-fill"></i> PRODUCT</label><textarea id="m1s4_product" class="form-input" rows="2" placeholder="e.g., Daily quality checks of the first bake." maxlength="150"></textarea></div>
+                    <div><label for="m1s4_product" class="font-semibold block mb-2 flex items-center gap-2">${croissantIconSVG} PRODUCT</label><textarea id="m1s4_product" class="form-input" rows="2" placeholder="e.g., Daily quality checks of the first bake." maxlength="150"></textarea></div>
                     <div><label for="m1s4_customer" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-heart-fill"></i> CUSTOMER</label><textarea id="m1s4_customer" class="form-input" rows="2" placeholder="e.g., Action all customer feedback within 24 hours." maxlength="150"></textarea></div>
                     <div><label for="m1s4_place" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-shop"></i> PLACE</label><textarea id="m1s4_place" class="form-input" rows="2" placeholder="e.g., Complete a bakery travel path twice a day." maxlength="150"></textarea></div>
                 </div></div>`
@@ -274,7 +279,7 @@ const DOMElements = {
             }
         }
     };
-
+    
     // --- AUTHENTICATION & APP FLOW ---
     auth.onAuthStateChanged(async (user) => {
         if (user) {
@@ -1278,6 +1283,7 @@ const pillarIcons = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
