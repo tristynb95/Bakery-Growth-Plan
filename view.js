@@ -66,9 +66,9 @@ function runViewScript(app) {
                             </div></div>
                             <div><h3 class="font-bold border-b pb-2 mb-2">Weekly Momentum Check</h3>${weeklyCheckinHTML}</div>
                             <div><h3 class="font-bold border-b pb-2 mb-2">End of Month Review</h3><div class="text-sm mt-2 space-y-2">
-                                <p><strong class="text-gray-600">Biggest Win:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_win`])}</span></p>
-                                <p><strong class="text-gray-600">Toughest Challenge:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p>
-                                <p><strong class="text-gray-600">What's Next:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_next`])}</span></p>
+                                <p><strong class="text-gray-600 flex items-center gap-2"><i class="bi bi-trophy-fill"></i> Biggest Win:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_win`])}</span></p>
+                                <p><strong class="text-gray-600 flex items-center gap-2"><i class="bi bi-lightbulb-fill"></i> Toughest Challenge:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p>
+                                <p><strong class="text-gray-600 flex items-center gap-2"><i class="bi bi-rocket-takeoff-fill"></i> What's Next:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_next`])}</span></p>
                             </div></div>
                         </div>
                     </div>`;
@@ -83,7 +83,12 @@ function runViewScript(app) {
                 ${renderMonthSummary(1)}
                 ${renderMonthSummary(2)}
                 ${renderMonthSummary(3)}
-                <div class="content-card p-6 mt-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);"><h2 class="text-2xl font-bold mb-4" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2><div class="space-y-4"><div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">Biggest Achievements</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_achievements)}</p></div><div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">Biggest Challenges & Learnings</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_challenges)}</p></div><div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">Performance vs Narrative</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_narrative)}</p></div><div><h3 class="font-bold text-lg" style="color: var(--review-blue-text);">Focus For Next Quarter</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_next_quarter)}</p></div></div></div>
+                <div class="content-card p-6 mt-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);"><h2 class="text-2xl font-bold mb-4" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2><div class="space-y-4">
+                    <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Biggest Achievements</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_achievements)}</p></div>
+                    <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_challenges)}</p></div>
+                    <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Narrative</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_narrative)}</p></div>
+                    <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Focus For Next Quarter</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_next_quarter)}</p></div>
+                </div></div>
             </div>`;
     };
 
