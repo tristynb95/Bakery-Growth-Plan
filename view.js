@@ -28,7 +28,7 @@ function runViewScript(app) {
 
     const renderSummary = (formData) => {
         const e = (text) => (text || '...').replace(/\n/g, '<br>');
-    
+        
         const renderMonthSummary = (monthNum) => {
             let weeklyCheckinHTML = '';
             for (let w = 1; w <= 4; w++) {
@@ -40,30 +40,18 @@ function runViewScript(app) {
             }
     
             const pillar = formData[`m${monthNum}s1_pillar`];
-            const pillarIcons = { 
-                'people': '<i class="bi bi-people-fill"></i>', 
-                'product': '<i class="bi bi-cup-hot-fill"></i>', 
-                'customer': '<i class="bi bi-heart-fill"></i>', 
-                'place': '<i class="bi bi-shop"></i>'
-            };
+            const pillarIcons = { 'people': '<i class="bi bi-people-fill"></i>', 'product': '<i class="bi bi-cup-hot-fill"></i>', 'customer': '<i class="bi bi-heart-fill"></i>', 'place': '<i class="bi bi-shop"></i>' };
             let pillarHTML = '';
             if (pillar) {
                 const pillarIcon = pillarIcons[pillar] || '';
                 const pillarText = pillar.charAt(0).toUpperCase() + pillar.slice(1);
-                pillarHTML = `
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="font-semibold text-sm text-gray-500">Focus Pillar:</span>
-                        <span class="pillar-badge">${pillarIcon} ${pillarText}</span>
-                    </div>`;
+                pillarHTML = `<div class="flex items-center gap-2 mb-3"><span class="font-semibold text-sm text-gray-500">Focus Pillar:</span><span class="pillar-badge">${pillarIcon} ${pillarText}</span></div>`;
             }
     
-            return `<div class="content-card monthly-sprint-card p-6 mt-8">
+            return `<div class="content-card p-6 mt-8">
                         <h2 class="text-2xl font-bold font-poppins mb-4">Month ${monthNum} Sprint</h2>
                         <div class="space-y-6">
-                            <div>
-                                <h3 class="font-bold border-b pb-2 mb-2 gails-red-text">Must-Win Battle</h3>
-                                ${pillarHTML} <p class="text-gray-700 whitespace-pre-wrap">${e(formData[`m${monthNum}s1_battle`])}</p>
-                            </div>
+                            <div><h3 class="font-bold border-b pb-2 mb-2 gails-red-text">Must-Win Battle</h3>${pillarHTML} <p class="text-gray-700 whitespace-pre-wrap">${e(formData[`m${monthNum}s1_battle`])}</p></div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                                 <div><h4 class="font-semibold text-gray-800">Key Levers</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s2_levers`])}</p></div>
                                 <div><h4 class="font-semibold text-gray-800">People Growth</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s3_people`])}</p></div>
@@ -78,9 +66,9 @@ function runViewScript(app) {
                             </div></div>
                             <div><h3 class="font-bold border-b pb-2 mb-2">Weekly Momentum Check</h3>${weeklyCheckinHTML}</div>
                             <div><h3 class="font-bold border-b pb-2 mb-2">End of Month Review</h3><div class="text-sm mt-2 space-y-2">
-                                <p><strong class="font-medium text-gray-600 flex items-center gap-2"><i class="bi bi-trophy-fill"></i> Biggest Win:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_win`])}</span></p>
-                                <p><strong class="font-medium text-gray-600 flex items-center gap-2"><i class="bi bi-lightbulb-fill"></i> Toughest Challenge:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p>
-                                <p><strong class="font-medium text-gray-600 flex items-center gap-2"><i class="bi bi-rocket-takeoff-fill"></i> What's Next:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_next`])}</span></p>
+                                <p><strong class="text-gray-600 flex items-center gap-2"><i class="bi bi-trophy-fill"></i> Biggest Win:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_win`])}</span></p>
+                                <p><strong class="text-gray-600 flex items-center gap-2"><i class="bi bi-lightbulb-fill"></i> Toughest Challenge:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p>
+                                <p><strong class="text-gray-600 flex items-center gap-2"><i class="bi bi-rocket-takeoff-fill"></i> What's Next:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_next`])}</span></p>
                             </div></div>
                         </div>
                     </div>`;
@@ -90,40 +78,17 @@ function runViewScript(app) {
         DOMElements.headerSubtitle.textContent = `A read-only summary for ${formData.bakeryLocation || 'the bakery'}.`;
 
         DOMElements.contentArea.innerHTML = `
-            <div class="print-header no-print">
-                <img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/92/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo">
-                <div class="print-header-details">
-                    <h1>90-Day Growth Plan</h1>
-                    <p>${e(formData.bakeryLocation)} | ${e(formData.quarter)}</p>
-                </div>
-            </div>
             <div class="space-y-8 summary-content">
-                <div class="content-card vision-card p-6">
-                    <h2 class="text-2xl font-bold font-poppins mb-4">Quarterly Vision & Sprints</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4">
-                        <div><h4 class="font-semibold text-sm text-gray-500">Manager</h4><p class="text-gray-800 font-medium">${e(formData.managerName)}</p></div>
-                        <div><h4 class="font-semibold text-sm text-gray-500">Bakery</h4><p class="text-gray-800 font-medium">${e(formData.bakeryLocation)}</p></div>
-                        <div><h4 class="font-semibold text-sm text-gray-500">Quarter</h4><p class="text-gray-800 font-medium">${e(formData.quarter)}</p></div>
-                    </div>
-                    <div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Theme</h4><p class="text-gray-800 whitespace-pre-wrap">${e(formData.quarterlyTheme)}</p></div>
-                    <div><h3 class="text-lg font-bold border-b pb-2 mb-3">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm">
-                        <div><strong class="font-semibold text-gray-600 block">Month 1 Goal:</strong><p class="text-gray-800 mt-1 whitespace-pre-wrap">${e(formData.month1Goal)}</p></div>
-                        <div><strong class="font-semibold text-gray-600 block">Month 2 Goal:</strong><p class="text-gray-800 mt-1 whitespace-pre-wrap">${e(formData.month2Goal)}</p></div>
-                        <div><strong class="font-semibold text-gray-600 block">Month 3 Goal:</strong><p class="text-gray-800 mt-1 whitespace-pre-wrap">${e(formData.month3Goal)}</p></div>
-                    </div></div>
-                </div>
+                <div class="content-card p-6"><h2 class="text-2xl font-bold font-poppins mb-4">Quarterly Vision & Sprints</h2><div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4"><div><h4 class="font-semibold text-sm text-gray-500">Manager</h4><p class="text-gray-800 font-medium">${e(formData.managerName)}</p></div><div><h4 class="font-semibold text-sm text-gray-500">Bakery</h4><p class="text-gray-800 font-medium">${e(formData.bakeryLocation)}</p></div><div><h4 class="font-semibold text-sm text-gray-500">Quarter</h4><p class="text-gray-800 font-medium">${e(formData.quarter)}</p></div></div><div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Theme</h4><p class="text-gray-800 whitespace-pre-wrap">${e(formData.quarterlyTheme)}</p></div><div><h3 class="text-lg font-bold border-b pb-2 mb-3">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm"><div><strong class="font-semibold text-gray-600 block">Month 1 Goal:</strong><p class="text-gray-800 mt-1 whitespace-pre-wrap">${e(formData.month1Goal)}</p></div><div><strong class="font-semibold text-gray-600 block">Month 2 Goal:</strong><p class="text-gray-800 mt-1 whitespace-pre-wrap">${e(formData.month2Goal)}</p></div><div><strong class="font-semibold text-gray-600 block">Month 3 Goal:</strong><p class="text-gray-800 mt-1 whitespace-pre-wrap">${e(formData.month3Goal)}</p></div></div></div></div>
                 ${renderMonthSummary(1)}
                 ${renderMonthSummary(2)}
                 ${renderMonthSummary(3)}
-                <div class="content-card p-6 mt-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);">
-                    <h2 class="text-2xl font-bold mb-4" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2>
-                    <div class="space-y-4">
-                        <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Biggest Achievements</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_achievements)}</p></div>
-                        <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_challenges)}</p></div>
-                        <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Narrative</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_narrative)}</p></div>
-                        <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Focus For Next Quarter</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_next_quarter)}</p></div>
-                    </div>
-                </div>
+                <div class="content-card p-6 mt-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);"><h2 class="text-2xl font-bold mb-4" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2><div class="space-y-4">
+                    <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Biggest Achievements</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_achievements)}</p></div>
+                    <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_challenges)}</p></div>
+                    <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Narrative</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_narrative)}</p></div>
+                    <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Focus For Next Quarter</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_next_quarter)}</p></div>
+                </div></div>
             </div>`;
     };
 
