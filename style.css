@@ -279,15 +279,106 @@ main { grid-area: main; }
 /* 8. Print-Specific Styles
 -------------------------------------------------- */
 @media print {
-    body { background-color: var(--gails-white); }
-    .no-print { display: none !important; }
-    .printable-area { padding: 0 !important; }
-    .main-layout, #dashboard-view { display: block; height: auto !important; }
-    main { overflow: visible !important; height: auto !important; }
-    header, .dashboard-header { display: none; }
-    .content-card { box-shadow: none; border: 1px solid var(--gails-grey-mid); margin-top: 1.5rem; page-break-inside: avoid; }
-    .summary-content { font-size: 10pt; }
-    h1, h2, h3, h4, h5 { page-break-after: avoid; }
+    body {
+        background-color: var(--gails-white);
+        font-size: 10pt; /* Standard print font size */
+        color: #333;
+    }
+
+    .no-print, 
+    header, 
+    .dashboard-header, 
+    #sidebar,
+    .main-header,
+    footer:not(.print-footer) {
+        display: none !important;
+    }
+
+    .printable-area {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100%;
+    }
+
+    .main-layout, #dashboard-view, main {
+        display: block;
+        height: auto !important;
+        overflow: visible !important;
+        width: 100%;
+    }
+
+    .print-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 2rem;
+        border-bottom: 2px solid var(--gails-red);
+        margin-bottom: 2rem;
+    }
+
+    .print-header img {
+        height: 40px;
+        width: auto;
+    }
+
+    .print-header-details {
+        text-align: right;
+    }
+
+    .print-header-details h1 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.5rem;
+        color: var(--gails-text-primary);
+        margin: 0;
+    }
+    
+    .print-header-details p {
+        font-size: 0.9rem;
+        color: var(--gails-text-secondary);
+        margin: 0;
+    }
+
+    .content-card {
+        box-shadow: none;
+        border: 1px solid var(--gails-grey-mid);
+        margin-top: 1.5rem;
+        page-break-inside: avoid;
+        padding: 1.5rem;
+    }
+
+    .summary-content h2 {
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--gails-grey-light);
+    }
+
+    h1, h2, h3, h4, h5 {
+        page-break-after: avoid;
+    }
+
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    /* Hide the default URL in printouts */
+    a[href]:after {
+        content: none !important;
+    }
+
+    /* Page break control */
+    .monthly-sprint-card {
+        page-break-before: always;
+    }
+    .vision-card {
+        page-break-inside: avoid;
+    }
+
+    @page {
+        margin: 1.5cm;
+        size: A4;
+    }
 }
 
 /* 9. Auth Enhancements */
@@ -392,3 +483,4 @@ main { grid-area: main; }
 .pillar-icon-svg {
     vertical-align: -0.125em; /* Aligns custom SVG with text baseline like Bootstrap Icons */
 }
+
