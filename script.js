@@ -747,6 +747,7 @@ const DOMElements = {
                 weeklyCheckinHTML += `<div class="border-t pt-3 mt-3"><h5 class="font-bold text-sm">Week ${w}${statusBadge}</h5><div class="text-sm mt-2"><strong class="text-gray-600">Win/Learning:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s5_w${w}_win`])}</span></div><div class="text-sm mt-1"><strong class="text-gray-600">Spotlight:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s5_w${w}_spotlight`])}</span></div></div>`;
             }
     
+            // START: Logic to get pillar data for the summary
             const pillar = formData[`m${monthNum}s1_pillar`];
             const pillarIcons = { 
                 'people': '<i class="bi bi-people-fill"></i>', 
@@ -764,8 +765,9 @@ const DOMElements = {
                         <span class="pillar-badge">${pillarIcon} ${pillarText}</span>
                     </div>`;
             }
+            // END: Logic to get pillar data
     
-            return `<div class="content-card monthly-sprint-card p-6 mt-8">
+            return `<div class="content-card p-6 mt-8">
                         <h2 class="text-2xl font-bold font-poppins mb-4">Month ${monthNum} Sprint</h2>
                         <div class="space-y-6">
                             <div>
@@ -795,15 +797,8 @@ const DOMElements = {
         };
 
         DOMElements.contentArea.innerHTML = `
-            <div class="print-header no-print">
-                <img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/92/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo">
-                <div class="print-header-details">
-                    <h1>90-Day Growth Plan</h1>
-                    <p>${e(formData.bakeryLocation)} | ${e(formData.quarter)}</p>
-                </div>
-            </div>
             <div class="space-y-8 summary-content">
-                <div class="content-card vision-card p-6">
+                <div class="content-card p-6">
                     <h2 class="text-2xl font-bold font-poppins mb-4">Quarterly Vision & Sprints</h2>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4">
                         <div><h4 class="font-semibold text-sm text-gray-500">Manager</h4><p class="text-gray-800 font-medium">${e(formData.managerName)}</p></div>
