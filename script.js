@@ -523,47 +523,11 @@ const DOMElements = {
     }
 
     function isStepComplete(stepKey, data) {
-        const planData = data || appState.planData;
-        const stepDefinition = templates.step[stepKey] || (stepKey === 'vision' ? templates.vision : null);
-        if (!stepDefinition) return false;
-
-        // Helper to check if rich text content is effectively empty
-        const isContentEmpty = (htmlContent) => {
-            if (!htmlContent) return true;
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlContent;
-            return tempDiv.innerText.trim() === '';
-        };
-
-        if (stepKey.endsWith('s1') && stepKey.startsWith('m')) {
-            const battleText = planData[`${stepKey}_battle`];
-            const pillarSelected = planData[`${stepKey}_pillar`];
-            return !isContentEmpty(battleText) && !!pillarSelected;
-        }
-
-        if (stepKey.endsWith('s5')) {
-            const monthNum = stepKey.charAt(1);
-            for (let w = 1; w <= 4; w++) {
-                const winFilled = !isContentEmpty(planData[`m${monthNum}s5_w${w}_win`]);
-                const spotlightFilled = !isContentEmpty(planData[`m${monthNum}s5_w${w}_spotlight`]);
-                const statusSelected = !!planData[`m${monthNum}s5_w${w}_status`];
-                if (!winFilled || !spotlightFilled || !statusSelected) return false;
-            }
-            return true;
-        }
-
-        const fields = stepDefinition.requiredFields;
-        if (!fields || fields.length === 0) return false;
-        return fields.every(fieldId => {
-            const value = planData[fieldId];
-            // For regular inputs, check value, for rich text, check content
-            const element = document.getElementById(fieldId);
-            if (element && element.isContentEditable) {
-                return !isContentEmpty(value);
-            }
-            return value && value.trim() !== '';
-        });
-    }
+    // A step is complete only if it has required fields and all of them are filled.
+    // This now uses the getStepProgress function as the single source of truth for completion logic.
+    const progress = getStepProgress(stepKey, data);
+    return progress.total > 0 && progress.completed === progress.total;
+}
 
     function isMonthComplete(monthNum) {
         const totalSteps = appState.monthContext[`month-${monthNum}`].totalSteps;
@@ -1411,6 +1375,7 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
