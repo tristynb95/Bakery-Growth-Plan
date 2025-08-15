@@ -419,6 +419,7 @@ textarea.form-input {
 [contenteditable="true"].form-input {
     min-height: 120px; /* Sets a larger default height */
     line-height: 1.6;  /* Improves readability of multi-line text */
+    position: relative; /* Add this line */
 }
 
 /* Replicates placeholder text for contenteditable divs using a JS-managed class */
@@ -426,7 +427,12 @@ textarea.form-input {
     content: attr(data-placeholder);
     color: #9CA3AF; /* Standard placeholder text colour */
     pointer-events: none; /* Allows clicking through the placeholder */
-    display: block;
+
+    /* New positioning rules */
+    position: absolute;
+    top: 1rem;        /* Match parent's top padding */
+    left: 1.15rem;    /* Match parent's left padding */
+    right: 1.15rem;   /* Allow text to wrap correctly */
 }
 
 /* 19. Custom Height for Weekly Check-in Text Boxes
@@ -449,6 +455,7 @@ textarea.form-input {
     color: var(--gails-text-secondary);
     margin-left: 0.5rem; /* Space between title and counter */
 }
+
 
 
 
