@@ -207,8 +207,29 @@ main { grid-area: main; }
 .btn-secondary { background-color: var(--gails-white); color: var(--gails-text-primary); border-color: var(--gails-grey-mid); }
 .btn-secondary:hover { border-color: #4B5563; background-color: var(--gails-grey-light); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
 .btn:active { transform: scale(0.98) translateY(0); box-shadow: none; }
-.form-input { width: 100%; padding: 0.85rem 1rem; border-radius: 0.5rem; border: 1px solid var(--gails-grey-mid); background-color: var(--gails-white); transition: all 0.2s; font-size: 1rem; }
-.form-input:focus { outline: none; border-color: var(--gails-red); box-shadow: var(--shadow-focus); }
+/* style.css */
+
+.form-input { 
+    width: 100%; 
+    padding: 1rem 1.15rem; /* Increased vertical and horizontal padding */
+    border-radius: 0.5rem; 
+    border: 1px solid var(--gails-grey-mid); 
+    background-color: var(--gails-white); 
+    transition: all 0.2s; 
+    font-size: 1.05rem; /* Slightly larger font */
+}
+
+/* Add this new rule for better textarea sizing */
+textarea.form-input {
+    min-height: 120px; /* Sets a larger default height */
+    line-height: 1.6;  /* Improves readability of multi-line text */
+}
+
+.form-input:focus { 
+    outline: none; 
+    border-color: var(--gails-red); 
+    box-shadow: var(--shadow-focus); 
+}
 .content-card { background-color: var(--gails-white); border-radius: 1.25rem; box-shadow: var(--shadow-sm); border: 1px solid #E5E7EB; padding: 2rem; /* Increased padding */ }
 
 /* Character Counter Styles */
@@ -392,3 +413,4 @@ main { grid-area: main; }
 .pillar-icon-svg {
     vertical-align: -0.125em; /* Aligns custom SVG with text baseline like Bootstrap Icons */
 }
+
