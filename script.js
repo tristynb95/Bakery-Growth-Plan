@@ -1100,12 +1100,10 @@ async function handleAIActionPlan() {
         DOMElements.modalActionBtn.textContent = 'Print Plan';
         DOMElements.modalActionBtn.style.display = 'inline-flex';
         
-        // --- NEW & IMPROVED PRINT LOGIC ---
         DOMElements.modalActionBtn.onclick = () => {
             const printableAreaHTML = document.getElementById('ai-printable-area').innerHTML;
             const originalPageHTML = document.documentElement.innerHTML;
 
-            // 1. Gather all CSS styles from the page, including dynamic ones from Tailwind.
             let allStyles = "";
             for (const sheet of document.styleSheets) {
                 try {
@@ -1117,7 +1115,6 @@ async function handleAIActionPlan() {
                 }
             }
 
-            // 2. Define specific, brand-aligned styles for the printout.
             const printSpecificStyles = `
                 @media print {
                     body {
@@ -1128,9 +1125,13 @@ async function handleAIActionPlan() {
                     h2 {
                         font-family: 'Poppins', sans-serif;
                     }
+                    th, td {
+                        /* This is the updated line */
+                        border: 1px solid #D1D5DB !important;
+                    }
                     th {
-                        background-color: #F3F4F6 !important; /* GAIL's Light Grey */
-                        color: #D10A11 !important; /* GAIL's Red */
+                        background-color: #F3F4F6 !important;
+                        color: #D10A11 !important;
                     }
                     @page {
                         size: A4 portrait;
@@ -1139,7 +1140,6 @@ async function handleAIActionPlan() {
                 }
             `;
 
-            // 3. Construct a new HTML document for printing with all styles included.
             const printPageHTML = `
                 <html>
                     <head>
@@ -1158,13 +1158,11 @@ async function handleAIActionPlan() {
                 </html>
             `;
 
-            // 4. Replace the document, print, and then restore it.
             document.documentElement.innerHTML = printPageHTML;
             window.print();
             document.documentElement.innerHTML = originalPageHTML;
             window.location.reload(); 
         };
-        // --- End of new print logic ---
 
         DOMElements.modalCancelBtn.textContent = 'Done';
 
@@ -1176,7 +1174,6 @@ async function handleAIActionPlan() {
         DOMElements.modalCancelBtn.textContent = 'Close';
     }
 }
-
     // --- Modal Management ---
     const handleEscKey = (event) => {
         if (event.key === 'Escape') {
@@ -1648,6 +1645,7 @@ async function handleAIActionPlan() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
