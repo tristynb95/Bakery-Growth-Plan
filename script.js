@@ -412,10 +412,7 @@ const DOMElements = {
         updateUI();
     }
 
-    async function handleBackToDashboard() {
-    // Force an immediate save and wait for it to complete before proceeding.
-    await saveData(true);
-
+    function handleBackToDashboard() {
     localStorage.removeItem('lastPlanId');
     localStorage.removeItem('lastViewId');
     
@@ -1283,27 +1280,27 @@ const DOMElements = {
     });
 
     DOMElements.contentArea.addEventListener('click', (e) => {
-        const target = e.target;
-    
-        const pillarButton = target.closest('.pillar-button');
-        if (pillarButton) {
-            const alreadySelected = pillarButton.classList.contains('selected');
-            pillarButton.parentElement.querySelectorAll('.pillar-button').forEach(btn => btn.classList.remove('selected'));
-            if (!alreadySelected) {
-                pillarButton.classList.add('selected');
-            }
-            saveData();
-            return;
+    const target = e.target;
+
+    const pillarButton = target.closest('.pillar-button');
+    if (pillarButton) {
+        const alreadySelected = pillarButton.classList.contains('selected');
+        pillarButton.parentElement.querySelectorAll('.pillar-button').forEach(btn => btn.classList.remove('selected'));
+        if (!alreadySelected) {
+            pillarButton.classList.add('selected');
         }
-    
-        if (target.closest('.status-button')) {
-            const button = target.closest('.status-button');
-            const alreadySelected = button.classList.contains('selected');
-            button.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
-            if (!alreadySelected) button.classList.add('selected');
-            saveData();
-        }
-    });
+        saveData(true); // Changed from saveData()
+        return;
+    }
+
+    if (target.closest('.status-button')) {
+        const button = target.closest('.status-button');
+        const alreadySelected = button.classList.contains('selected');
+        button.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
+        if (!alreadySelected) button.classList.add('selected');
+        saveData(true); // Changed from saveData()
+    }
+});
 
     DOMElements.printBtn.addEventListener('click', () => window.print());
     DOMElements.shareBtn.addEventListener('click', handleShare);
@@ -1378,6 +1375,7 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
