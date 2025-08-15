@@ -412,16 +412,19 @@ const DOMElements = {
         updateUI();
     }
 
-    function handleBackToDashboard() {
-        localStorage.removeItem('lastPlanId');
-        localStorage.removeItem('lastViewId');
-        
-        appState.planData = {};
-        appState.currentPlanId = null;
-        DOMElements.appView.classList.add('hidden');
-        DOMElements.dashboardView.classList.remove('hidden');
-        renderDashboard();
-    }
+    async function handleBackToDashboard() {
+    // Force an immediate save and wait for it to complete before proceeding.
+    await saveData(true);
+
+    localStorage.removeItem('lastPlanId');
+    localStorage.removeItem('lastViewId');
+    
+    appState.planData = {};
+    appState.currentPlanId = null;
+    DOMElements.appView.classList.add('hidden');
+    DOMElements.dashboardView.classList.remove('hidden');
+    renderDashboard();
+}
 
     // --- DATA HANDLING ---
     async function loadPlanFromFirestore() {
@@ -1375,6 +1378,7 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
