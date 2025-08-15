@@ -743,13 +743,12 @@ const DOMElements = {
         if (isComplete) item.classList.add('completed');
         if (i === activeStep) item.classList.add('active');
 
-        // --- NEW LOGIC START ---
-        // If the step is complete AND not the currently active step, show a checkmark.
-        // Otherwise, show the step number. This keeps the active step's number visible for clarity.
-        const stepCircleContent = (isComplete && i !== activeStep)
+        // --- UPDATED LOGIC ---
+        // If the step is complete, show a checkmark. Otherwise, show the number.
+        const stepCircleContent = isComplete
             ? `<i class="bi bi-check-lg"></i>`
             : `<span class="step-number">${i}</span>`;
-        // --- NEW LOGIC END ---
+        // --- END UPDATED LOGIC ---
 
         item.innerHTML = `<div class="flex flex-col items-center mr-4"><div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">${stepCircleContent}</div>${i < totalSteps ? '<div class="step-line w-0.5 h-9"></div>' : ''}</div><div><p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}</p></div>`;
         item.addEventListener('click', () => renderStep(i));
@@ -1353,5 +1352,6 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
