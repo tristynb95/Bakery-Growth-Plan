@@ -911,61 +911,6 @@ function runApp(app) {
         return summary;
     }
 
-    function handleSaveAsWord() {
-        const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType } = docx;
-    
-        const printableArea = document.getElementById('ai-printable-area');
-        if (!printableArea) return;
-    
-        const docSections = [];
-        const elements = Array.from(printableArea.children);
-    
-        elements.forEach(element => {
-            if (element.tagName === 'H2') {
-                docSections.push(new Paragraph({ text: element.innerText, heading: HeadingLevel.HEADING_2, spacing: { before: 400, after: 200 } }));
-            }
-    
-            if (element.tagName === 'TABLE') {
-                const tableRows = [];
-                const htmlRows = Array.from(element.querySelectorAll('tr'));
-    
-                htmlRows.forEach(htmlRow => {
-                    const tableCells = [];
-                    const htmlCells = Array.from(htmlRow.children);
-    
-                    htmlCells.forEach(htmlCell => {
-                        tableCells.push(
-                            new TableCell({
-                                children: [new Paragraph({ text: htmlCell.innerText })],
-                            })
-                        );
-                    });
-    
-                    tableRows.push(new TableRow({ children: tableCells }));
-                });
-    
-                const docxTable = new Table({
-                    rows: tableRows,
-                    width: {
-                        size: 100,
-                        type: WidthType.PERCENTAGE,
-                    },
-                });
-                docSections.push(docxTable);
-            }
-        });
-    
-        const doc = new Document({
-            sections: [{
-                children: docSections,
-            }],
-        });
-    
-        Packer.toBlob(doc).then(blob => {
-            saveAs(blob, "AI-Generated Action Plan.docx");
-        });
-    }
-
     async function handleAIActionPlan() {
         const savedPlan = appState.planData.aiActionPlan;
     
