@@ -1039,7 +1039,6 @@ async function handleAIActionPlan() {
         });
 
         if (!response.ok) {
-            // Try to get a more specific error message from the backend
             const errorResult = await response.json();
             throw new Error(errorResult.error || 'The AI assistant failed to generate a response.');
         }
@@ -1050,7 +1049,6 @@ async function handleAIActionPlan() {
         const modalContent = document.getElementById('modal-content');
         modalContent.innerHTML = actionPlanHTML;
 
-        // --- Add a Save as Word button ---
         const saveButton = document.createElement('button');
         saveButton.id = 'modal-save-word-btn';
         saveButton.className = 'btn btn-secondary';
@@ -1058,18 +1056,21 @@ async function handleAIActionPlan() {
         saveButton.onclick = handleSaveAsWord;
         DOMElements.modalActionBtn.parentNode.insertBefore(saveButton, DOMElements.modalActionBtn);
 
-
-        // --- Update existing buttons ---
         DOMElements.modalActionBtn.textContent = 'Print Plan';
         DOMElements.modalActionBtn.style.display = 'inline-flex';
+        
+        // --- THIS is the updated part ---
         DOMElements.modalActionBtn.onclick = () => {
             const printableArea = document.getElementById('ai-printable-area').innerHTML;
             const originalContents = document.body.innerHTML;
-            document.body.innerHTML = `<div class="prose p-8">${printableArea}</div>`;
+            // Removed the "prose" class to preserve table styling
+            document.body.innerHTML = `<div class="p-8">${printableArea}</div>`; 
             window.print();
             document.body.innerHTML = originalContents;
             window.location.reload(); 
         };
+        // --- End of updated part ---
+
         DOMElements.modalCancelBtn.textContent = 'Done';
 
     } catch (error) {
@@ -1552,4 +1553,5 @@ async function handleAIActionPlan() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
