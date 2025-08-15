@@ -710,7 +710,10 @@ const DOMElements = {
 
     function getStepProgress(stepKey, data) {
     const planData = data || appState.planData;
-    const stepDefinition = templates.step[stepKey];
+    const isVisionStep = stepKey === 'vision';
+    // Get the correct definition object for either a vision or a monthly step
+    const stepDefinition = isVisionStep ? templates.vision : templates.step[stepKey];
+
     if (!stepDefinition) return { completed: 0, total: 0 };
 
     const isContentEmpty = (htmlContent) => {
@@ -723,16 +726,16 @@ const DOMElements = {
     let completed = 0;
     let total = 0;
 
-    // Special handling for "Must-Win Battle" which has a text input and a pillar selection
-    if (stepKey.endsWith('s1') && stepKey.startsWith('m')) {
+    // Special handling for "Must-Win Battle"
+    if (!isVisionStep && stepKey.endsWith('s1')) {
         total = 2;
         if (!isContentEmpty(planData[`${stepKey}_battle`])) completed++;
         if (!!planData[`${stepKey}_pillar`]) completed++;
         return { completed, total };
     }
 
-    // Special handling for "Weekly Check-in" which has multiple fields per week
-    if (stepKey.endsWith('s5')) {
+    // Special handling for "Weekly Check-in"
+    if (!isVisionStep && stepKey.endsWith('s5')) {
         total = 12; // 4 weeks * 3 fields (status, win, spotlight)
         const monthNum = stepKey.charAt(1);
         for (let w = 1; w <= 4; w++) {
@@ -743,7 +746,7 @@ const DOMElements = {
         return { completed, total };
     }
     
-    // Default handling for all other steps based on their required fields
+    // Default handling for all other steps (including the vision step)
     const fields = stepDefinition.requiredFields;
     if (!fields || fields.length === 0) {
         return { completed: 0, total: 0 };
@@ -1396,6 +1399,7 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
