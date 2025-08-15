@@ -60,6 +60,7 @@ const DOMElements = {
     progressBarFill: document.getElementById('progress-bar-fill'),
     progressPercentage: document.getElementById('progress-percentage'),
     desktopHeaderButtons: document.getElementById('desktop-header-buttons'),
+    aiActionBtn: document.getElementById('ai-action-btn'),
     // Mobile Menu
     mobileMenuBtn: document.getElementById('mobile-menu-btn'),
     sidebarOverlay: document.getElementById('sidebar-overlay'),
@@ -145,12 +146,43 @@ const DOMElements = {
 
     // --- CHARACTER COUNTER ---
     function initializeCharCounters() {
-    document.querySelectorAll('div[data-maxlength]').forEach(editor => {
-        if (editor.parentNode.classList.contains('textarea-wrapper')) {
-            const wrapper = editor.parentNode;
-            const counter = wrapper.querySelector('.char-counter');
-            
-            const updateFn = () => {
+        document.querySelectorAll('div[data-maxlength]').forEach(editor => {
+            if (editor.parentNode.classList.contains('textarea-wrapper')) {
+                const wrapper = editor.parentNode;
+                const counter = wrapper.querySelector('.char-counter');
+                
+                const updateFn = () => {
+                    const maxLength = parseInt(editor.dataset.maxlength, 10);
+                    const currentLength = editor.innerText.length;
+                    const remaining = maxLength - currentLength;
+                    counter.textContent = `${remaining}`;
+                    if (remaining < 0) {
+                        counter.style.color = 'var(--gails-red)';
+                    } else if (remaining < 20) {
+                        counter.style.color = '#D97706'; // Amber
+                    } else {
+                        counter.style.color = 'var(--gails-text-secondary)';
+                    }
+                };
+                
+                editor.addEventListener('input', updateFn);
+                // Add focus/blur listeners
+                editor.addEventListener('focus', () => counter.classList.add('visible'));
+                editor.addEventListener('blur', () => counter.classList.remove('visible'));
+                updateFn(); 
+                return;
+            }
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'textarea-wrapper';
+            editor.parentNode.insertBefore(wrapper, editor);
+            wrapper.appendChild(editor);
+
+            const counter = document.createElement('div');
+            counter.className = 'char-counter';
+            wrapper.appendChild(counter);
+
+            const updateCounter = () => {
                 const maxLength = parseInt(editor.dataset.maxlength, 10);
                 const currentLength = editor.innerText.length;
                 const remaining = maxLength - currentLength;
@@ -163,117 +195,86 @@ const DOMElements = {
                     counter.style.color = 'var(--gails-text-secondary)';
                 }
             };
-            
-            editor.addEventListener('input', updateFn);
+
+            updateCounter();
+            editor.addEventListener('input', updateCounter);
             // Add focus/blur listeners
             editor.addEventListener('focus', () => counter.classList.add('visible'));
             editor.addEventListener('blur', () => counter.classList.remove('visible'));
-            updateFn(); 
-            return;
-        }
-
-        const wrapper = document.createElement('div');
-        wrapper.className = 'textarea-wrapper';
-        editor.parentNode.insertBefore(wrapper, editor);
-        wrapper.appendChild(editor);
-
-        const counter = document.createElement('div');
-        counter.className = 'char-counter';
-        wrapper.appendChild(counter);
-
-        const updateCounter = () => {
-            const maxLength = parseInt(editor.dataset.maxlength, 10);
-            const currentLength = editor.innerText.length;
-            const remaining = maxLength - currentLength;
-            counter.textContent = `${remaining}`;
-            if (remaining < 0) {
-                counter.style.color = 'var(--gails-red)';
-            } else if (remaining < 20) {
-                counter.style.color = '#D97706'; // Amber
-            } else {
-                counter.style.color = 'var(--gails-text-secondary)';
-            }
-        };
-
-        updateCounter();
-        editor.addEventListener('input', updateCounter);
-        // Add focus/blur listeners
-        editor.addEventListener('focus', () => counter.classList.add('visible'));
-        editor.addEventListener('blur', () => counter.classList.remove('visible'));
-    });
-}
+        });
+    }
    
     // --- HTML TEMPLATES ---
 
     const templates = {
         vision: {
-    html: `<div class="space-y-8">
-                <div class="content-card p-6 md:p-8"><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="managerName" class="font-semibold block mb-2">Manager:</label><input type="text" id="managerName" class="form-input" placeholder="e.g., Tristen Bayley"></div><div><label for="bakeryLocation" class="font-semibold block mb-2">Bakery:</label><input type="text" id="bakeryLocation" class="form-input" placeholder="e.g., Marlow"></div><div><label for="quarter" class="font-semibold block mb-2">Quarter:</label><input type="text" id="quarter" class="form-input" placeholder="e.g., Q3 FY26"></div></div></div>
-                <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-sm"><h3 class="font-bold text-lg text-amber-900 mb-2">Our Mission</h3><p class="text-xl font-semibold text-gray-800">"To make world-class, craft baking a part of every neighbourhood."</p></div>
-                <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">This Quarter's Narrative: <i class="bi bi-info-circle info-icon" title="The big, overarching mission for the next 90 days."></i></label><div id="quarterlyTheme" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Become the undisputed neighbourhood favourite by mastering our availability." data-maxlength="400"></div></div>
-                <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the first 30-day sprint."></i></label><div id="month1Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PRODUCT: Master afternoon availability and reduce waste." data-maxlength="300"></div></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the second 30-day sprint."></i></label><div id="month2Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PLACE: Embed new production processes and daily checks." data-maxlength="300"></div></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the third 30-day sprint."></i></label><div id="month3Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PEOPLE: Develop team skills for consistent execution." data-maxlength="300"></div></div></div></div>
-           </div>`,
-    requiredFields: ['managerName', 'bakeryLocation', 'quarter', 'quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
-},
+            html: `<div class="space-y-8">
+                        <div class="content-card p-6 md:p-8"><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="managerName" class="font-semibold block mb-2">Manager:</label><input type="text" id="managerName" class="form-input" placeholder="e.g., Tristen Bayley"></div><div><label for="bakeryLocation" class="font-semibold block mb-2">Bakery:</label><input type="text" id="bakeryLocation" class="form-input" placeholder="e.g., Marlow"></div><div><label for="quarter" class="font-semibold block mb-2">Quarter:</label><input type="text" id="quarter" class="form-input" placeholder="e.g., Q3 FY26"></div></div></div>
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-sm"><h3 class="font-bold text-lg text-amber-900 mb-2">Our Mission</h3><p class="text-xl font-semibold text-gray-800">"To make world-class, craft baking a part of every neighbourhood."</p></div>
+                        <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">This Quarter's Narrative: <i class="bi bi-info-circle info-icon" title="The big, overarching mission for the next 90 days."></i></label><div id="quarterlyTheme" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Become the undisputed neighbourhood favourite by mastering our availability." data-maxlength="400"></div></div>
+                        <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the first 30-day sprint."></i></label><div id="month1Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PRODUCT: Master afternoon availability and reduce waste." data-maxlength="300"></div></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the second 30-day sprint."></i></label><div id="month2Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PLACE: Embed new production processes and daily checks." data-maxlength="300"></div></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the third 30-day sprint."></i></label><div id="month3Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PEOPLE: Develop team skills for consistent execution." data-maxlength="300"></div></div></div></div>
+                   </div>`,
+            requiredFields: ['managerName', 'bakeryLocation', 'quarter', 'quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
+        },
         month: (monthNum) => `<div class="grid grid-cols-1 lg:grid-cols-4 gap-8"><div class="lg:col-span-1 no-print"><nav id="month-${monthNum}-stepper" class="space-y-2"></nav></div><div class="lg:col-span-3"><div id="step-content-container"></div><div class="mt-8 flex justify-between no-print"><button id="prev-step-btn" class="btn btn-secondary">Previous</button><button id="next-step-btn" class="btn btn-primary">Next Step</button></div></div></div>`,
         step: {
             'm1s1': {
-    title: "Must-Win Battle",
-    requiredFields: ['m1s1_battle'],
-    html: `<div class="content-card p-8 weekly-check-in-container"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 1: The Must-Win Battle</h3><p class="text-gray-600 mb-4">What is the single most important, measurable outcome for this month?</p><div id="m1s1_battle" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly and placing smart orders.'" data-maxlength="500"></div><div class="mt-6"><label class="font-semibold block mb-3 text-gray-700">Monthly Focus Pillar:</label><div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m1s1"><button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button><button class="btn pillar-button" data-pillar="product"><i class="bi bi-cup-hot-fill"></i> Product</button><button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button><button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button></div></div></div>`
-},
-'m1s2': {
-    title: "Levers & Power-Up",
-    requiredFields: ['m1s2_levers', 'm1s2_powerup_q', 'm1s2_powerup_a'],
-    html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3><p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div><label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label><div id="m1s2_levers" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="1. Review ordering report with daily.&#10;2. Coach the team on the 'why' behind the production matrix." data-maxlength="600"></div></div><div class="space-y-4"><div><label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label><div id="m1s2_powerup_q" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., 'What is one thing that slows us down before 8am?'" data-maxlength="300"></div></div><div><label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label><div id="m1s2_powerup_a" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Pre-portioning key ingredients the night before." data-maxlength="300"></div></div></div></div></div>`
-},
-'m1s3': {
-    title: "People Growth",
-    requiredFields: ['m1s3_people'],
-    html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 3: People Growth</h3><p class="text-gray-600 mb-4">Who will I invest in this month to help us win our battle, and how?</p><div id="m1s3_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" data-maxlength="600"></div></div>`
-},
-'m1s4': {
-    title: "Protect the Core",
-    requiredFields: ['m1s4_people', 'm1s4_product', 'm1s4_customer', 'm1s4_place'],
-    html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 4: Protect the Core</h3><p class="text-gray-600 mb-6">One key behaviour you will protect for each pillar to ensure standards don't slip.</p><div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-        <div><label for="m1s4_people" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-people-fill"></i> PEOPLE</label><div id="m1s4_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Meaningful 1-2-1s with my two keyholders." data-maxlength="300"></div></div>
-        <div><label for="m1s4_product" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-cup-hot-fill"></i> PRODUCT</label><div id="m1s4_product" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Daily quality checks of the first bake." data-maxlength="300"></div></div>
-        <div><label for="m1s4_customer" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-heart-fill"></i> CUSTOMER</label><div id="m1s4_customer" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Action all customer feedback within 24 hours." data-maxlength="300"></div></div>
-        <div><label for="m1s4_place" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-shop"></i> PLACE</label><div id="m1s4_place" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Complete a bakery travel path twice a day." data-maxlength="300"></div></div>
-    </div></div>`
-},
-'m1s5': {
-    title: "Weekly Check-in",
-    requiredFields: [],
-    html: `<div class="content-card p-8 weekly-check-in-container"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 5: Weekly Momentum Check</h3><p class="text-gray-600 mb-6">A 5-minute pulse check each Friday to maintain focus and celebrate wins.</p><div class="space-y-6">
-        ${[1,2,3,4].map(w => `<div class="border-t border-gray-200 pt-4"><h4 class="font-bold text-lg mb-4">Week ${w}</h4><div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-            <div><label class="font-semibold block mb-2 text-sm">Progress:</label><div class="flex items-center space-x-2 status-buttons" data-week="${w}"><button class="status-button" data-status="on-track">ON TRACK</button><button class="status-button" data-status="issues">ISSUES</button><button class="status-button" data-status="off-track">OFF TRACK</button></div></div>
-            <div><label for="m1s5_w${w}_win" class="font-semibold block mb-2 text-sm">A Win or Learning:</label><div id="m1s5_w${w}_win" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., The team hit 80% availability on Thursday!" data-maxlength="400"></div></div>
-            <div class="md:col-span-2"><label for="m1s5_w${w}_spotlight" class="font-semibold block mb-2 text-sm">Team Member Spotlight:</label><div id="m1s5_w${w}_spotlight" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Sarah for her excellent attention to detail during the bake." data-maxlength="400"></div></div>
-        </div></div>`).join("")}
-    </div></div>`
-},
-'m1s6': {
-    title: "End of Month Review",
-    requiredFields: ['m1s6_win', 'm1s6_challenge', 'm1s6_next'],
-    html: `<div class="content-card p-8 bg-red-50 border border-red-100"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 6: End of Month Review</h3><p class="text-gray-600 mb-6">Reflect on the month to prepare for your conversation with your line manager.</p><div class="space-y-6">
-    <div><label for="m1s6_win" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-trophy-fill"></i> Biggest Win:</label><div id="m1s6_win" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
-    <div><label for="m1s6_challenge" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-lightbulb-fill"></i> Toughest Challenge & What I Learned:</label><div id="m1s6_challenge" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
-    <div><label for="m1s6_next" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-rocket-takeoff-fill"></i> What's Next (Focus for Next Month):</label><div id="m1s6_next" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
-    </div></div>`
-},
+                title: "Must-Win Battle",
+                requiredFields: ['m1s1_battle'],
+                html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 1: The Must-Win Battle</h3><p class="text-gray-600 mb-4">What is the single most important, measurable outcome for this month?</p><div id="m1s1_battle" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly and placing smart orders.'" data-maxlength="500"></div><div class="mt-6"><label class="font-semibold block mb-3 text-gray-700">Monthly Focus Pillar:</label><div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m1s1"><button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button><button class="btn pillar-button" data-pillar="product"><i class="bi bi-cup-hot-fill"></i> Product</button><button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button><button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button></div></div></div>`
+            },
+            'm1s2': {
+                title: "Levers & Power-Up",
+                requiredFields: ['m1s2_levers', 'm1s2_powerup_q', 'm1s2_powerup_a'],
+                html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3><p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div><label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label><div id="m1s2_levers" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="1. Review ordering report with daily.&#10;2. Coach the team on the 'why' behind the production matrix." data-maxlength="600"></div></div><div class="space-y-4"><div><label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label><div id="m1s2_powerup_q" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., 'What is one thing that slows us down before 8am?'" data-maxlength="300"></div></div><div><label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label><div id="m1s2_powerup_a" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Pre-portioning key ingredients the night before." data-maxlength="300"></div></div></div></div></div>`
+            },
+            'm1s3': {
+                title: "People Growth",
+                requiredFields: ['m1s3_people'],
+                html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 3: People Growth</h3><p class="text-gray-600 mb-4">Who will I invest in this month to help us win our battle, and how?</p><div id="m1s3_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" data-maxlength="600"></div></div>`
+            },
+            'm1s4': {
+                title: "Protect the Core",
+                requiredFields: ['m1s4_people', 'm1s4_product', 'm1s4_customer', 'm1s4_place'],
+                html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 4: Protect the Core</h3><p class="text-gray-600 mb-6">One key behaviour you will protect for each pillar to ensure standards don't slip.</p><div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                    <div><label for="m1s4_people" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-people-fill"></i> PEOPLE</label><div id="m1s4_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Meaningful 1-2-1s with my two keyholders." data-maxlength="300"></div></div>
+                    <div><label for="m1s4_product" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-cup-hot-fill"></i> PRODUCT</label><div id="m1s4_product" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Daily quality checks of the first bake." data-maxlength="300"></div></div>
+                    <div><label for="m1s4_customer" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-heart-fill"></i> CUSTOMER</label><div id="m1s4_customer" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Action all customer feedback within 24 hours." data-maxlength="300"></div></div>
+                    <div><label for="m1s4_place" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-shop"></i> PLACE</label><div id="m1s4_place" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Complete a bakery travel path twice a day." data-maxlength="300"></div></div>
+                </div></div>`
+            },
+            'm1s5': {
+                title: "Weekly Check-in",
+                requiredFields: [],
+                html: `<div class="content-card p-8 weekly-check-in-container"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 5: Weekly Momentum Check</h3><p class="text-gray-600 mb-6">A 5-minute pulse check each Friday to maintain focus and celebrate wins.</p><div class="space-y-6">
+                    ${[1,2,3,4].map(w => `<div class="border-t border-gray-200 pt-4"><h4 class="font-bold text-lg mb-4">Week ${w}</h4><div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div><label class="font-semibold block mb-2 text-sm">Progress:</label><div class="flex items-center space-x-2 status-buttons" data-week="${w}"><button class="status-button" data-status="on-track">ON TRACK</button><button class="status-button" data-status="issues">ISSUES</button><button class="status-button" data-status="off-track">OFF TRACK</button></div></div>
+                        <div><label for="m1s5_w${w}_win" class="font-semibold block mb-2 text-sm">A Win or Learning:</label><div id="m1s5_w${w}_win" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., The team hit 80% availability on Thursday!" data-maxlength="400"></div></div>
+                        <div class="md:col-span-2"><label for="m1s5_w${w}_spotlight" class="font-semibold block mb-2 text-sm">Team Member Spotlight:</label><div id="m1s5_w${w}_spotlight" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Sarah for her excellent attention to detail during the bake." data-maxlength="400"></div></div>
+                    </div></div>`).join("")}
+                </div></div>`
+            },
+            'm1s6': {
+                title: "End of Month Review",
+                requiredFields: ['m1s6_win', 'm1s6_challenge', 'm1s6_next'],
+                html: `<div class="content-card p-8 bg-red-50 border border-red-100"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 6: End of Month Review</h3><p class="text-gray-600 mb-6">Reflect on the month to prepare for your conversation with your line manager.</p><div class="space-y-6">
+                <div><label for="m1s6_win" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-trophy-fill"></i> Biggest Win:</label><div id="m1s6_win" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
+                <div><label for="m1s6_challenge" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-lightbulb-fill"></i> Toughest Challenge & What I Learned:</label><div id="m1s6_challenge" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
+                <div><label for="m1s6_next" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-rocket-takeoff-fill"></i> What's Next (Focus for Next Month):</label><div id="m1s6_next" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
+                </div></div>`
+            },
             'm2s1': {},'m2s2': {},'m2s3': {},'m2s4': {},'m2s5': {},'m2s6': {},
             'm3s1': {},'m3s2': {},'m3s3': {},'m3s4': {},'m3s5': {},'m3s6': {},
             'm3s7': {
-    title: "Quarterly Reflection",
-    requiredFields: ['m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter'],
-    html: `<div class="content-card p-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);"><h3 class="text-xl font-bold mb-1" style="color: var(--review-blue-text);">Step 7: Final Quarterly Reflection</h3><p class="text-gray-600 mb-6">A deep dive into the whole quarter's performance to prepare for your review with your line manager.</p><div class="space-y-6">
-    <div><label for="m3s7_achievements" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> What were the quarter's biggest achievements?</label><div id="m3s7_achievements" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Consider financial results, team growth, customer feedback, and process improvements." data-maxlength="800"></div></div>
-    <div><label for="m3s7_challenges" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> What were the biggest challenges and what did you learn?</label><div id="m3s7_challenges" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="What didn't go to plan? What were the key takeaways?" data-maxlength="800"></div></div>
-    <div><label for="m3s7_narrative" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> How did you perform against the quarterly narrative?</label><div id="m3s7_narrative" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Review the 'Central Theme' you set in the Vision section. How well did you deliver on it?" data-maxlength="800"></div></div>
-    <div><label for="m3s7_next_quarter" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> What is the primary focus for next quarter?</label><div id="m3s7_next_quarter" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Based on your learnings, what is the 'must-win battle' for the next 90 days?" data-maxlength="800"></div></div>
-    </div></div>`
-}
+                title: "Quarterly Reflection",
+                requiredFields: ['m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter'],
+                html: `<div class="content-card p-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);"><h3 class="text-xl font-bold mb-1" style="color: var(--review-blue-text);">Step 7: Final Quarterly Reflection</h3><p class="text-gray-600 mb-6">A deep dive into the whole quarter's performance to prepare for your review with your line manager.</p><div class="space-y-6">
+                <div><label for="m3s7_achievements" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> What were the quarter's biggest achievements?</label><div id="m3s7_achievements" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Consider financial results, team growth, customer feedback, and process improvements." data-maxlength="800"></div></div>
+                <div><label for="m3s7_challenges" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> What were the biggest challenges and what did you learn?</label><div id="m3s7_challenges" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="What didn't go to plan? What were the key takeaways?" data-maxlength="800"></div></div>
+                <div><label for="m3s7_narrative" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> How did you perform against the quarterly narrative?</label><div id="m3s7_narrative" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Review the 'Central Theme' you set in the Vision section. How well did you deliver on it?" data-maxlength="800"></div></div>
+                <div><label for="m3s7_next_quarter" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> What is the primary focus for next quarter?</label><div id="m3s7_next_quarter" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Based on your learnings, what is the 'must-win battle' for the next 90 days?" data-maxlength="800"></div></div>
+                </div></div>`
+            }
         }
     };
     
@@ -416,15 +417,15 @@ const DOMElements = {
     }
 
     function handleBackToDashboard() {
-    localStorage.removeItem('lastPlanId');
-    localStorage.removeItem('lastViewId');
-    
-    appState.planData = {};
-    appState.currentPlanId = null;
-    DOMElements.appView.classList.add('hidden');
-    DOMElements.dashboardView.classList.remove('hidden');
-    renderDashboard();
-}
+        localStorage.removeItem('lastPlanId');
+        localStorage.removeItem('lastViewId');
+        
+        appState.planData = {};
+        appState.currentPlanId = null;
+        DOMElements.appView.classList.add('hidden');
+        DOMElements.dashboardView.classList.remove('hidden');
+        renderDashboard();
+    }
 
     // --- DATA HANDLING ---
     async function loadPlanFromFirestore() {
@@ -438,88 +439,89 @@ const DOMElements = {
     }
 
     function saveData(forceImmediate = false) {
-    if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
-
-    const fieldsToDelete = {}; // Object to track fields that need to be deleted from Firestore
-
-    document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
-        if (el.id) {
-            if (el.isContentEditable) {
-                appState.planData[el.id] = el.innerHTML;
-            } else {
-                appState.planData[el.id] = el.value;
+        if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
+    
+        const fieldsToDelete = {}; // Object to track fields that need to be deleted from Firestore
+    
+        document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
+            if (el.id) {
+                if (el.isContentEditable) {
+                    appState.planData[el.id] = el.innerHTML;
+                } else {
+                    appState.planData[el.id] = el.value;
+                }
             }
-        }
-    });
-
-    document.querySelectorAll('.pillar-buttons').forEach(group => {
-        const stepKey = group.dataset.stepKey;
-        const selected = group.querySelector('.selected');
-        const dataKey = `${stepKey}_pillar`;
-        if (selected) {
-            appState.planData[dataKey] = selected.dataset.pillar;
-        } else {
-            delete appState.planData[dataKey];
-            fieldsToDelete[dataKey] = firebase.firestore.FieldValue.delete();
-        }
-    });
-
-    if (appState.currentView.startsWith('month-')) {
-        const monthNum = appState.currentView.split('-')[1];
-        document.querySelectorAll('.status-buttons').forEach(group => {
-            const week = group.dataset.week;
+        });
+    
+        document.querySelectorAll('.pillar-buttons').forEach(group => {
+            const stepKey = group.dataset.stepKey;
             const selected = group.querySelector('.selected');
-            const key = `m${monthNum}s5_w${week}_status`;
+            const dataKey = `${stepKey}_pillar`;
             if (selected) {
-                appState.planData[key] = selected.dataset.status;
+                appState.planData[dataKey] = selected.dataset.pillar;
             } else {
-                delete appState.planData[key]; // Keep local state clean for UI updates
-                fieldsToDelete[key] = firebase.firestore.FieldValue.delete(); // Mark for deletion in Firestore
+                delete appState.planData[dataKey];
+                fieldsToDelete[dataKey] = firebase.firestore.FieldValue.delete();
             }
         });
-    }
-
-    updateUI();
-
-    clearTimeout(appState.saveTimeout);
-
-    const saveToFirestore = async () => {
-        const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
-
-        // Combine the current state with the fields marked for deletion for the final update
-        const dataToSave = {
-            ...appState.planData,
-            ...fieldsToDelete,
-            lastEdited: firebase.firestore.FieldValue.serverTimestamp()
+    
+        if (appState.currentView.startsWith('month-')) {
+            const monthNum = appState.currentView.split('-')[1];
+            document.querySelectorAll('.status-buttons').forEach(group => {
+                const week = group.dataset.week;
+                const selected = group.querySelector('.selected');
+                const key = `m${monthNum}s5_w${week}_status`;
+                if (selected) {
+                    appState.planData[key] = selected.dataset.status;
+                } else {
+                    delete appState.planData[key]; // Keep local state clean for UI updates
+                    fieldsToDelete[key] = firebase.firestore.FieldValue.delete(); // Mark for deletion in Firestore
+                }
+            });
+        }
+    
+        updateUI();
+    
+        clearTimeout(appState.saveTimeout);
+    
+        const saveToFirestore = async () => {
+            const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
+    
+            // Combine the current state with the fields marked for deletion for the final update
+            const dataToSave = {
+                ...appState.planData,
+                ...fieldsToDelete,
+                lastEdited: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            await docRef.set(dataToSave, { merge: true });
+    
+            DOMElements.saveIndicator.classList.remove('opacity-0');
+            setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
         };
-        
-        await docRef.set(dataToSave, { merge: true });
-
-        DOMElements.saveIndicator.classList.remove('opacity-0');
-        setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
-    };
-
-    if (forceImmediate) {
-        return saveToFirestore();
-    } else {
-        return new Promise(resolve => {
-            appState.saveTimeout = setTimeout(async () => {
-                await saveToFirestore();
-                resolve();
-            }, 1000);
-        });
+    
+        if (forceImmediate) {
+            return saveToFirestore();
+        } else {
+            return new Promise(resolve => {
+                appState.saveTimeout = setTimeout(async () => {
+                    await saveToFirestore();
+                    resolve();
+                }, 1000);
+            });
+        }
     }
-}
+
 
     // --- UI & RENDER LOGIC ---
     function updateUI() {
-    updateSidebarInfo();
-    updateOverallProgress();
-    updateSidebarNavStatus(); // This function checks and applies the 'completed' class
-    if (appState.currentView.startsWith('month-')) {
-        renderStepper(appState.monthContext[appState.currentView].currentStep);
+        updateSidebarInfo();
+        updateOverallProgress();
+        updateSidebarNavStatus();
+        if (appState.currentView.startsWith('month-')) {
+            renderStepper(appState.monthContext[appState.currentView].currentStep);
+        }
     }
-}
 
     function updateSidebarInfo() {
         const managerName = appState.planData.managerName || '';
@@ -536,12 +538,68 @@ const DOMElements = {
         }
     }
 
+    function getStepProgress(stepKey, data) {
+        const planData = data || appState.planData;
+        const isVisionStep = stepKey === 'vision';
+        // Get the correct definition object for either a vision or a monthly step
+        const stepDefinition = isVisionStep ? templates.vision : templates.step[stepKey];
+    
+        if (!stepDefinition) return { completed: 0, total: 0 };
+    
+        const isContentEmpty = (htmlContent) => {
+            if (!htmlContent) return true;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            return tempDiv.innerText.trim() === '';
+        };
+    
+        let completed = 0;
+        let total = 0;
+    
+        // Special handling for "Must-Win Battle"
+        if (!isVisionStep && stepKey.endsWith('s1')) {
+            total = 2;
+            if (!isContentEmpty(planData[`${stepKey}_battle`])) completed++;
+            if (!!planData[`${stepKey}_pillar`]) completed++;
+            return { completed, total };
+        }
+    
+        // Special handling for "Weekly Check-in"
+        if (!isVisionStep && stepKey.endsWith('s5')) {
+            total = 12; // 4 weeks * 3 fields (status, win, spotlight)
+            const monthNum = stepKey.charAt(1);
+            for (let w = 1; w <= 4; w++) {
+                if (!isContentEmpty(planData[`m${monthNum}s5_w${w}_win`])) completed++;
+                if (!isContentEmpty(planData[`m${monthNum}s5_w${w}_spotlight`])) completed++;
+                if (!!planData[`m${monthNum}s5_w${w}_status`]) completed++;
+            }
+            return { completed, total };
+        }
+        
+        // Default handling for all other steps (including the vision step)
+        const fields = stepDefinition.requiredFields;
+        if (!fields || fields.length === 0) {
+            return { completed: 0, total: 0 };
+        }
+    
+        total = fields.length;
+        completed = fields.filter(fieldId => {
+            const value = planData[fieldId];
+            if (typeof value === 'string' && (value.includes('<') && value.includes('>'))) {
+                 return !isContentEmpty(value);
+            }
+            return value && value.trim() !== '';
+        }).length;
+    
+        return { completed, total };
+    }
+
     function isStepComplete(stepKey, data) {
-    // A step is complete only if it has required fields and all of them are filled.
-    // This now uses the getStepProgress function as the single source of truth for completion logic.
-    const progress = getStepProgress(stepKey, data);
-    return progress.total > 0 && progress.completed === progress.total;
-}
+        // A step is complete only if it has required fields and all of them are filled.
+        // This now uses the getStepProgress function as the single source of truth for completion logic.
+        const progress = getStepProgress(stepKey, data);
+        return progress.total > 0 && progress.completed === progress.total;
+    }
 
     function isMonthComplete(monthNum) {
         const totalSteps = appState.monthContext[`month-${monthNum}`].totalSteps;
@@ -596,42 +654,40 @@ const DOMElements = {
     }
     
     function populateViewWithData() {
-    document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
-        if (el.isContentEditable) {
-             el.innerHTML = appState.planData[el.id] || '';
-        } else {
-             el.value = appState.planData[el.id] || '';
-        }
-    });
-
-    document.querySelectorAll('.pillar-buttons').forEach(group => {
-        const stepKey = group.dataset.stepKey;
-        const dataKey = `${stepKey}_pillar`;
-        const pillar = appState.planData[dataKey];
-        group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
-        if (pillar) {
-            const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
-            if (buttonToSelect) buttonToSelect.classList.add('selected');
-        }
-    });
-
-    if (appState.currentView.startsWith('month-')) {
-        const monthNum = appState.currentView.split('-')[1];
-        document.querySelectorAll('.status-buttons').forEach(group => {
-            const week = group.dataset.week;
-            const key = `m${monthNum}s5_w${week}_status`;
-            const status = appState.planData[key];
+        document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
+            if (el.isContentEditable) {
+                 el.innerHTML = appState.planData[el.id] || '';
+            } else {
+                 el.value = appState.planData[el.id] || '';
+            }
+        });
+    
+        document.querySelectorAll('.pillar-buttons').forEach(group => {
+            const stepKey = group.dataset.stepKey;
+            const dataKey = `${stepKey}_pillar`;
+            const pillar = appState.planData[dataKey];
             group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
-            if (status) {
-                const buttonToSelect = group.querySelector(`[data-status="${status}"]`);
+            if (pillar) {
+                const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
                 if (buttonToSelect) buttonToSelect.classList.add('selected');
             }
         });
+    
+        if (appState.currentView.startsWith('month-')) {
+            const monthNum = appState.currentView.split('-')[1];
+            document.querySelectorAll('.status-buttons').forEach(group => {
+                const week = group.dataset.week;
+                const key = `m${monthNum}s5_w${week}_status`;
+                const status = appState.planData[key];
+                group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+                if (status) {
+                    const buttonToSelect = group.querySelector(`[data-status="${status}"]`);
+                    if (buttonToSelect) buttonToSelect.classList.add('selected');
+                }
+            });
+        }
+        document.querySelectorAll('#app-view [contenteditable="true"]').forEach(managePlaceholder);
     }
-
-    // Add the new line right here
-    document.querySelectorAll('#app-view [contenteditable="true"]').forEach(managePlaceholder);
-}
 
     function switchView(viewId) {
         DOMElements.mainContent.scrollTop = 0;
@@ -656,11 +712,13 @@ const DOMElements = {
             DOMElements.desktopHeaderButtons.classList.remove('hidden');
             DOMElements.printBtn.classList.remove('hidden');
             DOMElements.shareBtn.classList.remove('hidden');
+            DOMElements.aiActionBtn.classList.remove('hidden');
             renderSummary();
         } else {
             DOMElements.desktopHeaderButtons.classList.add('hidden');
             DOMElements.printBtn.classList.add('hidden');
             DOMElements.shareBtn.classList.add('hidden');
+            DOMElements.aiActionBtn.classList.add('hidden');
             const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
             DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
 
@@ -708,97 +766,38 @@ const DOMElements = {
         }
     }
 
-    function getStepProgress(stepKey, data) {
-    const planData = data || appState.planData;
-    const isVisionStep = stepKey === 'vision';
-    // Get the correct definition object for either a vision or a monthly step
-    const stepDefinition = isVisionStep ? templates.vision : templates.step[stepKey];
-
-    if (!stepDefinition) return { completed: 0, total: 0 };
-
-    const isContentEmpty = (htmlContent) => {
-        if (!htmlContent) return true;
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = htmlContent;
-        return tempDiv.innerText.trim() === '';
-    };
-
-    let completed = 0;
-    let total = 0;
-
-    // Special handling for "Must-Win Battle"
-    if (!isVisionStep && stepKey.endsWith('s1')) {
-        total = 2;
-        if (!isContentEmpty(planData[`${stepKey}_battle`])) completed++;
-        if (!!planData[`${stepKey}_pillar`]) completed++;
-        return { completed, total };
-    }
-
-    // Special handling for "Weekly Check-in"
-    if (!isVisionStep && stepKey.endsWith('s5')) {
-        total = 12; // 4 weeks * 3 fields (status, win, spotlight)
-        const monthNum = stepKey.charAt(1);
-        for (let w = 1; w <= 4; w++) {
-            if (!isContentEmpty(planData[`m${monthNum}s5_w${w}_win`])) completed++;
-            if (!isContentEmpty(planData[`m${monthNum}s5_w${w}_spotlight`])) completed++;
-            if (!!planData[`m${monthNum}s5_w${w}_status`]) completed++;
-        }
-        return { completed, total };
-    }
-    
-    // Default handling for all other steps (including the vision step)
-    const fields = stepDefinition.requiredFields;
-    if (!fields || fields.length === 0) {
-        return { completed: 0, total: 0 };
-    }
-
-    total = fields.length;
-    completed = fields.filter(fieldId => {
-        const value = planData[fieldId];
-        if (typeof value === 'string' && (value.includes('<') && value.includes('>'))) {
-             return !isContentEmpty(value);
-        }
-        return value && value.trim() !== '';
-    }).length;
-
-    return { completed, total };
-}
-    
     function renderStepper(activeStep) {
-    const monthKey = appState.currentView;
-    const { totalSteps } = appState.monthContext[monthKey];
-    const monthNum = monthKey.split('-')[1];
-    const stepperNav = document.getElementById(`${monthKey}-stepper`);
-    if (!stepperNav) return;
-    stepperNav.innerHTML = '';
-    for (let i = 1; i <= totalSteps; i++) {
-        const stepKey = `m${monthNum}s${i}`;
-        const isComplete = isStepComplete(stepKey);
-        const item = document.createElement('div');
-        item.className = 'stepper-item flex items-start cursor-pointer';
-        item.dataset.step = i;
-        if (isComplete) item.classList.add('completed');
-        if (i === activeStep) item.classList.add('active');
+        const monthKey = appState.currentView;
+        const { totalSteps } = appState.monthContext[monthKey];
+        const monthNum = monthKey.split('-')[1];
+        const stepperNav = document.getElementById(`${monthKey}-stepper`);
+        if (!stepperNav) return;
+        stepperNav.innerHTML = '';
+        for (let i = 1; i <= totalSteps; i++) {
+            const stepKey = `m${monthNum}s${i}`;
+            const isComplete = isStepComplete(stepKey);
+            const item = document.createElement('div');
+            item.className = 'stepper-item flex items-start cursor-pointer';
+            item.dataset.step = i;
+            if (isComplete) item.classList.add('completed');
+            if (i === activeStep) item.classList.add('active');
 
-        const stepCircleContent = isComplete
-            ? `<i class="bi bi-check-lg"></i>`
-            : `<span class="step-number">${i}</span>`;
-        
-        // --- UPDATED LOGIC for more subtle progress text ---
-        const progress = getStepProgress(stepKey);
-        let progressHTML = '';
-        if (progress.total > 0) {
-            // Format as (X/Y) and wrap in a span to be placed inline with the title.
-            progressHTML = ` <span class="step-progress">(${progress.completed}/${progress.total})</span>`;
+            const stepCircleContent = isComplete
+                ? `<i class="bi bi-check-lg"></i>`
+                : `<span class="step-number">${i}</span>`;
+            
+            const progress = getStepProgress(stepKey);
+            let progressHTML = '';
+            if (progress.total > 0) {
+                progressHTML = ` <span class="step-progress">(${progress.completed}/${progress.total})</span>`;
+            }
+
+            item.innerHTML = `<div class="flex flex-col items-center mr-4"><div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">${stepCircleContent}</div>${i < totalSteps ? '<div class="step-line w-0.5 h-9"></div>' : ''}</div><div><p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}${progressHTML}</p></div>`;
+            item.addEventListener('click', () => renderStep(i));
+            stepperNav.appendChild(item);
         }
-        // --- END UPDATED LOGIC ---
-
-        // Append the progressHTML directly after the title within the same <p> tag.
-        item.innerHTML = `<div class="flex flex-col items-center mr-4"><div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">${stepCircleContent}</div>${i < totalSteps ? '<div class="step-line w-0.5 h-9"></div>' : ''}</div><div><p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}${progressHTML}</p></div>`;
-        item.addEventListener('click', () => renderStep(i));
-        stepperNav.appendChild(item);
     }
-}
+
     function renderSummary() {
         const formData = appState.planData;
         const e = (html) => (html || '...');
@@ -891,6 +890,72 @@ const DOMElements = {
             </div>`;
     }
 
+    function summarizePlanForAI(planData) {
+        const e = (text) => {
+            if (!text) return '';
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = text;
+            return tempDiv.innerText.trim();
+        };
+    
+        let summary = `QUARTERLY NARRATIVE: ${e(planData.quarterlyTheme)}\n\n`;
+    
+        for (let m = 1; m <= 3; m++) {
+            summary += `--- MONTH ${m} ---\n`;
+            summary += `GOAL: ${e(planData[`month${m}Goal`])}\n`;
+            summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
+            summary += `KEY LEVERS: ${e(planData[`m${m}s2_levers`])}\n`;
+            summary += `PEOPLE GROWTH: ${e(planData[`m${m}s3_people`])}\n`;
+            summary += `PROTECT THE CORE (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
+            summary += `PROTECT THE CORE (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
+            summary += `PROTECT THE CORE (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
+            summary += `PROTECT THE CORE (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
+        }
+        return summary;
+    }
+
+    async function generateAIActionPlan(summary) {
+        // --- AI Simulation ---
+        // This function acts as the AI. It takes the summarized plan
+        // and reframes it into a structured, actionable checklist.
+        const sections = summary.split('---').filter(s => s.trim() !== '');
+        let actionPlanHTML = `<div id="ai-printable-area">`;
+    
+        sections.forEach(section => {
+            if (section.includes("QUARTERLY NARRATIVE")) {
+                 actionPlanHTML += `<h2 class="text-2xl font-bold font-poppins mb-4">Quarterly Action Plan</h2><p class="mb-6 text-gray-600">Based on your narrative: <em>"${section.replace('QUARTERLY NARRATIVE:', '').trim()}"</em></p>`;
+                 return;
+            }
+    
+            const monthMatch = section.match(/MONTH (\d)/);
+            if (monthMatch) {
+                const monthNum = monthMatch[1];
+                actionPlanHTML += `<div class="month-section mt-8"><h3 class="text-xl font-bold font-poppins border-b pb-2 mb-4">Month ${monthNum}</h3>`;
+                
+                const lines = section.split('\n').filter(l => l.trim() !== '');
+                lines.forEach(line => {
+                    if (line.includes(`MONTH ${monthNum}`)) return;
+                    const [key, ...valueParts] = line.split(':');
+                    const value = valueParts.join(':').trim();
+                    if (!value) return;
+    
+                    actionPlanHTML += `<div class="task-category mt-4"><h4 class="font-semibold text-gray-800">${key.trim()}</h4><ul class="list-none space-y-2 mt-2">`;
+                    
+                    // Split multi-line values into individual checklist items
+                    const items = value.split(/\d\.\s|\s-\s|\n/).filter(i => i.trim() !== '');
+                    items.forEach(item => {
+                         actionPlanHTML += `<li class="flex items-start"><input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500 mt-1 mr-3"><span class="flex-1 text-gray-700">${item.trim()}</span></li>`;
+                    });
+                    actionPlanHTML += `</ul></div>`;
+                });
+                actionPlanHTML += `</div>`;
+            }
+        });
+    
+        actionPlanHTML += `</div>`;
+        return actionPlanHTML;
+    }
+
    async function handleShare() {
     openModal('sharing');
     
@@ -943,6 +1008,29 @@ const DOMElements = {
         const modalContent = document.getElementById('modal-content');
         modalContent.innerHTML = `<p class="text-red-600">Could not create a shareable link. Please try again later.</p>`;
     }
+}
+
+async function handleAIActionPlan() {
+    openModal('aiActionPlan');
+    const planSummary = summarizePlanForAI(appState.planData);
+    const actionPlanHTML = await generateAIActionPlan(planSummary);
+
+    const modalContent = document.getElementById('modal-content');
+    modalContent.innerHTML = actionPlanHTML;
+
+    // Make the primary button a "Print" button
+    DOMElements.modalActionBtn.textContent = 'Print Plan';
+    DOMElements.modalActionBtn.style.display = 'inline-flex';
+    DOMElements.modalActionBtn.onclick = () => {
+        const printableArea = document.getElementById('ai-printable-area').innerHTML;
+        const originalContents = document.body.innerHTML;
+        document.body.innerHTML = `<div class="prose p-8">${printableArea}</div>`;
+        window.print();
+        document.body.innerHTML = originalContents;
+        // This is a bit of a hack for a demo; a real app would need to re-initialize event listeners
+        window.location.reload(); 
+    };
+    DOMElements.modalCancelBtn.textContent = 'Done';
 }
 
     // --- Modal Management ---
@@ -1017,6 +1105,18 @@ const DOMElements = {
                     <div class="flex items-center justify-center p-8">
                         <div class="loading-spinner"></div>
                         <p class="ml-4 text-gray-600">Generating secure shareable link...</p>
+                    </div>
+                `;
+                DOMElements.modalActionBtn.style.display = 'none';
+                DOMElements.modalCancelBtn.textContent = 'Cancel';
+                DOMElements.modalCancelBtn.style.display = 'inline-flex';
+                break;
+            case 'aiActionPlan':
+                DOMElements.modalTitle.textContent = "AI Generated Action Plan";
+                DOMElements.modalContent.innerHTML = `
+                    <div class="flex items-center justify-center p-8">
+                        <div class="loading-spinner"></div>
+                        <p class="ml-4 text-gray-600">Your AI assistant is analyzing your plan...</p>
                     </div>
                 `;
                 DOMElements.modalActionBtn.style.display = 'none';
@@ -1294,40 +1394,40 @@ const DOMElements = {
     });
 
     DOMElements.contentArea.addEventListener('input', (e) => { 
-    if (e.target.matches('input, [contenteditable="true"]')) { 
-        saveData(); 
-    }
-    // Add this check to manage the placeholder on every input event
-    if (e.target.isContentEditable) {
-        managePlaceholder(e.target);
-    }
-});
+        if (e.target.matches('input, [contenteditable="true"]')) { 
+            saveData(); 
+        }
+        if (e.target.isContentEditable) {
+            managePlaceholder(e.target);
+        }
+    });
 
     DOMElements.contentArea.addEventListener('click', (e) => {
-    const target = e.target;
-
-    const pillarButton = target.closest('.pillar-button');
-    if (pillarButton) {
-        const alreadySelected = pillarButton.classList.contains('selected');
-        pillarButton.parentElement.querySelectorAll('.pillar-button').forEach(btn => btn.classList.remove('selected'));
-        if (!alreadySelected) {
-            pillarButton.classList.add('selected');
+        const target = e.target;
+    
+        const pillarButton = target.closest('.pillar-button');
+        if (pillarButton) {
+            const alreadySelected = pillarButton.classList.contains('selected');
+            pillarButton.parentElement.querySelectorAll('.pillar-button').forEach(btn => btn.classList.remove('selected'));
+            if (!alreadySelected) {
+                pillarButton.classList.add('selected');
+            }
+            saveData(true);
+            return;
         }
-        saveData(true); // Changed from saveData()
-        return;
-    }
-
-    if (target.closest('.status-button')) {
-        const button = target.closest('.status-button');
-        const alreadySelected = button.classList.contains('selected');
-        button.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
-        if (!alreadySelected) button.classList.add('selected');
-        saveData(true); // Changed from saveData()
-    }
-});
+    
+        if (target.closest('.status-button')) {
+            const button = target.closest('.status-button');
+            const alreadySelected = button.classList.contains('selected');
+            button.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
+            if (!alreadySelected) button.classList.add('selected');
+            saveData(true);
+        }
+    });
 
     DOMElements.printBtn.addEventListener('click', () => window.print());
     DOMElements.shareBtn.addEventListener('click', handleShare);
+    DOMElements.aiActionBtn.addEventListener('click', handleAIActionPlan);
 
     DOMElements.modalCloseBtn.addEventListener('click', closeModal);
     DOMElements.modalCancelBtn.addEventListener('click', closeModal);
@@ -1399,19 +1499,3 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
