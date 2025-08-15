@@ -508,6 +508,32 @@ textarea.form-input {
     padding-bottom: 0.5rem;
 }
 
+/* 25. Redesigned Summary Page Styles
+-------------------------------------------------- */
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Default to single column on mobile */
+}
+
+/* Two-column layout for wider screens */
+@media (min-width: 768px) {
+    .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.summary-section:not(:first-child) {
+    margin-top: 2rem;
+}
+
+.summary-heading {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--gails-red);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+}
 
 
 
