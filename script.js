@@ -435,67 +435,78 @@ const DOMElements = {
     }
 
     function saveData(forceImmediate = false) {
-        if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
-    
-        document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
-            if (el.id) {
-                if (el.isContentEditable) {
-                    appState.planData[el.id] = el.innerHTML;
-                } else {
-                    appState.planData[el.id] = el.value;
-                }
-            }
-        });
-    
-        document.querySelectorAll('.pillar-buttons').forEach(group => {
-            const stepKey = group.dataset.stepKey;
-            const selected = group.querySelector('.selected');
-            const dataKey = `${stepKey}_pillar`;
-            if (selected) {
-                appState.planData[dataKey] = selected.dataset.pillar;
+    if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
+
+    const fieldsToDelete = {}; // Object to track fields that need to be deleted from Firestore
+
+    document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
+        if (el.id) {
+            if (el.isContentEditable) {
+                appState.planData[el.id] = el.innerHTML;
             } else {
-                delete appState.planData[dataKey];
+                appState.planData[el.id] = el.value;
+            }
+        }
+    });
+
+    document.querySelectorAll('.pillar-buttons').forEach(group => {
+        const stepKey = group.dataset.stepKey;
+        const selected = group.querySelector('.selected');
+        const dataKey = `${stepKey}_pillar`;
+        if (selected) {
+            appState.planData[dataKey] = selected.dataset.pillar;
+        } else {
+            delete appState.planData[dataKey];
+            fieldsToDelete[dataKey] = firebase.firestore.FieldValue.delete();
+        }
+    });
+
+    if (appState.currentView.startsWith('month-')) {
+        const monthNum = appState.currentView.split('-')[1];
+        document.querySelectorAll('.status-buttons').forEach(group => {
+            const week = group.dataset.week;
+            const selected = group.querySelector('.selected');
+            const key = `m${monthNum}s5_w${week}_status`;
+            if (selected) {
+                appState.planData[key] = selected.dataset.status;
+            } else {
+                delete appState.planData[key]; // Keep local state clean for UI updates
+                fieldsToDelete[key] = firebase.firestore.FieldValue.delete(); // Mark for deletion in Firestore
             }
         });
-    
-        if (appState.currentView.startsWith('month-')) {
-            const monthNum = appState.currentView.split('-')[1];
-            document.querySelectorAll('.status-buttons').forEach(group => {
-                const week = group.dataset.week;
-                const selected = group.querySelector('.selected');
-                const key = `m${monthNum}s5_w${week}_status`;
-                if (selected) {
-                    appState.planData[key] = selected.dataset.status;
-                } else {
-                    delete appState.planData[key];
-                }
-            });
-        }
-    
-        updateUI();
-    
-        clearTimeout(appState.saveTimeout);
-    
-        const saveToFirestore = async () => {
-            const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
-            await docRef.set({ ...appState.planData, lastEdited: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-    
-            DOMElements.saveIndicator.classList.remove('opacity-0');
-            setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
-        };
-    
-        if (forceImmediate) {
-            return saveToFirestore();
-        } else {
-            return new Promise(resolve => {
-                appState.saveTimeout = setTimeout(async () => {
-                    await saveToFirestore();
-                    resolve();
-                }, 1000);
-            });
-        }
     }
 
+    updateUI();
+
+    clearTimeout(appState.saveTimeout);
+
+    const saveToFirestore = async () => {
+        const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
+
+        // Combine the current state with the fields marked for deletion for the final update
+        const dataToSave = {
+            ...appState.planData,
+            ...fieldsToDelete,
+            lastEdited: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await docRef.set(dataToSave, { merge: true });
+
+        DOMElements.saveIndicator.classList.remove('opacity-0');
+        setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
+    };
+
+    if (forceImmediate) {
+        return saveToFirestore();
+    } else {
+        return new Promise(resolve => {
+            appState.saveTimeout = setTimeout(async () => {
+                await saveToFirestore();
+                resolve();
+            }, 1000);
+        });
+    }
+}
 
     // --- UI & RENDER LOGIC ---
     function updateUI() {
@@ -1375,6 +1386,7 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
