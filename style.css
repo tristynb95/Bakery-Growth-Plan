@@ -421,8 +421,8 @@ textarea.form-input {
     line-height: 1.6;  /* Improves readability of multi-line text */
 }
 
-/* Replicates placeholder text for contenteditable divs */
-[contenteditable="true"].form-input:empty::before {
+/* Replicates placeholder text for contenteditable divs using a JS-managed class */
+[contenteditable="true"].form-input.is-placeholder-showing::before {
     content: attr(data-placeholder);
     color: #9CA3AF; /* Standard placeholder text colour */
     pointer-events: none; /* Allows clicking through the placeholder */
@@ -449,6 +449,7 @@ textarea.form-input {
     color: var(--gails-text-secondary);
     margin-left: 0.5rem; /* Space between title and counter */
 }
+
 
 
 
