@@ -517,6 +517,7 @@ const DOMElements = {
     function updateUI() {
         updateSidebarInfo();
         updateOverallProgress();
+        updateSidebarNavStatus();
         if (appState.currentView.startsWith('month-')) {
             renderStepper(appState.monthContext[appState.currentView].currentStep);
         }
@@ -539,7 +540,10 @@ const DOMElements = {
 
     function getStepProgress(stepKey, data) {
         const planData = data || appState.planData;
-        const stepDefinition = templates.step[stepKey];
+        const isVisionStep = stepKey === 'vision';
+        // Get the correct definition object for either a vision or a monthly step
+        const stepDefinition = isVisionStep ? templates.vision : templates.step[stepKey];
+    
         if (!stepDefinition) return { completed: 0, total: 0 };
     
         const isContentEmpty = (htmlContent) => {
@@ -552,14 +556,16 @@ const DOMElements = {
         let completed = 0;
         let total = 0;
     
-        if (stepKey.endsWith('s1') && stepKey.startsWith('m')) {
+        // Special handling for "Must-Win Battle"
+        if (!isVisionStep && stepKey.endsWith('s1')) {
             total = 2;
             if (!isContentEmpty(planData[`${stepKey}_battle`])) completed++;
             if (!!planData[`${stepKey}_pillar`]) completed++;
             return { completed, total };
         }
     
-        if (stepKey.endsWith('s5')) {
+        // Special handling for "Weekly Check-in"
+        if (!isVisionStep && stepKey.endsWith('s5')) {
             total = 12; // 4 weeks * 3 fields (status, win, spotlight)
             const monthNum = stepKey.charAt(1);
             for (let w = 1; w <= 4; w++) {
@@ -570,6 +576,7 @@ const DOMElements = {
             return { completed, total };
         }
         
+        // Default handling for all other steps (including the vision step)
         const fields = stepDefinition.requiredFields;
         if (!fields || fields.length === 0) {
             return { completed: 0, total: 0 };
@@ -588,6 +595,8 @@ const DOMElements = {
     }
 
     function isStepComplete(stepKey, data) {
+        // A step is complete only if it has required fields and all of them are filled.
+        // This now uses the getStepProgress function as the single source of truth for completion logic.
         const progress = getStepProgress(stepKey, data);
         return progress.total > 0 && progress.completed === progress.total;
     }
@@ -677,6 +686,7 @@ const DOMElements = {
                 }
             });
         }
+        document.querySelectorAll('#app-view [contenteditable="true"]').forEach(managePlaceholder);
     }
 
     function switchView(viewId) {
@@ -702,11 +712,13 @@ const DOMElements = {
             DOMElements.desktopHeaderButtons.classList.remove('hidden');
             DOMElements.printBtn.classList.remove('hidden');
             DOMElements.shareBtn.classList.remove('hidden');
+            DOMElements.aiActionBtn.classList.remove('hidden');
             renderSummary();
         } else {
             DOMElements.desktopHeaderButtons.classList.add('hidden');
             DOMElements.printBtn.classList.add('hidden');
             DOMElements.shareBtn.classList.add('hidden');
+            DOMElements.aiActionBtn.classList.add('hidden');
             const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
             DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
 
@@ -769,7 +781,18 @@ const DOMElements = {
             item.dataset.step = i;
             if (isComplete) item.classList.add('completed');
             if (i === activeStep) item.classList.add('active');
-            item.innerHTML = `<div class="flex flex-col items-center mr-4"><div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"><span class="step-number">${i}</span></div>${i < totalSteps ? '<div class="step-line w-0.5 h-9"></div>' : ''}</div><div><p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}</p></div>`;
+
+            const stepCircleContent = isComplete
+                ? `<i class="bi bi-check-lg"></i>`
+                : `<span class="step-number">${i}</span>`;
+            
+            const progress = getStepProgress(stepKey);
+            let progressHTML = '';
+            if (progress.total > 0) {
+                progressHTML = ` <span class="step-progress">(${progress.completed}/${progress.total})</span>`;
+            }
+
+            item.innerHTML = `<div class="flex flex-col items-center mr-4"><div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">${stepCircleContent}</div>${i < totalSteps ? '<div class="step-line w-0.5 h-9"></div>' : ''}</div><div><p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}${progressHTML}</p></div>`;
             item.addEventListener('click', () => renderStep(i));
             stepperNav.appendChild(item);
         }
@@ -867,6 +890,70 @@ const DOMElements = {
             </div>`;
     }
 
+    function summarizePlanForAI(planData) {
+        const e = (text) => {
+            if (!text) return '';
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = text;
+            return tempDiv.innerText.trim();
+        };
+    
+        let summary = `QUARTERLY NARRATIVE: ${e(planData.quarterlyTheme)}\n\n`;
+    
+        for (let m = 1; m <= 3; m++) {
+            summary += `--- MONTH ${m} ---\n`;
+            summary += `GOAL: ${e(planData[`month${m}Goal`])}\n`;
+            summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
+            summary += `KEY LEVERS: ${e(planData[`m${m}s2_levers`])}\n`;
+            summary += `PEOPLE GROWTH: ${e(planData[`m${m}s3_people`])}\n`;
+            summary += `PROTECT THE CORE (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
+            summary += `PROTECT THE CORE (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
+            summary += `PROTECT THE CORE (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
+            summary += `PROTECT THE CORE (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
+        }
+        return summary;
+    }
+
+    function handleSaveAsWord() {
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel, Bullet } = docx;
+    
+        const printableArea = document.getElementById('ai-printable-area');
+        if (!printableArea) return;
+    
+        const children = Array.from(printableArea.children);
+        const docSections = [];
+    
+        // This loop converts the HTML plan into a format the docx library understands
+        children.forEach(node => {
+            if (node.tagName === 'H2') {
+                docSections.push(new Paragraph({ text: node.innerText, heading: HeadingLevel.HEADING_1, spacing: { before: 400, after: 200 } }));
+            } else if (node.tagName === 'P') {
+                docSections.push(new Paragraph({ children: [new TextRun({ text: node.innerText, italics: true })], spacing: { after: 200 } }));
+            } else if (node.classList.contains('month-section')) {
+                const heading = node.querySelector('h3');
+                if (heading) {
+                    docSections.push(new Paragraph({ text: heading.innerText, heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 150 } }));
+                }
+                const items = node.querySelectorAll('li');
+                items.forEach(item => {
+                    docSections.push(new Paragraph({ text: item.innerText, bullet: { level: 0 }, indent: { left: 720 } }));
+                });
+            }
+        });
+    
+        const doc = new Document({
+            sections: [{
+                properties: {},
+                children: docSections,
+            }],
+        });
+    
+        Packer.toBlob(doc).then(blob => {
+            // Use the FileSaver library to trigger the download
+            saveAs(blob, "AI-Generated Action Plan.docx");
+        });
+    }
+
    async function handleShare() {
     openModal('sharing');
     
@@ -918,6 +1005,61 @@ const DOMElements = {
         console.error("Error creating shareable link:", error);
         const modalContent = document.getElementById('modal-content');
         modalContent.innerHTML = `<p class="text-red-600">Could not create a shareable link. Please try again later.</p>`;
+    }
+}
+
+async function handleAIActionPlan() {
+    openModal('aiActionPlan'); // Shows the "loading..." modal
+    
+    try {
+        const planSummary = summarizePlanForAI(appState.planData);
+        
+        const response = await fetch('/.netlify/functions/generate-plan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ planSummary: planSummary })
+        });
+
+        if (!response.ok) {
+            // Try to get a more specific error message from the backend
+            const errorResult = await response.json();
+            throw new Error(errorResult.error || 'The AI assistant failed to generate a response.');
+        }
+
+        const data = await response.json();
+        const actionPlanHTML = `<div id="ai-printable-area">${data.actionPlan}</div>`;
+
+        const modalContent = document.getElementById('modal-content');
+        modalContent.innerHTML = actionPlanHTML;
+
+        // --- Add a Save as Word button ---
+        const saveButton = document.createElement('button');
+        saveButton.id = 'modal-save-word-btn';
+        saveButton.className = 'btn btn-secondary';
+        saveButton.innerHTML = 'Save as Word';
+        saveButton.onclick = handleSaveAsWord;
+        DOMElements.modalActionBtn.parentNode.insertBefore(saveButton, DOMElements.modalActionBtn);
+
+
+        // --- Update existing buttons ---
+        DOMElements.modalActionBtn.textContent = 'Print Plan';
+        DOMElements.modalActionBtn.style.display = 'inline-flex';
+        DOMElements.modalActionBtn.onclick = () => {
+            const printableArea = document.getElementById('ai-printable-area').innerHTML;
+            const originalContents = document.body.innerHTML;
+            document.body.innerHTML = `<div class="prose p-8">${printableArea}</div>`;
+            window.print();
+            document.body.innerHTML = originalContents;
+            window.location.reload(); 
+        };
+        DOMElements.modalCancelBtn.textContent = 'Done';
+
+    } catch (error) {
+        console.error("Error generating AI plan:", error);
+        const modalContent = document.getElementById('modal-content');
+        modalContent.innerHTML = `<p class="text-red-600 font-semibold">An error occurred.</p><p class="text-gray-600 mt-2 text-sm">Could not connect to the AI assistant. Please ensure your API key is correct and try again later.</p>`;
+        DOMElements.modalActionBtn.style.display = 'none';
+        DOMElements.modalCancelBtn.textContent = 'Close';
     }
 }
 
@@ -999,6 +1141,18 @@ const DOMElements = {
                 DOMElements.modalCancelBtn.textContent = 'Cancel';
                 DOMElements.modalCancelBtn.style.display = 'inline-flex';
                 break;
+            case 'aiActionPlan':
+                DOMElements.modalTitle.textContent = "AI Generated Action Plan";
+                DOMElements.modalContent.innerHTML = `
+                    <div class="flex items-center justify-center p-8">
+                        <div class="loading-spinner"></div>
+                        <p class="ml-4 text-gray-600">Your AI assistant is analyzing your plan...</p>
+                    </div>
+                `;
+                DOMElements.modalActionBtn.style.display = 'none';
+                DOMElements.modalCancelBtn.textContent = 'Cancel';
+                DOMElements.modalCancelBtn.style.display = 'inline-flex';
+                break;
         }
         DOMElements.modalOverlay.classList.remove('hidden');
         window.addEventListener('keydown', handleEscKey);
@@ -1010,6 +1164,11 @@ const DOMElements = {
     }
 
     function closeModal() {
+        const saveWordBtn = document.getElementById('modal-save-word-btn');
+        if (saveWordBtn) {
+            saveWordBtn.remove();
+        }
+    
         if (DOMElements.modalBox.dataset.type === 'timeout') {
             DOMElements.modalOverlay.classList.add('hidden');
             window.removeEventListener('keydown', handleEscKey);
@@ -1273,6 +1432,9 @@ const DOMElements = {
         if (e.target.matches('input, [contenteditable="true"]')) { 
             saveData(); 
         }
+        if (e.target.isContentEditable) {
+            managePlaceholder(e.target);
+        }
     });
 
     DOMElements.contentArea.addEventListener('click', (e) => {
@@ -1285,7 +1447,7 @@ const DOMElements = {
             if (!alreadySelected) {
                 pillarButton.classList.add('selected');
             }
-            saveData();
+            saveData(true);
             return;
         }
     
@@ -1294,12 +1456,13 @@ const DOMElements = {
             const alreadySelected = button.classList.contains('selected');
             button.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
             if (!alreadySelected) button.classList.add('selected');
-            saveData();
+            saveData(true);
         }
     });
 
     DOMElements.printBtn.addEventListener('click', () => window.print());
     DOMElements.shareBtn.addEventListener('click', handleShare);
+    DOMElements.aiActionBtn.addEventListener('click', handleAIActionPlan);
 
     DOMElements.modalCloseBtn.addEventListener('click', closeModal);
     DOMElements.modalCancelBtn.addEventListener('click', closeModal);
