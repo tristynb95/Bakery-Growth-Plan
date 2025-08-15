@@ -1115,26 +1115,48 @@ async function handleAIActionPlan() {
                 }
             }
 
-            // --- THIS is the updated part ---
+            // --- NEW: Redesigned Print Styles ---
             const printSpecificStyles = `
                 @media print {
                     body {
-                        font-family: 'Inter', sans-serif;
+                        font-family: 'DM Sans', sans-serif;
                         -webkit-print-color-adjust: exact !important;
                         color-adjust: exact !important;
                     }
                     h2 {
                         font-family: 'Poppins', sans-serif;
+                        color: #1F2937;
+                        margin-top: 1.5rem;
+                        padding-bottom: 0.5rem;
+                        border-bottom: 2px solid #F3F4F6;
+                    }
+                    h2:not(:first-of-type) {
+                        page-break-before: always; /* Start each month on a new page */
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 1rem;
                     }
                     th, td {
-                        border: 1px solid #D1D5DB !important;
-                        padding: 0.5rem !important; /* Adds space inside the cells */
-                        text-align: center !important; /* Centers text horizontally */
-                        vertical-align: middle !important; /* Centers text vertically */
+                        padding: 0.75rem !important; /* Increase padding */
+                        text-align: center !important;
+                        vertical-align: middle !important;
+                        border: none !important; /* Remove all borders */
+                        border-bottom: 1px solid #E5E7EB !important; /* Add horizontal lines only */
                     }
                     th {
-                        background-color: #F3F4F6 !important;
-                        color: #D10A11 !important;
+                        background-color: transparent !important; /* Cleaner header */
+                        color: #D10A11 !important; /* GAIL's Red */
+                        font-weight: 600 !important;
+                        text-align: left !important; /* Left-align headers for readability */
+                        border-bottom-width: 2px !important;
+                    }
+                    td {
+                         color: #1F2937;
+                    }
+                    tr:nth-child(even) td {
+                        background-color: #FDFDFC !important; /* Subtle zebra striping */
                     }
                     @page {
                         size: A4 portrait;
@@ -1142,7 +1164,6 @@ async function handleAIActionPlan() {
                     }
                 }
             `;
-            // --- End of updated part ---
 
             const printPageHTML = `
                 <html>
@@ -1150,7 +1171,7 @@ async function handleAIActionPlan() {
                         <title>AI Generated Action Plan</title>
                         <link rel="preconnect" href="https://fonts.googleapis.com">
                         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-                        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700;900&display=swap" rel="stylesheet">
+                        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@700;900&display=swap" rel="stylesheet">
                         <style>
                             ${allStyles}
                             ${printSpecificStyles}
@@ -1650,6 +1671,7 @@ async function handleAIActionPlan() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
