@@ -727,58 +727,58 @@ const DOMElements = {
         }
     }
 
-    function getStepProgress(stepKey) {
-        const planData = appState.planData;
-        const stepDefinition = templates.step[stepKey];
-        if (!stepDefinition) return { completed: 0, total: 0 };
+    function getStepProgress(stepKey, data) {
+    const planData = data || appState.planData;
+    const stepDefinition = templates.step[stepKey];
+    if (!stepDefinition) return { completed: 0, total: 0 };
 
-        const isContentEmpty = (htmlContent) => {
-            if (!htmlContent) return true;
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlContent;
-            return tempDiv.innerText.trim() === '';
-        };
+    const isContentEmpty = (htmlContent) => {
+        if (!htmlContent) return true;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        return tempDiv.innerText.trim() === '';
+    };
 
-        let completed = 0;
-        let total = 0;
+    let completed = 0;
+    let total = 0;
 
-        // Special handling for "Must-Win Battle" which has a text input and a pillar selection
-        if (stepKey.endsWith('s1') && stepKey.startsWith('m')) {
-            total = 2;
-            if (!isContentEmpty(planData[`${stepKey}_battle`])) completed++;
-            if (!!planData[`${stepKey}_pillar`]) completed++;
-            return { completed, total };
-        }
-
-        // Special handling for "Weekly Check-in" which has multiple fields per week
-        if (stepKey.endsWith('s5')) {
-            total = 12; // 4 weeks * 3 fields (status, win, spotlight)
-            const monthNum = stepKey.charAt(1);
-            for (let w = 1; w <= 4; w++) {
-                if (!isContentEmpty(planData[`m${monthNum}s5_w${w}_win`])) completed++;
-                if (!isContentEmpty(planData[`m${monthNum}s5_w${w}_spotlight`])) completed++;
-                if (!!planData[`m${monthNum}s5_w${w}_status`]) completed++;
-            }
-            return { completed, total };
-        }
-        
-        // Default handling for all other steps based on their required fields
-        const fields = stepDefinition.requiredFields;
-        if (!fields || fields.length === 0) {
-            return { completed: 0, total: 0 };
-        }
-
-        total = fields.length;
-        completed = fields.filter(fieldId => {
-            const value = planData[fieldId];
-            if (typeof value === 'string' && (value.includes('<') && value.includes('>'))) {
-                 return !isContentEmpty(value);
-            }
-            return value && value.trim() !== '';
-        }).length;
-
+    // Special handling for "Must-Win Battle" which has a text input and a pillar selection
+    if (stepKey.endsWith('s1') && stepKey.startsWith('m')) {
+        total = 2;
+        if (!isContentEmpty(planData[`${stepKey}_battle`])) completed++;
+        if (!!planData[`${stepKey}_pillar`]) completed++;
         return { completed, total };
     }
+
+    // Special handling for "Weekly Check-in" which has multiple fields per week
+    if (stepKey.endsWith('s5')) {
+        total = 12; // 4 weeks * 3 fields (status, win, spotlight)
+        const monthNum = stepKey.charAt(1);
+        for (let w = 1; w <= 4; w++) {
+            if (!isContentEmpty(planData[`m${monthNum}s5_w${w}_win`])) completed++;
+            if (!isContentEmpty(planData[`m${monthNum}s5_w${w}_spotlight`])) completed++;
+            if (!!planData[`m${monthNum}s5_w${w}_status`]) completed++;
+        }
+        return { completed, total };
+    }
+    
+    // Default handling for all other steps based on their required fields
+    const fields = stepDefinition.requiredFields;
+    if (!fields || fields.length === 0) {
+        return { completed: 0, total: 0 };
+    }
+
+    total = fields.length;
+    completed = fields.filter(fieldId => {
+        const value = planData[fieldId];
+        if (typeof value === 'string' && (value.includes('<') && value.includes('>'))) {
+             return !isContentEmpty(value);
+        }
+        return value && value.trim() !== '';
+    }).length;
+
+    return { completed, total };
+}
     
     function renderStepper(activeStep) {
     const monthKey = appState.currentView;
@@ -1411,6 +1411,7 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
