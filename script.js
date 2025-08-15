@@ -1115,6 +1115,7 @@ async function handleAIActionPlan() {
                 }
             }
 
+            // --- THIS is the updated part ---
             const printSpecificStyles = `
                 @media print {
                     body {
@@ -1126,8 +1127,10 @@ async function handleAIActionPlan() {
                         font-family: 'Poppins', sans-serif;
                     }
                     th, td {
-                        /* This is the updated line */
                         border: 1px solid #D1D5DB !important;
+                        padding: 0.5rem !important; /* Adds space inside the cells */
+                        text-align: center !important; /* Centers text horizontally */
+                        vertical-align: middle !important; /* Centers text vertically */
                     }
                     th {
                         background-color: #F3F4F6 !important;
@@ -1139,6 +1142,7 @@ async function handleAIActionPlan() {
                     }
                 }
             `;
+            // --- End of updated part ---
 
             const printPageHTML = `
                 <html>
@@ -1174,6 +1178,7 @@ async function handleAIActionPlan() {
         DOMElements.modalCancelBtn.textContent = 'Close';
     }
 }
+    
     // --- Modal Management ---
     const handleEscKey = (event) => {
         if (event.key === 'Escape') {
@@ -1645,6 +1650,7 @@ async function handleAIActionPlan() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
