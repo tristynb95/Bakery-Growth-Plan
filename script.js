@@ -915,44 +915,62 @@ const DOMElements = {
     }
 
     function handleSaveAsWord() {
-        const { Document, Packer, Paragraph, TextRun, HeadingLevel, Bullet } = docx;
-    
-        const printableArea = document.getElementById('ai-printable-area');
-        if (!printableArea) return;
-    
-        const children = Array.from(printableArea.children);
-        const docSections = [];
-    
-        // This loop converts the HTML plan into a format the docx library understands
-        children.forEach(node => {
-            if (node.tagName === 'H2') {
-                docSections.push(new Paragraph({ text: node.innerText, heading: HeadingLevel.HEADING_1, spacing: { before: 400, after: 200 } }));
-            } else if (node.tagName === 'P') {
-                docSections.push(new Paragraph({ children: [new TextRun({ text: node.innerText, italics: true })], spacing: { after: 200 } }));
-            } else if (node.classList.contains('month-section')) {
-                const heading = node.querySelector('h3');
-                if (heading) {
-                    docSections.push(new Paragraph({ text: heading.innerText, heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 150 } }));
-                }
-                const items = node.querySelectorAll('li');
-                items.forEach(item => {
-                    docSections.push(new Paragraph({ text: item.innerText, bullet: { level: 0 }, indent: { left: 720 } }));
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType } = docx;
+
+    const printableArea = document.getElementById('ai-printable-area');
+    if (!printableArea) return;
+
+    const docSections = [];
+    const elements = Array.from(printableArea.children);
+
+    elements.forEach(element => {
+        // Add main headings (e.g., "Month 1 Action Plan")
+        if (element.tagName === 'H2') {
+            docSections.push(new Paragraph({ text: element.innerText, heading: HeadingLevel.HEADING_2, spacing: { before: 400, after: 200 } }));
+        }
+
+        // Process and convert the HTML table
+        if (element.tagName === 'TABLE') {
+            const tableRows = [];
+            const htmlRows = Array.from(element.querySelectorAll('tr'));
+
+            htmlRows.forEach(htmlRow => {
+                const tableCells = [];
+                const htmlCells = Array.from(htmlRow.children); // Use .children to get both <th> and <td>
+
+                htmlCells.forEach(htmlCell => {
+                    tableCells.push(
+                        new TableCell({
+                            children: [new Paragraph({ text: htmlCell.innerText })],
+                        })
+                    );
                 });
-            }
-        });
-    
-        const doc = new Document({
-            sections: [{
-                properties: {},
-                children: docSections,
-            }],
-        });
-    
-        Packer.toBlob(doc).then(blob => {
-            // Use the FileSaver library to trigger the download
-            saveAs(blob, "AI-Generated Action Plan.docx");
-        });
-    }
+
+                tableRows.push(new TableRow({ children: tableCells }));
+            });
+
+            const docxTable = new Table({
+                rows: tableRows,
+                width: {
+                    size: 100,
+                    type: WidthType.PERCENTAGE,
+                },
+            });
+            docSections.push(docxTable);
+        }
+    });
+
+
+    const doc = new Document({
+        sections: [{
+            children: docSections,
+        }],
+    });
+
+    Packer.toBlob(doc).then(blob => {
+        saveAs(blob, "AI-Generated Action Plan.docx");
+    });
+}
 
    async function handleShare() {
     openModal('sharing');
@@ -1534,3 +1552,4 @@ async function handleAIActionPlan() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
