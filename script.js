@@ -240,16 +240,16 @@ const DOMElements = {
                 </div></div>`
             },
             'm1s5': {
-                title: "Weekly Check-in",
-                requiredFields: [],
-                html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 5: Weekly Momentum Check</h3><p class="text-gray-600 mb-6">A 5-minute pulse check each Friday to maintain focus and celebrate wins.</p><div class="space-y-6">
-                    ${[1,2,3,4].map(w => `<div class="border-t border-gray-200 pt-4"><h4 class="font-bold text-lg mb-4">Week ${w}</h4><div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                        <div><label class="font-semibold block mb-2 text-sm">Progress:</label><div class="flex items-center space-x-2 status-buttons" data-week="${w}"><button class="status-button" data-status="on-track">ON TRACK</button><button class="status-button" data-status="issues">ISSUES</button><button class="status-button" data-status="off-track">OFF TRACK</button></div></div>
-                        <div><label for="m1s5_w${w}_win" class="font-semibold block mb-2 text-sm">A Win or Learning:</label><div id="m1s5_w${w}_win" class="form-input text-sm" contenteditable="true" data-placeholder="e.g., The team hit 80% availability on Thursday!" data-maxlength="400"></div></div>
-                        <div class="md:col-span-2"><label for="m1s5_w${w}_spotlight" class="font-semibold block mb-2 text-sm">Team Member Spotlight:</label><div id="m1s5_w${w}_spotlight" class="form-input text-sm" contenteditable="true" data-placeholder="e.g., Sarah for her excellent attention to detail during the bake." data-maxlength="400"></div></div>
-                    </div></div>`).join("")}
-                </div></div>`
-            },
+    title: "Weekly Check-in",
+    requiredFields: [],
+    html: `<div class="content-card p-8 weekly-check-in-container"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 5: Weekly Momentum Check</h3><p class="text-gray-600 mb-6">A 5-minute pulse check each Friday to maintain focus and celebrate wins.</p><div class="space-y-6">
+        ${[1,2,3,4].map(w => `<div class="border-t border-gray-200 pt-4"><h4 class="font-bold text-lg mb-4">Week ${w}</h4><div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            <div><label class="font-semibold block mb-2 text-sm">Progress:</label><div class="flex items-center space-x-2 status-buttons" data-week="${w}"><button class="status-button" data-status="on-track">ON TRACK</button><button class="status-button" data-status="issues">ISSUES</button><button class="status-button" data-status="off-track">OFF TRACK</button></div></div>
+            <div><label for="m1s5_w${w}_win" class="font-semibold block mb-2 text-sm">A Win or Learning:</label><div id="m1s5_w${w}_win" class="form-input text-sm" contenteditable="true" data-placeholder="e.g., The team hit 80% availability on Thursday!" data-maxlength="400"></div></div>
+            <div class="md:col-span-2"><label for="m1s5_w${w}_spotlight" class="font-semibold block mb-2 text-sm">Team Member Spotlight:</label><div id="m1s5_w${w}_spotlight" class="form-input text-sm" contenteditable="true" data-placeholder="e.g., Sarah for her excellent attention to detail during the bake." data-maxlength="400"></div></div>
+        </div></div>`).join("")}
+    </div></div>`
+},
             'm1s6': {
                 title: "End of Month Review",
                 requiredFields: ['m1s6_win', 'm1s6_challenge', 'm1s6_next'],
@@ -1344,3 +1344,4 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
