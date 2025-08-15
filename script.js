@@ -980,7 +980,7 @@ async function handleAIActionPlan() {
     try {
         const planSummary = summarizePlanForAI(appState.planData);
         
-        // This is the new part: it calls your secure backend function
+        // This calls your secure backend function to get a live AI response
         const response = await fetch('/.netlify/functions/generate-plan', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -992,19 +992,29 @@ async function handleAIActionPlan() {
         }
 
         const data = await response.json();
-        // The AI's response is clean HTML, so we can insert it directly.
         const actionPlanHTML = `<div id="ai-printable-area">${data.actionPlan}</div>`;
 
         const modalContent = document.getElementById('modal-content');
         modalContent.innerHTML = actionPlanHTML;
 
-        // --- The rest of the function is the same ---
+        // --- NEW: Add a Save as Word button ---
+        // Create a new button for saving
+        const saveButton = document.createElement('button');
+        saveButton.id = 'modal-save-word-btn';
+        saveButton.className = 'btn btn-secondary';
+        saveButton.innerHTML = 'Save as Word';
+        saveButton.onclick = handleSaveAsWord;
+
+        // Add the new button to the modal footer
+        DOMElements.modalActionBtn.parentNode.insertBefore(saveButton, DOMElements.modalActionBtn);
+
+
+        // --- Update existing buttons ---
         DOMElements.modalActionBtn.textContent = 'Print Plan';
         DOMElements.modalActionBtn.style.display = 'inline-flex';
         DOMElements.modalActionBtn.onclick = () => {
             const printableArea = document.getElementById('ai-printable-area').innerHTML;
             const originalContents = document.body.innerHTML;
-            // We wrap it in 'prose' for better print styling
             document.body.innerHTML = `<div class="prose p-8">${printableArea}</div>`;
             window.print();
             document.body.innerHTML = originalContents;
@@ -1019,6 +1029,45 @@ async function handleAIActionPlan() {
         DOMElements.modalActionBtn.style.display = 'none';
         DOMElements.modalCancelBtn.textContent = 'Close';
     }
+}
+    function handleSaveAsWord() {
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel, Bullet } = docx;
+
+    const printableArea = document.getElementById('ai-printable-area');
+    if (!printableArea) return;
+
+    const children = Array.from(printableArea.children);
+    const docSections = [];
+
+    // This loop converts the HTML plan into a format the docx library understands
+    children.forEach(node => {
+        if (node.tagName === 'H2') {
+            docSections.push(new Paragraph({ text: node.innerText, heading: HeadingLevel.HEADING_1, spacing: { before: 400, after: 200 } }));
+        } else if (node.tagName === 'P') {
+            docSections.push(new Paragraph({ children: [new TextRun({ text: node.innerText, italics: true })], spacing: { after: 200 } }));
+        } else if (node.classList.contains('month-section')) {
+            const heading = node.querySelector('h3');
+            if (heading) {
+                docSections.push(new Paragraph({ text: heading.innerText, heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 150 } }));
+            }
+            const items = node.querySelectorAll('li');
+            items.forEach(item => {
+                docSections.push(new Paragraph({ text: item.innerText, bullet: { level: 0 }, indent: { left: 720 } }));
+            });
+        }
+    });
+
+    const doc = new Document({
+        sections: [{
+            properties: {},
+            children: docSections,
+        }],
+    });
+
+    Packer.toBlob(doc).then(blob => {
+        // Use the FileSaver library to trigger the download
+        saveAs(blob, "AI-Generated Action Plan.docx");
+    });
 }
 
     // --- Modal Management ---
@@ -1122,15 +1171,19 @@ async function handleAIActionPlan() {
     }
 
     function closeModal() {
-        if (DOMElements.modalBox.dataset.type === 'timeout') {
-            DOMElements.modalOverlay.classList.add('hidden');
-            window.removeEventListener('keydown', handleEscKey);
-        } else {
-            DOMElements.modalOverlay.classList.add('hidden');
-            window.removeEventListener('keydown', handleEscKey);
-        }
+    const saveWordBtn = document.getElementById('modal-save-word-btn');
+    if (saveWordBtn) {
+        saveWordBtn.remove();
     }
 
+    if (DOMElements.modalBox.dataset.type === 'timeout') {
+        DOMElements.modalOverlay.classList.add('hidden');
+        window.removeEventListener('keydown', handleEscKey);
+    } else {
+        DOMElements.modalOverlay.classList.add('hidden');
+        window.removeEventListener('keydown', handleEscKey);
+    }
+}
     async function handleModalAction() {
         const type = DOMElements.modalBox.dataset.type;
         const planId = DOMElements.modalBox.dataset.planId;
@@ -1487,3 +1540,4 @@ async function handleAIActionPlan() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
