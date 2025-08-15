@@ -802,18 +802,40 @@ const DOMElements = {
     const formData = appState.planData;
     const e = (html) => (html || '...');
 
+    // Helper to check for empty text boxes
+    const isContentEmpty = (htmlContent) => {
+        if (!htmlContent) return true;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        return tempDiv.innerText.trim() === '';
+    };
+
     const renderMonthSummary = (monthNum) => {
         let weeklyCheckinHTML = '<ul class="space-y-3">';
+        let hasLoggedWeeks = false;
+
         for (let w = 1; w <= 4; w++) {
-            const status = formData[`m${monthNum}s5_w${w}_status`] || 'N/A';
-            const statusColors = { 'on-track': 'text-green-500', 'issues': 'text-yellow-500', 'off-track': 'text-red-500', 'N/A': 'text-gray-400' };
+            const status = formData[`m${monthNum}s5_w${w}_status`];
             const win = formData[`m${monthNum}s5_w${w}_win`];
 
-            if (win && win.trim() !== '') {
-                 weeklyCheckinHTML += `<li class="flex items-start text-sm"><i class="bi bi-dot ${statusColors[status]} -ml-1 mr-2 mt-1 text-2xl"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Week ${w}:</strong> ${e(win)}</span></li>`;
+            // NEW LOGIC: Only show a week if a status has been selected
+            if (status) {
+                hasLoggedWeeks = true;
+                const statusColors = { 'on-track': 'text-green-500', 'issues': 'text-yellow-500', 'off-track': 'text-red-500' };
+                const winText = !isContentEmpty(win) ? e(win) : '<em>No win/learning logged.</em>';
+
+                weeklyCheckinHTML += `<li class="flex items-start text-sm">
+                                        <i class="bi bi-dot ${statusColors[status] || 'text-gray-400'} -ml-1 mr-2 mt-1 text-2xl"></i>
+                                        <span class="flex-1"><strong class="font-semibold text-gray-700">Week ${w}:</strong> ${winText}</span>
+                                      </li>`;
             }
         }
-        weeklyCheckinHTML += '</ul>';
+
+        if (!hasLoggedWeeks) {
+            weeklyCheckinHTML = '<p class="text-sm text-gray-500">No weekly check-ins have been logged for this month.</p>';
+        } else {
+            weeklyCheckinHTML += '</ul>';
+        }
 
         const pillar = formData[`m${monthNum}s1_pillar`];
         const pillarIcons = { 
@@ -1592,6 +1614,7 @@ async function handleAIActionPlan() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
