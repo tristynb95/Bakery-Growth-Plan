@@ -798,7 +798,7 @@ const DOMElements = {
         }
     }
 
-    function renderSummary() {
+   function renderSummary() {
     const formData = appState.planData;
     const e = (html) => (html || '...');
 
@@ -881,7 +881,7 @@ const DOMElements = {
                             </ul>
                         </div>
                         <div class="summary-section">
-                            <h3 class="summary-heading">Weekly Momentum Wins</h3>
+                            <h3 class="summary-heading">Weekly Momentum Wins & Learnings</h3>
                             ${weeklyCheckinHTML}
                         </div>
                         <div class="summary-section">
@@ -1614,6 +1614,7 @@ async function handleAIActionPlan() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
