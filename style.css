@@ -482,7 +482,7 @@ textarea.form-input {
 
 /* Give the AI modal a bit more width to better display the plan */
 #modal-box[data-type="aiActionPlan"] {
-    max-width: 640px; /* 500px is the default */
+    max-width: 900px; /* Increased from 640px for better table readability */
 }
 
 /* 24. AI Action Plan Table Styles
@@ -507,6 +507,7 @@ textarea.form-input {
     border-bottom: 2px solid var(--gails-red-light);
     padding-bottom: 0.5rem;
 }
+
 
 
 
