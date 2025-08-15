@@ -145,40 +145,12 @@ const DOMElements = {
 
     // --- CHARACTER COUNTER ---
     function initializeCharCounters() {
-        document.querySelectorAll('div[data-maxlength]').forEach(editor => {
-            if (editor.parentNode.classList.contains('textarea-wrapper')) {
-                const wrapper = editor.parentNode;
-                const counter = wrapper.querySelector('.char-counter');
-                
-                const updateFn = () => {
-                    const maxLength = parseInt(editor.dataset.maxlength, 10);
-                    const currentLength = editor.innerText.length;
-                    const remaining = maxLength - currentLength;
-                    counter.textContent = `${remaining}`;
-                    if (remaining < 0) {
-                        counter.style.color = 'var(--gails-red)';
-                    } else if (remaining < 20) {
-                        counter.style.color = '#D97706'; // Amber
-                    } else {
-                        counter.style.color = 'var(--gails-text-secondary)';
-                    }
-                };
-                
-                editor.addEventListener('input', updateFn);
-                updateFn(); 
-                return;
-            }
-
-            const wrapper = document.createElement('div');
-            wrapper.className = 'textarea-wrapper';
-            editor.parentNode.insertBefore(wrapper, editor);
-            wrapper.appendChild(editor);
-
-            const counter = document.createElement('div');
-            counter.className = 'char-counter';
-            wrapper.appendChild(counter);
-
-            const updateCounter = () => {
+    document.querySelectorAll('div[data-maxlength]').forEach(editor => {
+        if (editor.parentNode.classList.contains('textarea-wrapper')) {
+            const wrapper = editor.parentNode;
+            const counter = wrapper.querySelector('.char-counter');
+            
+            const updateFn = () => {
                 const maxLength = parseInt(editor.dataset.maxlength, 10);
                 const currentLength = editor.innerText.length;
                 const remaining = maxLength - currentLength;
@@ -191,11 +163,45 @@ const DOMElements = {
                     counter.style.color = 'var(--gails-text-secondary)';
                 }
             };
+            
+            editor.addEventListener('input', updateFn);
+            // Add focus/blur listeners
+            editor.addEventListener('focus', () => counter.classList.add('visible'));
+            editor.addEventListener('blur', () => counter.classList.remove('visible'));
+            updateFn(); 
+            return;
+        }
 
-            updateCounter();
-            editor.addEventListener('input', updateCounter);
-        });
-    }
+        const wrapper = document.createElement('div');
+        wrapper.className = 'textarea-wrapper';
+        editor.parentNode.insertBefore(wrapper, editor);
+        wrapper.appendChild(editor);
+
+        const counter = document.createElement('div');
+        counter.className = 'char-counter';
+        wrapper.appendChild(counter);
+
+        const updateCounter = () => {
+            const maxLength = parseInt(editor.dataset.maxlength, 10);
+            const currentLength = editor.innerText.length;
+            const remaining = maxLength - currentLength;
+            counter.textContent = `${remaining}`;
+            if (remaining < 0) {
+                counter.style.color = 'var(--gails-red)';
+            } else if (remaining < 20) {
+                counter.style.color = '#D97706'; // Amber
+            } else {
+                counter.style.color = 'var(--gails-text-secondary)';
+            }
+        };
+
+        updateCounter();
+        editor.addEventListener('input', updateCounter);
+        // Add focus/blur listeners
+        editor.addEventListener('focus', () => counter.classList.add('visible'));
+        editor.addEventListener('blur', () => counter.classList.remove('visible'));
+    });
+}
    
     // --- HTML TEMPLATES ---
 
@@ -1390,6 +1396,7 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
