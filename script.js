@@ -811,22 +811,25 @@ const DOMElements = {
     };
 
     const renderMonthSummary = (monthNum) => {
-        let weeklyCheckinHTML = '<ul class="space-y-3">';
+        let weeklyCheckinHTML = '<ul>';
         let hasLoggedWeeks = false;
 
         for (let w = 1; w <= 4; w++) {
             const status = formData[`m${monthNum}s5_w${w}_status`];
             const win = formData[`m${monthNum}s5_w${w}_win`];
 
-            // NEW LOGIC: Only show a week if a status has been selected
             if (status) {
                 hasLoggedWeeks = true;
-                const statusColors = { 'on-track': 'text-green-500', 'issues': 'text-yellow-500', 'off-track': 'text-red-500' };
+                const statusText = status.replace('-', ' ').toUpperCase();
+                const statusBadgeHTML = `<span class="summary-status-badge status-${status}">${statusText}</span>`;
                 const winText = !isContentEmpty(win) ? e(win) : '<em>No win/learning logged.</em>';
 
-                weeklyCheckinHTML += `<li class="flex items-start text-sm">
-                                        <i class="bi bi-dot ${statusColors[status] || 'text-gray-400'} -ml-1 mr-2 mt-1 text-2xl"></i>
-                                        <span class="flex-1"><strong class="font-semibold text-gray-700">Week ${w}:</strong> ${winText}</span>
+                weeklyCheckinHTML += `<li>
+                                        <div class="flex justify-between items-center mb-1">
+                                            <strong class="font-semibold text-gray-700">Week ${w}</strong>
+                                            ${statusBadgeHTML}
+                                        </div>
+                                        <p class="text-sm text-gray-600">${winText}</p>
                                       </li>`;
             }
         }
@@ -1645,6 +1648,7 @@ async function handleAIActionPlan() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
