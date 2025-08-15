@@ -241,8 +241,9 @@ textarea.form-input {
     backdrop-filter: blur(2px); padding: 2px 8px; border-radius: 6px;
     opacity: 0; transition: opacity 0.2s ease-in-out; pointer-events: none;
 }
-.textarea-wrapper textarea:focus + .char-counter { opacity: 1; }
-
+.textarea-wrapper:focus-within .char-counter {
+    opacity: 1;
+}
 
 /* 6. Interactive Elements & Enhancements
 -------------------------------------------------- */
@@ -455,6 +456,7 @@ textarea.form-input {
     color: var(--gails-text-secondary);
     margin-left: 0.5rem; /* Space between title and counter */
 }
+
 
 
 
