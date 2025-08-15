@@ -454,7 +454,7 @@ const DOMElements = {
             if (selected) {
                 appState.planData[dataKey] = selected.dataset.pillar;
             } else {
-                appState.planData[dataKey] = null;
+                delete appState.planData[dataKey];
             }
         });
     
@@ -467,7 +467,7 @@ const DOMElements = {
                 if (selected) {
                     appState.planData[key] = selected.dataset.status;
                 } else {
-                    appState.planData[key] = null;
+                    delete appState.planData[key];
                 }
             });
         }
@@ -1343,3 +1343,4 @@ const DOMElements = {
 // This ensures we don't run any code until the whole page is ready.
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
+});
