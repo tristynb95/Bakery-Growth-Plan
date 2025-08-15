@@ -1061,13 +1061,36 @@ async function handleAIActionPlan() {
         
         // --- THIS is the updated part ---
         DOMElements.modalActionBtn.onclick = () => {
-            const printableArea = document.getElementById('ai-printable-area').innerHTML;
-            const originalContents = document.body.innerHTML;
-            // Removed the "prose" class to preserve table styling
-            document.body.innerHTML = `<div class="p-8">${printableArea}</div>`; 
+            const printableAreaHTML = document.getElementById('ai-printable-area').innerHTML;
+            const originalPageHTML = document.documentElement.innerHTML;
+
+            // Get all stylesheet links from the current page
+            const stylesheetLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+                                         .map(link => link.outerHTML)
+                                         .join('');
+
+            // Create a new, full HTML document string that includes the styles
+            const printPageHTML = `
+                <html>
+                    <head>
+                        <title>AI Generated Action Plan</title>
+                        ${stylesheetLinks}
+                        <style>
+                            /* Add some basic print padding */
+                            body { padding: 2rem; } 
+                        </style>
+                    </head>
+                    <body>
+                        ${printableAreaHTML}
+                    </body>
+                </html>
+            `;
+
+            // Temporarily replace the document, print, and then restore it
+            document.documentElement.innerHTML = printPageHTML;
             window.print();
-            document.body.innerHTML = originalContents;
-            window.location.reload(); 
+            document.documentElement.innerHTML = originalPageHTML;
+            window.location.reload(); // Reload to re-attach all event listeners
         };
         // --- End of updated part ---
 
@@ -1553,5 +1576,6 @@ async function handleAIActionPlan() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
