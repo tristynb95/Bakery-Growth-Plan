@@ -414,3 +414,17 @@ textarea.form-input {
     vertical-align: -0.125em; /* Aligns custom SVG with text baseline like Bootstrap Icons */
 }
 
+/* 18. Rich Text Editing Styles
+-------------------------------------------------- */
+[contenteditable="true"].form-input {
+    min-height: 120px; /* Sets a larger default height */
+    line-height: 1.6;  /* Improves readability of multi-line text */
+}
+
+/* Replicates placeholder text for contenteditable divs */
+[contenteditable="true"].form-input:empty::before {
+    content: attr(data-placeholder);
+    color: #9CA3AF; /* Standard placeholder text colour */
+    pointer-events: none; /* Allows clicking through the placeholder */
+    display: block;
+}
