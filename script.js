@@ -727,35 +727,92 @@ const DOMElements = {
         }
     }
 
-    function renderStepper(activeStep) {
-    const monthKey = appState.currentView;
-    const { totalSteps } = appState.monthContext[monthKey];
-    const monthNum = monthKey.split('-')[1];
-    const stepperNav = document.getElementById(`${monthKey}-stepper`);
-    if (!stepperNav) return;
-    stepperNav.innerHTML = '';
-    for (let i = 1; i <= totalSteps; i++) {
-        const stepKey = `m${monthNum}s${i}`;
-        const isComplete = isStepComplete(stepKey);
-        const item = document.createElement('div');
-        item.className = 'stepper-item flex items-start cursor-pointer';
-        item.dataset.step = i;
-        if (isComplete) item.classList.add('completed');
-        if (i === activeStep) item.classList.add('active');
+    function getStepProgress(stepKey) {
+        const planData = appState.planData;
+        const stepDefinition = templates.step[stepKey];
+        if (!stepDefinition) return { completed: 0, total: 0 };
 
-        // --- UPDATED LOGIC ---
-        // If the step is complete, show a checkmark. Otherwise, show the number.
-        const stepCircleContent = isComplete
-            ? `<i class="bi bi-check-lg"></i>`
-            : `<span class="step-number">${i}</span>`;
-        // --- END UPDATED LOGIC ---
+        const isContentEmpty = (htmlContent) => {
+            if (!htmlContent) return true;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            return tempDiv.innerText.trim() === '';
+        };
 
-        item.innerHTML = `<div class="flex flex-col items-center mr-4"><div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">${stepCircleContent}</div>${i < totalSteps ? '<div class="step-line w-0.5 h-9"></div>' : ''}</div><div><p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}</p></div>`;
-        item.addEventListener('click', () => renderStep(i));
-        stepperNav.appendChild(item);
+        let completed = 0;
+        let total = 0;
+
+        // Special handling for "Must-Win Battle" which has a text input and a pillar selection
+        if (stepKey.endsWith('s1') && stepKey.startsWith('m')) {
+            total = 2;
+            if (!isContentEmpty(planData[`${stepKey}_battle`])) completed++;
+            if (!!planData[`${stepKey}_pillar`]) completed++;
+            return { completed, total };
+        }
+
+        // Special handling for "Weekly Check-in" which has multiple fields per week
+        if (stepKey.endsWith('s5')) {
+            total = 12; // 4 weeks * 3 fields (status, win, spotlight)
+            const monthNum = stepKey.charAt(1);
+            for (let w = 1; w <= 4; w++) {
+                if (!isContentEmpty(planData[`m${monthNum}s5_w${w}_win`])) completed++;
+                if (!isContentEmpty(planData[`m${monthNum}s5_w${w}_spotlight`])) completed++;
+                if (!!planData[`m${monthNum}s5_w${w}_status`]) completed++;
+            }
+            return { completed, total };
+        }
+        
+        // Default handling for all other steps based on their required fields
+        const fields = stepDefinition.requiredFields;
+        if (!fields || fields.length === 0) {
+            return { completed: 0, total: 0 };
+        }
+
+        total = fields.length;
+        completed = fields.filter(fieldId => {
+            const value = planData[fieldId];
+            if (typeof value === 'string' && (value.includes('<') && value.includes('>'))) {
+                 return !isContentEmpty(value);
+            }
+            return value && value.trim() !== '';
+        }).length;
+
+        return { completed, total };
     }
-}
+    
+    function renderStepper(activeStep) {
+        const monthKey = appState.currentView;
+        const { totalSteps } = appState.monthContext[monthKey];
+        const monthNum = monthKey.split('-')[1];
+        const stepperNav = document.getElementById(`${monthKey}-stepper`);
+        if (!stepperNav) return;
+        stepperNav.innerHTML = '';
+        for (let i = 1; i <= totalSteps; i++) {
+            const stepKey = `m${monthNum}s${i}`;
+            const isComplete = isStepComplete(stepKey);
+            const item = document.createElement('div');
+            item.className = 'stepper-item flex items-start cursor-pointer';
+            item.dataset.step = i;
+            if (isComplete) item.classList.add('completed');
+            if (i === activeStep) item.classList.add('active');
 
+            const stepCircleContent = isComplete
+                ? `<i class="bi bi-check-lg"></i>`
+                : `<span class="step-number">${i}</span>`;
+            
+            // --- NEW ---: Generate the progress text HTML
+            const progress = getStepProgress(stepKey);
+            let progressHTML = '';
+            if (progress.total > 0) {
+                progressHTML = `<p class="step-progress">${progress.completed} / ${progress.total} complete</p>`;
+            }
+            // --- END NEW ---
+
+            item.innerHTML = `<div class="flex flex-col items-center mr-4"><div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">${stepCircleContent}</div>${i < totalSteps ? '<div class="step-line w-0.5 h-9"></div>' : ''}</div><div><p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}</p>${progressHTML}</div>`;
+            item.addEventListener('click', () => renderStep(i));
+            stepperNav.appendChild(item);
+        }
+    }
     function renderSummary() {
         const formData = appState.planData;
         const e = (html) => (html || '...');
@@ -1352,6 +1409,7 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
