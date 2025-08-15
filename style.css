@@ -574,6 +574,27 @@ textarea.form-input {
     border-top: 1px solid var(--gails-grey-light);
 }
 
+/* 27. Editable AI Action Plan Styles
+-------------------------------------------------- */
+.editable-action-plan {
+    border: 1px solid var(--gails-grey-mid);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    min-height: 200px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.editable-action-plan:focus {
+    border-color: var(--gails-red);
+    box-shadow: var(--shadow-focus);
+}
+
+/* Ensure the new buttons in the modal footer look good */
+.modal-footer {
+    flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+}
+
 
 
 
