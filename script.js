@@ -914,46 +914,10 @@ const DOMElements = {
         return summary;
     }
 
-    async function generateAIActionPlan(summary) {
-        // --- AI Simulation ---
-        // This function acts as the AI. It takes the summarized plan
-        // and reframes it into a structured, actionable checklist.
-        const sections = summary.split('---').filter(s => s.trim() !== '');
-        let actionPlanHTML = `<div id="ai-printable-area">`;
-    
-        sections.forEach(section => {
-            if (section.includes("QUARTERLY NARRATIVE")) {
-                 actionPlanHTML += `<h2 class="text-2xl font-bold font-poppins mb-4">Quarterly Action Plan</h2><p class="mb-6 text-gray-600">Based on your narrative: <em>"${section.replace('QUARTERLY NARRATIVE:', '').trim()}"</em></p>`;
-                 return;
-            }
-    
-            const monthMatch = section.match(/MONTH (\d)/);
-            if (monthMatch) {
-                const monthNum = monthMatch[1];
-                actionPlanHTML += `<div class="month-section mt-8"><h3 class="text-xl font-bold font-poppins border-b pb-2 mb-4">Month ${monthNum}</h3>`;
-                
-                const lines = section.split('\n').filter(l => l.trim() !== '');
-                lines.forEach(line => {
-                    if (line.includes(`MONTH ${monthNum}`)) return;
-                    const [key, ...valueParts] = line.split(':');
-                    const value = valueParts.join(':').trim();
-                    if (!value) return;
-    
-                    actionPlanHTML += `<div class="task-category mt-4"><h4 class="font-semibold text-gray-800">${key.trim()}</h4><ul class="list-none space-y-2 mt-2">`;
-                    
-                    // Split multi-line values into individual checklist items
-                    const items = value.split(/\d\.\s|\s-\s|\n/).filter(i => i.trim() !== '');
-                    items.forEach(item => {
-                         actionPlanHTML += `<li class="flex items-start"><input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500 mt-1 mr-3"><span class="flex-1 text-gray-700">${item.trim()}</span></li>`;
-                    });
-                    actionPlanHTML += `</ul></div>`;
-                });
-                actionPlanHTML += `</div>`;
-            }
-        });
-    
-        actionPlanHTML += `</div>`;
-        return actionPlanHTML;
+    async function generateAIActionPlan() {
+        // The AI generation logic has been moved to the Netlify serverless function.
+        // This function is now handled by the 'handleAIActionPlan' function.
+        return "<p>An error occurred. AI function was not called correctly.</p>";
     }
 
    async function handleShare() {
@@ -1011,26 +975,50 @@ const DOMElements = {
 }
 
 async function handleAIActionPlan() {
-    openModal('aiActionPlan');
-    const planSummary = summarizePlanForAI(appState.planData);
-    const actionPlanHTML = await generateAIActionPlan(planSummary);
+    openModal('aiActionPlan'); // Shows the "loading..." modal
+    
+    try {
+        const planSummary = summarizePlanForAI(appState.planData);
+        
+        // This is the new part: it calls your secure backend function
+        const response = await fetch('/.netlify/functions/generate-plan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ planSummary: planSummary })
+        });
 
-    const modalContent = document.getElementById('modal-content');
-    modalContent.innerHTML = actionPlanHTML;
+        if (!response.ok) {
+            throw new Error('The AI assistant failed to generate a response.');
+        }
 
-    // Make the primary button a "Print" button
-    DOMElements.modalActionBtn.textContent = 'Print Plan';
-    DOMElements.modalActionBtn.style.display = 'inline-flex';
-    DOMElements.modalActionBtn.onclick = () => {
-        const printableArea = document.getElementById('ai-printable-area').innerHTML;
-        const originalContents = document.body.innerHTML;
-        document.body.innerHTML = `<div class="prose p-8">${printableArea}</div>`;
-        window.print();
-        document.body.innerHTML = originalContents;
-        // This is a bit of a hack for a demo; a real app would need to re-initialize event listeners
-        window.location.reload(); 
-    };
-    DOMElements.modalCancelBtn.textContent = 'Done';
+        const data = await response.json();
+        // The AI's response is clean HTML, so we can insert it directly.
+        const actionPlanHTML = `<div id="ai-printable-area">${data.actionPlan}</div>`;
+
+        const modalContent = document.getElementById('modal-content');
+        modalContent.innerHTML = actionPlanHTML;
+
+        // --- The rest of the function is the same ---
+        DOMElements.modalActionBtn.textContent = 'Print Plan';
+        DOMElements.modalActionBtn.style.display = 'inline-flex';
+        DOMElements.modalActionBtn.onclick = () => {
+            const printableArea = document.getElementById('ai-printable-area').innerHTML;
+            const originalContents = document.body.innerHTML;
+            // We wrap it in 'prose' for better print styling
+            document.body.innerHTML = `<div class="prose p-8">${printableArea}</div>`;
+            window.print();
+            document.body.innerHTML = originalContents;
+            window.location.reload(); 
+        };
+        DOMElements.modalCancelBtn.textContent = 'Done';
+
+    } catch (error) {
+        console.error("Error generating AI plan:", error);
+        const modalContent = document.getElementById('modal-content');
+        modalContent.innerHTML = `<p class="text-red-600">There was an error connecting to the AI assistant. Please try again later.</p>`;
+        DOMElements.modalActionBtn.style.display = 'none';
+        DOMElements.modalCancelBtn.textContent = 'Close';
+    }
 }
 
     // --- Modal Management ---
