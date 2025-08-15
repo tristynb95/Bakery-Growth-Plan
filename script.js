@@ -1097,25 +1097,56 @@ async function handleAIActionPlan() {
         DOMElements.modalActionBtn.textContent = 'Print Plan';
         DOMElements.modalActionBtn.style.display = 'inline-flex';
         
-        // --- THIS is the updated part ---
+        // --- NEW & IMPROVED PRINT LOGIC ---
         DOMElements.modalActionBtn.onclick = () => {
             const printableAreaHTML = document.getElementById('ai-printable-area').innerHTML;
             const originalPageHTML = document.documentElement.innerHTML;
 
-            // Get all stylesheet links from the current page
-            const stylesheetLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
-                                         .map(link => link.outerHTML)
-                                         .join('');
+            // 1. Gather all CSS styles from the page, including dynamic ones from Tailwind.
+            let allStyles = "";
+            for (const sheet of document.styleSheets) {
+                try {
+                    for (const rule of sheet.cssRules) {
+                        allStyles += rule.cssText;
+                    }
+                } catch (e) {
+                    console.warn("Could not read stylesheet for printing:", e);
+                }
+            }
 
-            // Create a new, full HTML document string that includes the styles
+            // 2. Define specific, brand-aligned styles for the printout.
+            const printSpecificStyles = `
+                @media print {
+                    body {
+                        font-family: 'Inter', sans-serif;
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                    }
+                    h2 {
+                        font-family: 'Poppins', sans-serif;
+                    }
+                    th {
+                        background-color: #F3F4F6 !important; /* GAIL's Light Grey */
+                        color: #D10A11 !important; /* GAIL's Red */
+                    }
+                    @page {
+                        size: A4 portrait;
+                        margin: 0.75in;
+                    }
+                }
+            `;
+
+            // 3. Construct a new HTML document for printing with all styles included.
             const printPageHTML = `
                 <html>
                     <head>
                         <title>AI Generated Action Plan</title>
-                        ${stylesheetLinks}
+                        <link rel="preconnect" href="https://fonts.googleapis.com">
+                        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700;900&display=swap" rel="stylesheet">
                         <style>
-                            /* Add some basic print padding */
-                            body { padding: 2rem; } 
+                            ${allStyles}
+                            ${printSpecificStyles}
                         </style>
                     </head>
                     <body>
@@ -1124,13 +1155,13 @@ async function handleAIActionPlan() {
                 </html>
             `;
 
-            // Temporarily replace the document, print, and then restore it
+            // 4. Replace the document, print, and then restore it.
             document.documentElement.innerHTML = printPageHTML;
             window.print();
             document.documentElement.innerHTML = originalPageHTML;
-            window.location.reload(); // Reload to re-attach all event listeners
+            window.location.reload(); 
         };
-        // --- End of updated part ---
+        // --- End of new print logic ---
 
         DOMElements.modalCancelBtn.textContent = 'Done';
 
@@ -1614,6 +1645,7 @@ async function handleAIActionPlan() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
