@@ -428,3 +428,9 @@ textarea.form-input {
     pointer-events: none; /* Allows clicking through the placeholder */
     display: block;
 }
+
+/* 19. Custom Height for Weekly Check-in Text Boxes
+-------------------------------------------------- */
+.weekly-check-in-container [contenteditable="true"].form-input {
+    min-height: 60px;
+}
