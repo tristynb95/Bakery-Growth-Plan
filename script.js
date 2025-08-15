@@ -1100,11 +1100,6 @@ function runApp(app) {
                 regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
                 regenButton.onclick = handleRegenerateActionPlan;
     
-                const saveWordBtn = document.createElement('button');
-                saveWordBtn.className = 'btn btn-secondary dynamic-btn';
-                saveWordBtn.innerHTML = 'Save as Word';
-                saveWordBtn.onclick = handleSaveAsWord;
-
                 const printBtn = document.createElement('button');
                 printBtn.className = 'btn btn-secondary dynamic-btn';
                 printBtn.innerHTML = 'Print Plan';
@@ -1153,7 +1148,6 @@ function runApp(app) {
                 };
 
                 footer.insertBefore(regenButton, DOMElements.modalActionBtn);
-                footer.insertBefore(saveWordBtn, DOMElements.modalActionBtn);
                 footer.insertBefore(printBtn, DOMElements.modalActionBtn);
                 
                 DOMElements.modalActionBtn.textContent = "Save Changes";
