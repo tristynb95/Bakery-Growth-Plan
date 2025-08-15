@@ -781,38 +781,40 @@ const DOMElements = {
     }
     
     function renderStepper(activeStep) {
-        const monthKey = appState.currentView;
-        const { totalSteps } = appState.monthContext[monthKey];
-        const monthNum = monthKey.split('-')[1];
-        const stepperNav = document.getElementById(`${monthKey}-stepper`);
-        if (!stepperNav) return;
-        stepperNav.innerHTML = '';
-        for (let i = 1; i <= totalSteps; i++) {
-            const stepKey = `m${monthNum}s${i}`;
-            const isComplete = isStepComplete(stepKey);
-            const item = document.createElement('div');
-            item.className = 'stepper-item flex items-start cursor-pointer';
-            item.dataset.step = i;
-            if (isComplete) item.classList.add('completed');
-            if (i === activeStep) item.classList.add('active');
+    const monthKey = appState.currentView;
+    const { totalSteps } = appState.monthContext[monthKey];
+    const monthNum = monthKey.split('-')[1];
+    const stepperNav = document.getElementById(`${monthKey}-stepper`);
+    if (!stepperNav) return;
+    stepperNav.innerHTML = '';
+    for (let i = 1; i <= totalSteps; i++) {
+        const stepKey = `m${monthNum}s${i}`;
+        const isComplete = isStepComplete(stepKey);
+        const item = document.createElement('div');
+        item.className = 'stepper-item flex items-start cursor-pointer';
+        item.dataset.step = i;
+        if (isComplete) item.classList.add('completed');
+        if (i === activeStep) item.classList.add('active');
 
-            const stepCircleContent = isComplete
-                ? `<i class="bi bi-check-lg"></i>`
-                : `<span class="step-number">${i}</span>`;
-            
-            // --- NEW ---: Generate the progress text HTML
-            const progress = getStepProgress(stepKey);
-            let progressHTML = '';
-            if (progress.total > 0) {
-                progressHTML = `<p class="step-progress">${progress.completed} / ${progress.total} complete</p>`;
-            }
-            // --- END NEW ---
-
-            item.innerHTML = `<div class="flex flex-col items-center mr-4"><div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">${stepCircleContent}</div>${i < totalSteps ? '<div class="step-line w-0.5 h-9"></div>' : ''}</div><div><p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}</p>${progressHTML}</div>`;
-            item.addEventListener('click', () => renderStep(i));
-            stepperNav.appendChild(item);
+        const stepCircleContent = isComplete
+            ? `<i class="bi bi-check-lg"></i>`
+            : `<span class="step-number">${i}</span>`;
+        
+        // --- UPDATED LOGIC for more subtle progress text ---
+        const progress = getStepProgress(stepKey);
+        let progressHTML = '';
+        if (progress.total > 0) {
+            // Format as (X/Y) and wrap in a span to be placed inline with the title.
+            progressHTML = ` <span class="step-progress">(${progress.completed}/${progress.total})</span>`;
         }
+        // --- END UPDATED LOGIC ---
+
+        // Append the progressHTML directly after the title within the same <p> tag.
+        item.innerHTML = `<div class="flex flex-col items-center mr-4"><div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">${stepCircleContent}</div>${i < totalSteps ? '<div class="step-line w-0.5 h-9"></div>' : ''}</div><div><p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}${progressHTML}</p></div>`;
+        item.addEventListener('click', () => renderStep(i));
+        stepperNav.appendChild(item);
     }
+}
     function renderSummary() {
         const formData = appState.planData;
         const e = (html) => (html || '...');
@@ -1409,6 +1411,7 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
