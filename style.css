@@ -468,6 +468,22 @@ textarea.form-input {
     border-left: 3px solid var(--gails-grey-light);
 }
 
+/* 23. Modal Content Scrolling Fix
+-------------------------------------------------- */
+.modal-box {
+    max-height: 85vh; /* Limit the modal's height to 85% of the screen height */
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-content {
+    overflow-y: auto; /* Make the content area scrollable if it overflows */
+}
+
+/* Give the AI modal a bit more width to better display the plan */
+#modal-box[data-type="aiActionPlan"] {
+    max-width: 640px; /* 500px is the default */
+}
 
 
 
