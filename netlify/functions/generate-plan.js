@@ -23,10 +23,11 @@ exports.handler = async function(event, context) {
       2.  Extract specific, actionable tasks from the "MUST-WIN BATTLE," "KEY LEVERS," and "PEOPLE GROWTH" sections for each month.
       3.  Present these tasks in an HTML table with a title for each month (e.g., <h2>Month 1 Action Plan</h2>). Group like items in a single month into 1 action (ie. "Izzy to complete kitchen training" and "Izzy to be in kitchen for 1 month" can be logically turned into a single action)
       4.  The table must have the following columns: "Action Step", "Owner", "Due Date", "Resources / Support Needed", and "Status".
-      5.  For the "Owner" column, identify the likely owner (e.g., "Manager", "Assistant Manager", "Team").
-      6.  For the "Due Date" column, suggest a realistic deadline within that month format as "DD/MM".
+      5.  For the "Owner" column leave it blank for the user to fill in.
+      6.  For the "Due Date" column leave it blank for the user to fill in.
       7.  For the "Status" column, leave it blank for the user to fill in.
-      8.  The entire output should be only the HTML for the tables, starting with an <h2> title. Do not include markdown or any other text.
+      8. For the "Resources / Support Needed", leave it blank for the user to fill in
+      9.  The entire output should be only the HTML for the tables, starting with an <h2> title. Do not include markdown or any other text.
 
       Here is the plan to analyze:
       ---
