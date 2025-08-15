@@ -13,14 +13,22 @@ exports.handler = async function(event, context) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
 
+    // --- NEW, MORE DETAILED PROMPT ---
     const prompt = `
-      You are an expert bakery operations manager. Based on the following 90-day growth plan, generate a simple, printable, and actionable checklist for the bakery manager.
-      - Break down the plan into clear, specific tasks.
-      - Group tasks by Month.
-      - For each task, use a simple, encouraging, and direct tone.
-      - The output should be clean HTML. Each task should be a list item in an unordered list. Do not include any markdown like "-".
+      You are an expert bakery operations manager tasked with creating a best-practice action plan from a manager's 90-day growth plan.
+      Your output must be a clean HTML table.
 
-      Here is the plan:
+      Instructions:
+      1.  Analyze the provided 90-day plan.
+      2.  Extract specific, actionable tasks from the "MUST-WIN BATTLE," "KEY LEVERS," and "PEOPLE GROWTH" sections for each month.
+      3.  Present these tasks in an HTML table with a title for each month (e.g., <h2>Month 1 Action Plan</h2>).
+      4.  The table must have the following columns: "Action Step", "Owner", "Due Date", "Resources / Support Needed", and "Status".
+      5.  For the "Owner" column, identify the likely owner (e.g., "Manager", "Assistant Manager", "Team").
+      6.  For the "Due Date" column, suggest a realistic deadline within that month.
+      7.  For the "Status" column, leave it blank for the user to fill in.
+      8.  The entire output should be only the HTML for the tables, starting with an <h2> title. Do not include markdown or any other text.
+
+      Here is the plan to analyze:
       ---
       ${planSummary}
       ---
