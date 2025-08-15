@@ -247,9 +247,669 @@ function runApp(app) {
         }
     };
     
-    // --- AUTHENTICATION, DASHBOARD, DATA HANDLING... (All these sections remain the same)
+    // --- AUTHENTICATION & APP FLOW ---
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            DOMElements.loginView.classList.add('hidden');
+            DOMElements.registerView.classList.add('hidden');
+            DOMElements.resetView.classList.add('hidden');
+            DOMElements.initialLoadingView.classList.remove('hidden');
 
-    // --- Replace the following functions in your existing file ---
+            appState.currentUser = user;
+            setupActivityListeners();
+            resetSessionTimeout();
+
+            const lastPlanId = localStorage.getItem('lastPlanId');
+            const lastViewId = localStorage.getItem('lastViewId');
+
+            if (lastPlanId && lastViewId) {
+                await restoreLastView(lastPlanId, lastViewId);
+            } else {
+                DOMElements.dashboardView.classList.remove('hidden');
+                await renderDashboard();
+            }
+
+            DOMElements.initialLoadingView.classList.add('hidden');
+
+        } else {
+            appState.currentUser = null;
+            appState.planData = {};
+            appState.currentPlanId = null;
+            clearActivityListeners();
+
+            DOMElements.initialLoadingView.classList.add('hidden');
+            DOMElements.appView.classList.add('hidden');
+            DOMElements.dashboardView.classList.add('hidden');
+            DOMElements.registerView.classList.add('hidden');
+            DOMElements.resetView.classList.add('hidden');
+            
+            DOMElements.loginView.classList.remove('hidden');
+        }
+    });
+
+    const handleLogout = (isTimeout = false) => {
+        localStorage.removeItem('lastPlanId');
+        localStorage.removeItem('lastViewId');
+        
+        if (isTimeout) {
+            openModal('timeout');
+        }
+        
+        DOMElements.emailInput.value = '';
+        DOMElements.passwordInput.value = '';
+        auth.signOut();
+    };
+
+    // --- DASHBOARD LOGIC ---
+    async function restoreLastView(planId, viewId) {
+        appState.currentPlanId = planId;
+        await loadPlanFromFirestore();
+        DOMElements.dashboardView.classList.add('hidden');
+        DOMElements.appView.classList.remove('hidden');
+        switchView(viewId);
+        updateUI();
+    }
+    
+    async function renderDashboard() {
+        if (!appState.currentUser) return;
+
+        let plans = [];
+        try {
+            const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
+            const snapshot = await plansRef.orderBy('lastEdited', 'desc').get();
+            plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) { console.error("Error fetching user plans:", error); }
+
+        let dashboardHTML = `<div class="flex justify-between items-center"><h1 class="text-4xl font-black text-gray-900 font-poppins">Your Growth Plans</h1></div><div class="dashboard-grid">`;
+
+        plans.forEach(plan => {
+            const completion = calculatePlanCompletion(plan);
+            const editedDate = plan.lastEdited?.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || 'N/A';
+            const planName = plan.planName || 'Untitled Plan';
+            dashboardHTML += `
+                <div class="plan-card">
+                    <div class="plan-card-actions">
+                        <button class="plan-action-btn edit-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Edit Name"><i class="bi bi-pencil-square"></i></button>
+                        <button class="plan-action-btn delete-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Delete Plan"><i class="bi bi-trash3-fill"></i></button>
+                    </div>
+                    <div class="plan-card-main" data-plan-id="${plan.id}">
+                        <div class="flex-grow">
+                            <h3 class="text-xl font-bold font-poppins">${planName}</h3>
+                            <p class="text-sm text-gray-500 mt-1">${plan.quarter || 'No quarter set'}</p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t text-sm space-y-2">
+                            <div class="flex justify-between"><span class="font-semibold text-gray-600">Last Edited:</span><span>${editedDate}</span></div>
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-gray-600">Completion:</span>
+                                <div class="progress-circle" data-progress="${completion}">
+                                    <div class="progress-circle-inner">${completion}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        });
+
+        dashboardHTML += `<div class="plan-card new-plan-card" id="create-new-plan-btn"><i class="bi bi-plus-circle-dotted text-4xl"></i><p class="mt-2 font-semibold">Create New Plan</p></div></div>`;
+        DOMElements.dashboardContent.innerHTML = dashboardHTML;
+        
+        document.querySelectorAll('.progress-circle').forEach(circle => {
+            const progress = circle.dataset.progress;
+            circle.style.setProperty('--progress', progress);
+        });
+    }
+
+    function handleCreateNewPlan() {
+        openModal('create');
+    }
+
+    function handleEditPlanName(planId, currentName) {
+        openModal('edit', { planId, currentName });
+    }
+
+    function handleDeletePlan(planId, planName) {
+        openModal('delete', { planId, planName });
+    }
+
+    async function handleSelectPlan(planId) {
+        appState.currentPlanId = planId;
+        await loadPlanFromFirestore();
+        DOMElements.dashboardView.classList.add('hidden');
+        DOMElements.appView.classList.remove('hidden');
+        switchView('vision');
+        updateUI();
+    }
+
+    function handleBackToDashboard() {
+        localStorage.removeItem('lastPlanId');
+        localStorage.removeItem('lastViewId');
+        
+        appState.planData = {};
+        appState.currentPlanId = null;
+        DOMElements.appView.classList.add('hidden');
+        DOMElements.dashboardView.classList.remove('hidden');
+        renderDashboard();
+    }
+
+    // --- DATA HANDLING ---
+    async function loadPlanFromFirestore() {
+        if (!appState.currentUser || !appState.currentPlanId) {
+            appState.planData = {};
+            return;
+        };
+        const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
+        const docSnap = await docRef.get();
+        appState.planData = docSnap.exists ? docSnap.data() : {};
+    }
+
+    function saveData(forceImmediate = false) {
+        if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
+    
+        const fieldsToDelete = {}; 
+    
+        document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
+            if (el.id) {
+                if (el.isContentEditable) {
+                    appState.planData[el.id] = el.innerHTML;
+                } else {
+                    appState.planData[el.id] = el.value;
+                }
+            }
+        });
+    
+        document.querySelectorAll('.pillar-buttons').forEach(group => {
+            const stepKey = group.dataset.stepKey;
+            const selected = group.querySelector('.selected');
+            const dataKey = `${stepKey}_pillar`;
+            if (selected) {
+                appState.planData[dataKey] = selected.dataset.pillar;
+            } else {
+                delete appState.planData[dataKey];
+                fieldsToDelete[dataKey] = firebase.firestore.FieldValue.delete();
+            }
+        });
+    
+        if (appState.currentView.startsWith('month-')) {
+            const monthNum = appState.currentView.split('-')[1];
+            document.querySelectorAll('.status-buttons').forEach(group => {
+                const week = group.dataset.week;
+                const selected = group.querySelector('.selected');
+                const key = `m${monthNum}s5_w${week}_status`;
+                if (selected) {
+                    appState.planData[key] = selected.dataset.status;
+                } else {
+                    delete appState.planData[key];
+                    fieldsToDelete[key] = firebase.firestore.FieldValue.delete();
+                }
+            });
+        }
+    
+        updateUI();
+    
+        clearTimeout(appState.saveTimeout);
+    
+        const saveToFirestore = async () => {
+            const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
+    
+            const dataToSave = {
+                ...appState.planData,
+                ...fieldsToDelete,
+                lastEdited: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            await docRef.set(dataToSave, { merge: true });
+    
+            DOMElements.saveIndicator.classList.remove('opacity-0');
+            setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
+        };
+    
+        if (forceImmediate) {
+            return saveToFirestore();
+        } else {
+            return new Promise(resolve => {
+                appState.saveTimeout = setTimeout(async () => {
+                    await saveToFirestore();
+                    resolve();
+                }, 1000);
+            });
+        }
+    }
+
+
+    // --- UI & RENDER LOGIC ---
+    function updateUI() {
+        updateSidebarInfo();
+        updateOverallProgress();
+        updateSidebarNavStatus();
+        if (appState.currentView.startsWith('month-')) {
+            renderStepper(appState.monthContext[appState.currentView].currentStep);
+        }
+    }
+
+    function updateSidebarInfo() {
+        const managerName = appState.planData.managerName || '';
+        DOMElements.sidebarName.textContent = managerName || 'Your Name';
+        DOMElements.sidebarBakery.textContent = appState.planData.bakeryLocation || "Your Bakery";
+
+        if (managerName) {
+            const names = managerName.trim().split(' ');
+            const firstInitial = names[0] ? names[0][0] : '';
+            const lastInitial = names.length > 1 ? names[names.length - 1][0] : '';
+            DOMElements.sidebarInitials.textContent = (firstInitial + lastInitial).toUpperCase();
+        } else {
+            DOMElements.sidebarInitials.textContent = '--';
+        }
+    }
+
+    function getStepProgress(stepKey, data) {
+        const planData = data || appState.planData;
+        const isVisionStep = stepKey === 'vision';
+        const stepDefinition = isVisionStep ? templates.vision : templates.step[stepKey];
+    
+        if (!stepDefinition) return { completed: 0, total: 0 };
+    
+        const isContentEmpty = (htmlContent) => {
+            if (!htmlContent) return true;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            return tempDiv.innerText.trim() === '';
+        };
+    
+        let completed = 0;
+        let total = 0;
+    
+        if (!isVisionStep && stepKey.endsWith('s1')) {
+            total = 2;
+            if (!isContentEmpty(planData[`${stepKey}_battle`])) completed++;
+            if (!!planData[`${stepKey}_pillar`]) completed++;
+            return { completed, total };
+        }
+    
+        if (!isVisionStep && stepKey.endsWith('s5')) {
+            total = 12;
+            const monthNum = stepKey.charAt(1);
+            for (let w = 1; w <= 4; w++) {
+                if (!isContentEmpty(planData[`m${monthNum}s5_w${w}_win`])) completed++;
+                if (!isContentEmpty(planData[`m${monthNum}s5_w${w}_spotlight`])) completed++;
+                if (!!planData[`m${monthNum}s5_w${w}_status`]) completed++;
+            }
+            return { completed, total };
+        }
+        
+        const fields = stepDefinition.requiredFields;
+        if (!fields || fields.length === 0) {
+            return { completed: 0, total: 0 };
+        }
+    
+        total = fields.length;
+        completed = fields.filter(fieldId => {
+            const value = planData[fieldId];
+            if (typeof value === 'string' && (value.includes('<') && value.includes('>'))) {
+                 return !isContentEmpty(value);
+            }
+            return value && value.trim() !== '';
+        }).length;
+    
+        return { completed, total };
+    }
+
+    function isStepComplete(stepKey, data) {
+        const progress = getStepProgress(stepKey, data);
+        return progress.total > 0 && progress.completed === progress.total;
+    }
+
+    function isMonthComplete(monthNum) {
+        const totalSteps = appState.monthContext[`month-${monthNum}`].totalSteps;
+        for (let i = 1; i <= totalSteps; i++) {
+            if (!isStepComplete(`m${monthNum}s${i}`)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function updateSidebarNavStatus() {
+        document.querySelector('#nav-vision').classList.toggle('completed', isStepComplete('vision'));
+        for (let m = 1; m <= 3; m++) {
+            document.querySelector(`#nav-month-${m}`).classList.toggle('completed', isMonthComplete(m));
+        }
+    }
+
+    function calculatePlanCompletion(planData) {
+        const allSteps = ['vision', ...Object.keys(templates.step).filter(k => templates.step[k].title)];
+        const completedSteps = allSteps.filter(stepKey => isStepComplete(stepKey, planData)).length;
+        const totalSteps = allSteps.length;
+        return totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+    }
+
+    function updateOverallProgress() {
+        const percentage = calculatePlanCompletion(appState.planData);
+        DOMElements.progressPercentage.textContent = `${percentage}%`;
+        DOMElements.progressBarFill.style.width = `${percentage}%`;
+    }
+
+
+    function generateTemplates() {
+        for (let m = 2; m <= 3; m++) {
+            for (let s = 1; s <= 6; s++) {
+                const sourceStepKey = `m1s${s}`;
+                const targetStepKey = `m${m}s${s}`;
+                const sourceStep = templates.step[sourceStepKey];
+                if (!sourceStep.html) continue;
+                
+                let newHtml = sourceStep.html.replace(new RegExp(`id="${sourceStepKey}`, 'g'), `id="${targetStepKey}`);
+                newHtml = newHtml.replace(new RegExp(`for="${sourceStepKey}`, 'g'), `for="${targetStepKey}`);
+                newHtml = newHtml.replace(new RegExp(`data-step-key="${sourceStepKey}"`, 'g'), `data-step-key="${targetStepKey}"`);
+
+                templates.step[targetStepKey] = {
+                    ...sourceStep,
+                    html: newHtml,
+                    requiredFields: sourceStep.requiredFields.map(field => field.replace(sourceStepKey, targetStepKey))
+                };
+            }
+        }
+    }
+    
+    function populateViewWithData() {
+        document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
+            if (el.isContentEditable) {
+                 el.innerHTML = appState.planData[el.id] || '';
+            } else {
+                 el.value = appState.planData[el.id] || '';
+            }
+        });
+    
+        document.querySelectorAll('.pillar-buttons').forEach(group => {
+            const stepKey = group.dataset.stepKey;
+            const dataKey = `${stepKey}_pillar`;
+            const pillar = appState.planData[dataKey];
+            group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+            if (pillar) {
+                const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
+                if (buttonToSelect) buttonToSelect.classList.add('selected');
+            }
+        });
+    
+        if (appState.currentView.startsWith('month-')) {
+            const monthNum = appState.currentView.split('-')[1];
+            document.querySelectorAll('.status-buttons').forEach(group => {
+                const week = group.dataset.week;
+                const key = `m${monthNum}s5_w${week}_status`;
+                const status = appState.planData[key];
+                group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+                if (status) {
+                    const buttonToSelect = group.querySelector(`[data-status="${status}"]`);
+                    if (buttonToSelect) buttonToSelect.classList.add('selected');
+                }
+            });
+        }
+        document.querySelectorAll('#app-view [contenteditable="true"]').forEach(managePlaceholder);
+    }
+
+    function switchView(viewId) {
+        DOMElements.mainContent.scrollTop = 0;
+        appState.currentView = viewId;
+        
+        if (appState.currentPlanId) {
+            localStorage.setItem('lastPlanId', appState.currentPlanId);
+            localStorage.setItem('lastViewId', viewId);
+        }
+
+        const titles = {
+            vision: { title: 'Bakery Growth Plan', subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.'},
+            'month-1': { title: 'Month 1 Sprint', subtitle: 'Lay the foundations for success.'},
+            'month-2': { title: 'Month 2 Sprint', subtitle: 'Build momentum and embed processes.'},
+            'month-3': { title: 'Month 3 Sprint', subtitle: 'Refine execution and review the quarter.'},
+            summary: { title: '90-Day Plan Summary', subtitle: 'A complete overview of your quarterly plan.'}
+        };
+        DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
+        DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
+
+        if (viewId === 'summary') {
+            DOMElements.desktopHeaderButtons.classList.remove('hidden');
+            DOMElements.printBtn.classList.remove('hidden');
+            DOMElements.shareBtn.classList.remove('hidden');
+            DOMElements.aiActionBtn.classList.remove('hidden');
+            renderSummary();
+        } else {
+            DOMElements.desktopHeaderButtons.classList.add('hidden');
+            DOMElements.printBtn.classList.add('hidden');
+            DOMElements.shareBtn.classList.add('hidden');
+            DOMElements.aiActionBtn.classList.add('hidden');
+            const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
+            DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
+
+            if (monthNum) {
+                renderStep(appState.monthContext[viewId].currentStep);
+            } else {
+                populateViewWithData();
+            }
+        }
+        document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
+        document.querySelector(`#nav-${viewId}`)?.classList.add('active');
+        
+        DOMElements.appView.classList.remove('sidebar-open');
+        initializeCharCounters();
+    }
+
+    function renderStep(stepNum) {
+        const monthKey = appState.currentView;
+        appState.monthContext[monthKey].currentStep = stepNum;
+        const monthNum = monthKey.split('-')[1];
+        const stepKey = `m${monthNum}s${stepNum}`;
+
+        document.getElementById('step-content-container').innerHTML = templates.step[stepKey].html;
+
+        populateViewWithData();
+        renderStepper(stepNum);
+        initializeCharCounters();
+        
+        const prevBtn = document.getElementById('prev-step-btn');
+        const nextBtn = document.getElementById('next-step-btn');
+        
+        prevBtn.onclick = () => changeStep(-1);
+        nextBtn.onclick = () => changeStep(1);
+        
+        prevBtn.classList.toggle('hidden', stepNum === 1);
+        nextBtn.classList.toggle('hidden', stepNum === appState.monthContext[monthKey].totalSteps);
+    }
+
+    function changeStep(direction) {
+        const monthKey = appState.currentView;
+        let { currentStep, totalSteps } = appState.monthContext[monthKey];
+        const newStep = currentStep + direction;
+        if (newStep >= 1 && newStep <= totalSteps) {
+            renderStep(newStep);
+        }
+    }
+
+    function renderStepper(activeStep) {
+        const monthKey = appState.currentView;
+        const { totalSteps } = appState.monthContext[monthKey];
+        const monthNum = monthKey.split('-')[1];
+        const stepperNav = document.getElementById(`${monthKey}-stepper`);
+        if (!stepperNav) return;
+        stepperNav.innerHTML = '';
+        for (let i = 1; i <= totalSteps; i++) {
+            const stepKey = `m${monthNum}s${i}`;
+            const isComplete = isStepComplete(stepKey);
+            const item = document.createElement('div');
+            item.className = 'stepper-item flex items-start cursor-pointer';
+            item.dataset.step = i;
+            if (isComplete) item.classList.add('completed');
+            if (i === activeStep) item.classList.add('active');
+
+            const stepCircleContent = isComplete
+                ? `<i class="bi bi-check-lg"></i>`
+                : `<span class="step-number">${i}</span>`;
+            
+            const progress = getStepProgress(stepKey);
+            let progressHTML = '';
+            if (progress.total > 0) {
+                progressHTML = ` <span class="step-progress">(${progress.completed}/${progress.total})</span>`;
+            }
+
+            item.innerHTML = `<div class="flex flex-col items-center mr-4"><div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">${stepCircleContent}</div>${i < totalSteps ? '<div class="step-line w-0.5 h-9"></div>' : ''}</div><div><p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}${progressHTML}</p></div>`;
+            item.addEventListener('click', () => renderStep(i));
+            stepperNav.appendChild(item);
+        }
+    }
+
+    function renderSummary() {
+        const formData = appState.planData;
+        const e = (html) => (html || '...');
+    
+        const isContentEmpty = (htmlContent) => {
+            if (!htmlContent) return true;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            return tempDiv.innerText.trim() === '';
+        };
+    
+        const renderMonthSummary = (monthNum) => {
+            let weeklyCheckinHTML = '<ul>';
+            let hasLoggedWeeks = false;
+    
+            for (let w = 1; w <= 4; w++) {
+                const status = formData[`m${monthNum}s5_w${w}_status`];
+                const win = formData[`m${monthNum}s5_w${w}_win`];
+    
+                if (status) {
+                    hasLoggedWeeks = true;
+                    const statusText = status.replace('-', ' ').toUpperCase();
+                    const statusBadgeHTML = `<span class="summary-status-badge status-${status}">${statusText}</span>`;
+                    const winText = !isContentEmpty(win) ? e(win) : '<em>No win/learning logged.</em>';
+    
+                    weeklyCheckinHTML += `<li>
+                                            <div class="flex justify-between items-center mb-1">
+                                                <strong class="font-semibold text-gray-700">Week ${w}</strong>
+                                                ${statusBadgeHTML}
+                                            </div>
+                                            <p class="text-sm text-gray-600">${winText}</p>
+                                          </li>`;
+                }
+            }
+    
+            if (!hasLoggedWeeks) {
+                weeklyCheckinHTML = '<p class="text-sm text-gray-500">No weekly check-ins have been logged for this month.</p>';
+            } else {
+                weeklyCheckinHTML += '</ul>';
+            }
+    
+            const pillar = formData[`m${monthNum}s1_pillar`];
+            const pillarIcons = { 
+                'people': '<i class="bi bi-people-fill"></i>', 
+                'product': '<i class="bi bi-cup-hot-fill"></i>', 
+                'customer': '<i class="bi bi-heart-fill"></i>', 
+                'place': '<i class="bi bi-shop"></i>'
+            };
+            let pillarHTML = '';
+            if (pillar) {
+                const pillarIcon = pillarIcons[pillar] || '';
+                const pillarText = pillar.charAt(0).toUpperCase() + pillar.slice(1);
+                pillarHTML = `<div class="flex items-center gap-2 mb-4"><span class="font-semibold text-sm text-gray-500">Focus Pillar:</span><span class="pillar-badge">${pillarIcon} ${pillarText}</span></div>`;
+            }
+    
+            return `
+                <div class="content-card p-0 overflow-hidden mt-8">
+                    <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">Month ${monthNum} Sprint</h2>
+                    <div class="summary-grid">
+                        <div class="p-6">
+                            ${pillarHTML}
+                            <div class="summary-section">
+                                <h3 class="summary-heading">Must-Win Battle</h3>
+                                <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div>
+                            </div>
+                            <div class="summary-section">
+                                <h3 class="summary-heading">Key Levers</h3>
+                                <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div>
+                            </div>
+                            <div class="summary-section">
+                                <h3 class="summary-heading">People Growth</h3>
+                                <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div>
+                            </div>
+                        </div>
+                        <div class="p-6 bg-gray-50/70 border-l">
+                            <div class="summary-section">
+                                <h3 class="summary-heading">Protect the Core</h3>
+                                <ul class="space-y-3 mt-2">
+                                    <li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li>
+                                    <li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li>
+                                    <li class="flex items-start text-sm"><i class="bi bi-heart-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_customer`])}</span></li>
+                                    <li class="flex items-start text-sm"><i class="bi bi-shop w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_place`])}</span></li>
+                                </ul>
+                            </div>
+                            <div class="summary-section">
+                                <h3 class="summary-heading">Weekly Momentum Wins & Learnings</h3>
+                                ${weeklyCheckinHTML}
+                            </div>
+                            <div class="summary-section">
+                                <h3 class="summary-heading">End of Month Review</h3>
+                                 <ul class="space-y-3 mt-2">
+                                    <li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li>
+                                    <li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Challenge:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li>
+                                    <li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Next:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        };
+    
+        DOMElements.contentArea.innerHTML = `
+            <div class="space-y-8 summary-content">
+                <div class="content-card p-6">
+                    <h2 class="text-2xl font-bold font-poppins mb-4">Quarterly Vision & Sprints</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4">
+                        <div><h4 class="font-semibold text-sm text-gray-500">Manager</h4><p class="text-gray-800 font-medium">${formData.managerName || '...'}</p></div>
+                        <div><h4 class="font-semibold text-sm text-gray-500">Bakery</h4><p class="text-gray-800 font-medium">${formData.bakeryLocation || '...'}</p></div>
+                        <div><h4 class="font-semibold text-sm text-gray-500">Quarter</h4><p class="text-gray-800 font-medium">${formData.quarter || '...'}</p></div>
+                    </div>
+                    <div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Theme</h4><div class="text-gray-800 prose prose-sm">${e(formData.quarterlyTheme)}</div></div>
+                    <div><h3 class="text-lg font-bold border-b pb-2 mb-3">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm">
+                        <div><strong class="font-semibold text-gray-600 block">Month 1 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month1Goal)}</div></div>
+                        <div><strong class="font-semibold text-gray-600 block">Month 2 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month2Goal)}</div></div>
+                        <div><strong class="font-semibold text-gray-600 block">Month 3 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month3Goal)}</div></div>
+                    </div></div>
+                </div>
+                ${renderMonthSummary(1)}
+                ${renderMonthSummary(2)}
+                ${renderMonthSummary(3)}
+                <div class="content-card p-6 mt-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);">
+                    <h2 class="text-2xl font-bold mb-4" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2>
+                    <div class="space-y-4">
+                        <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Biggest Achievements</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_achievements)}</div></div>
+                        <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_challenges)}</div></div>
+                        <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Narrative</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_narrative)}</div></div>
+                        <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Focus For Next Quarter</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_next_quarter)}</div></div>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    function summarizePlanForAI(planData) {
+        const e = (text) => {
+            if (!text) return '';
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = text;
+            return tempDiv.innerText.trim();
+        };
+    
+        let summary = `QUARTERLY NARRATIVE: ${e(planData.quarterlyTheme)}\n\n`;
+    
+        for (let m = 1; m <= 3; m++) {
+            summary += `--- MONTH ${m} ---\n`;
+            summary += `GOAL: ${e(planData[`month${m}Goal`])}\n`;
+            summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
+            summary += `KEY LEVERS: ${e(planData[`m${m}s2_levers`])}\n`;
+            summary += `PEOPLE GROWTH: ${e(planData[`m${m}s3_people`])}\n`;
+            summary += `PROTECT THE CORE (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
+            summary += `PROTECT THE CORE (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
+            summary += `PROTECT THE CORE (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
+            summary += `PROTECT THE CORE (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
+        }
+        return summary;
+    }
 
     function handleSaveAsWord() {
         const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType } = docx;
@@ -371,6 +1031,60 @@ function runApp(app) {
         DOMElements.modalCancelBtn.onclick = handleAIActionPlan;
     }
 
+    async function handleShare() {
+        openModal('sharing');
+        
+        try {
+            let shareableLink;
+            
+            const pointerQuery = db.collection('sharedPlans').where('originalPlanId', '==', appState.currentPlanId);
+            const querySnapshot = await pointerQuery.get();
+    
+            if (!querySnapshot.empty) {
+                const existingPointer = querySnapshot.docs[0];
+                shareableLink = `${window.location.origin}/view.html?id=${existingPointer.id}`;
+            } else {
+                const originalPlanRef = db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(appState.currentPlanId);
+                await originalPlanRef.update({ isShared: true });
+    
+                const pointerDoc = {
+                    originalUserId: appState.currentUser.uid,
+                    originalPlanId: appState.currentPlanId,
+                    sharedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                const newPointerRef = await db.collection('sharedPlans').add(pointerDoc);
+                shareableLink = `${window.location.origin}/view.html?id=${newPointerRef.id}`;
+            }
+            
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = `
+                <p class="text-sm text-gray-600 mb-4">This is a live link that will update as you make changes to your plan.</p>
+                <label for="shareable-link" class="font-semibold block mb-2">Shareable Link:</label>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="shareable-link" class="form-input" value="${shareableLink}" readonly>
+                    <button id="copy-link-btn" class="btn btn-secondary"><i class="bi bi-clipboard"></i></button>
+                </div>
+                <p id="copy-success-msg" class="text-green-600 text-sm mt-2 hidden">Link copied to clipboard!</p>
+            `;
+    
+            document.getElementById('copy-link-btn').addEventListener('click', () => {
+                const linkInput = document.getElementById('shareable-link');
+                linkInput.select();
+                document.execCommand('copy');
+                document.getElementById('copy-success-msg').classList.remove('hidden');
+                setTimeout(() => document.getElementById('copy-success-msg').classList.add('hidden'), 2000);
+            });
+            
+            DOMElements.modalActionBtn.style.display = 'none';
+            DOMElements.modalCancelBtn.textContent = 'Done';
+            
+        } catch (error) {
+            console.error("Error creating shareable link:", error);
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = `<p class="text-red-600">Could not create a shareable link. Please try again later.</p>`;
+        }
+    }
+
     function openModal(type, context = {}) {
         const { planId, currentName, planName } = context;
         DOMElements.modalBox.dataset.type = type;
@@ -382,7 +1096,51 @@ function runApp(app) {
         DOMElements.modalCancelBtn.style.display = 'inline-flex';
     
         switch (type) {
-            // ... (keep cases for 'create', 'edit', 'delete', 'timeout', 'sharing')
+            case 'create':
+                DOMElements.modalTitle.textContent = "Create New Plan";
+                DOMElements.modalContent.innerHTML = `
+                    <label for="newPlanName" class="font-semibold block mb-2">Plan Name:</label>
+                    <input type="text" id="newPlanName" class="form-input" placeholder="e.g., Q4 2025 Focus" value="New Plan ${new Date().toLocaleDateString('en-GB')}">
+                    <div id="modal-error-container" class="modal-error-container"></div>
+                `;
+                DOMElements.modalActionBtn.textContent = "Create Plan";
+                DOMElements.modalActionBtn.className = 'btn btn-primary';
+                DOMElements.modalCancelBtn.textContent = 'Cancel';
+                DOMElements.modalActionBtn.onclick = handleModalAction;
+                const newPlanNameInput = document.getElementById('newPlanName');
+                newPlanNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleModalAction(); });
+                break;
+            case 'edit':
+                DOMElements.modalTitle.textContent = "Edit Plan Name";
+                DOMElements.modalContent.innerHTML = `<label for="editPlanName" class="font-semibold block mb-2">Plan Name:</label><input type="text" id="editPlanName" class="form-input" value="${currentName}">`;
+                DOMElements.modalActionBtn.textContent = "Save Changes";
+                DOMElements.modalActionBtn.className = 'btn btn-primary';
+                DOMElements.modalCancelBtn.textContent = 'Cancel';
+                DOMElements.modalActionBtn.onclick = handleModalAction;
+                document.getElementById('editPlanName').addEventListener('keyup', (e) => { if (e.key === 'Enter') handleModalAction(); });
+                break;
+            case 'delete':
+                DOMElements.modalTitle.textContent = "Confirm Deletion";
+                DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete the plan: <strong class="font-bold">${planName}</strong>?</p><p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action is final and cannot be undone.</p>`;
+                DOMElements.modalActionBtn.textContent = "Confirm Delete";
+                DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+                DOMElements.modalCancelBtn.textContent = 'Cancel';
+                DOMElements.modalActionBtn.onclick = handleModalAction;
+                break;
+            case 'timeout':
+                DOMElements.modalTitle.textContent = "Session Timed Out";
+                DOMElements.modalContent.innerHTML = `<p>For your security, you have been logged out due to inactivity. All of your progress has been saved.</p>`;
+                DOMElements.modalActionBtn.textContent = "OK";
+                DOMElements.modalActionBtn.className = 'btn btn-primary';
+                DOMElements.modalCancelBtn.style.display = 'none';
+                DOMElements.modalActionBtn.onclick = closeModal;
+                break;
+            case 'sharing':
+                DOMElements.modalTitle.textContent = "Share Your Plan";
+                DOMElements.modalContent.innerHTML = `<div class="flex items-center justify-center p-8"><div class="loading-spinner"></div><p class="ml-4 text-gray-600">Generating secure shareable link...</p></div>`;
+                DOMElements.modalActionBtn.style.display = 'none';
+                DOMElements.modalCancelBtn.textContent = 'Cancel';
+                break;
             case 'aiActionPlan_generate':
                 DOMElements.modalTitle.textContent = "AI Action Plan";
                 DOMElements.modalContent.innerHTML = `<div class="flex items-center justify-center p-8"><div class="loading-spinner"></div><p class="ml-4 text-gray-600">Your AI assistant is building your plan...</p></div>`;
@@ -470,5 +1228,354 @@ function runApp(app) {
         DOMElements.modalOverlay.classList.add('hidden');
     }
 
-    // --- All other functions (auth, event listeners, etc.) from the original file go here ---
-}
+    async function handleModalAction() {
+        const type = DOMElements.modalBox.dataset.type;
+        const planId = DOMElements.modalBox.dataset.planId;
+
+        if (type === 'timeout') {
+            closeModal();
+            return;
+        }
+
+        switch(type) {
+            case 'create':
+                const newPlanNameInput = document.getElementById('newPlanName');
+                const newPlanName = newPlanNameInput.value.trim();
+                const originalButtonText = DOMElements.modalActionBtn.textContent;
+                const errorContainer = document.getElementById('modal-error-container');
+
+                if(errorContainer) errorContainer.innerHTML = '';
+                newPlanNameInput.classList.remove('input-error');
+
+                if (!newPlanName) {
+                    newPlanNameInput.classList.add('input-error', 'shake');
+                    setTimeout(() => newPlanNameInput.classList.remove('shake'), 500);
+                    return;
+                }
+                
+                DOMElements.modalActionBtn.disabled = true;
+                DOMElements.modalActionBtn.textContent = 'Checking...';
+
+                const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
+                const nameQuery = await plansRef.where('planName', '==', newPlanName).get();
+
+                if (!nameQuery.empty) {
+                    newPlanNameInput.classList.add('input-error', 'shake');
+                    if(errorContainer) {
+                       errorContainer.innerHTML = `<p class="auth-error" style="display:block; margin: 0; width: 100%;">A plan with this name already exists. Please choose another.</p>`;
+                    }
+                    
+                    DOMElements.modalActionBtn.disabled = false;
+                    DOMElements.modalActionBtn.textContent = originalButtonText;
+                    setTimeout(() => newPlanNameInput.classList.remove('shake'), 500);
+                    return;
+                }
+                
+                DOMElements.modalActionBtn.disabled = false;
+                DOMElements.modalActionBtn.textContent = originalButtonText;
+
+                closeModal();
+                DOMElements.creationLoadingView.classList.remove('hidden');
+
+                try {
+                    const newPlan = await plansRef.add({ 
+                        planName: newPlanName, 
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(), 
+                        lastEdited: firebase.firestore.FieldValue.serverTimestamp(), 
+                        managerName: '' 
+                    });
+                    await handleSelectPlan(newPlan.id);
+                } catch (error) {
+                    console.error("Error creating new plan:", error);
+                } finally {
+                    DOMElements.creationLoadingView.classList.add('hidden');
+                }
+                break;
+
+            case 'edit':
+                const newName = document.getElementById('editPlanName').value;
+                if (newName && newName.trim() !== '') {
+                    try {
+                        await db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(planId).update({ planName: newName });
+                        await renderDashboard();
+                    } catch (error) { console.error("Error updating plan name:", error); }
+                }
+                closeModal();
+                break;
+
+            case 'delete':
+                try {
+                    await db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(planId).delete();
+                    await renderDashboard();
+                } catch (error) { console.error("Error deleting plan:", error); }
+                closeModal();
+                break;
+        }
+    }
+
+
+    // --- EVENT LISTENERS ---
+    const handleLoginAttempt = () => {
+        DOMElements.authError.style.display = 'none';
+        auth.signInWithEmailAndPassword(DOMElements.emailInput.value, DOMElements.passwordInput.value)
+            .catch(error => {
+                let friendlyMessage = 'An unexpected error occurred. Please try again.';
+                switch (error.code) {
+                    case 'auth/invalid-login-credentials':
+                    case 'auth/invalid-credential':
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                        friendlyMessage = 'Incorrect email or password. Please check your details and try again.';
+                        break;
+                    case 'auth/invalid-email':
+                        friendlyMessage = 'The email address is not valid. Please enter a valid email.';
+                        break;
+                }
+                DOMElements.authError.textContent = friendlyMessage;
+                DOMElements.authError.style.display = 'block';
+            });
+    };
+
+    DOMElements.loginBtn.addEventListener('click', handleLoginAttempt);
+
+    const loginOnEnter = (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            handleLoginAttempt();
+        }
+    };
+    DOMElements.emailInput.addEventListener('keyup', loginOnEnter);
+    DOMElements.passwordInput.addEventListener('keyup', loginOnEnter);
+
+    DOMElements.createAccountBtn.addEventListener('click', () => {
+        const email = DOMElements.registerEmail.value;
+        const password = DOMElements.registerPassword.value;
+        const errorContainer = DOMElements.registerError;
+        
+        errorContainer.style.display = 'none';
+
+        if (!DOMElements.termsAgreeCheckbox.checked) {
+            errorContainer.textContent = 'You must agree to the Terms and Conditions and Privacy Policy.';
+            errorContainer.style.display = 'block';
+            return;
+        }
+
+        auth.createUserWithEmailAndPassword(email, password)
+            .catch(error => {
+                let friendlyMessage = 'An unexpected error occurred. Please try again.';
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        friendlyMessage = 'An account with this email address already exists. Please try logging in.';
+                        break;
+                    case 'auth/weak-password':
+                        friendlyMessage = 'The password is too weak. Please choose a stronger password.';
+                        break;
+                    case 'auth/invalid-email':
+                        friendlyMessage = 'The email address is not valid. Please enter a valid email.';
+                        break;
+                }
+                errorContainer.textContent = friendlyMessage;
+                errorContainer.style.display = 'block';
+            });
+    });
+
+    DOMElements.showRegisterViewBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        DOMElements.loginView.classList.add('hidden');
+        DOMElements.resetView.classList.add('hidden');
+        DOMElements.registerView.classList.remove('hidden');
+        DOMElements.authError.style.display = 'none';
+    });
+
+    DOMElements.backToLoginFromRegisterBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        DOMElements.registerView.classList.add('hidden');
+        DOMElements.loginView.classList.remove('hidden');
+    });
+
+    DOMElements.forgotPasswordBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        DOMElements.loginView.classList.add('hidden');
+        DOMElements.registerView.classList.add('hidden');
+        DOMElements.resetView.classList.remove('hidden');
+        DOMElements.authError.style.display = 'none';
+        DOMElements.resetMessageContainer.innerHTML = '';
+    });
+
+    DOMElements.backToLoginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        DOMElements.resetView.classList.add('hidden');
+        DOMElements.loginView.classList.remove('hidden');
+    });
+
+    DOMElements.sendResetBtn.addEventListener('click', () => {
+        const email = DOMElements.resetEmail.value;
+        const messageContainer = DOMElements.resetMessageContainer;
+        messageContainer.innerHTML = '';
+
+        if (!email) {
+            messageContainer.innerHTML = `<p class="auth-error" style="display:block; margin-bottom: 1rem;">Please enter your email address.</p>`;
+            return;
+        }
+
+        DOMElements.sendResetBtn.disabled = true;
+        DOMElements.sendResetBtn.textContent = 'Sending...';
+
+        auth.sendPasswordResetEmail(email)
+            .then(() => {
+                messageContainer.innerHTML = `<p class="auth-success">If an account exists for this email, a password reset link has been sent. Please check your inbox.</p>`;
+            })
+            .catch((error) => {
+                messageContainer.innerHTML = `<p class="auth-success">If an account exists for this email, a password reset link has been sent. Please check your inbox.</p>`;
+                console.error("Password Reset Error:", error.message);
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    DOMElements.sendResetBtn.disabled = false;
+                    DOMElements.sendResetBtn.textContent = 'Send Reset Link';
+                }, 3000);
+            });
+    });
+
+
+    DOMElements.logoutBtn.addEventListener('click', () => handleLogout(false));
+    DOMElements.dashboardLogoutBtn.addEventListener('click', () => handleLogout(false));
+    DOMElements.backToDashboardBtn.addEventListener('click', handleBackToDashboard);
+
+    DOMElements.dashboardContent.addEventListener('click', (e) => {
+        const createBtn = e.target.closest('#create-new-plan-btn');
+        const mainCard = e.target.closest('.plan-card-main');
+        const editBtn = e.target.closest('.edit-plan-btn');
+        const deleteBtn = e.target.closest('.delete-plan-btn');
+
+        if (editBtn) { e.stopPropagation(); handleEditPlanName(editBtn.dataset.planId, editBtn.dataset.planName); }
+        else if (deleteBtn) { e.stopPropagation(); handleDeletePlan(deleteBtn.dataset.planId, deleteBtn.dataset.planName); }
+        else if (createBtn) { handleCreateNewPlan(); }
+        else if (mainCard) { handleSelectPlan(mainCard.dataset.planId); }
+    });
+
+    DOMElements.mainNav.addEventListener('click', (e) => { e.preventDefault(); const navLink = e.target.closest('a'); if (navLink) { switchView(navLink.id.replace('nav-', '')); }});
+    
+    DOMElements.contentArea.addEventListener('keydown', (e) => {
+        const editor = e.target.closest('[contenteditable="true"]');
+        if (!editor) return;
+
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+            e.preventDefault();
+            document.execCommand('bold', false, null);
+        }
+
+        const maxLength = parseInt(editor.dataset.maxlength, 10);
+        if (maxLength) {
+            const isControlKey = e.key.length > 1 || e.ctrlKey || e.metaKey;
+            if (editor.innerText.length >= maxLength && !isControlKey) {
+                e.preventDefault();
+            }
+        }
+    });
+
+    DOMElements.contentArea.addEventListener('input', (e) => { 
+        if (e.target.matches('input, [contenteditable="true"]')) { 
+            saveData(); 
+        }
+        if (e.target.isContentEditable) {
+            managePlaceholder(e.target);
+        }
+    });
+
+    DOMElements.contentArea.addEventListener('click', (e) => {
+        const target = e.target;
+    
+        const pillarButton = target.closest('.pillar-button');
+        if (pillarButton) {
+            const alreadySelected = pillarButton.classList.contains('selected');
+            pillarButton.parentElement.querySelectorAll('.pillar-button').forEach(btn => btn.classList.remove('selected'));
+            if (!alreadySelected) {
+                pillarButton.classList.add('selected');
+            }
+            saveData(true);
+            return;
+        }
+    
+        if (target.closest('.status-button')) {
+            const button = target.closest('.status-button');
+            const alreadySelected = button.classList.contains('selected');
+            button.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
+            if (!alreadySelected) button.classList.add('selected');
+            saveData(true);
+        }
+    });
+
+    DOMElements.printBtn.addEventListener('click', () => window.print());
+    DOMElements.shareBtn.addEventListener('click', handleShare);
+    DOMElements.aiActionBtn.addEventListener('click', handleAIActionPlan);
+
+    DOMElements.modalCloseBtn.addEventListener('click', closeModal);
+    DOMElements.modalCancelBtn.addEventListener('click', closeModal);
+    DOMElements.modalOverlay.addEventListener('mousedown', (e) => {
+        if (e.target === DOMElements.modalOverlay) {
+            closeModal();
+        }
+    });
+    DOMElements.modalActionBtn.addEventListener('click', handleModalAction);
+    
+    DOMElements.mobileMenuBtn.addEventListener('click', () => {
+        DOMElements.appView.classList.toggle('sidebar-open');
+    });
+    DOMElements.sidebarOverlay.addEventListener('click', () => {
+        DOMElements.appView.classList.remove('sidebar-open');
+    });
+    
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const swipeThreshold = 50; 
+
+    DOMElements.mainContent.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    DOMElements.mainContent.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchEndX > touchStartX + swipeThreshold) {
+            DOMElements.appView.classList.add('sidebar-open');
+        }
+    });
+    
+    DOMElements.sidebar.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    DOMElements.sidebar.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchEndX < touchStartX - swipeThreshold) {
+            DOMElements.appView.classList.remove('sidebar-open');
+        }
+    });
+
+    // --- COOKIE CONSENT ---
+    const cookieBanner = document.getElementById('cookie-consent-banner');
+    const acceptBtn = document.getElementById('cookie-accept-btn');
+    const declineBtn = document.getElementById('cookie-decline-btn');
+
+    if (localStorage.getItem('gails_cookie_consent') === null) {
+        cookieBanner.classList.remove('hidden');
+    }
+
+    acceptBtn.addEventListener('click', () => {
+        localStorage.setItem('gails_cookie_consent', 'true');
+        cookieBanner.classList.add('hidden');
+    });
+
+    declineBtn.addEventListener('click', () => {
+        localStorage.setItem('gails_cookie_consent', 'false');
+        cookieBanner.classList.add('hidden');
+    });
+
+    // --- INITIALIZE APP ---
+    generateTemplates();
+
+} 
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeFirebase();
+});
