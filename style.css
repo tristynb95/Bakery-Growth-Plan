@@ -434,3 +434,10 @@ textarea.form-input {
 .weekly-check-in-container [contenteditable="true"].form-input {
     min-height: 60px;
 }
+/* 20. Stepper Completion Checkmark Icon
+-------------------------------------------------- */
+.stepper-item.completed .step-circle .bi-check-lg {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
