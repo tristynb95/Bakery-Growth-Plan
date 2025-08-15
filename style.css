@@ -481,8 +481,10 @@ textarea.form-input {
 }
 
 /* Give the AI modal a bit more width to better display the plan */
-#modal-box[data-type="aiActionPlan"] {
-    max-width: 900px; /* Increased from 640px for better table readability */
+#modal-box[data-type="aiActionPlan"],
+#modal-box[data-type="aiActionPlan_view"],
+#modal-box[data-type="aiActionPlan_generate"] {
+    max-width: 1200px; /* Increased for better table readability */
 }
 
 /* 24. AI Action Plan Table Styles
@@ -594,6 +596,7 @@ textarea.form-input {
 .modal-footer {
     flex-wrap: wrap; /* Allow buttons to wrap on small screens */
 }
+
 
 
 
