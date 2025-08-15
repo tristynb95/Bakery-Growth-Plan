@@ -440,4 +440,22 @@ textarea.form-input {
     font-size: 1.2rem;
     line-height: 1;
 }
+/* 21. Stepper Progress Text
+-------------------------------------------------- */
+.step-progress {
+    font-size: 0.75rem; /* 12px */
+    font-weight: 500;
+    color: var(--gails-text-secondary);
+    margin-top: 0.125rem; /* 2px */
+    transition: color 0.3s;
+}
+
+.stepper-item.active .step-progress {
+    color: var(--gails-red);
+}
+
+.stepper-item.completed:not(.active) .step-progress {
+    color: var(--gails-green);
+}
+
 
