@@ -513,13 +513,13 @@ const DOMElements = {
 
     // --- UI & RENDER LOGIC ---
     function updateUI() {
-        updateSidebarInfo();
-        updateOverallProgress();
-        updateSidebarNavStatus();
-        if (appState.currentView.startsWith('month-')) {
-            renderStepper(appState.monthContext[appState.currentView].currentStep);
-        }
+    updateSidebarInfo();
+    updateOverallProgress();
+    updateSidebarNavStatus(); // This function checks and applies the 'completed' class
+    if (appState.currentView.startsWith('month-')) {
+        renderStepper(appState.monthContext[appState.currentView].currentStep);
     }
+}
 
     function updateSidebarInfo() {
         const managerName = appState.planData.managerName || '';
@@ -1396,6 +1396,7 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
