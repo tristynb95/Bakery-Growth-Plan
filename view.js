@@ -27,68 +27,136 @@ function runViewScript(app) {
     };
 
     const renderSummary = (formData) => {
-        const e = (text) => (text || '...').replace(/\n/g, '<br>');
-        
+        const e = (html) => (html || '...');
+
+        const isContentEmpty = (htmlContent) => {
+            if (!htmlContent) return true;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            return tempDiv.innerText.trim() === '';
+        };
+
         const renderMonthSummary = (monthNum) => {
-            let weeklyCheckinHTML = '';
+            let weeklyCheckinHTML = '<ul>';
+            let hasLoggedWeeks = false;
+
             for (let w = 1; w <= 4; w++) {
-                const statusKey = `m${monthNum}s5_w${w}_status`;
-                const status = formData[statusKey] || 'N/A';
-                const statusColors = { 'on-track': 'bg-green-100 text-green-800', 'issues': 'bg-yellow-100 text-yellow-800', 'off-track': 'bg-red-100 text-red-800', 'N/A': 'bg-gray-100 text-gray-800' };
-                const statusBadge = `<span class="text-xs font-semibold ml-2 px-2 py-0.5 rounded-full capitalize ${statusColors[status] || statusColors['N/A']}">${status.replace('-', ' ')}</span>`;
-                weeklyCheckinHTML += `<div class="border-t pt-3 mt-3"><h5 class="font-bold text-sm">Week ${w}${statusBadge}</h5><div class="text-sm mt-2"><strong class="text-gray-600">Win/Learning:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s5_w${w}_win`])}</span></div><div class="text-sm mt-1"><strong class="text-gray-600">Spotlight:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s5_w${w}_spotlight`])}</span></div></div>`;
+                const status = formData[`m${monthNum}s5_w${w}_status`];
+                const win = formData[`m${monthNum}s5_w${w}_win`];
+
+                if (status) {
+                    hasLoggedWeeks = true;
+                    const statusText = status.replace('-', ' ').toUpperCase();
+                    const statusBadgeHTML = `<span class="summary-status-badge status-${status}">${statusText}</span>`;
+                    const winText = !isContentEmpty(win) ? e(win) : '<em>No win/learning logged.</em>';
+
+                    weeklyCheckinHTML += `<li>
+                                            <div class="flex justify-between items-center mb-1">
+                                                <strong class="font-semibold text-gray-700">Week ${w}</strong>
+                                                ${statusBadgeHTML}
+                                            </div>
+                                            <p class="text-sm text-gray-600">${winText}</p>
+                                          </li>`;
+                }
             }
-    
+
+            if (!hasLoggedWeeks) {
+                weeklyCheckinHTML = '<p class="text-sm text-gray-500">No weekly check-ins have been logged for this month.</p>';
+            } else {
+                weeklyCheckinHTML += '</ul>';
+            }
+
             const pillar = formData[`m${monthNum}s1_pillar`];
-            const pillarIcons = { 'people': '<i class="bi bi-people-fill"></i>', 'product': '<i class="bi bi-cup-hot-fill"></i>', 'customer': '<i class="bi bi-heart-fill"></i>', 'place': '<i class="bi bi-shop"></i>' };
+            const pillarIcons = {
+                'people': '<i class="bi bi-people-fill"></i>',
+                'product': '<i class="bi bi-cup-hot-fill"></i>',
+                'customer': '<i class="bi bi-heart-fill"></i>',
+                'place': '<i class="bi bi-shop"></i>'
+            };
             let pillarHTML = '';
             if (pillar) {
                 const pillarIcon = pillarIcons[pillar] || '';
                 const pillarText = pillar.charAt(0).toUpperCase() + pillar.slice(1);
-                pillarHTML = `<div class="flex items-center gap-2 mb-3"><span class="font-semibold text-sm text-gray-500">Focus Pillar:</span><span class="pillar-badge">${pillarIcon} ${pillarText}</span></div>`;
+                pillarHTML = `<div class="flex items-center gap-2 mb-4"><span class="font-semibold text-sm text-gray-500">Focus Pillar:</span><span class="pillar-badge">${pillarIcon} ${pillarText}</span></div>`;
             }
-    
-            return `<div class="content-card p-6 mt-8">
-                        <h2 class="text-2xl font-bold font-poppins mb-4">Month ${monthNum} Sprint</h2>
-                        <div class="space-y-6">
-                            <div><h3 class="font-bold border-b pb-2 mb-2 gails-red-text">Must-Win Battle</h3>${pillarHTML} <p class="text-gray-700 whitespace-pre-wrap">${e(formData[`m${monthNum}s1_battle`])}</p></div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                                <div><h4 class="font-semibold text-gray-800">Key Levers</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s2_levers`])}</p></div>
-                                <div><h4 class="font-semibold text-gray-800">People Growth</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s3_people`])}</p></div>
-                                <div class="col-span-1"><h4 class="font-semibold text-gray-800">Team Power-Up Question</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s2_powerup_q`])}</p></div>
-                                <div class="col-span-1"><h4 class="font-semibold text-gray-800">Team's Winning Idea</h4><p class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${e(formData[`m${monthNum}s2_powerup_a`])}</p></div>
+
+            return `
+                <div class="content-card p-0 overflow-hidden mt-8">
+                    <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">Month ${monthNum} Sprint</h2>
+                    <div class="summary-grid">
+                        <div class="p-6">
+                            ${pillarHTML}
+                            <div class="summary-section">
+                                <h3 class="summary-heading">Must-Win Battle</h3>
+                                <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div>
                             </div>
-                            <div><h3 class="font-bold border-b pb-2 mb-2">Protect the Core Behaviours</h3><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
-                                <div><strong class="text-gray-600 block"><i class="bi bi-people-fill"></i> People</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_people`])}</span></div>
-                                <div><strong class="text-gray-600 block"><i class="bi bi-cup-hot-fill"></i> Product</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_product`])}</span></div>
-                                <div><strong class="text-gray-600 block"><i class="bi bi-heart-fill"></i> Customer</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_customer`])}</span></div>
-                                <div><strong class="text-gray-600 block"><i class="bi bi-shop"></i> Place</strong><span class="text-gray-800">${e(formData[`m${monthNum}s4_place`])}</span></div>
-                            </div></div>
-                            <div><h3 class="font-bold border-b pb-2 mb-2">Weekly Momentum Check</h3>${weeklyCheckinHTML}</div>
-                            <div><h3 class="font-bold border-b pb-2 mb-2">End of Month Review</h3><div class="text-sm mt-2 space-y-2">
-                                <p><strong class="text-gray-600 flex items-center gap-2"><i class="bi bi-trophy-fill"></i> Biggest Win:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_win`])}</span></p>
-                                <p><strong class="text-gray-600 flex items-center gap-2"><i class="bi bi-lightbulb-fill"></i> Toughest Challenge:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_challenge`])}</span></p>
-                                <p><strong class="text-gray-600 flex items-center gap-2"><i class="bi bi-rocket-takeoff-fill"></i> What's Next:</strong> <span class="text-gray-800">${e(formData[`m${monthNum}s6_next`])}</span></p>
-                            </div></div>
+                            <div class="summary-section">
+                                <h3 class="summary-heading">Key Levers</h3>
+                                <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div>
+                            </div>
+                            <div class="summary-section">
+                                <h3 class="summary-heading">People Growth</h3>
+                                <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div>
+                            </div>
                         </div>
-                    </div>`;
+                        <div class="p-6 bg-gray-50/70 border-l">
+                            <div class="summary-section">
+                                <h3 class="summary-heading">Protect the Core</h3>
+                                <ul class="space-y-3 mt-2">
+                                    <li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li>
+                                    <li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li>
+                                    <li class="flex items-start text-sm"><i class="bi bi-heart-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_customer`])}</span></li>
+                                    <li class="flex items-start text-sm"><i class="bi bi-shop w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_place`])}</span></li>
+                                </ul>
+                            </div>
+                            <div class="summary-section">
+                                <h3 class="summary-heading">Weekly Momentum Wins & Learnings</h3>
+                                ${weeklyCheckinHTML}
+                            </div>
+                            <div class="summary-section">
+                                <h3 class="summary-heading">End of Month Review</h3>
+                                 <ul class="space-y-3 mt-2">
+                                    <li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li>
+                                    <li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Challenge:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li>
+                                    <li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Next:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
         };
-        
+
         DOMElements.headerTitle.textContent = formData.planName || 'Growth Plan Summary';
         DOMElements.headerSubtitle.textContent = `A read-only summary for ${formData.bakeryLocation || 'the bakery'}.`;
 
         DOMElements.contentArea.innerHTML = `
             <div class="space-y-8 summary-content">
-                <div class="content-card p-6"><h2 class="text-2xl font-bold font-poppins mb-4">Quarterly Vision & Sprints</h2><div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4"><div><h4 class="font-semibold text-sm text-gray-500">Manager</h4><p class="text-gray-800 font-medium">${e(formData.managerName)}</p></div><div><h4 class="font-semibold text-sm text-gray-500">Bakery</h4><p class="text-gray-800 font-medium">${e(formData.bakeryLocation)}</p></div><div><h4 class="font-semibold text-sm text-gray-500">Quarter</h4><p class="text-gray-800 font-medium">${e(formData.quarter)}</p></div></div><div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Theme</h4><p class="text-gray-800 whitespace-pre-wrap">${e(formData.quarterlyTheme)}</p></div><div><h3 class="text-lg font-bold border-b pb-2 mb-3">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm"><div><strong class="font-semibold text-gray-600 block">Month 1 Goal:</strong><p class="text-gray-800 mt-1 whitespace-pre-wrap">${e(formData.month1Goal)}</p></div><div><strong class="font-semibold text-gray-600 block">Month 2 Goal:</strong><p class="text-gray-800 mt-1 whitespace-pre-wrap">${e(formData.month2Goal)}</p></div><div><strong class="font-semibold text-gray-600 block">Month 3 Goal:</strong><p class="text-gray-800 mt-1 whitespace-pre-wrap">${e(formData.month3Goal)}</p></div></div></div></div>
+                <div class="content-card p-6">
+                    <h2 class="text-2xl font-bold font-poppins mb-4">Quarterly Vision & Sprints</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4">
+                        <div><h4 class="font-semibold text-sm text-gray-500">Manager</h4><p class="text-gray-800 font-medium">${formData.managerName || '...'}</p></div>
+                        <div><h4 class="font-semibold text-sm text-gray-500">Bakery</h4><p class="text-gray-800 font-medium">${formData.bakeryLocation || '...'}</p></div>
+                        <div><h4 class="font-semibold text-sm text-gray-500">Quarter</h4><p class="text-gray-800 font-medium">${formData.quarter || '...'}</p></div>
+                    </div>
+                    <div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Theme</h4><div class="text-gray-800 prose prose-sm">${e(formData.quarterlyTheme)}</div></div>
+                    <div><h3 class="text-lg font-bold border-b pb-2 mb-3">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm">
+                        <div><strong class="font-semibold text-gray-600 block">Month 1 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month1Goal)}</div></div>
+                        <div><strong class="font-semibold text-gray-600 block">Month 2 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month2Goal)}</div></div>
+                        <div><strong class="font-semibold text-gray-600 block">Month 3 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month3Goal)}</div></div>
+                    </div></div>
+                </div>
                 ${renderMonthSummary(1)}
                 ${renderMonthSummary(2)}
                 ${renderMonthSummary(3)}
-                <div class="content-card p-6 mt-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);"><h2 class="text-2xl font-bold mb-4" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2><div class="space-y-4">
-                    <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Biggest Achievements</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_achievements)}</p></div>
-                    <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_challenges)}</p></div>
-                    <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Narrative</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_narrative)}</p></div>
-                    <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Focus For Next Quarter</h3><p class="text-gray-700 whitespace-pre-wrap mt-1">${e(formData.m3s7_next_quarter)}</p></div>
-                </div></div>
+                <div class="content-card p-6 mt-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);">
+                    <h2 class="text-2xl font-bold mb-4" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2>
+                    <div class="space-y-4">
+                        <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Biggest Achievements</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_achievements)}</div></div>
+                        <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_challenges)}</div></div>
+                        <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Narrative</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_narrative)}</div></div>
+                        <div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Focus For Next Quarter</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_next_quarter)}</div></div>
+                    </div>
+                </div>
             </div>`;
     };
 
