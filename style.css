@@ -535,6 +535,45 @@ textarea.form-input {
     margin-bottom: 0.75rem;
 }
 
+/* 26. Summary Page Status Badges
+-------------------------------------------------- */
+.summary-status-badge {
+    padding: 0.25rem 0.625rem; /* 4px 10px */
+    border-radius: 9999px;
+    font-size: 0.625rem; /* 10px */
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+}
+
+.summary-status-badge.status-on-track {
+    background-color: var(--status-on-track-bg);
+    color: var(--status-on-track-text);
+    border-color: var(--status-on-track-border);
+}
+.summary-status-badge.status-issues {
+    background-color: var(--status-issues-bg);
+    color: var(--status-issues-text);
+    border-color: var(--status-issues-border);
+}
+.summary-status-badge.status-off-track {
+    background-color: var(--status-off-track-bg);
+    color: var(--status-off-track-text);
+    border-color: var(--status-off-track-border);
+}
+
+/* Add some spacing for the new two-line weekly win layout */
+.summary-section ul {
+    list-style: none;
+    padding: 0;
+}
+.summary-section ul li:not(:first-child) {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gails-grey-light);
+}
+
 
 
 
