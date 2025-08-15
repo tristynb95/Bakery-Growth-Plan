@@ -133,6 +133,16 @@ const DOMElements = {
         clearTimeout(appState.sessionTimeout);
     }
 
+    function managePlaceholder(editor) {
+        if (!editor || !editor.isContentEditable) return;
+        // If the visible text is empty, show the placeholder; otherwise, hide it.
+        if (editor.innerText.trim() === '') {
+            editor.classList.add('is-placeholder-showing');
+        } else {
+            editor.classList.remove('is-placeholder-showing');
+        }
+    }
+
     // --- CHARACTER COUNTER ---
     function initializeCharCounters() {
         document.querySelectorAll('div[data-maxlength]').forEach(editor => {
@@ -593,39 +603,42 @@ const DOMElements = {
     }
     
     function populateViewWithData() {
-        document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
-            if (el.isContentEditable) {
-                 el.innerHTML = appState.planData[el.id] || '';
-            } else {
-                 el.value = appState.planData[el.id] || '';
-            }
-        });
-    
-        document.querySelectorAll('.pillar-buttons').forEach(group => {
-            const stepKey = group.dataset.stepKey;
-            const dataKey = `${stepKey}_pillar`;
-            const pillar = appState.planData[dataKey];
+    document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
+        if (el.isContentEditable) {
+             el.innerHTML = appState.planData[el.id] || '';
+        } else {
+             el.value = appState.planData[el.id] || '';
+        }
+    });
+
+    document.querySelectorAll('.pillar-buttons').forEach(group => {
+        const stepKey = group.dataset.stepKey;
+        const dataKey = `${stepKey}_pillar`;
+        const pillar = appState.planData[dataKey];
+        group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+        if (pillar) {
+            const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
+            if (buttonToSelect) buttonToSelect.classList.add('selected');
+        }
+    });
+
+    if (appState.currentView.startsWith('month-')) {
+        const monthNum = appState.currentView.split('-')[1];
+        document.querySelectorAll('.status-buttons').forEach(group => {
+            const week = group.dataset.week;
+            const key = `m${monthNum}s5_w${week}_status`;
+            const status = appState.planData[key];
             group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
-            if (pillar) {
-                const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
+            if (status) {
+                const buttonToSelect = group.querySelector(`[data-status="${status}"]`);
                 if (buttonToSelect) buttonToSelect.classList.add('selected');
             }
         });
-    
-        if (appState.currentView.startsWith('month-')) {
-            const monthNum = appState.currentView.split('-')[1];
-            document.querySelectorAll('.status-buttons').forEach(group => {
-                const week = group.dataset.week;
-                const key = `m${monthNum}s5_w${week}_status`;
-                const status = appState.planData[key];
-                group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
-                if (status) {
-                    const buttonToSelect = group.querySelector(`[data-status="${status}"]`);
-                    if (buttonToSelect) buttonToSelect.classList.add('selected');
-                }
-            });
-        }
     }
+
+    // Add the new line right here
+    document.querySelectorAll('#app-view [contenteditable="true"]').forEach(managePlaceholder);
+}
 
     function switchView(viewId) {
         DOMElements.mainContent.scrollTop = 0;
@@ -1285,10 +1298,14 @@ const DOMElements = {
     });
 
     DOMElements.contentArea.addEventListener('input', (e) => { 
-        if (e.target.matches('input, [contenteditable="true"]')) { 
-            saveData(); 
-        }
-    });
+    if (e.target.matches('input, [contenteditable="true"]')) { 
+        saveData(); 
+    }
+    // Add this check to manage the placeholder on every input event
+    if (e.target.isContentEditable) {
+        managePlaceholder(e.target);
+    }
+});
 
     DOMElements.contentArea.addEventListener('click', (e) => {
     const target = e.target;
@@ -1386,6 +1403,7 @@ const DOMElements = {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
