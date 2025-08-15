@@ -457,6 +457,16 @@ textarea.form-input {
     margin-left: 0.5rem; /* Space between title and counter */
 }
 
+/* 22. AI Action Plan Modal Styles
+-------------------------------------------------- */
+#ai-printable-area ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+#ai-printable-area .task-category {
+    padding-left: 1rem;
+    border-left: 3px solid var(--gails-grey-light);
+}
 
 
 
