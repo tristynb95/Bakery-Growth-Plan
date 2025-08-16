@@ -691,5 +691,5 @@ textarea.form-input {
 }
 
 .weekly-tab.completed .weekly-tab-completed-icon {
-    display: inline-block; /* Show the icon when the tab is marked as completed */
+    display: inline-block; /* Show the icon ONLY when the tab is completed */
 }
