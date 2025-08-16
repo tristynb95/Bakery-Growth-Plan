@@ -579,20 +579,34 @@ function runApp(app) {
     }
 
     function isMonthComplete(monthNum, data) {
-        const planData = data || appState.planData;
-        const fields = [
-            `m${monthNum}s1_battle`, `m${monthNum}s1_pillar`,
-            `m${monthNum}s2_levers`, `m${monthNum}s2_powerup_q`,
-            `m${monthNum}s3_people`,
-            `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
-            `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
-        ];
-        if (monthNum == 3) {
-            fields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
-        }
-        const completed = fields.filter(field => planData[field] && (planData[field].trim() !== '' && !planData[field].includes('placeholder'))).length;
-        return completed === fields.length;
+    const planData = data || appState.planData;
+
+    // This is a more robust helper function to determine if a field is truly empty,
+    // even if it contains empty HTML tags left over from the editor.
+    const isContentEmpty = (htmlContent) => {
+        if (!htmlContent) return true;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        return tempDiv.innerText.trim() === '';
+    };
+
+    const requiredFields = [
+        `m${monthNum}s1_battle`, `m${monthNum}s1_pillar`,
+        `m${monthNum}s2_levers`, `m${monthNum}s2_powerup_q`,
+        `m${monthNum}s3_people`,
+        `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
+        `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
+    ];
+
+    // For Month 3, we also need to check the final quarterly reflection fields.
+    if (monthNum == 3) {
+        requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
     }
+
+    // The .every() method ensures that every single required field has content.
+    // If even one is empty, it will return false.
+    return requiredFields.every(field => !isContentEmpty(planData[field]));
+}
 
     function updateSidebarNavStatus() {
         document.querySelector('#nav-vision').classList.toggle('completed', isStepComplete('vision'));
@@ -1477,3 +1491,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
