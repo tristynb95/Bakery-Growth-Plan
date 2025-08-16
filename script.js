@@ -730,10 +730,9 @@ function runApp(app) {
     }
 
     // --- NEW FUNCTION FOR WEEKLY COMPLETION ---
-    function updateWeeklyTabStatus(monthNum) {
+   function updateWeeklyTabStatus(monthNum) {
     if (!monthNum) return;
 
-    // Helper to check if a single week is complete
     const isWeekComplete = (weekNum) => {
         const status = appState.planData[`m${monthNum}s5_w${weekNum}_status`];
         const win = appState.planData[`m${monthNum}s5_w${weekNum}_win`];
@@ -749,11 +748,10 @@ function runApp(app) {
         return status && !isContentEmpty(win) && !isContentEmpty(spotlight);
     };
 
-    // Loop through weeks 1-4 and update their tab's class
     for (let w = 1; w <= 4; w++) {
-        const tab = document.querySelector(`.weekly-tab[data-week="${w}"]`);
-        if (tab) {
-            tab.classList.toggle('completed', isWeekComplete(w));
+        const tabItem = document.querySelector(`.weekly-tab-item[data-week="${w}"]`);
+        if (tabItem) {
+            tabItem.classList.toggle('completed', isWeekComplete(w));
         }
     }
 }
@@ -1573,5 +1571,6 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
