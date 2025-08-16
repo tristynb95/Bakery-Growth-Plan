@@ -185,7 +185,7 @@ function runApp(app) {
                    </div>`,
             requiredFields: ['managerName', 'bakeryLocation', 'quarter', 'quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
         },
-        month: (monthNum) => `
+       month: (monthNum) => `
     <div class="space-y-8">
         <div class="content-card p-6 md:p-8">
             <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation Plan</h2>
@@ -247,10 +247,22 @@ function runApp(app) {
             
             <div class="mb-6 border-b border-gray-200">
                 <nav id="weekly-tabs" class="flex -mb-px space-x-6" aria-label="Tabs">
-                    <a href="#" class="weekly-tab active" data-week="1">Week 1 <i class="bi bi-check-circle-fill weekly-tab-completed-icon"></i></a>
-                    <a href="#" class="weekly-tab" data-week="2">Week 2 <i class="bi bi-check-circle-fill weekly-tab-completed-icon"></i></a>
-                    <a href="#" class="weekly-tab" data-week="3">Week 3 <i class="bi bi-check-circle-fill weekly-tab-completed-icon"></i></a>
-                    <a href="#" class="weekly-tab" data-week="4">Week 4 <i class="bi bi-check-circle-fill weekly-tab-completed-icon"></i></a>
+                    <div class="weekly-tab-item" data-week="1">
+                        <a href="#" class="weekly-tab active">Week 1</a>
+                        <i class="bi bi-check-circle-fill weekly-tab-completed-icon"></i>
+                    </div>
+                    <div class="weekly-tab-item" data-week="2">
+                        <a href="#" class="weekly-tab">Week 2</a>
+                        <i class="bi bi-check-circle-fill weekly-tab-completed-icon"></i>
+                    </div>
+                    <div class="weekly-tab-item" data-week="3">
+                        <a href="#" class="weekly-tab">Week 3</a>
+                        <i class="bi bi-check-circle-fill weekly-tab-completed-icon"></i>
+                    </div>
+                    <div class="weekly-tab-item" data-week="4">
+                        <a href="#" class="weekly-tab">Week 4</a>
+                        <i class="bi bi-check-circle-fill weekly-tab-completed-icon"></i>
+                    </div>
                 </nav>
             </div>
 
@@ -1561,4 +1573,5 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
