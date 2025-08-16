@@ -681,15 +681,22 @@ textarea.form-input {
     display: none;
 }
 
-/* 31. Weekly Tab Completion Checkmark
+/* 31. Weekly Tab Completion Checkmark (Revised)
 -------------------------------------------------- */
+.weekly-tab-item {
+    display: flex;
+    align-items: center;
+}
+
 .weekly-tab-completed-icon {
     display: none; /* Hide the icon by default */
     color: var(--gails-green);
     margin-left: 0.5rem;
-    font-size: 0.9em;
+    font-size: 1rem;
+    line-height: 1;
 }
 
-.weekly-tab.completed .weekly-tab-completed-icon {
-    display: inline-block; /* Show the icon ONLY when the tab is completed */
+.weekly-tab-item.completed .weekly-tab-completed-icon {
+    display: inline-block; /* Show the icon when the item is marked as completed */
 }
+
