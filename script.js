@@ -627,9 +627,8 @@ function updateSidebarNavStatus() {
         navLink.classList.toggle('completed', isComplete);
 
         const progressCircle = navLink.querySelector('.progress-donut__progress');
-        const progressText = navLink.querySelector('.progress-donut__text');
 
-        if (progressCircle && progressText) {
+        if (progressCircle) { // Check if the donut element exists on the nav item
             const radius = progressCircle.r.baseVal.value;
             const circumference = 2 * Math.PI * radius;
             
@@ -639,7 +638,6 @@ function updateSidebarNavStatus() {
             const offset = circumference - (progressFraction * circumference);
             
             progressCircle.style.strokeDashoffset = offset;
-            progressText.textContent = `${progress.completed}`;
         }
     };
 
@@ -1524,6 +1522,7 @@ function updateSidebarNavStatus() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
