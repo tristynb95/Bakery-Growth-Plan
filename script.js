@@ -605,10 +605,10 @@ function runApp(app) {
             `m${monthNum}s3_people`,
             `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
             // Weekly Momentum (4 weeks x 3 fields)
-            `m${monthNum}s5_w1_status`, `m${monthNum}s5_w1_win`, `m${monthNum}s5_w1_spotlight`,
-            `m${monthNum}s5_w2_status`, `m${monthNum}s5_w2_win`, `m${monthNum}s5_w2_spotlight`,
-            `m${monthNum}s5_w3_status`, `m${monthNum}s5_w3_win`, `m${monthNum}s5_w3_spotlight`,
-            `m${monthNum}s5_w4_status`, `m${monthNum}s5_w4_win`, `m${monthNum}s5_w4_spotlight`,
+            // `m${monthNum}s5_w1_status`, `m${monthNum}s5_w1_win`, `m${monthNum}s5_w1_spotlight`,
+            // `m${monthNum}s5_w2_status`, `m${monthNum}s5_w2_win`, `m${monthNum}s5_w2_spotlight`,
+            // `m${monthNum}s5_w3_status`, `m${monthNum}s5_w3_win`, `m${monthNum}s5_w3_spotlight`,
+            // `m${monthNum}s5_w4_status`, `m${monthNum}s5_w4_win`, `m${monthNum}s5_w4_spotlight`,
             // End of Month Review
             `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
         ];
@@ -739,7 +739,7 @@ function runApp(app) {
         const spotlight = appState.planData[`m${monthNum}s5_w${weekNum}_spotlight`];
 
         const isContentEmpty = (htmlContent) => {
-            if (!htmlContent) return true;
+            if (!htmlContent || typeof htmlContent !== 'string') return true;
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlContent;
             return tempDiv.innerText.trim() === '';
@@ -1488,15 +1488,16 @@ function runApp(app) {
     }
 
     // --- CORRECTED LOGIC START ---
-    const tabItem = target.closest('.weekly-tab-item');
-    if (tabItem) {
+    const tabLink = target.closest('.weekly-tab');
+    if (tabLink) {
         e.preventDefault();
+        const tabItem = tabLink.closest('.weekly-tab-item');
         const week = tabItem.dataset.week;
 
         // Remove 'active' class from all tab links
         document.querySelectorAll('.weekly-tab').forEach(t => t.classList.remove('active'));
-        // Add 'active' class to the link inside the item that was clicked
-        tabItem.querySelector('.weekly-tab').classList.add('active');
+        // Add 'active' class to the link that was clicked
+        tabLink.classList.add('active');
 
         // Show the correct content panel
         document.querySelectorAll('.weekly-tab-panel').forEach(p => {
@@ -1576,7 +1577,3 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
