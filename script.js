@@ -622,18 +622,24 @@ function updateSidebarNavStatus() {
     const updateNavItem = (navId, progress) => {
         const navLink = document.querySelector(navId);
         if (!navLink) return;
-        const progressSpan = navLink.querySelector('.nav-progress');
 
         const isComplete = progress.total > 0 && progress.completed === progress.total;
         navLink.classList.toggle('completed', isComplete);
 
-        if (progressSpan) {
-            if (!isComplete) {
-                progressSpan.textContent = `(${progress.completed}/${progress.total})`;
-                progressSpan.style.display = 'inline';
-            } else {
-                progressSpan.style.display = 'none';
-            }
+        const progressCircle = navLink.querySelector('.progress-donut__progress');
+        const progressText = navLink.querySelector('.progress-donut__text');
+
+        if (progressCircle && progressText) {
+            const radius = progressCircle.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            
+            progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+
+            const progressFraction = progress.total > 0 ? progress.completed / progress.total : 0;
+            const offset = circumference - (progressFraction * circumference);
+            
+            progressCircle.style.strokeDashoffset = offset;
+            progressText.textContent = `${progress.completed}`;
         }
     };
 
@@ -1518,6 +1524,7 @@ function updateSidebarNavStatus() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
