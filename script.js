@@ -84,10 +84,10 @@ function runApp(app) {
         currentUser: null,
         currentPlanId: null,
         currentView: 'vision',
-        monthContext: {
-            'month-1': { currentStep: 1, totalSteps: 6 },
-            'month-2': { currentStep: 1, totalSteps: 6 },
-            'month-3': { currentStep: 1, totalSteps: 7 },
+        monthContext: { // This can be simplified or removed if no longer needed for progress calculation
+            'month-1': { totalSteps: 7 }, // Total fields/sections to track for completion
+            'month-2': { totalSteps: 7 },
+            'month-3': { totalSteps: 8 },
         },
         saveTimeout: null,
         sessionTimeout: null,
@@ -185,66 +185,120 @@ function runApp(app) {
                    </div>`,
             requiredFields: ['managerName', 'bakeryLocation', 'quarter', 'quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
         },
-        month: (monthNum) => `<div class="grid grid-cols-1 lg:grid-cols-4 gap-8"><div class="lg:col-span-1 no-print"><nav id="month-${monthNum}-stepper" class="space-y-2"></nav></div><div class="lg:col-span-3"><div id="step-content-container"></div><div class="mt-8 flex justify-between no-print"><button id="prev-step-btn" class="btn btn-secondary">Previous</button><button id="next-step-btn" class="btn btn-primary">Next Step</button></div></div></div>`,
-        step: {
-            'm1s1': {
-                title: "Must-Win Battle",
-                requiredFields: ['m1s1_battle'],
-                html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 1: The Must-Win Battle</h3><p class="text-gray-600 mb-4">What is the single most important, measurable outcome for this month?</p><div id="m1s1_battle" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly and placing smart orders.'" data-maxlength="500"></div><div class="mt-6"><label class="font-semibold block mb-3 text-gray-700">Monthly Focus Pillar:</label><div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m1s1"><button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button><button class="btn pillar-button" data-pillar="product"><i class="bi bi-cup-hot-fill"></i> Product</button><button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button><button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button></div></div></div>`
-            },
-            'm1s2': {
-                title: "Levers & Power-Up",
-                requiredFields: ['m1s2_levers', 'm1s2_powerup_q', 'm1s2_powerup_a'],
-                html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 2: Key Levers & Team Power-Up</h3><p class="text-gray-600 mb-6">What actions will you take, and how will you involve your team?</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div><label for="m1s2_levers" class="font-semibold block mb-2">My Key Levers (The actions I will own):</label><div id="m1s2_levers" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="1. Review ordering report with daily.&#10;2. Coach the team on the 'why' behind the production matrix." data-maxlength="600"></div></div><div class="space-y-4"><div><label for="m1s2_powerup_q" class="font-semibold block mb-2">Team Power-Up Question:</label><div id="m1s2_powerup_q" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., 'What is one thing that slows us down before 8am?'" data-maxlength="300"></div></div><div><label for="m1s2_powerup_a" class="font-semibold block mb-2">Our Team's Winning Idea:</label><div id="m1s2_powerup_a" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Pre-portioning key ingredients the night before." data-maxlength="300"></div></div></div></div></div>`
-            },
-            'm1s3': {
-                title: "People Growth",
-                requiredFields: ['m1s3_people'],
-                html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 3: People Growth</h3><p class="text-gray-600 mb-4">Who will I invest in this month to help us win our battle, and how?</p><div id="m1s3_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" data-maxlength="600"></div></div>`
-            },
-            'm1s4': {
-                title: "Protect the Core",
-                requiredFields: ['m1s4_people', 'm1s4_product', 'm1s4_customer', 'm1s4_place'],
-                html: `<div class="content-card p-8"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 4: Protect the Core</h3><p class="text-gray-600 mb-6">One key behaviour you will protect for each pillar to ensure standards don't slip.</p><div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                    <div><label for="m1s4_people" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-people-fill"></i> PEOPLE</label><div id="m1s4_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Meaningful 1-2-1s with my two keyholders." data-maxlength="300"></div></div>
-                    <div><label for="m1s4_product" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-cup-hot-fill"></i> PRODUCT</label><div id="m1s4_product" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Daily quality checks of the first bake." data-maxlength="300"></div></div>
-                    <div><label for="m1s4_customer" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-heart-fill"></i> CUSTOMER</label><div id="m1s4_customer" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Action all customer feedback within 24 hours." data-maxlength="300"></div></div>
-                    <div><label for="m1s4_place" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-shop"></i> PLACE</label><div id="m1s4_place" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Complete a bakery travel path twice a day." data-maxlength="300"></div></div>
-                </div></div>`
-            },
-            'm1s5': {
-                title: "Weekly Check-in",
-                requiredFields: [],
-                html: `<div class="content-card p-8 weekly-check-in-container"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 5: Weekly Momentum Check</h3><p class="text-gray-600 mb-6">A 5-minute pulse check each Friday to maintain focus and celebrate wins.</p><div class="space-y-6">
-                    ${[1,2,3,4].map(w => `<div class="border-t border-gray-200 pt-4"><h4 class="font-bold text-lg mb-4">Week ${w}</h4><div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                        <div><label class="font-semibold block mb-2 text-sm">Progress:</label><div class="flex items-center space-x-2 status-buttons" data-week="${w}"><button class="status-button" data-status="on-track">ON TRACK</button><button class="status-button" data-status="issues">ISSUES</button><button class="status-button" data-status="off-track">OFF TRACK</button></div></div>
-                        <div><label for="m1s5_w${w}_win" class="font-semibold block mb-2 text-sm">A Win or Learning:</label><div id="m1s5_w${w}_win" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., The team hit 80% availability on Thursday!" data-maxlength="400"></div></div>
-                        <div class="md:col-span-2"><label for="m1s5_w${w}_spotlight" class="font-semibold block mb-2 text-sm">Team Member Spotlight:</label><div id="m1s5_w${w}_spotlight" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Sarah for her excellent attention to detail during the bake." data-maxlength="400"></div></div>
-                    </div></div>`).join("")}
-                </div></div>`
-            },
-            'm1s6': {
-                title: "End of Month Review",
-                requiredFields: ['m1s6_win', 'm1s6_challenge', 'm1s6_next'],
-                html: `<div class="content-card p-8 bg-red-50 border border-red-100"><h3 class="text-xl font-bold mb-1 gails-red-text">Step 6: End of Month Review</h3><p class="text-gray-600 mb-6">Reflect on the month to prepare for your conversation with your line manager.</p><div class="space-y-6">
-                <div><label for="m1s6_win" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-trophy-fill"></i> Biggest Win:</label><div id="m1s6_win" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
-                <div><label for="m1s6_challenge" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-lightbulb-fill"></i> Toughest Challenge & What I Learned:</label><div id="m1s6_challenge" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
-                <div><label for="m1s6_next" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-rocket-takeoff-fill"></i> What's Next (Focus for Next Month):</label><div id="m1s6_next" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
-                </div></div>`
-            },
-            'm2s1': {},'m2s2': {},'m2s3': {},'m2s4': {},'m2s5': {},'m2s6': {},
-            'm3s1': {},'m3s2': {},'m3s3': {},'m3s4': {},'m3s5': {},'m3s6': {},
-            'm3s7': {
-                title: "Quarterly Reflection",
-                requiredFields: ['m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter'],
-                html: `<div class="content-card p-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);"><h3 class="text-xl font-bold mb-1" style="color: var(--review-blue-text);">Step 7: Final Quarterly Reflection</h3><p class="text-gray-600 mb-6">A deep dive into the whole quarter's performance to prepare for your review with your line manager.</p><div class="space-y-6">
-                <div><label for="m3s7_achievements" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> What were the quarter's biggest achievements?</label><div id="m3s7_achievements" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Consider financial results, team growth, customer feedback, and process improvements." data-maxlength="800"></div></div>
-                <div><label for="m3s7_challenges" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> What were the biggest challenges and what did you learn?</label><div id="m3s7_challenges" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="What didn't go to plan? What were the key takeaways?" data-maxlength="800"></div></div>
-                <div><label for="m3s7_narrative" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> How did you perform against the quarterly narrative?</label><div id="m3s7_narrative" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Review the 'Central Theme' you set in the Vision section. How well did you deliver on it?" data-maxlength="800"></div></div>
-                <div><label for="m3s7_next_quarter" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> What is the primary focus for next quarter?</label><div id="m3s7_next_quarter" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Based on your learnings, what is the 'must-win battle' for the next 90 days?" data-maxlength="800"></div></div>
-                </div></div>`
-            }
-        }
+        month: (monthNum) => `
+            <div class="space-y-8">
+                <div class="content-card p-6 md:p-8">
+                    <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation Plan</h2>
+                    <p class="text-gray-600 mb-6">Complete these sections at the start of your month to set a clear direction.</p>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="font-semibold text-lg block mb-2 text-gray-800">Must-Win Battle:</label>
+                            <div id="m${monthNum}s1_battle" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly...'" data-maxlength="500"></div>
+                            <div class="mt-4">
+                                <label class="font-semibold block mb-3 text-sm text-gray-600">Monthly Focus Pillar:</label>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m${monthNum}s1">
+                                    <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
+                                    <button class="btn pillar-button" data-pillar="product"><i class="bi bi-cup-hot-fill"></i> Product</button>
+                                    <button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button>
+                                    <button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
+                            <div>
+                                <label for="m${monthNum}s2_levers" class="font-semibold text-lg block mb-2 text-gray-800">My Key Levers:</label>
+                                <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="1. Review ordering report daily.&#10;2. Coach the team on the 'why'..." data-maxlength="600"></div>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="m${monthNum}s2_powerup_q" class="font-semibold text-lg block mb-2 text-gray-800">Team Power-Up Question:</label>
+                                    <div id="m${monthNum}s2_powerup_q" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., 'What is one thing that slows us down before 8am?'" data-maxlength="300"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t">
+                            <label class="font-semibold text-lg block mb-2 text-gray-800">People Growth:</label>
+                            <div id="m${monthNum}s3_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" data-maxlength="600"></div>
+                        </div>
+                        
+                        <div class="pt-6 border-t">
+                            <label class="font-semibold text-lg block mb-2 text-gray-800">Protect the Core:</label>
+                            <p class="text-gray-600 mb-4 -mt-2 text-sm">One key behaviour for each pillar to ensure standards don't slip.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                                <div><label for="m${monthNum}s4_people" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-people-fill"></i> PEOPLE</label><div id="m${monthNum}s4_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Meaningful 1-2-1s with my two keyholders." data-maxlength="300"></div></div>
+                                <div><label for="m${monthNum}s4_product" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-cup-hot-fill"></i> PRODUCT</label><div id="m${monthNum}s4_product" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Daily quality checks of the first bake." data-maxlength="300"></div></div>
+                                <div><label for="m${monthNum}s4_customer" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-heart-fill"></i> CUSTOMER</label><div id="m${monthNum}s4_customer" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Action all customer feedback within 24 hours." data-maxlength="300"></div></div>
+                                <div><label for="m${monthNum}s4_place" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-shop"></i> PLACE</label><div id="m${monthNum}s4_place" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Complete a bakery travel path twice a day." data-maxlength="300"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card p-6 md:p-8">
+                    <h2 class="text-2xl font-bold font-poppins mb-1">Weekly Momentum</h2>
+                    <p class="text-gray-600 mb-6">Return here each week to log your progress, celebrate wins, and spotlight your team.</p>
+                    
+                    <div class="mb-6 border-b border-gray-200">
+                        <nav id="weekly-tabs" class="flex -mb-px space-x-6" aria-label="Tabs">
+                            <a href="#" class="weekly-tab active" data-week="1">Week 1</a>
+                            <a href="#" class="weekly-tab" data-week="2">Week 2</a>
+                            <a href="#" class="weekly-tab" data-week="3">Week 3</a>
+                            <a href="#" class="weekly-tab" data-week="4">Week 4</a>
+                        </nav>
+                    </div>
+
+                    <div id="weekly-tab-content">
+                        ${[1, 2, 3, 4].map(w => `
+                            <div class="weekly-tab-panel ${w !== 1 ? 'hidden' : ''}" data-week-panel="${w}">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                                    <div class="md:col-span-2">
+                                        <label class="font-semibold block mb-3 text-gray-700">Progress:</label>
+                                        <div class="flex items-center space-x-2 status-buttons" data-week="${w}">
+                                            <button class="status-button" data-status="on-track">ON TRACK</button>
+                                            <button class="status-button" data-status="issues">ISSUES</button>
+                                            <button class="status-button" data-status="off-track">OFF TRACK</button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="m${monthNum}s5_w${w}_win" class="font-semibold block mb-2 text-gray-700">A Win or Learning:</label>
+                                        <div id="m${monthNum}s5_w${w}_win" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., The team hit 80% availability on Thursday!" data-maxlength="400"></div>
+                                    </div>
+                                    <div>
+                                        <label for="m${monthNum}s5_w${w}_spotlight" class="font-semibold block mb-2 text-gray-700">Team Member Spotlight:</label>
+                                        <div id="m${monthNum}s5_w${w}_spotlight" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., Sarah for her excellent attention to detail during the bake." data-maxlength="400"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="content-card p-6 md:p-8 bg-red-50 border border-red-100">
+                    <h2 class="text-2xl font-bold font-poppins mb-1">End of Month Review</h2>
+                    <p class="text-gray-600 mb-6">At the end of the month, reflect on your performance to prepare for your line manager conversation.</p>
+                    <div class="space-y-6">
+                        <div><label for="m${monthNum}s6_win" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-trophy-fill"></i> Biggest Win:</label><div id="m${monthNum}s6_win" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
+                        <div><label for="m${monthNum}s6_challenge" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-lightbulb-fill"></i> Toughest Challenge & What I Learned:</label><div id="m${monthNum}s6_challenge" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
+                        <div><label for="m${monthNum}s6_next" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-rocket-takeoff-fill"></i> Focus for Next Month:</label><div id="m${monthNum}s6_next" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
+                    </div>
+                </div>
+                
+                ${monthNum == 3 ? `
+                <div class="content-card p-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);">
+                    <h2 class="text-2xl font-bold font-poppins mb-1" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2>
+                    <p class="text-gray-600 mb-6">A deep dive into the quarter's performance for your review.</p>
+                    <div class="space-y-6">
+                        <div><label for="m3s7_achievements" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Quarter's Biggest Achievements:</label><div id="m3s7_achievements" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
+                        <div><label for="m3s7_challenges" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings:</label><div id="m3s7_challenges" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
+                        <div><label for="m3s7_narrative" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Quarterly Narrative:</label><div id="m3s7_narrative" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
+                        <div><label for="m3s7_next_quarter" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Primary Focus for Next Quarter:</label><div id="m3s7_next_quarter" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
+                    </div>
+                </div>` : ''}
+            </div>
+        `,
     };
     
     // --- AUTHENTICATION & APP FLOW ---
@@ -481,9 +535,6 @@ function runApp(app) {
         updateSidebarInfo();
         updateOverallProgress();
         updateSidebarNavStatus();
-        if (appState.currentView.startsWith('month-')) {
-            renderStepper(appState.monthContext[appState.currentView].currentStep);
-        }
     }
 
     function updateSidebarInfo() {
@@ -502,70 +553,45 @@ function runApp(app) {
     }
 
     function getStepProgress(stepKey, data) {
+        // This function might need tweaking based on how you now define "completion"
+        // For simplicity, we can keep it based on required fields if they exist
+        // or define a new logic for the dashboard view.
+        return { completed: 0, total: 0 }; // Placeholder
+    }
+
+    function isStepComplete(stepKey, data) {
+        // Redefine what "complete" means for a view.
+        // For 'vision', it's the same. For a 'month', it might mean all core plan sections are filled.
         const planData = data || appState.planData;
-        const isVisionStep = stepKey === 'vision';
-        const stepDefinition = isVisionStep ? templates.vision : templates.step[stepKey];
-    
-        if (!stepDefinition) return { completed: 0, total: 0 };
-    
         const isContentEmpty = (htmlContent) => {
             if (!htmlContent) return true;
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlContent;
             return tempDiv.innerText.trim() === '';
         };
-    
-        let completed = 0;
-        let total = 0;
-    
-        if (!isVisionStep && stepKey.endsWith('s1')) {
-            total = 2;
-            if (!isContentEmpty(planData[`${stepKey}_battle`])) completed++;
-            if (!!planData[`${stepKey}_pillar`]) completed++;
-            return { completed, total };
+
+        if(stepKey === 'vision') {
+             const fields = templates.vision.requiredFields;
+             const completed = fields.filter(fieldId => !isContentEmpty(planData[fieldId])).length;
+             return fields.length > 0 && completed === fields.length;
         }
-    
-        if (!isVisionStep && stepKey.endsWith('s5')) {
-            total = 12;
-            const monthNum = stepKey.charAt(1);
-            for (let w = 1; w <= 4; w++) {
-                if (!isContentEmpty(planData[`m${monthNum}s5_w${w}_win`])) completed++;
-                if (!isContentEmpty(planData[`m${monthNum}s5_w${w}_spotlight`])) completed++;
-                if (!!planData[`m${monthNum}s5_w${w}_status`]) completed++;
-            }
-            return { completed, total };
-        }
-        
-        const fields = stepDefinition.requiredFields;
-        if (!fields || fields.length === 0) {
-            return { completed: 0, total: 0 };
-        }
-    
-        total = fields.length;
-        completed = fields.filter(fieldId => {
-            const value = planData[fieldId];
-            if (typeof value === 'string' && (value.includes('<') && value.includes('>'))) {
-                 return !isContentEmpty(value);
-            }
-            return value && value.trim() !== '';
-        }).length;
-    
-        return { completed, total };
+        return false;
     }
 
-    function isStepComplete(stepKey, data) {
-        const progress = getStepProgress(stepKey, data);
-        return progress.total > 0 && progress.completed === progress.total;
-    }
-
-    function isMonthComplete(monthNum) {
-        const totalSteps = appState.monthContext[`month-${monthNum}`].totalSteps;
-        for (let i = 1; i <= totalSteps; i++) {
-            if (!isStepComplete(`m${monthNum}s${i}`)) {
-                return false;
-            }
+    function isMonthComplete(monthNum, data) {
+        const planData = data || appState.planData;
+        const fields = [
+            `m${monthNum}s1_battle`, `m${monthNum}s1_pillar`,
+            `m${monthNum}s2_levers`, `m${monthNum}s2_powerup_q`,
+            `m${monthNum}s3_people`,
+            `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
+            `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
+        ];
+        if (monthNum == 3) {
+            fields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
         }
-        return true;
+        const completed = fields.filter(field => planData[field] && (planData[field].trim() !== '' && !planData[field].includes('placeholder'))).length;
+        return completed === fields.length;
     }
 
     function updateSidebarNavStatus() {
@@ -576,38 +602,28 @@ function runApp(app) {
     }
 
     function calculatePlanCompletion(planData) {
-        const allSteps = ['vision', ...Object.keys(templates.step).filter(k => templates.step[k].title)];
-        const completedSteps = allSteps.filter(stepKey => isStepComplete(stepKey, planData)).length;
-        const totalSteps = allSteps.length;
-        return totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+        let totalFields = templates.vision.requiredFields.length;
+        let completedFields = templates.vision.requiredFields.filter(f => planData[f] && planData[f].trim() !== '').length;
+
+        for (let m = 1; m <= 3; m++) {
+            const monthFields = [
+                `m${m}s1_battle`, `m${m}s1_pillar`, `m${m}s2_levers`, `m${m}s2_powerup_q`, `m${m}s3_people`,
+                `m${m}s4_people`, `m${m}s4_product`, `m${m}s4_customer`, `m${m}s4_place`,
+                `m${m}s6_win`, `m${m}s6_challenge`, `m${m}s6_next`
+            ];
+            if (m === 3) monthFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
+            
+            totalFields += monthFields.length;
+            completedFields += monthFields.filter(f => planData[f] && planData[f].trim() !== '').length;
+        }
+
+        return totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
     }
 
     function updateOverallProgress() {
         const percentage = calculatePlanCompletion(appState.planData);
         DOMElements.progressPercentage.textContent = `${percentage}%`;
         DOMElements.progressBarFill.style.width = `${percentage}%`;
-    }
-
-
-    function generateTemplates() {
-        for (let m = 2; m <= 3; m++) {
-            for (let s = 1; s <= 6; s++) {
-                const sourceStepKey = `m1s${s}`;
-                const targetStepKey = `m${m}s${s}`;
-                const sourceStep = templates.step[sourceStepKey];
-                if (!sourceStep.html) continue;
-                
-                let newHtml = sourceStep.html.replace(new RegExp(`id="${sourceStepKey}`, 'g'), `id="${targetStepKey}`);
-                newHtml = newHtml.replace(new RegExp(`for="${sourceStepKey}`, 'g'), `for="${targetStepKey}`);
-                newHtml = newHtml.replace(new RegExp(`data-step-key="${sourceStepKey}"`, 'g'), `data-step-key="${targetStepKey}"`);
-
-                templates.step[targetStepKey] = {
-                    ...sourceStep,
-                    html: newHtml,
-                    requiredFields: sourceStep.requiredFields.map(field => field.replace(sourceStepKey, targetStepKey))
-                };
-            }
-        }
     }
     
     function populateViewWithData() {
@@ -678,81 +694,13 @@ function runApp(app) {
             DOMElements.aiActionBtn.classList.add('hidden');
             const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
             DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
-
-            if (monthNum) {
-                renderStep(appState.monthContext[viewId].currentStep);
-            } else {
-                populateViewWithData();
-            }
+            populateViewWithData();
         }
         document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
         document.querySelector(`#nav-${viewId}`)?.classList.add('active');
         
         DOMElements.appView.classList.remove('sidebar-open');
         initializeCharCounters();
-    }
-
-    function renderStep(stepNum) {
-        const monthKey = appState.currentView;
-        appState.monthContext[monthKey].currentStep = stepNum;
-        const monthNum = monthKey.split('-')[1];
-        const stepKey = `m${monthNum}s${stepNum}`;
-
-        document.getElementById('step-content-container').innerHTML = templates.step[stepKey].html;
-
-        populateViewWithData();
-        renderStepper(stepNum);
-        initializeCharCounters();
-        
-        const prevBtn = document.getElementById('prev-step-btn');
-        const nextBtn = document.getElementById('next-step-btn');
-        
-        prevBtn.onclick = () => changeStep(-1);
-        nextBtn.onclick = () => changeStep(1);
-        
-        prevBtn.classList.toggle('hidden', stepNum === 1);
-        nextBtn.classList.toggle('hidden', stepNum === appState.monthContext[monthKey].totalSteps);
-    }
-
-    function changeStep(direction) {
-        const monthKey = appState.currentView;
-        let { currentStep, totalSteps } = appState.monthContext[monthKey];
-        const newStep = currentStep + direction;
-        if (newStep >= 1 && newStep <= totalSteps) {
-            renderStep(newStep);
-        }
-    }
-
-    function renderStepper(activeStep) {
-        const monthKey = appState.currentView;
-        const { totalSteps } = appState.monthContext[monthKey];
-        const monthNum = monthKey.split('-')[1];
-        const stepperNav = document.getElementById(`${monthKey}-stepper`);
-        if (!stepperNav) return;
-        stepperNav.innerHTML = '';
-        for (let i = 1; i <= totalSteps; i++) {
-            const stepKey = `m${monthNum}s${i}`;
-            const isComplete = isStepComplete(stepKey);
-            const item = document.createElement('div');
-            item.className = 'stepper-item flex items-start cursor-pointer';
-            item.dataset.step = i;
-            if (isComplete) item.classList.add('completed');
-            if (i === activeStep) item.classList.add('active');
-
-            const stepCircleContent = isComplete
-                ? `<i class="bi bi-check-lg"></i>`
-                : `<span class="step-number">${i}</span>`;
-            
-            const progress = getStepProgress(stepKey);
-            let progressHTML = '';
-            if (progress.total > 0) {
-                progressHTML = ` <span class="step-progress">(${progress.completed}/${progress.total})</span>`;
-            }
-
-            item.innerHTML = `<div class="flex flex-col items-center mr-4"><div class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">${stepCircleContent}</div>${i < totalSteps ? '<div class="step-line w-0.5 h-9"></div>' : ''}</div><div><p class="step-label font-medium text-gray-500">${templates.step[stepKey].title}${progressHTML}</p></div>`;
-            item.addEventListener('click', () => renderStep(i));
-            stepperNav.appendChild(item);
-        }
     }
 
     function renderSummary() {
@@ -1436,12 +1384,26 @@ function runApp(app) {
             return;
         }
     
-        if (target.closest('.status-button')) {
-            const button = target.closest('.status-button');
+        const statusButton = target.closest('.status-button');
+        if (statusButton) {
+            const button = statusButton;
             const alreadySelected = button.classList.contains('selected');
             button.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
             if (!alreadySelected) button.classList.add('selected');
             saveData(true);
+        }
+
+        const tab = e.target.closest('.weekly-tab');
+        if (tab) {
+            e.preventDefault();
+            const week = tab.dataset.week;
+
+            document.querySelectorAll('.weekly-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            document.querySelectorAll('.weekly-tab-panel').forEach(p => {
+                p.classList.toggle('hidden', p.dataset.weekPanel !== week);
+            });
         }
     });
 
@@ -1509,9 +1471,6 @@ function runApp(app) {
         localStorage.setItem('gails_cookie_consent', 'false');
         cookieBanner.classList.add('hidden');
     });
-
-    // --- INITIALIZE APP ---
-    generateTemplates();
 
 } 
 
