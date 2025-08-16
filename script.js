@@ -172,7 +172,7 @@ function runApp(app) {
             editor.addEventListener('blur', () => newCounter.classList.remove('visible'));
         });
     }
-   
+
     // --- HTML TEMPLATES ---
 
     const templates = {
@@ -186,125 +186,125 @@ function runApp(app) {
             requiredFields: ['managerName', 'bakeryLocation', 'quarter', 'quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
         },
         month: (monthNum) => `
-    <div class="space-y-8">
-        <div class="content-card p-6 md:p-8">
-            <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation Plan</h2>
-            <p class="text-gray-600 mb-6">Complete these sections at the start of your month to set a clear direction.</p>
-            
-            <div class="space-y-6">
-                <div>
-                    <label class="font-semibold text-lg block mb-2 text-gray-800">Must-Win Battle:</label>
-                    <div id="m${monthNum}s1_battle" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly...'" data-maxlength="500"></div>
-                    <div class="mt-4">
-                        <label class="font-semibold block mb-3 text-sm text-gray-600">Monthly Focus Pillar:</label>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m${monthNum}s1">
-                            <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
-                            <button class="btn pillar-button" data-pillar="product"><i class="bi bi-cup-hot-fill"></i> Product</button>
-                            <button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button>
-                            <button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="space-y-8">
+                <div class="content-card p-6 md:p-8">
+                    <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation Plan</h2>
+                    <p class="text-gray-600 mb-6">Complete these sections at the start of your month to set a clear direction.</p>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
-                    <div>
-                        <label for="m${monthNum}s2_levers" class="font-semibold text-lg block mb-2 text-gray-800">My Key Levers:</label>
-                        <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="1. Review ordering report daily.&#10;2. Coach the team on the 'why'..." data-maxlength="600"></div>
-                    </div>
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         <div>
-                            <label for="m${monthNum}s2_powerup_q" class="font-semibold text-lg block mb-2 text-gray-800">Team Power-Up Question:</label>
-                            <div id="m${monthNum}s2_powerup_q" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., 'What is one thing that slows us down before 8am?'" data-maxlength="300"></div>
-                        </div>
-                        <div>
-                            <label for="m${monthNum}s2_powerup_a" class="font-semibold text-lg block mb-2 text-gray-800">Our Team's Winning Idea:</label>
-                            <div id="m${monthNum}s2_powerup_a" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Pre-portioning key ingredients the night before." data-maxlength="300"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pt-6 border-t">
-                    <label class="font-semibold text-lg block mb-2 text-gray-800">People Growth:</label>
-                    <div id="m${monthNum}s3_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" data-maxlength="600"></div>
-                </div>
-                
-                <div class="pt-6 border-t">
-                    <label class="font-semibold text-lg block mb-2 text-gray-800">Protect the Core:</label>
-                    <p class="text-gray-600 mb-4 -mt-2 text-sm">One key behaviour for each pillar to ensure standards don't slip.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                        <div><label for="m${monthNum}s4_people" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-people-fill"></i> PEOPLE</label><div id="m${monthNum}s4_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Meaningful 1-2-1s with my two keyholders." data-maxlength="300"></div></div>
-                        <div><label for="m${monthNum}s4_product" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-cup-hot-fill"></i> PRODUCT</label><div id="m${monthNum}s4_product" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Daily quality checks of the first bake." data-maxlength="300"></div></div>
-                        <div><label for="m${monthNum}s4_customer" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-heart-fill"></i> CUSTOMER</label><div id="m${monthNum}s4_customer" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Action all customer feedback within 24 hours." data-maxlength="300"></div></div>
-                        <div><label for="m${monthNum}s4_place" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-shop"></i> PLACE</label><div id="m${monthNum}s4_place" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Complete a bakery travel path twice a day." data-maxlength="300"></div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="content-card p-6 md:p-8">
-            <h2 class="text-2xl font-bold font-poppins mb-1">Weekly Momentum</h2>
-            <p class="text-gray-600 mb-6">Return here each week to log your progress, celebrate wins, and spotlight your team.</p>
-            
-            <div class="mb-6 border-b border-gray-200">
-                <nav id="weekly-tabs" class="flex -mb-px space-x-6" aria-label="Tabs">
-                    <a href="#" class="weekly-tab active" data-week="1">Week 1</a>
-                    <a href="#" class="weekly-tab" data-week="2">Week 2</a>
-                    <a href="#" class="weekly-tab" data-week="3">Week 3</a>
-                    <a href="#" class="weekly-tab" data-week="4">Week 4</a>
-                </nav>
-            </div>
-
-            <div id="weekly-tab-content">
-                ${[1, 2, 3, 4].map(w => `
-                    <div class="weekly-tab-panel ${w !== 1 ? 'hidden' : ''}" data-week-panel="${w}">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                            <div class="md:col-span-2">
-                                <label class="font-semibold block mb-3 text-gray-700">Progress:</label>
-                                <div class="flex items-center space-x-2 status-buttons" data-week="${w}">
-                                    <button class="status-button" data-status="on-track">ON TRACK</button>
-                                    <button class="status-button" data-status="issues">ISSUES</button>
-                                    <button class="status-button" data-status="off-track">OFF TRACK</button>
+                            <label class="font-semibold text-lg block mb-2 text-gray-800">Must-Win Battle:</label>
+                            <div id="m${monthNum}s1_battle" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly...'" data-maxlength="500"></div>
+                            <div class="mt-4">
+                                <label class="font-semibold block mb-3 text-sm text-gray-600">Monthly Focus Pillar:</label>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m${monthNum}s1">
+                                    <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
+                                    <button class="btn pillar-button" data-pillar="product"><i class="bi bi-cup-hot-fill"></i> Product</button>
+                                    <button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button>
+                                    <button class="btn pillar-button" data-pillar="place"><i class="bi bi-shop"></i> Place</button>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
                             <div>
-                                <label for="m${monthNum}s5_w${w}_win" class="font-semibold block mb-2 text-gray-700">A Win or Learning:</label>
-                                <div id="m${monthNum}s5_w${w}_win" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., The team hit 80% availability on Thursday!" data-maxlength="400"></div>
+                                <label for="m${monthNum}s2_levers" class="font-semibold text-lg block mb-2 text-gray-800">My Key Levers:</label>
+                                <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="1. Review ordering report daily.&#10;2. Coach the team on the 'why'..." data-maxlength="600"></div>
                             </div>
-                            <div>
-                                <label for="m${monthNum}s5_w${w}_spotlight" class="font-semibold block mb-2 text-gray-700">Team Member Spotlight:</label>
-                                <div id="m${monthNum}s5_w${w}_spotlight" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., Sarah for her excellent attention to detail during the bake." data-maxlength="400"></div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="m${monthNum}s2_powerup_q" class="font-semibold text-lg block mb-2 text-gray-800">Team Power-Up Question:</label>
+                                    <div id="m${monthNum}s2_powerup_q" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., 'What is one thing that slows us down before 8am?'" data-maxlength="300"></div>
+                                </div>
+                                <div>
+                                    <label for="m${monthNum}s2_powerup_a" class="font-semibold text-lg block mb-2 text-gray-800">Our Team's Winning Idea:</label>
+                                    <div id="m${monthNum}s2_powerup_a" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Pre-portioning key ingredients the night before." data-maxlength="300"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t">
+                            <label class="font-semibold text-lg block mb-2 text-gray-800">People Growth:</label>
+                            <div id="m${monthNum}s3_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" data-maxlength="600"></div>
+                        </div>
+
+                        <div class="pt-6 border-t">
+                            <label class="font-semibold text-lg block mb-2 text-gray-800">Protect the Core:</label>
+                            <p class="text-gray-600 mb-4 -mt-2 text-sm">One key behaviour for each pillar to ensure standards don't slip.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                                <div><label for="m${monthNum}s4_people" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-people-fill"></i> PEOPLE</label><div id="m${monthNum}s4_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Meaningful 1-2-1s with my two keyholders." data-maxlength="300"></div></div>
+                                <div><label for="m${monthNum}s4_product" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-cup-hot-fill"></i> PRODUCT</label><div id="m${monthNum}s4_product" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Daily quality checks of the first bake." data-maxlength="300"></div></div>
+                                <div><label for="m${monthNum}s4_customer" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-heart-fill"></i> CUSTOMER</label><div id="m${monthNum}s4_customer" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Action all customer feedback within 24 hours." data-maxlength="300"></div></div>
+                                <div><label for="m${monthNum}s4_place" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-shop"></i> PLACE</label><div id="m${monthNum}s4_place" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Complete a bakery travel path twice a day." data-maxlength="300"></div></div>
                             </div>
                         </div>
                     </div>
-                `).join('')}
-            </div>
-        </div>
+                </div>
 
-        <div class="content-card p-6 md:p-8 bg-red-50 border border-red-100">
-            <h2 class="text-2xl font-bold font-poppins mb-1">End of Month Review</h2>
-            <p class="text-gray-600 mb-6">At the end of the month, reflect on your performance to prepare for your line manager conversation.</p>
-            <div class="space-y-6">
-                <div><label for="m${monthNum}s6_win" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-trophy-fill"></i> Biggest Win:</label><div id="m${monthNum}s6_win" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
-                <div><label for="m${monthNum}s6_challenge" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-lightbulb-fill"></i> Toughest Challenge & What I Learned:</label><div id="m${monthNum}s6_challenge" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
-                <div><label for="m${monthNum}s6_next" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-rocket-takeoff-fill"></i> Focus for Next Month:</label><div id="m${monthNum}s6_next" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
+                <div class="content-card p-6 md:p-8">
+                    <h2 class="text-2xl font-bold font-poppins mb-1">Weekly Momentum</h2>
+                    <p class="text-gray-600 mb-6">Return here each week to log your progress, celebrate wins, and spotlight your team.</p>
+
+                    <div class="mb-6 border-b border-gray-200">
+                        <nav id="weekly-tabs" class="flex -mb-px space-x-6" aria-label="Tabs">
+                            <a href="#" class="weekly-tab active" data-week="1">Week 1</a>
+                            <a href="#" class="weekly-tab" data-week="2">Week 2</a>
+                            <a href="#" class="weekly-tab" data-week="3">Week 3</a>
+                            <a href="#" class="weekly-tab" data-week="4">Week 4</a>
+                        </nav>
+                    </div>
+
+                    <div id="weekly-tab-content">
+                        ${[1, 2, 3, 4].map(w => `
+                            <div class="weekly-tab-panel ${w !== 1 ? 'hidden' : ''}" data-week-panel="${w}">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                                    <div class="md:col-span-2">
+                                        <label class="font-semibold block mb-3 text-gray-700">Progress:</label>
+                                        <div class="flex items-center space-x-2 status-buttons" data-week="${w}">
+                                            <button class="status-button" data-status="on-track">ON TRACK</button>
+                                            <button class="status-button" data-status="issues">ISSUES</button>
+                                            <button class="status-button" data-status="off-track">OFF TRACK</button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="m${monthNum}s5_w${w}_win" class="font-semibold block mb-2 text-gray-700">A Win or Learning:</label>
+                                        <div id="m${monthNum}s5_w${w}_win" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., The team hit 80% availability on Thursday!" data-maxlength="400"></div>
+                                    </div>
+                                    <div>
+                                        <label for="m${monthNum}s5_w${w}_spotlight" class="font-semibold block mb-2 text-gray-700">Team Member Spotlight:</label>
+                                        <div id="m${monthNum}s5_w${w}_spotlight" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., Sarah for her excellent attention to detail during the bake." data-maxlength="400"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="content-card p-6 md:p-8 bg-red-50 border border-red-100">
+                    <h2 class="text-2xl font-bold font-poppins mb-1">End of Month Review</h2>
+                    <p class="text-gray-600 mb-6">At the end of the month, reflect on your performance to prepare for your line manager conversation.</p>
+                    <div class="space-y-6">
+                        <div><label for="m${monthNum}s6_win" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-trophy-fill"></i> Biggest Win:</label><div id="m${monthNum}s6_win" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
+                        <div><label for="m${monthNum}s6_challenge" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-lightbulb-fill"></i> Toughest Challenge & What I Learned:</label><div id="m${monthNum}s6_challenge" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
+                        <div><label for="m${monthNum}s6_next" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-rocket-takeoff-fill"></i> Focus for Next Month:</label><div id="m${monthNum}s6_next" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
+                    </div>
+                </div>
+
+                ${monthNum == 3 ? `
+                <div class="content-card p-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);">
+                    <h2 class="text-2xl font-bold font-poppins mb-1" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2>
+                    <p class="text-gray-600 mb-6">A deep dive into the quarter's performance for your review.</p>
+                    <div class="space-y-6">
+                        <div><label for="m3s7_achievements" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Quarter's Biggest Achievements:</label><div id="m3s7_achievements" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
+                        <div><label for="m3s7_challenges" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings:</label><div id="m3s7_challenges" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
+                        <div><label for="m3s7_narrative" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Quarterly Narrative:</label><div id="m3s7_narrative" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
+                        <div><label for="m3s7_next_quarter" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Primary Focus for Next Quarter:</label><div id="m3s7_next_quarter" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
+                    </div>
+                </div>` : ''}
             </div>
-        </div>
-        
-        ${monthNum == 3 ? `
-        <div class="content-card p-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);">
-            <h2 class="text-2xl font-bold font-poppins mb-1" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2>
-            <p class="text-gray-600 mb-6">A deep dive into the quarter's performance for your review.</p>
-            <div class="space-y-6">
-                <div><label for="m3s7_achievements" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Quarter's Biggest Achievements:</label><div id="m3s7_achievements" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
-                <div><label for="m3s7_challenges" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings:</label><div id="m3s7_challenges" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
-                <div><label for="m3s7_narrative" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Quarterly Narrative:</label><div id="m3s7_narrative" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
-                <div><label for="m3s7_next_quarter" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Primary Focus for Next Quarter:</label><div id="m3s7_next_quarter" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
-            </div>
-        </div>` : ''}
-    </div>
-`,
+        `,
     };
-    
+
     // --- AUTHENTICATION & APP FLOW ---
     auth.onAuthStateChanged(async (user) => {
         if (user) {
@@ -340,7 +340,7 @@ function runApp(app) {
             DOMElements.dashboardView.classList.add('hidden');
             DOMElements.registerView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
-            
+
             DOMElements.loginView.classList.remove('hidden');
         }
     });
@@ -348,11 +348,11 @@ function runApp(app) {
     const handleLogout = (isTimeout = false) => {
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
-        
+
         if (isTimeout) {
             openModal('timeout');
         }
-        
+
         DOMElements.emailInput.value = '';
         DOMElements.passwordInput.value = '';
         auth.signOut();
@@ -367,7 +367,7 @@ function runApp(app) {
         switchView(viewId);
         updateUI();
     }
-    
+
     async function renderDashboard() {
         if (!appState.currentUser) return;
 
@@ -410,7 +410,7 @@ function runApp(app) {
 
         dashboardHTML += `<div class="plan-card new-plan-card" id="create-new-plan-btn"><i class="bi bi-plus-circle-dotted text-4xl"></i><p class="mt-2 font-semibold">Create New Plan</p></div></div>`;
         DOMElements.dashboardContent.innerHTML = dashboardHTML;
-        
+
         document.querySelectorAll('.progress-circle').forEach(circle => {
             const progress = circle.dataset.progress;
             circle.style.setProperty('--progress', progress);
@@ -441,7 +441,7 @@ function runApp(app) {
     function handleBackToDashboard() {
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
-        
+
         appState.planData = {};
         appState.currentPlanId = null;
         DOMElements.appView.classList.add('hidden');
@@ -462,9 +462,9 @@ function runApp(app) {
 
     function saveData(forceImmediate = false) {
         if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
-    
-        const fieldsToDelete = {}; 
-    
+
+        const fieldsToDelete = {};
+
         document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
             if (el.id) {
                 if (el.isContentEditable) {
@@ -474,7 +474,7 @@ function runApp(app) {
                 }
             }
         });
-    
+
         document.querySelectorAll('.pillar-buttons').forEach(group => {
             const stepKey = group.dataset.stepKey;
             const selected = group.querySelector('.selected');
@@ -486,7 +486,7 @@ function runApp(app) {
                 fieldsToDelete[dataKey] = firebase.firestore.FieldValue.delete();
             }
         });
-    
+
         if (appState.currentView.startsWith('month-')) {
             const monthNum = appState.currentView.split('-')[1];
             document.querySelectorAll('.status-buttons').forEach(group => {
@@ -501,26 +501,26 @@ function runApp(app) {
                 }
             });
         }
-    
+
         updateUI();
-    
+
         clearTimeout(appState.saveTimeout);
-    
+
         const saveToFirestore = async () => {
             const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
-    
+
             const dataToSave = {
                 ...appState.planData,
                 ...fieldsToDelete,
                 lastEdited: firebase.firestore.FieldValue.serverTimestamp()
             };
-            
+
             await docRef.set(dataToSave, { merge: true });
-    
+
             DOMElements.saveIndicator.classList.remove('opacity-0');
             setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
         };
-    
+
         if (forceImmediate) {
             return saveToFirestore();
         } else {
@@ -556,16 +556,7 @@ function runApp(app) {
         }
     }
 
-    function getStepProgress(stepKey, data) {
-        // This function might need tweaking based on how you now define "completion"
-        // For simplicity, we can keep it based on required fields if they exist
-        // or define a new logic for the dashboard view.
-        return { completed: 0, total: 0 }; // Placeholder
-    }
-
     function isStepComplete(stepKey, data) {
-        // Redefine what "complete" means for a view.
-        // For 'vision', it's the same. For a 'month', it might mean all core plan sections are filled.
         const planData = data || appState.planData;
         const isContentEmpty = (htmlContent) => {
             if (!htmlContent) return true;
@@ -576,41 +567,36 @@ function runApp(app) {
 
         if(stepKey === 'vision') {
              const fields = templates.vision.requiredFields;
-             const completed = fields.filter(fieldId => !isContentEmpty(planData[fieldId])).length;
-             return fields.length > 0 && completed === fields.length;
+             return fields.every(fieldId => !isContentEmpty(planData[fieldId]));
         }
         return false;
     }
 
     function isMonthComplete(monthNum, data) {
-    const planData = data || appState.planData;
+        const planData = data || appState.planData;
 
-    const isContentEmpty = (htmlContent) => {
-        if (!htmlContent) return true;
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = htmlContent;
-        return tempDiv.innerText.trim() === '';
-    };
+        const isContentEmpty = (htmlContent) => {
+            if (!htmlContent) return true;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            return tempDiv.innerText.trim() === '';
+        };
 
-    const requiredFields = [
-        `m${monthNum}s1_battle`, `m${monthNum}s1_pillar`,
-        `m${monthNum}s2_levers`, `m${monthNum}s2_powerup_q`, `m${monthNum}s2_powerup_a`,
-        `m${monthNum}s3_people`,
-        `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
-        `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
-    ];
+        const requiredFields = [
+            `m${monthNum}s1_battle`, `m${monthNum}s1_pillar`,
+            `m${monthNum}s2_levers`, `m${monthNum}s2_powerup_q`, `m${monthNum}s2_powerup_a`,
+            `m${monthNum}s3_people`,
+            `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
+            `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
+        ];
 
-    if (monthNum == 3) {
-        requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
+        if (monthNum == 3) {
+            requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
+        }
+
+        return requiredFields.every(field => !isContentEmpty(planData[field]));
     }
 
-    return requiredFields.every(field => !isContentEmpty(planData[field]));
-}
-
-    // The .every() method ensures that every single required field has content.
-    // If even one is empty, it will return false.
-    return requiredFields.every(field => !isContentEmpty(planData[field]));
-}
 
     function updateSidebarNavStatus() {
         document.querySelector('#nav-vision').classList.toggle('completed', isStepComplete('vision'));
@@ -620,30 +606,42 @@ function runApp(app) {
     }
 
     function calculatePlanCompletion(planData) {
-        let totalFields = templates.vision.requiredFields.length;
-        let completedFields = templates.vision.requiredFields.filter(f => planData[f] && planData[f].trim() !== '').length;
+        let totalFields = 0;
+        let completedFields = 0;
+
+        const isContentEmpty = (htmlContent) => {
+            if (!htmlContent) return true;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            return tempDiv.innerText.trim() === '';
+        };
+
+        const visionFields = templates.vision.requiredFields;
+        totalFields += visionFields.length;
+        completedFields += visionFields.filter(f => !isContentEmpty(planData[f])).length;
 
         for (let m = 1; m <= 3; m++) {
             const monthFields = [
-                `m${m}s1_battle`, `m${m}s1_pillar`, `m${m}s2_levers`, `m${m}s2_powerup_q`, `m${m}s3_people`,
-                `m${m}s4_people`, `m${m}s4_product`, `m${m}s4_customer`, `m${m}s4_place`,
+                `m${m}s1_battle`, `m${m}s1_pillar`, `m${m}s2_levers`, `m${m}s2_powerup_q`, `m${m}s2_powerup_a`,
+                `m${m}s3_people`, `m${m}s4_people`, `m${m}s4_product`, `m${m}s4_customer`, `m${m}s4_place`,
                 `m${m}s6_win`, `m${m}s6_challenge`, `m${m}s6_next`
             ];
             if (m === 3) monthFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
-            
+
             totalFields += monthFields.length;
-            completedFields += monthFields.filter(f => planData[f] && planData[f].trim() !== '').length;
+            completedFields += monthFields.filter(f => !isContentEmpty(planData[f])).length;
         }
 
         return totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
     }
+
 
     function updateOverallProgress() {
         const percentage = calculatePlanCompletion(appState.planData);
         DOMElements.progressPercentage.textContent = `${percentage}%`;
         DOMElements.progressBarFill.style.width = `${percentage}%`;
     }
-    
+
     function populateViewWithData() {
         document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
             if (el.isContentEditable) {
@@ -652,7 +650,7 @@ function runApp(app) {
                  el.value = appState.planData[el.id] || '';
             }
         });
-    
+
         document.querySelectorAll('.pillar-buttons').forEach(group => {
             const stepKey = group.dataset.stepKey;
             const dataKey = `${stepKey}_pillar`;
@@ -663,7 +661,7 @@ function runApp(app) {
                 if (buttonToSelect) buttonToSelect.classList.add('selected');
             }
         });
-    
+
         if (appState.currentView.startsWith('month-')) {
             const monthNum = appState.currentView.split('-')[1];
             document.querySelectorAll('.status-buttons').forEach(group => {
@@ -683,7 +681,7 @@ function runApp(app) {
     function switchView(viewId) {
         DOMElements.mainContent.scrollTop = 0;
         appState.currentView = viewId;
-        
+
         if (appState.currentPlanId) {
             localStorage.setItem('lastPlanId', appState.currentPlanId);
             localStorage.setItem('lastViewId', viewId);
@@ -716,7 +714,7 @@ function runApp(app) {
         }
         document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
         document.querySelector(`#nav-${viewId}`)?.classList.add('active');
-        
+
         DOMElements.appView.classList.remove('sidebar-open');
         initializeCharCounters();
     }
@@ -724,28 +722,28 @@ function runApp(app) {
     function renderSummary() {
         const formData = appState.planData;
         const e = (html) => (html || '...');
-    
+
         const isContentEmpty = (htmlContent) => {
             if (!htmlContent) return true;
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlContent;
             return tempDiv.innerText.trim() === '';
         };
-    
+
         const renderMonthSummary = (monthNum) => {
             let weeklyCheckinHTML = '<ul>';
             let hasLoggedWeeks = false;
-    
+
             for (let w = 1; w <= 4; w++) {
                 const status = formData[`m${monthNum}s5_w${w}_status`];
                 const win = formData[`m${monthNum}s5_w${w}_win`];
-    
+
                 if (status) {
                     hasLoggedWeeks = true;
                     const statusText = status.replace('-', ' ').toUpperCase();
                     const statusBadgeHTML = `<span class="summary-status-badge status-${status}">${statusText}</span>`;
                     const winText = !isContentEmpty(win) ? e(win) : '<em>No win/learning logged.</em>';
-    
+
                     weeklyCheckinHTML += `<li>
                                             <div class="flex justify-between items-center mb-1">
                                                 <strong class="font-semibold text-gray-700">Week ${w}</strong>
@@ -755,18 +753,18 @@ function runApp(app) {
                                           </li>`;
                 }
             }
-    
+
             if (!hasLoggedWeeks) {
                 weeklyCheckinHTML = '<p class="text-sm text-gray-500">No weekly check-ins have been logged for this month.</p>';
             } else {
                 weeklyCheckinHTML += '</ul>';
             }
-    
+
             const pillar = formData[`m${monthNum}s1_pillar`];
-            const pillarIcons = { 
-                'people': '<i class="bi bi-people-fill"></i>', 
-                'product': '<i class="bi bi-cup-hot-fill"></i>', 
-                'customer': '<i class="bi bi-heart-fill"></i>', 
+            const pillarIcons = {
+                'people': '<i class="bi bi-people-fill"></i>',
+                'product': '<i class="bi bi-cup-hot-fill"></i>',
+                'customer': '<i class="bi bi-heart-fill"></i>',
                 'place': '<i class="bi bi-shop"></i>'
             };
             let pillarHTML = '';
@@ -775,7 +773,7 @@ function runApp(app) {
                 const pillarText = pillar.charAt(0).toUpperCase() + pillar.slice(1);
                 pillarHTML = `<div class="flex items-center gap-2 mb-4"><span class="font-semibold text-sm text-gray-500">Focus Pillar:</span><span class="pillar-badge">${pillarIcon} ${pillarText}</span></div>`;
             }
-    
+
             return `
                 <div class="content-card p-0 overflow-hidden mt-8">
                     <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">Month ${monthNum} Sprint</h2>
@@ -821,7 +819,7 @@ function runApp(app) {
                     </div>
                 </div>`;
         };
-    
+
         DOMElements.contentArea.innerHTML = `
             <div class="space-y-8 summary-content">
                 <div class="content-card p-6">
@@ -860,9 +858,9 @@ function runApp(app) {
             tempDiv.innerHTML = text;
             return tempDiv.innerText.trim();
         };
-    
+
         let summary = `QUARTERLY NARRATIVE: ${e(planData.quarterlyTheme)}\n\n`;
-    
+
         for (let m = 1; m <= 3; m++) {
             summary += `--- MONTH ${m} ---\n`;
             summary += `GOAL: ${e(planData[`month${m}Goal`])}\n`;
@@ -879,7 +877,7 @@ function runApp(app) {
 
     async function handleAIActionPlan() {
         const savedPlan = appState.planData.aiActionPlan;
-    
+
         if (savedPlan) {
             openModal('aiActionPlan_view');
             const modalContent = document.getElementById('modal-content');
@@ -893,17 +891,17 @@ function runApp(app) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ planSummary })
                 });
-    
+
                 if (!response.ok) {
                     const errorResult = await response.json();
                     throw new Error(errorResult.error || 'The AI assistant failed to generate a response.');
                 }
-    
+
                 const data = await response.json();
                 appState.planData.aiActionPlan = data.actionPlan;
                 await saveData(true);
                 handleAIActionPlan();
-    
+
             } catch (error) {
                 console.error("Error generating AI plan:", error);
                 const modalContent = document.getElementById('modal-content');
@@ -913,14 +911,14 @@ function runApp(app) {
             }
         }
     }
-    
+
     async function saveActionPlan() {
         const editedContent = document.getElementById('ai-printable-area').innerHTML;
         appState.planData.aiActionPlan = editedContent;
         await saveData(true);
         closeModal();
     }
-    
+
     function handleRegenerateActionPlan() {
         const modalContent = document.getElementById('modal-content');
         modalContent.innerHTML = `
@@ -929,7 +927,7 @@ function runApp(app) {
                 <p class="text-gray-600 mt-2">Generating a new plan will overwrite your existing action plan and any edits you've made. This cannot be undone.</p>
             </div>
         `;
-    
+
         DOMElements.modalActionBtn.textContent = "Yes, Generate New Plan";
         DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
         DOMElements.modalActionBtn.onclick = async () => {
@@ -937,27 +935,27 @@ function runApp(app) {
             await saveData(true);
             handleAIActionPlan();
         };
-    
+
         DOMElements.modalCancelBtn.textContent = "Cancel";
         DOMElements.modalCancelBtn.onclick = handleAIActionPlan;
     }
 
     async function handleShare() {
         openModal('sharing');
-        
+
         try {
             let shareableLink;
-            
+
             const pointerQuery = db.collection('sharedPlans').where('originalPlanId', '==', appState.currentPlanId);
             const querySnapshot = await pointerQuery.get();
-    
+
             if (!querySnapshot.empty) {
                 const existingPointer = querySnapshot.docs[0];
                 shareableLink = `${window.location.origin}/view.html?id=${existingPointer.id}`;
             } else {
                 const originalPlanRef = db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(appState.currentPlanId);
                 await originalPlanRef.update({ isShared: true });
-    
+
                 const pointerDoc = {
                     originalUserId: appState.currentUser.uid,
                     originalPlanId: appState.currentPlanId,
@@ -966,7 +964,7 @@ function runApp(app) {
                 const newPointerRef = await db.collection('sharedPlans').add(pointerDoc);
                 shareableLink = `${window.location.origin}/view.html?id=${newPointerRef.id}`;
             }
-            
+
             const modalContent = document.getElementById('modal-content');
             modalContent.innerHTML = `
                 <p class="text-sm text-gray-600 mb-4">This is a live link that will update as you make changes to your plan.</p>
@@ -977,7 +975,7 @@ function runApp(app) {
                 </div>
                 <p id="copy-success-msg" class="text-green-600 text-sm mt-2 hidden">Link copied to clipboard!</p>
             `;
-    
+
             document.getElementById('copy-link-btn').addEventListener('click', () => {
                 const linkInput = document.getElementById('shareable-link');
                 linkInput.select();
@@ -985,10 +983,10 @@ function runApp(app) {
                 document.getElementById('copy-success-msg').classList.remove('hidden');
                 setTimeout(() => document.getElementById('copy-success-msg').classList.add('hidden'), 2000);
             });
-            
+
             DOMElements.modalActionBtn.style.display = 'none';
             DOMElements.modalCancelBtn.textContent = 'Done';
-            
+
         } catch (error) {
             console.error("Error creating shareable link:", error);
             const modalContent = document.getElementById('modal-content');
@@ -1000,12 +998,12 @@ function runApp(app) {
         const { planId, currentName, planName } = context;
         DOMElements.modalBox.dataset.type = type;
         DOMElements.modalBox.dataset.planId = planId;
-    
+
         const footer = DOMElements.modalActionBtn.parentNode;
         footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
         DOMElements.modalActionBtn.style.display = 'inline-flex';
         DOMElements.modalCancelBtn.style.display = 'inline-flex';
-    
+
         switch (type) {
             case 'create':
                 DOMElements.modalTitle.textContent = "Create New Plan";
@@ -1060,12 +1058,12 @@ function runApp(app) {
                 break;
             case 'aiActionPlan_view':
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
-                
+
                 const regenButton = document.createElement('button');
                 regenButton.className = 'btn btn-secondary dynamic-btn';
                 regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
                 regenButton.onclick = handleRegenerateActionPlan;
-    
+
                 const printBtn = document.createElement('button');
                 printBtn.className = 'btn btn-secondary dynamic-btn';
                 printBtn.innerHTML = 'Print Plan';
@@ -1110,12 +1108,12 @@ function runApp(app) {
                     document.documentElement.innerHTML = printPageHTML;
                     window.print();
                     document.documentElement.innerHTML = originalPageHTML;
-                    window.location.reload(); 
+                    window.location.reload();
                 };
 
                 footer.insertBefore(regenButton, DOMElements.modalActionBtn);
                 footer.insertBefore(printBtn, DOMElements.modalActionBtn);
-                
+
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
                 DOMElements.modalActionBtn.onclick = saveActionPlan;
@@ -1124,7 +1122,7 @@ function runApp(app) {
         }
         DOMElements.modalOverlay.classList.remove('hidden');
     }
-    
+
     function closeModal() {
         document.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
         DOMElements.modalActionBtn.onclick = handleModalAction;
@@ -1157,7 +1155,7 @@ function runApp(app) {
                     setTimeout(() => newPlanNameInput.classList.remove('shake'), 500);
                     return;
                 }
-                
+
                 DOMElements.modalActionBtn.disabled = true;
                 DOMElements.modalActionBtn.textContent = 'Checking...';
 
@@ -1169,13 +1167,13 @@ function runApp(app) {
                     if(errorContainer) {
                        errorContainer.innerHTML = `<p class="auth-error" style="display:block; margin: 0; width: 100%;">A plan with this name already exists. Please choose another.</p>`;
                     }
-                    
+
                     DOMElements.modalActionBtn.disabled = false;
                     DOMElements.modalActionBtn.textContent = originalButtonText;
                     setTimeout(() => newPlanNameInput.classList.remove('shake'), 500);
                     return;
                 }
-                
+
                 DOMElements.modalActionBtn.disabled = false;
                 DOMElements.modalActionBtn.textContent = originalButtonText;
 
@@ -1183,11 +1181,11 @@ function runApp(app) {
                 DOMElements.creationLoadingView.classList.remove('hidden');
 
                 try {
-                    const newPlan = await plansRef.add({ 
-                        planName: newPlanName, 
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(), 
-                        lastEdited: firebase.firestore.FieldValue.serverTimestamp(), 
-                        managerName: '' 
+                    const newPlan = await plansRef.add({
+                        planName: newPlanName,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastEdited: firebase.firestore.FieldValue.serverTimestamp(),
+                        managerName: ''
                     });
                     await handleSelectPlan(newPlan.id);
                 } catch (error) {
@@ -1256,7 +1254,7 @@ function runApp(app) {
         const email = DOMElements.registerEmail.value;
         const password = DOMElements.registerPassword.value;
         const errorContainer = DOMElements.registerError;
-        
+
         errorContainer.style.display = 'none';
 
         if (!DOMElements.termsAgreeCheckbox.checked) {
@@ -1360,7 +1358,7 @@ function runApp(app) {
     });
 
     DOMElements.mainNav.addEventListener('click', (e) => { e.preventDefault(); const navLink = e.target.closest('a'); if (navLink) { switchView(navLink.id.replace('nav-', '')); }});
-    
+
     DOMElements.contentArea.addEventListener('keydown', (e) => {
         const editor = e.target.closest('[contenteditable="true"]');
         if (!editor) return;
@@ -1379,9 +1377,9 @@ function runApp(app) {
         }
     });
 
-    DOMElements.contentArea.addEventListener('input', (e) => { 
-        if (e.target.matches('input, [contenteditable="true"]')) { 
-            saveData(); 
+    DOMElements.contentArea.addEventListener('input', (e) => {
+        if (e.target.matches('input, [contenteditable="true"]')) {
+            saveData();
         }
         if (e.target.isContentEditable) {
             managePlaceholder(e.target);
@@ -1390,7 +1388,7 @@ function runApp(app) {
 
     DOMElements.contentArea.addEventListener('click', (e) => {
         const target = e.target;
-    
+
         const pillarButton = target.closest('.pillar-button');
         if (pillarButton) {
             const alreadySelected = pillarButton.classList.contains('selected');
@@ -1401,7 +1399,7 @@ function runApp(app) {
             saveData(true);
             return;
         }
-    
+
         const statusButton = target.closest('.status-button');
         if (statusButton) {
             const button = statusButton;
@@ -1437,17 +1435,17 @@ function runApp(app) {
         }
     });
     DOMElements.modalActionBtn.addEventListener('click', handleModalAction);
-    
+
     DOMElements.mobileMenuBtn.addEventListener('click', () => {
         DOMElements.appView.classList.toggle('sidebar-open');
     });
     DOMElements.sidebarOverlay.addEventListener('click', () => {
         DOMElements.appView.classList.remove('sidebar-open');
     });
-    
+
     let touchStartX = 0;
     let touchEndX = 0;
-    const swipeThreshold = 50; 
+    const swipeThreshold = 50;
 
     DOMElements.mainContent.addEventListener('touchstart', e => {
         touchStartX = e.changedTouches[0].screenX;
@@ -1459,7 +1457,7 @@ function runApp(app) {
             DOMElements.appView.classList.add('sidebar-open');
         }
     });
-    
+
     DOMElements.sidebar.addEventListener('touchstart', e => {
         touchStartX = e.changedTouches[0].screenX;
     }, { passive: true });
@@ -1490,10 +1488,8 @@ function runApp(app) {
         cookieBanner.classList.add('hidden');
     });
 
-} 
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
