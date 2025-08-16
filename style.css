@@ -597,7 +597,34 @@ textarea.form-input {
     flex-wrap: wrap; /* Allow buttons to wrap on small screens */
 }
 
+/* 28. Redesigned Monthly Dashboard Styles
+-------------------------------------------------- */
 
+/* Weekly Check-in Tab Styles */
+.weekly-tab {
+    padding: 0.75rem 0.25rem; /* 12px 4px */
+    font-size: 1rem; /* 16px */
+    font-weight: 600;
+    color: var(--gails-text-secondary);
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+}
+
+.weekly-tab:hover {
+    color: var(--gails-text-primary);
+    border-bottom-color: var(--gails-grey-mid);
+}
+
+.weekly-tab.active {
+    color: var(--gails-red);
+    border-bottom-color: var(--gails-red);
+}
+
+/* Custom Height for Weekly Check-in Text Boxes */
+.weekly-check-in-input {
+    min-height: 80px;
+}
 
 
 
