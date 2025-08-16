@@ -632,6 +632,19 @@ textarea.form-input {
     min-height: 360px; /* Adjust this value as needed */
 }
 
+/* 30. Sidebar Navigation Progress Counter
+-------------------------------------------------- */
+.nav-progress {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--gails-text-secondary);
+    margin-left: 0.5rem;
+    display: none; /* Hidden by default, JS will show it */
+}
+
+.sidebar-nav a.active .nav-progress {
+    color: var(--gails-red);
+}
 
 
 
