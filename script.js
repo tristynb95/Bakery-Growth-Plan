@@ -185,7 +185,7 @@ function runApp(app) {
                    </div>`,
             requiredFields: ['managerName', 'bakeryLocation', 'quarter', 'quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
         },
-       month: (monthNum) => `
+      month: (monthNum) => `
     <div class="space-y-8">
         <div class="content-card p-6 md:p-8">
             <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation Plan</h2>
@@ -244,13 +244,13 @@ function runApp(app) {
         <div class="content-card p-6 md:p-8">
             <h2 class="text-2xl font-bold font-poppins mb-1">Weekly Momentum</h2>
             <p class="text-gray-600 mb-6">Return here each week to log your progress, celebrate wins, and spotlight your team.</p>
-
+            
             <div class="mb-6 border-b border-gray-200">
                 <nav id="weekly-tabs" class="flex -mb-px space-x-6" aria-label="Tabs">
-                    <a href="#" class="weekly-tab active" data-week="1">Week 1</a>
-                    <a href="#" class="weekly-tab" data-week="2">Week 2</a>
-                    <a href="#" class="weekly-tab" data-week="3">Week 3</a>
-                    <a href="#" class="weekly-tab" data-week="4">Week 4</a>
+                    <a href="#" class="weekly-tab active" data-week="1">Week 1 <i class="bi bi-check-circle-fill weekly-tab-completed-icon"></i></a>
+                    <a href="#" class="weekly-tab" data-week="2">Week 2 <i class="bi bi-check-circle-fill weekly-tab-completed-icon"></i></a>
+                    <a href="#" class="weekly-tab" data-week="3">Week 3 <i class="bi bi-check-circle-fill weekly-tab-completed-icon"></i></a>
+                    <a href="#" class="weekly-tab" data-week="4">Week 4 <i class="bi bi-check-circle-fill weekly-tab-completed-icon"></i></a>
                 </nav>
             </div>
 
@@ -1522,6 +1522,7 @@ function updateSidebarNavStatus() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
