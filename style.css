@@ -680,3 +680,16 @@ textarea.form-input {
 .sidebar-nav a.completed .nav-progress-donut-container {
     display: none;
 }
+
+/* 31. Weekly Tab Completion Checkmark
+-------------------------------------------------- */
+.weekly-tab-completed-icon {
+    display: none; /* Hide the icon by default */
+    color: var(--gails-green);
+    margin-left: 0.5rem;
+    font-size: 0.9em;
+}
+
+.weekly-tab.completed .weekly-tab-completed-icon {
+    display: inline-block; /* Show the icon when the tab is marked as completed */
+}
