@@ -626,6 +626,12 @@ textarea.form-input {
     min-height: 80px;
 }
 
+/* 29. Taller Key Levers Text Box
+-------------------------------------------------- */
+.key-levers-input {
+    min-height: 280px; /* Adjust this value as needed */
+}
+
 
 
 
