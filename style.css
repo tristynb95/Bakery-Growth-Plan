@@ -646,6 +646,73 @@ textarea.form-input {
     color: var(--gails-red);
 }
 
+/* 30. Sidebar Donut Progress Indicator
+-------------------------------------------------- */
+.nav-icon-container {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    margin-right: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.progress-donut {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg); /* Starts the circle at the 12 o'clock position */
+}
+
+.progress-donut__track {
+    stroke: var(--gails-grey-light);
+}
+
+.progress-donut__progress {
+    stroke: var(--gails-red);
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.progress-donut__text {
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--gails-text-secondary);
+}
+
+/* Hide the old icon classes and text progress counter */
+.sidebar-nav a .nav-icon {
+    display: none;
+}
+.nav-progress {
+    display: none !important;
+}
+
+/* Style the checkmark for the completed state */
+.sidebar-nav a .nav-icon-container .nav-icon-completed {
+    font-size: 1.5rem; /* 24px */
+}
+
+/* When a link is complete, hide the donut and its text */
+.sidebar-nav a.completed .progress-donut,
+.sidebar-nav a.completed .progress-donut__text {
+    display: none;
+}
+/* But when a link is NOT complete, hide the checkmark */
+.sidebar-nav a:not(.completed) .nav-icon-completed {
+    display: none;
+}
+
+/* Active state colors */
+.sidebar-nav a.active .progress-donut__text {
+    color: var(--gails-red);
+}
+
 
 
 
