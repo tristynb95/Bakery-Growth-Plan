@@ -535,6 +535,47 @@ function runApp(app) {
 
 
     // --- UI & RENDER LOGIC ---
+function getVisionProgress(planData) {
+    const data = planData || appState.planData;
+    // A robust helper to check if content is empty.
+    const isContentEmpty = (htmlContent) => {
+        if (!htmlContent) return true;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        return tempDiv.innerText.trim() === '';
+    };
+
+    const requiredFields = templates.vision.requiredFields;
+    const total = requiredFields.length;
+    const completed = requiredFields.filter(field => !isContentEmpty(data[field])).length;
+    return { completed, total };
+}
+
+function getMonthProgress(monthNum, planData) {
+    const data = planData || appState.planData;
+    // A robust helper to check if content is empty.
+    const isContentEmpty = (htmlContent) => {
+        if (!htmlContent) return true;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        return tempDiv.innerText.trim() === '';
+    };
+
+    const requiredFields = [
+        `m${monthNum}s1_battle`, `m${monthNum}s1_pillar`,
+        `m${monthNum}s2_levers`, `m${monthNum}s2_powerup_q`, `m${monthNum}s2_powerup_a`,
+        `m${monthNum}s3_people`,
+        `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
+        `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
+    ];
+    if (monthNum == 3) {
+        requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
+    }
+    const total = requiredFields.length;
+    const completed = requiredFields.filter(field => !isContentEmpty(data[field])).length;
+    return { completed, total };
+}
+    
     function updateUI() {
         updateSidebarInfo();
         updateOverallProgress();
@@ -557,53 +598,44 @@ function runApp(app) {
     }
 
     function isStepComplete(stepKey, data) {
-        const planData = data || appState.planData;
-        const isContentEmpty = (htmlContent) => {
-            if (!htmlContent) return true;
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlContent;
-            return tempDiv.innerText.trim() === '';
-        };
-
-        if(stepKey === 'vision') {
-             const fields = templates.vision.requiredFields;
-             return fields.every(fieldId => !isContentEmpty(planData[fieldId]));
-        }
-        return false;
+    if (stepKey === 'vision') {
+        const progress = getVisionProgress(data);
+        return progress.total > 0 && progress.completed === progress.total;
     }
+    return false; // This function is now only used for the 'vision' step.
+}
 
-    function isMonthComplete(monthNum, data) {
-        const planData = data || appState.planData;
+function isMonthComplete(monthNum, data) {
+    const progress = getMonthProgress(monthNum, data);
+    return progress.total > 0 && progress.completed === progress.total;
+}
 
-        const isContentEmpty = (htmlContent) => {
-            if (!htmlContent) return true;
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlContent;
-            return tempDiv.innerText.trim() === '';
-        };
+function updateSidebarNavStatus() {
+    const updateNavItem = (navId, progress) => {
+        const navLink = document.querySelector(navId);
+        if (!navLink) return;
+        const progressSpan = navLink.querySelector('.nav-progress');
 
-        const requiredFields = [
-            `m${monthNum}s1_battle`, `m${monthNum}s1_pillar`,
-            `m${monthNum}s2_levers`, `m${monthNum}s2_powerup_q`, `m${monthNum}s2_powerup_a`,
-            `m${monthNum}s3_people`,
-            `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
-            `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
-        ];
+        // Toggle completion class for 100%
+        const isComplete = progress.total > 0 && progress.completed === progress.total;
+        navLink.classList.toggle('completed', isComplete);
 
-        if (monthNum == 3) {
-            requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
+        // Update and show/hide progress text
+        if (progressSpan) {
+            if (progress.completed > 0 && !isComplete) {
+                progressSpan.textContent = `(${progress.completed}/${progress.total})`;
+                progressSpan.style.display = 'inline';
+            } else {
+                progressSpan.style.display = 'none';
+            }
         }
+    };
 
-        return requiredFields.every(field => !isContentEmpty(planData[field]));
+    updateNavItem('#nav-vision', getVisionProgress());
+    for (let m = 1; m <= 3; m++) {
+        updateNavItem(`#nav-month-${m}`, getMonthProgress(m));
     }
-
-
-    function updateSidebarNavStatus() {
-        document.querySelector('#nav-vision').classList.toggle('completed', isStepComplete('vision'));
-        for (let m = 1; m <= 3; m++) {
-            document.querySelector(`#nav-month-${m}`).classList.toggle('completed', isMonthComplete(m));
-        }
-    }
+}
 
     function calculatePlanCompletion(planData) {
         let totalFields = 0;
@@ -1493,6 +1525,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
