@@ -719,32 +719,32 @@ function runApp(app) {
 
     // --- NEW FUNCTION FOR WEEKLY COMPLETION ---
     function updateWeeklyTabStatus(monthNum) {
-        if (!monthNum) return;
+    if (!monthNum) return;
 
-        // Helper to check if a single week is complete
-        const isWeekComplete = (weekNum) => {
-            const status = appState.planData[`m${monthNum}s5_w${weekNum}_status`];
-            const win = appState.planData[`m${monthNum}s5_w${weekNum}_win`];
-            const spotlight = appState.planData[`m${monthNum}s5_w${weekNum}_spotlight`];
+    // Helper to check if a single week is complete
+    const isWeekComplete = (weekNum) => {
+        const status = appState.planData[`m${monthNum}s5_w${weekNum}_status`];
+        const win = appState.planData[`m${monthNum}s5_w${weekNum}_win`];
+        const spotlight = appState.planData[`m${monthNum}s5_w${weekNum}_spotlight`];
 
-            const isContentEmpty = (htmlContent) => {
-                if (!htmlContent) return true;
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = htmlContent;
-                return tempDiv.innerText.trim() === '';
-            };
-
-            return status && !isContentEmpty(win) && !isContentEmpty(spotlight);
+        const isContentEmpty = (htmlContent) => {
+            if (!htmlContent) return true;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            return tempDiv.innerText.trim() === '';
         };
 
-        // Loop through weeks 1-4 and update their tab's class
-        for (let w = 1; w <= 4; w++) {
-            const tab = document.querySelector(`.weekly-tab[data-week="${w}"]`);
-            if (tab) {
-                tab.classList.toggle('completed', isWeekComplete(w));
-            }
+        return status && !isContentEmpty(win) && !isContentEmpty(spotlight);
+    };
+
+    // Loop through weeks 1-4 and update their tab's class
+    for (let w = 1; w <= 4; w++) {
+        const tab = document.querySelector(`.weekly-tab[data-week="${w}"]`);
+        if (tab) {
+            tab.classList.toggle('completed', isWeekComplete(w));
         }
     }
+}
 
     function switchView(viewId) {
         DOMElements.mainContent.scrollTop = 0;
@@ -1561,3 +1561,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
