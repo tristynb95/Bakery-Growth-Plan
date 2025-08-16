@@ -562,12 +562,20 @@ function getMonthProgress(monthNum, planData) {
     };
 
     const requiredFields = [
+        // Foundation Plan
         `m${monthNum}s1_battle`, `m${monthNum}s1_pillar`,
         `m${monthNum}s2_levers`, `m${monthNum}s2_powerup_q`, `m${monthNum}s2_powerup_a`,
         `m${monthNum}s3_people`,
         `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
+        // Weekly Momentum (4 weeks x 3 fields)
+        `m${monthNum}s5_w1_status`, `m${monthNum}s5_w1_win`, `m${monthNum}s5_w1_spotlight`,
+        `m${monthNum}s5_w2_status`, `m${monthNum}s5_w2_win`, `m${monthNum}s5_w2_spotlight`,
+        `m${monthNum}s5_w3_status`, `m${monthNum}s5_w3_win`, `m${monthNum}s5_w3_spotlight`,
+        `m${monthNum}s5_w4_status`, `m${monthNum}s5_w4_win`, `m${monthNum}s5_w4_spotlight`,
+        // End of Month Review
         `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
     ];
+
     if (monthNum == 3) {
         requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
     }
@@ -616,13 +624,11 @@ function updateSidebarNavStatus() {
         if (!navLink) return;
         const progressSpan = navLink.querySelector('.nav-progress');
 
-        // Toggle completion class for 100%
         const isComplete = progress.total > 0 && progress.completed === progress.total;
         navLink.classList.toggle('completed', isComplete);
 
-        // Update and show/hide progress text
         if (progressSpan) {
-            if (progress.completed > 0 && !isComplete) {
+            if (!isComplete) {
                 progressSpan.textContent = `(${progress.completed}/${progress.total})`;
                 progressSpan.style.display = 'inline';
             } else {
@@ -638,34 +644,21 @@ function updateSidebarNavStatus() {
 }
 
     function calculatePlanCompletion(planData) {
-        let totalFields = 0;
-        let completedFields = 0;
+    let totalFields = 0;
+    let completedFields = 0;
 
-        const isContentEmpty = (htmlContent) => {
-            if (!htmlContent) return true;
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlContent;
-            return tempDiv.innerText.trim() === '';
-        };
+    const visionProgress = getVisionProgress(planData);
+    totalFields += visionProgress.total;
+    completedFields += visionProgress.completed;
 
-        const visionFields = templates.vision.requiredFields;
-        totalFields += visionFields.length;
-        completedFields += visionFields.filter(f => !isContentEmpty(planData[f])).length;
-
-        for (let m = 1; m <= 3; m++) {
-            const monthFields = [
-                `m${m}s1_battle`, `m${m}s1_pillar`, `m${m}s2_levers`, `m${m}s2_powerup_q`, `m${m}s2_powerup_a`,
-                `m${m}s3_people`, `m${m}s4_people`, `m${m}s4_product`, `m${m}s4_customer`, `m${m}s4_place`,
-                `m${m}s6_win`, `m${m}s6_challenge`, `m${m}s6_next`
-            ];
-            if (m === 3) monthFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
-
-            totalFields += monthFields.length;
-            completedFields += monthFields.filter(f => !isContentEmpty(planData[f])).length;
-        }
-
-        return totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
+    for (let m = 1; m <= 3; m++) {
+        const monthProgress = getMonthProgress(m, planData);
+        totalFields += monthProgress.total;
+        completedFields += monthProgress.completed;
     }
+
+    return totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
+}
 
 
     function updateOverallProgress() {
@@ -1525,6 +1518,7 @@ function updateSidebarNavStatus() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
