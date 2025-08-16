@@ -185,7 +185,7 @@ function runApp(app) {
                    </div>`,
             requiredFields: ['managerName', 'bakeryLocation', 'quarter', 'quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
         },
-      month: (monthNum) => `
+        month: (monthNum) => `
     <div class="space-y-8">
         <div class="content-card p-6 md:p-8">
             <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation Plan</h2>
@@ -535,59 +535,16 @@ function runApp(app) {
 
 
     // --- UI & RENDER LOGIC ---
-function getVisionProgress(planData) {
-    const data = planData || appState.planData;
-    // A robust helper to check if content is empty.
-    const isContentEmpty = (htmlContent) => {
-        if (!htmlContent) return true;
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = htmlContent;
-        return tempDiv.innerText.trim() === '';
-    };
-
-    const requiredFields = templates.vision.requiredFields;
-    const total = requiredFields.length;
-    const completed = requiredFields.filter(field => !isContentEmpty(data[field])).length;
-    return { completed, total };
-}
-
-function getMonthProgress(monthNum, planData) {
-    const data = planData || appState.planData;
-    // A robust helper to check if content is empty.
-    const isContentEmpty = (htmlContent) => {
-        if (!htmlContent) return true;
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = htmlContent;
-        return tempDiv.innerText.trim() === '';
-    };
-
-    const requiredFields = [
-        // Foundation Plan
-        `m${monthNum}s1_battle`, `m${monthNum}s1_pillar`,
-        `m${monthNum}s2_levers`, `m${monthNum}s2_powerup_q`, `m${monthNum}s2_powerup_a`,
-        `m${monthNum}s3_people`,
-        `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
-        // Weekly Momentum (4 weeks x 3 fields)
-        `m${monthNum}s5_w1_status`, `m${monthNum}s5_w1_win`, `m${monthNum}s5_w1_spotlight`,
-        `m${monthNum}s5_w2_status`, `m${monthNum}s5_w2_win`, `m${monthNum}s5_w2_spotlight`,
-        `m${monthNum}s5_w3_status`, `m${monthNum}s5_w3_win`, `m${monthNum}s5_w3_spotlight`,
-        `m${monthNum}s5_w4_status`, `m${monthNum}s5_w4_win`, `m${monthNum}s5_w4_spotlight`,
-        // End of Month Review
-        `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
-    ];
-
-    if (monthNum == 3) {
-        requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
-    }
-    const total = requiredFields.length;
-    const completed = requiredFields.filter(field => !isContentEmpty(data[field])).length;
-    return { completed, total };
-}
-    
     function updateUI() {
         updateSidebarInfo();
         updateOverallProgress();
         updateSidebarNavStatus();
+        
+        // Add this block to check weekly status on every update
+        if (appState.currentView.startsWith('month-')) {
+            const monthNum = appState.currentView.split('-')[1];
+            updateWeeklyTabStatus(monthNum);
+        }
     }
 
     function updateSidebarInfo() {
@@ -605,64 +562,111 @@ function getMonthProgress(monthNum, planData) {
         }
     }
 
+    function getVisionProgress(planData) {
+        const data = planData || appState.planData;
+        const isContentEmpty = (htmlContent) => {
+            if (!htmlContent) return true;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            return tempDiv.innerText.trim() === '';
+        };
+
+        const requiredFields = templates.vision.requiredFields;
+        const total = requiredFields.length;
+        const completed = requiredFields.filter(field => !isContentEmpty(data[field])).length;
+        return { completed, total };
+    }
+
+    function getMonthProgress(monthNum, planData) {
+        const data = planData || appState.planData;
+        const isContentEmpty = (htmlContent) => {
+            if (!htmlContent) return true;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            return tempDiv.innerText.trim() === '';
+        };
+
+        const requiredFields = [
+            // Foundation Plan
+            `m${monthNum}s1_battle`, `m${monthNum}s1_pillar`,
+            `m${monthNum}s2_levers`, `m${monthNum}s2_powerup_q`, `m${monthNum}s2_powerup_a`,
+            `m${monthNum}s3_people`,
+            `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
+            // Weekly Momentum (4 weeks x 3 fields)
+            `m${monthNum}s5_w1_status`, `m${monthNum}s5_w1_win`, `m${monthNum}s5_w1_spotlight`,
+            `m${monthNum}s5_w2_status`, `m${monthNum}s5_w2_win`, `m${monthNum}s5_w2_spotlight`,
+            `m${monthNum}s5_w3_status`, `m${monthNum}s5_w3_win`, `m${monthNum}s5_w3_spotlight`,
+            `m${monthNum}s5_w4_status`, `m${monthNum}s5_w4_win`, `m${monthNum}s5_w4_spotlight`,
+            // End of Month Review
+            `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
+        ];
+
+        if (monthNum == 3) {
+            requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
+        }
+        const total = requiredFields.length;
+        const completed = requiredFields.filter(field => !isContentEmpty(data[field])).length;
+        return { completed, total };
+    }
+
     function isStepComplete(stepKey, data) {
-    if (stepKey === 'vision') {
-        const progress = getVisionProgress(data);
+        if (stepKey === 'vision') {
+            const progress = getVisionProgress(data);
+            return progress.total > 0 && progress.completed === progress.total;
+        }
+        return false;
+    }
+
+    function isMonthComplete(monthNum, data) {
+        const progress = getMonthProgress(monthNum, data);
         return progress.total > 0 && progress.completed === progress.total;
     }
-    return false; // This function is now only used for the 'vision' step.
-}
 
-function isMonthComplete(monthNum, data) {
-    const progress = getMonthProgress(monthNum, data);
-    return progress.total > 0 && progress.completed === progress.total;
-}
+    function updateSidebarNavStatus() {
+        const updateNavItem = (navId, progress) => {
+            const navLink = document.querySelector(navId);
+            if (!navLink) return;
 
-function updateSidebarNavStatus() {
-    const updateNavItem = (navId, progress) => {
-        const navLink = document.querySelector(navId);
-        if (!navLink) return;
+            const isComplete = progress.total > 0 && progress.completed === progress.total;
+            navLink.classList.toggle('completed', isComplete);
 
-        const isComplete = progress.total > 0 && progress.completed === progress.total;
-        navLink.classList.toggle('completed', isComplete);
+            const progressCircle = navLink.querySelector('.progress-donut__progress');
 
-        const progressCircle = navLink.querySelector('.progress-donut__progress');
+            if (progressCircle) {
+                const radius = progressCircle.r.baseVal.value;
+                const circumference = 2 * Math.PI * radius;
+                
+                progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
 
-        if (progressCircle) { // Check if the donut element exists on the nav item
-            const radius = progressCircle.r.baseVal.value;
-            const circumference = 2 * Math.PI * radius;
-            
-            progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+                const progressFraction = progress.total > 0 ? progress.completed / progress.total : 0;
+                const offset = circumference - (progressFraction * circumference);
+                
+                progressCircle.style.strokeDashoffset = offset;
+            }
+        };
 
-            const progressFraction = progress.total > 0 ? progress.completed / progress.total : 0;
-            const offset = circumference - (progressFraction * circumference);
-            
-            progressCircle.style.strokeDashoffset = offset;
+        updateNavItem('#nav-vision', getVisionProgress());
+        for (let m = 1; m <= 3; m++) {
+            updateNavItem(`#nav-month-${m}`, getMonthProgress(m));
         }
-    };
-
-    updateNavItem('#nav-vision', getVisionProgress());
-    for (let m = 1; m <= 3; m++) {
-        updateNavItem(`#nav-month-${m}`, getMonthProgress(m));
     }
-}
 
     function calculatePlanCompletion(planData) {
-    let totalFields = 0;
-    let completedFields = 0;
+        let totalFields = 0;
+        let completedFields = 0;
 
-    const visionProgress = getVisionProgress(planData);
-    totalFields += visionProgress.total;
-    completedFields += visionProgress.completed;
+        const visionProgress = getVisionProgress(planData);
+        totalFields += visionProgress.total;
+        completedFields += visionProgress.completed;
 
-    for (let m = 1; m <= 3; m++) {
-        const monthProgress = getMonthProgress(m, planData);
-        totalFields += monthProgress.total;
-        completedFields += monthProgress.completed;
+        for (let m = 1; m <= 3; m++) {
+            const monthProgress = getMonthProgress(m, planData);
+            totalFields += monthProgress.total;
+            completedFields += monthProgress.completed;
+        }
+
+        return totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
     }
-
-    return totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
-}
 
 
     function updateOverallProgress() {
@@ -705,6 +709,41 @@ function updateSidebarNavStatus() {
             });
         }
         document.querySelectorAll('#app-view [contenteditable="true"]').forEach(managePlaceholder);
+        
+        // Add this block to check weekly status when the view first loads
+        if (appState.currentView.startsWith('month-')) {
+            const monthNum = appState.currentView.split('-')[1];
+            updateWeeklyTabStatus(monthNum);
+        }
+    }
+
+    // --- NEW FUNCTION FOR WEEKLY COMPLETION ---
+    function updateWeeklyTabStatus(monthNum) {
+        if (!monthNum) return;
+
+        // Helper to check if a single week is complete
+        const isWeekComplete = (weekNum) => {
+            const status = appState.planData[`m${monthNum}s5_w${weekNum}_status`];
+            const win = appState.planData[`m${monthNum}s5_w${weekNum}_win`];
+            const spotlight = appState.planData[`m${monthNum}s5_w${weekNum}_spotlight`];
+
+            const isContentEmpty = (htmlContent) => {
+                if (!htmlContent) return true;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = htmlContent;
+                return tempDiv.innerText.trim() === '';
+            };
+
+            return status && !isContentEmpty(win) && !isContentEmpty(spotlight);
+        };
+
+        // Loop through weeks 1-4 and update their tab's class
+        for (let w = 1; w <= 4; w++) {
+            const tab = document.querySelector(`.weekly-tab[data-week="${w}"]`);
+            if (tab) {
+                tab.classList.toggle('completed', isWeekComplete(w));
+            }
+        }
     }
 
     function switchView(viewId) {
@@ -1522,11 +1561,3 @@ function updateSidebarNavStatus() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
-
-
-
-
