@@ -1465,41 +1465,46 @@ function runApp(app) {
     });
 
     DOMElements.contentArea.addEventListener('click', (e) => {
-        const target = e.target;
+    const target = e.target;
 
-        const pillarButton = target.closest('.pillar-button');
-        if (pillarButton) {
-            const alreadySelected = pillarButton.classList.contains('selected');
-            pillarButton.parentElement.querySelectorAll('.pillar-button').forEach(btn => btn.classList.remove('selected'));
-            if (!alreadySelected) {
-                pillarButton.classList.add('selected');
-            }
-            saveData(true);
-            return;
+    const pillarButton = target.closest('.pillar-button');
+    if (pillarButton) {
+        const alreadySelected = pillarButton.classList.contains('selected');
+        pillarButton.parentElement.querySelectorAll('.pillar-button').forEach(btn => btn.classList.remove('selected'));
+        if (!alreadySelected) {
+            pillarButton.classList.add('selected');
         }
+        saveData(true);
+        return;
+    }
 
-        const statusButton = target.closest('.status-button');
-        if (statusButton) {
-            const button = statusButton;
-            const alreadySelected = button.classList.contains('selected');
-            button.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
-            if (!alreadySelected) button.classList.add('selected');
-            saveData(true);
-        }
+    const statusButton = target.closest('.status-button');
+    if (statusButton) {
+        const button = statusButton;
+        const alreadySelected = button.classList.contains('selected');
+        button.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
+        if (!alreadySelected) button.classList.add('selected');
+        saveData(true);
+    }
 
-        const tab = e.target.closest('.weekly-tab');
-        if (tab) {
-            e.preventDefault();
-            const week = tab.dataset.week;
+    // --- CORRECTED LOGIC START ---
+    const tabItem = target.closest('.weekly-tab-item');
+    if (tabItem) {
+        e.preventDefault();
+        const week = tabItem.dataset.week;
 
-            document.querySelectorAll('.weekly-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
+        // Remove 'active' class from all tab links
+        document.querySelectorAll('.weekly-tab').forEach(t => t.classList.remove('active'));
+        // Add 'active' class to the link inside the item that was clicked
+        tabItem.querySelector('.weekly-tab').classList.add('active');
 
-            document.querySelectorAll('.weekly-tab-panel').forEach(p => {
-                p.classList.toggle('hidden', p.dataset.weekPanel !== week);
-            });
-        }
-    });
+        // Show the correct content panel
+        document.querySelectorAll('.weekly-tab-panel').forEach(p => {
+            p.classList.toggle('hidden', p.dataset.weekPanel !== week);
+        });
+    }
+    // --- CORRECTED LOGIC END ---
+});
 
     DOMElements.printBtn.addEventListener('click', () => window.print());
     DOMElements.shareBtn.addEventListener('click', handleShare);
@@ -1571,6 +1576,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
