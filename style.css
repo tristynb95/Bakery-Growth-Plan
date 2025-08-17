@@ -741,4 +741,98 @@ textarea.form-input {
     box-shadow: none;
 }
 
+/* 32. Dynamic Table Action Buttons
+-------------------------------------------------- */
+.btn-add-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gails-text-secondary);
+    background-color: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-add-row:hover {
+    background-color: var(--gails-grey-light);
+    color: var(--gails-text-primary);
+}
+
+.btn-add-row .bi {
+    font-size: 1.2rem;
+}
+
+td.actions-cell {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.btn-remove-row {
+    background: none;
+    border: none;
+    color: var(--gails-grey-mid);
+    cursor: pointer;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    opacity: 0; /* Hidden by default */
+    transition: all 0.2s ease;
+}
+
+tr:hover .btn-remove-row {
+    opacity: 1; /* Show on row hover */
+}
+
+.btn-remove-row:hover {
+    background-color: var(--gails-red-light);
+    color: var(--gails-red);
+}
+
+/* Ensure actions column in print is hidden */
+@media print {
+    th:last-child,
+    td:last-child {
+        display: none !important;
+    }
+}
+
+/* 33. Undo/Redo Buttons
+-------------------------------------------------- */
+.undo-redo-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-right: auto; /* Pushes this group to the left */
+}
+
+.btn-icon {
+    padding: 0.75rem; /* Make it square */
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.btn-icon .bi {
+    margin: 0; /* Remove default gap */
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Adjust modal footer for new button layout */
+.modal-footer {
+    justify-content: space-between;
+    flex-wrap: nowrap;
+}
 
