@@ -1251,14 +1251,14 @@ function runApp(app) {
 
                     allPanels.forEach((panel, index) => {
                         const tableRows = panel.querySelector('tbody tr');
-                        if (tableRows) { // Only print months that have actions
+                        if (tableRows) {
                             printableHTML += `<h2>${monthTitles[index]}</h2>`;
                             printableHTML += panel.innerHTML;
                         }
                     });
                     
                     if (!printableHTML) {
-                        printableHTML = printableArea.innerHTML; // Fallback
+                        printableHTML = printableArea.innerHTML;
                     }
                     
                     const originalPageHTML = document.documentElement.innerHTML;
@@ -1295,7 +1295,7 @@ function runApp(app) {
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
                 DOMElements.modalActionBtn.onclick = saveActionPlan;
                 DOMElements.modalCancelBtn.textContent = 'Close';
-                DOMElements.modalCancelBtn.onclick = null; // Clear any previous specific onclick
+                DOMElements.modalCancelBtn.onclick = null;
                 
                 updateUndoRedoButtons();
                 break;
@@ -1312,7 +1312,6 @@ function runApp(app) {
                 
                 cancelBtn.textContent = "Cancel";
 
-                // Clear any lingering generic listeners to prevent conflicts
                 discardBtn.onclick = null;
                 cancelBtn.onclick = null;
                 
@@ -1331,64 +1330,9 @@ function runApp(app) {
                     updateUndoRedoButtons();
                 };
 
-                // Use single-fire event listeners for safety
                 discardBtn.addEventListener('click', handleDiscard, { once: true });
                 cancelBtn.addEventListener('click', handleCancel, { once: true });
                 
-                break;
-        }
-        
-                    const printSpecificStyles = `@media print {
-                                                    body { font-family: 'DM Sans', sans-serif; -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
-                                                    h2 { font-family: 'Poppins', sans-serif; color: #1F2937; margin-top: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #F3F4F6; }
-                                                    h2:not(:first-of-type) { page-break-before: always; }
-                                                    table { width: 100%; border-collapse: collapse; margin-top: 1rem; page-break-inside: avoid; }
-                                                    th, td { padding: 0.75rem !important; text-align: left !important; vertical-align: middle !important; border: none !important; border-bottom: 1px solid #E5E7EB !important; }
-                                                    th { background-color: transparent !important; color: #D10A11 !important; font-weight: 600 !important; border-bottom-width: 2px !important; }
-                                                    td { color: #1F2937; }
-                                                    tr:nth-child(even) td { background-color: #FDFDFC !important; }
-                                                    @page { size: A4 portrait; margin: 0.75in; }
-                                                    th:last-child, td:last-child { display: none !important; }
-                                                }`;
-                    const printPageHTML = `<html><head><title>AI Generated Action Plan</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@700;900&display=swap" rel="stylesheet"><style>${allStyles}${printSpecificStyles}</style></head><body>${printableHTML}</body></html>`;
-                    document.documentElement.innerHTML = printPageHTML;
-                    window.print();
-                    document.documentElement.innerHTML = originalPageHTML;
-                    window.location.reload();
-                };
-
-                // --- Final Button Setup ---
-                DOMElements.modalActionBtn.textContent = "Save Changes";
-                DOMElements.modalActionBtn.className = 'btn btn-primary';
-                DOMElements.modalActionBtn.onclick = saveActionPlan;
-                DOMElements.modalCancelBtn.textContent = 'Close';
-                
-                updateUndoRedoButtons(); // Set initial state
-                break;
-            case 'confirmClose':
-                DOMElements.modalTitle.textContent = "Discard Changes?";
-                DOMElements.modalContent.innerHTML = `<p>You have unsaved changes. Are you sure you want to close without saving?</p>`;
-                
-                DOMElements.modalActionBtn.textContent = "Discard";
-                DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
-                DOMElements.modalActionBtn.onclick = closeModal;
-
-                DOMElements.modalCancelBtn.textContent = "Cancel";
-                DOMElements.modalCancelBtn.onclick = () => {
-                    // Get the last unsaved state from the history
-                    const lastUnsavedState = undoStack[undoStack.length - 1];
-
-                    // Re-open the AI modal with the correct buttons and footer
-                    openModal('aiActionPlan_view');
-                    
-                    // Restore the unsaved content
-                    const modalContent = document.getElementById('modal-content');
-                    modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${lastUnsavedState}</div>`;
-                    
-                    // Re-attach all the event listeners. The undo/redo stacks are still intact.
-                    setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
-                    updateUndoRedoButtons();
-                };
                 break;
         }
         DOMElements.modalOverlay.classList.remove('hidden');
@@ -1723,5 +1667,6 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
