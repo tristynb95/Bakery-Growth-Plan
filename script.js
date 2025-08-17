@@ -894,6 +894,7 @@ function runApp(app) {
                         th.dataset.column = config.index;
                         th.dataset.sortType = config.type;
                         
+                        // Clear the header and rebuild it with a wrapper for Flexbox
                         th.innerHTML = '';
                         const wrapper = document.createElement('div');
                         wrapper.className = 'header-flex-wrapper';
@@ -923,6 +924,7 @@ function runApp(app) {
 
             const container = modalContent.querySelector('#ai-printable-area');
             if (container) {
+                // Dynamically ensure tables are sortable
                 makeTablesSortable(container);
 
                 const handleTableSort = (header) => {
@@ -1061,11 +1063,23 @@ function runApp(app) {
         }
     }
 
+    function requestCloseModal() {
+        const isAiModal = DOMElements.modalBox.dataset.type === 'aiActionPlan_view';
+        const hasUnsavedChanges = undoStack.length > 1;
+
+        if (isAiModal && hasUnsavedChanges) {
+            if (confirm("You have unsaved changes that will be lost. Are you sure you want to close?")) {
+                closeModal();
+            }
+        } else {
+            closeModal();
+        }
+    }
+
     async function saveActionPlan() {
         const editedContent = document.getElementById('ai-printable-area').innerHTML;
         appState.planData.aiActionPlan = editedContent;
         
-        // Provide user feedback directly on the button
         const saveButton = DOMElements.modalActionBtn;
         const originalHTML = saveButton.innerHTML;
         saveButton.disabled = true;
@@ -1073,13 +1087,18 @@ function runApp(app) {
 
         await saveData(true);
 
-        // Restore the button after a short delay
+        // Reset the undo stack to the new saved state
+        const printableArea = document.getElementById('ai-printable-area');
+        if (printableArea) {
+            undoStack = [printableArea.innerHTML];
+            redoStack = [];
+            updateUndoRedoButtons();
+        }
+
         setTimeout(() => {
             saveButton.disabled = false;
             saveButton.innerHTML = originalHTML;
         }, 2000);
-
-        // closeModal(); // This line has been removed
     }
 
     function handleRegenerateActionPlan() {
@@ -1561,11 +1580,11 @@ function runApp(app) {
     DOMElements.shareBtn.addEventListener('click', handleShare);
     DOMElements.aiActionBtn.addEventListener('click', handleAIActionPlan);
 
-    DOMElements.modalCloseBtn.addEventListener('click', closeModal);
-    DOMElements.modalCancelBtn.addEventListener('click', closeModal);
+    DOMElements.modalCloseBtn.addEventListener('click', requestCloseModal);
+    DOMElements.modalCancelBtn.addEventListener('click', requestCloseModal);
     DOMElements.modalOverlay.addEventListener('mousedown', (e) => {
         if (e.target === DOMElements.modalOverlay) {
-            closeModal();
+            requestCloseModal();
         }
     });
     DOMElements.modalActionBtn.addEventListener('click', handleModalAction);
@@ -1620,10 +1639,3 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
-
-
-
