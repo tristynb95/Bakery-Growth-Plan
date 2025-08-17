@@ -898,11 +898,13 @@ tr:hover .btn-remove-row {
 .sortable-header {
     cursor: pointer;
     user-select: none;
-    text-align: inherit;
-    /* New Flexbox properties for alignment */
+}
+
+.header-flex-wrapper {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
 }
 
 .sortable-header:hover {
@@ -910,14 +912,13 @@ tr:hover .btn-remove-row {
 }
 
 .sortable-header .sort-icon {
-    /* Removed absolute positioning */
     display: inline-block;
     width: 1em;
     height: 1em;
     margin-left: 0.5rem;
     opacity: 0.3;
     transition: all 0.2s ease;
-    flex-shrink: 0; /* Prevents icon from shrinking */
+    flex-shrink: 0;
 }
 
 /* Default state icon */
