@@ -894,7 +894,6 @@ function runApp(app) {
                         th.dataset.column = config.index;
                         th.dataset.sortType = config.type;
                         
-                        // Clear the header and rebuild it with a wrapper for Flexbox
                         th.innerHTML = '';
                         const wrapper = document.createElement('div');
                         wrapper.className = 'header-flex-wrapper';
@@ -924,7 +923,6 @@ function runApp(app) {
 
             const container = modalContent.querySelector('#ai-printable-area');
             if (container) {
-                // Dynamically ensure tables are sortable
                 makeTablesSortable(container);
 
                 const handleTableSort = (header) => {
@@ -1046,8 +1044,11 @@ function runApp(app) {
                 }
 
                 const data = JSON.parse(textResponse);
+                
+                // --- FIX: Clean the AI response to remove markdown artifacts ---
+                const cleanedHTML = data.actionPlan.replace(/^```(html)?\s*/, '').replace(/```$/, '').trim();
 
-                appState.planData.aiActionPlan = data.actionPlan;
+                appState.planData.aiActionPlan = cleanedHTML;
                 await saveData(true);
                 handleAIActionPlan();
             } catch (error) {
@@ -1605,6 +1606,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
