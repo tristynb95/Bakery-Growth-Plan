@@ -1100,7 +1100,7 @@ function runApp(app) {
         }, 2000);
     }
 
-   function handleRegenerateActionPlan() {
+  function handleRegenerateActionPlan() {
         // Hide the other footer buttons
         const regenButton = document.getElementById('modal-regen-btn');
         const printButton = document.getElementById('modal-print-btn');
@@ -1108,7 +1108,11 @@ function runApp(app) {
 
         if (regenButton) regenButton.style.display = 'none';
         if (printButton) printButton.style.display = 'none';
-        if (undoRedoContainer) undoRedoContainer.style.display = 'none'; // Hide the undo/redo buttons
+        if (undoRedoContainer) undoRedoContainer.style.display = 'none';
+
+        // Add a class to the footer to center the remaining buttons
+        const footer = DOMElements.modalActionBtn.parentNode;
+        footer.classList.add('is-confirming');
 
         // Update modal content for confirmation
         DOMElements.modalTitle.textContent = "Are you sure?";
@@ -1118,17 +1122,29 @@ function runApp(app) {
                                 </div>`;
 
         // Configure confirmation buttons
-        DOMElements.modalActionBtn.textContent = "Yes, Generate New Plan";
-        DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
-        DOMElements.modalActionBtn.onclick = async () => {
+        const confirmBtn = DOMElements.modalActionBtn;
+        const cancelBtn = DOMElements.modalCancelBtn;
+
+        confirmBtn.textContent = "Yes, Generate New Plan";
+        confirmBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+        cancelBtn.textContent = "Cancel";
+
+        // Clear any old onclick handlers to prevent conflicts
+        confirmBtn.onclick = null;
+        cancelBtn.onclick = null;
+        
+        const handleConfirm = (e) => {
+            e.stopImmediatePropagation();
+            footer.classList.remove('is-confirming'); // Clean up class
             delete appState.planData.aiActionPlan;
-            await saveData(true);
-            handleAIActionPlan(); // This will regenerate and reload the modal
+            saveData(true).then(() => {
+                handleAIActionPlan();
+            });
         };
 
-        DOMElements.modalCancelBtn.textContent = "Cancel";
-        DOMElements.modalCancelBtn.onclick = () => {
-            // Restore the last unsaved state if user cancels
+        const handleCancel = (e) => {
+            e.stopImmediatePropagation();
+            footer.classList.remove('is-confirming'); // Clean up class
             const lastUnsavedState = undoStack[undoStack.length - 1];
             openModal('aiActionPlan_view');
             const modalContent = document.getElementById('modal-content');
@@ -1136,6 +1152,10 @@ function runApp(app) {
             setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
             updateUndoRedoButtons();
         };
+
+        // Use single-fire event listeners for safety
+        confirmBtn.addEventListener('click', handleConfirm, { once: true });
+        cancelBtn.addEventListener('click', handleCancel, { once: true });
     }
     
     async function handleShare() {
@@ -1638,6 +1658,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
