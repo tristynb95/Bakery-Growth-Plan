@@ -1048,7 +1048,6 @@ function runApp(app) {
 
                 const data = JSON.parse(textResponse);
                 
-                // --- FIX: Clean the AI response to remove markdown artifacts ---
                 const cleanedHTML = data.actionPlan.replace(/^```(html)?\s*/, '').replace(/```$/, '').trim();
 
                 appState.planData.aiActionPlan = cleanedHTML;
@@ -1086,7 +1085,6 @@ function runApp(app) {
 
         await saveData(true);
 
-        // Reset the undo stack to the new saved state
         const printableArea = document.getElementById('ai-printable-area');
         if (printableArea) {
             undoStack = [printableArea.innerHTML];
@@ -1219,12 +1217,12 @@ function runApp(app) {
                     <button id="redo-btn" class="btn btn-secondary btn-icon" title="Redo"><i class="bi bi-arrow-clockwise"></i></button>
                 `;
                 const regenButton = document.createElement('button');
-                regenButton.id = 'modal-regen-btn'; // Add ID
+                regenButton.id = 'modal-regen-btn';
                 regenButton.className = 'btn btn-secondary dynamic-btn';
                 regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
 
                 const printBtn = document.createElement('button');
-                printBtn.id = 'modal-print-btn'; // Add ID
+                printBtn.id = 'modal-print-btn';
                 printBtn.className = 'btn btn-secondary dynamic-btn';
                 printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
                 
@@ -1235,21 +1233,59 @@ function runApp(app) {
                 regenButton.onclick = handleRegenerateActionPlan;
                 document.getElementById('undo-btn').onclick = undo;
                 document.getElementById('redo-btn').onclick = redo;
-                printBtn.onclick = () => { 
-                    const printableArea = document.getElementById('ai-printable-area').innerHTML;
+                
+                printBtn.onclick = () => {
+                    const aiPlanContainer = document.getElementById('ai-printable-area');
+                    if (!aiPlanContainer) return;
+
+                    const printNode = aiPlanContainer.cloneNode(true);
+
+                    printNode.querySelector('.ai-tabs-nav')?.remove();
+                    printNode.querySelectorAll('.actions-cell, .btn-remove-row, tfoot').forEach(el => el.remove());
+
+                    printNode.querySelectorAll('.ai-tabs-content > div').forEach(panel => {
+                        panel.classList.add('active');
+                        panel.style.display = 'block';
+                    });
+
+                    const monthTitles = ["Month 1 Action Plan", "Month 2 Action Plan", "Month 3 Action Plan"];
+                    printNode.querySelectorAll('.ai-tabs-content > div').forEach((panel, index) => {
+                        const title = document.createElement('h2');
+                        title.textContent = monthTitles[index];
+                        title.className = 'month-title';
+                        panel.prepend(title);
+                    });
+
+                    const printableHTML = printNode.innerHTML;
+
+                    const printStyles = `
+                        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@700;900&display=swap');
+                        @page { size: A4; margin: 25mm; }
+                        body { font-family: 'DM Sans', sans-serif; color: #1F2937; }
+                        .print-header { text-align: center; border-bottom: 2px solid #D10A11; padding-bottom: 15px; margin-bottom: 25px; }
+                        .print-header h1 { font-family: 'Poppins', sans-serif; font-size: 24pt; color: #1F2937; margin: 0; }
+                        .print-header p { font-size: 11pt; color: #6B7280; margin: 5px 0 0; }
+                        .month-title { font-family: 'Poppins', sans-serif; font-size: 16pt; color: #D10A11; margin-top: 30px; margin-bottom: 15px; page-break-after: avoid; }
+                        .ai-tabs-content > div:first-child .month-title { margin-top: 0; }
+                        table { width: 100%; border-collapse: collapse; font-size: 9pt; page-break-inside: auto; }
+                        tr { page-break-inside: avoid; page-break-after: auto; }
+                        th, td { border: 1px solid #E5E7EB; padding: 10px 12px; text-align: left; vertical-align: top; }
+                        thead { display: table-header-group; }
+                        th { background-color: #F9FAFB; font-weight: 600; color: #374151; }
+                        .ai-tabs-nav, .actions-cell, .btn-remove-row, .btn-add-row, tfoot { display: none !important; }
+                    `;
+
                     const printWindow = window.open('', '', 'height=800,width=1200');
                     printWindow.document.write('<html><head><title>AI Action Plan</title>');
-                    printWindow.document.write('<link rel="stylesheet" href="style.css">');
-                    printWindow.document.write('<style> @page { size: A4; margin: 20mm; } body { font-family: "DM Sans", sans-serif; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #D1D5DB; padding: 8px; text-align: left; } th { background-color: #F3F4F6; } .actions-cell, .btn-remove-row { display: none; } </style>');
+                    printWindow.document.write(`<style>${printStyles}</style>`);
                     printWindow.document.write('</head><body>');
-                    printWindow.document.write(`<h1>AI Action Plan for ${appState.planData.planName || 'the plan'}</h1>`);
-                    printWindow.document.write(printableArea);
+                    printWindow.document.write(`<div class="print-header"><h1>AI Action Plan</h1><p>${appState.planData.planName || 'Growth Plan'} | ${appState.planData.bakeryLocation || 'Your Bakery'}</p></div>`);
+                    printWindow.document.write(printableHTML);
                     printWindow.document.write('</body></html>');
                     printWindow.document.close();
-                    setTimeout(() => {
-                        printWindow.print();
-                    }, 500);
-                 };
+
+                    setTimeout(() => { printWindow.print(); }, 500);
+                };
 
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
@@ -1310,7 +1346,6 @@ function runApp(app) {
 
                 footer.classList.add('is-confirming');
                 footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.style.display = 'none');
-
 
                 confirmBtn.onclick = () => {
                     footer.classList.remove('is-confirming');
