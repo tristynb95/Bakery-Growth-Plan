@@ -873,140 +873,184 @@ function runApp(app) {
     }
     
     async function handleAIActionPlan() {
-        const savedPlan = appState.planData.aiActionPlan;
+    const savedPlan = appState.planData.aiActionPlan;
 
-        const makeTablesSortable = (container) => {
-            const tables = container.querySelectorAll('table');
-            tables.forEach(table => {
-                const headers = table.querySelectorAll('thead th');
-                const sortableColumns = {
-                    'Action Step': { index: 0, type: 'text' },
-                    'Owner': { index: 1, type: 'text' },
-                    'Due Date': { index: 2, type: 'date' },
-                    'Status': { index: 4, type: 'text' }
-                };
+    const makeTablesSortable = (container) => {
+        const tables = container.querySelectorAll('table');
+        tables.forEach(table => {
+            const headers = table.querySelectorAll('thead th');
+            const sortableColumns = {
+                'Action Step': { index: 0, type: 'text' },
+                'Owner': { index: 1, type: 'text' },
+                'Due Date': { index: 2, type: 'date' },
+                'Status': { index: 4, type: 'text' }
+            };
 
-                headers.forEach((th) => {
-                    const headerText = th.innerText.trim();
-                    if (sortableColumns[headerText]) {
-                        const config = sortableColumns[headerText];
-                        th.classList.add('sortable-header');
-                        th.dataset.column = config.index;
-                        th.dataset.sortType = config.type;
-                        
-                        if (!th.querySelector('.sort-icon')) {
-                            const iconSpan = document.createElement('span');
-                            iconSpan.className = 'sort-icon';
-                            th.appendChild(iconSpan);
-                        }
-                    }
-                });
-            });
-        };
-
-        if (savedPlan) {
-            openModal('aiActionPlan_view');
-            const modalContent = document.getElementById('modal-content');
-            modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${savedPlan}</div>`;
-
-            undoStack = [];
-            redoStack = [];
-            saveState();
-
-            const container = modalContent.querySelector('#ai-printable-area');
-            if (container) {
-                // Dynamically ensure tables are sortable
-                makeTablesSortable(container);
-
-                const handleTableSort = (header) => {
-                    const table = header.closest('table');
-                    const tbody = table.querySelector('tbody');
-                    const columnIndex = parseInt(header.dataset.column, 10);
-                    const sortType = header.dataset.sortType || 'text';
-                    const currentDirection = header.dataset.sortDir || 'desc';
-                    const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
-
-                    table.querySelectorAll('.sortable-header').forEach(th => {
-                        th.removeAttribute('data-sort-dir');
-                    });
-                    header.dataset.sortDir = newDirection;
-
-                    const rows = Array.from(tbody.querySelectorAll('tr'));
+            headers.forEach((th) => {
+                const headerText = th.innerText.trim();
+                if (sortableColumns[headerText]) {
+                    const config = sortableColumns[headerText];
+                    th.classList.add('sortable-header');
+                    th.dataset.column = config.index;
+                    th.dataset.sortType = config.type;
                     
-                    rows.sort((rowA, rowB) => {
-                        const cellA = rowA.querySelectorAll('td')[columnIndex];
-                        const cellB = rowB.querySelectorAll('td')[columnIndex];
-                        const valA = cellA ? cellA.innerText.trim() : '';
-                        const valB = cellB ? cellB.innerText.trim() : '';
-                        
-                        let compare = 0;
-                        if (sortType === 'date') {
-                            const dateA = valA.split('/').reverse().join('-');
-                            const dateB = valB.split('/').reverse().join('-');
-                            compare = new Date(dateA) - new Date(dateB);
-                        } else {
-                            compare = valA.localeCompare(valB, undefined, {numeric: true});
-                        }
-                        return newDirection === 'asc' ? compare : -compare;
-                    });
-                    
-                    tbody.innerHTML = '';
-                    rows.forEach(row => tbody.appendChild(row));
-                    saveState();
-                };
-
-                container.addEventListener('click', (e) => {
-                    const addBtn = e.target.closest('.btn-add-row');
-                    const removeBtn = e.target.closest('.btn-remove-row');
-                    const tab = e.target.closest('.ai-tabs-nav a');
-                    const sortHeader = e.target.closest('.sortable-header');
-
-                    if (addBtn) { /* ... */ } // existing add/remove/tab logic
-                    if (removeBtn) { /* ... */ }
-                    if (tab) { /* ... */ }
-                    if (sortHeader) {
-                        handleTableSort(sortHeader);
+                    if (!th.querySelector('.sort-icon')) {
+                        const iconSpan = document.createElement('span');
+                        iconSpan.className = 'sort-icon';
+                        th.appendChild(iconSpan);
                     }
-                });
-
-                const observer = new MutationObserver((mutations) => {
-                    const isTextChange = mutations.some(m => m.type === 'characterData');
-                    if (isTextChange) {
-                       saveState();
-                    }
-                });
-                observer.observe(container, {
-                    childList: false,
-                    subtree: true,
-                    characterData: true
-                });
-            }
-        } else {
-            openModal('aiActionPlan_generate');
-            try {
-                const planSummary = summarizePlanForAI(appState.planData);
-                const response = await fetch('/.netlify/functions/generate-plan', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ planSummary })
-                });
-                if (!response.ok) {
-                    const errorResult = await response.json();
-                    throw new Error(errorResult.error || 'The AI assistant failed to generate a response.');
                 }
-                const data = await response.json();
-                appState.planData.aiActionPlan = data.actionPlan;
-                await saveData(true);
-                handleAIActionPlan();
-            } catch (error) {
-                console.error("Error generating AI plan:", error);
-                const modalContent = document.getElementById('modal-content');
-                modalContent.innerHTML = `<p class="text-red-600 font-semibold">An error occurred.</p><p class="text-gray-600 mt-2 text-sm">${error.message}</p>`;
-                DOMElements.modalActionBtn.style.display = 'none';
-                DOMElements.modalCancelBtn.textContent = 'Close';
+            });
+        });
+    };
+
+    if (savedPlan) {
+        openModal('aiActionPlan_view');
+        const modalContent = document.getElementById('modal-content');
+        modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${savedPlan}</div>`;
+
+        undoStack = [];
+        redoStack = [];
+        saveState();
+
+        const container = modalContent.querySelector('#ai-printable-area');
+        if (container) {
+            // Dynamically ensure tables are sortable
+            makeTablesSortable(container);
+
+            const handleTableSort = (header) => {
+                const table = header.closest('table');
+                const tbody = table.querySelector('tbody');
+                const columnIndex = parseInt(header.dataset.column, 10);
+                const sortType = header.dataset.sortType || 'text';
+                const currentDirection = header.dataset.sortDir || 'desc';
+                const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+
+                table.querySelectorAll('.sortable-header').forEach(th => {
+                    th.removeAttribute('data-sort-dir');
+                });
+                header.dataset.sortDir = newDirection;
+
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                
+                rows.sort((rowA, rowB) => {
+                    const cellA = rowA.querySelectorAll('td')[columnIndex];
+                    const cellB = rowB.querySelectorAll('td')[columnIndex];
+                    const valA = cellA ? cellA.innerText.trim() : '';
+                    const valB = cellB ? cellB.innerText.trim() : '';
+                    
+                    let compare = 0;
+                    if (sortType === 'date') {
+                        const dateA = valA.split('/').reverse().join('-');
+                        const dateB = valB.split('/').reverse().join('-');
+                        compare = new Date(dateA) - new Date(dateB);
+                    } else {
+                        compare = valA.localeCompare(valB, undefined, {numeric: true});
+                    }
+                    return newDirection === 'asc' ? compare : -compare;
+                });
+                
+                tbody.innerHTML = '';
+                rows.forEach(row => tbody.appendChild(row));
+                saveState();
+            };
+
+            container.addEventListener('click', (e) => {
+                const addBtn = e.target.closest('.btn-add-row');
+                const removeBtn = e.target.closest('.btn-remove-row');
+                const tab = e.target.closest('.ai-tabs-nav a');
+                const sortHeader = e.target.closest('.sortable-header');
+
+                if (addBtn) {
+                    const tableBody = addBtn.closest('table').querySelector('tbody');
+                    if (tableBody) {
+                        const newRow = document.createElement('tr');
+                        newRow.innerHTML = `
+                            <td contenteditable="true"></td>
+                            <td contenteditable="true"></td>
+                            <td contenteditable="true"></td>
+                            <td contenteditable="true"></td>
+                            <td contenteditable="true"></td>
+                            <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-trash3"></i></button></td>
+                        `;
+                        tableBody.appendChild(newRow);
+                        saveState();
+                    }
+                }
+                if (removeBtn) {
+                    removeBtn.closest('tr').remove();
+                    saveState();
+                }
+                if (tab) {
+                    e.preventDefault();
+                    if (tab.classList.contains('active')) return;
+                    
+                    const tabContainer = tab.closest('.ai-action-plan-container');
+                    const tabs = tabContainer.querySelectorAll('.ai-tabs-nav a');
+                    const panels = tabContainer.querySelectorAll('.ai-tabs-content > div');
+
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panels.forEach(p => p.classList.remove('active'));
+                    tab.classList.add('active');
+                    const targetPanel = tabContainer.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
+                    if (targetPanel) targetPanel.classList.add('active');
+                }
+                if (sortHeader) {
+                    handleTableSort(sortHeader);
+                }
+            });
+
+            const observer = new MutationObserver((mutations) => {
+                const isTextChange = mutations.some(m => m.type === 'characterData');
+                if (isTextChange) {
+                   saveState();
+                }
+            });
+            observer.observe(container, {
+                childList: false,
+                subtree: true,
+                characterData: true
+            });
+        }
+    } else {
+        openModal('aiActionPlan_generate');
+        try {
+            const planSummary = summarizePlanForAI(appState.planData);
+            const response = await fetch('/.netlify/functions/generate-plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ planSummary })
+            });
+
+            if (!response.ok) {
+                let errorResult;
+                try {
+                    errorResult = await response.json();
+                } catch (e) {
+                    throw new Error(response.statusText || 'The AI assistant failed to respond.');
+                }
+                throw new Error(errorResult.error || 'The AI assistant failed to generate a response.');
             }
+            
+            const textResponse = await response.text();
+            if (!textResponse) {
+                throw new Error("The AI assistant returned an empty plan. Please try regenerating.");
+            }
+
+            const data = JSON.parse(textResponse);
+
+            appState.planData.aiActionPlan = data.actionPlan;
+            await saveData(true);
+            handleAIActionPlan();
+        } catch (error) {
+            console.error("Error generating AI plan:", error);
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = `<p class="text-red-600 font-semibold">An error occurred.</p><p class="text-gray-600 mt-2 text-sm">${error.message}</p>`;
+            DOMElements.modalActionBtn.style.display = 'none';
+            DOMElements.modalCancelBtn.textContent = 'Close';
         }
     }
+}
 
     async function saveActionPlan() {
         const editedContent = document.getElementById('ai-printable-area').innerHTML;
@@ -1553,5 +1597,6 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
