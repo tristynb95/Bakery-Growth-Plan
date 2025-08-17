@@ -872,8 +872,8 @@ function runApp(app) {
         }
     }
     
-    async function handleAIActionPlan() {
-        const savedPlan = appState.planData.aiActionPlan;
+    function setupAiModalInteractivity(container) {
+        if (!container) return;
 
         const makeTablesSortable = (container) => {
             const tables = container.querySelectorAll('table');
@@ -894,7 +894,6 @@ function runApp(app) {
                         th.dataset.column = config.index;
                         th.dataset.sortType = config.type;
                         
-                        // Clear the header and rebuild it with a wrapper for Flexbox
                         th.innerHTML = '';
                         const wrapper = document.createElement('div');
                         wrapper.className = 'header-flex-wrapper';
@@ -913,113 +912,115 @@ function runApp(app) {
             });
         };
 
+        makeTablesSortable(container);
+
+        const handleTableSort = (header) => {
+            const table = header.closest('table');
+            const tbody = table.querySelector('tbody');
+            const columnIndex = parseInt(header.dataset.column, 10);
+            const sortType = header.dataset.sortType || 'text';
+            const currentDirection = header.dataset.sortDir || 'desc';
+            const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+
+            table.querySelectorAll('.sortable-header').forEach(th => {
+                th.removeAttribute('data-sort-dir');
+            });
+            header.dataset.sortDir = newDirection;
+
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            rows.sort((rowA, rowB) => {
+                const cellA = rowA.querySelectorAll('td')[columnIndex];
+                const cellB = rowB.querySelectorAll('td')[columnIndex];
+                const valA = cellA ? cellA.innerText.trim() : '';
+                const valB = cellB ? cellB.innerText.trim() : '';
+                
+                let compare = 0;
+                if (sortType === 'date') {
+                    const dateA = valA.split('/').reverse().join('-');
+                    const dateB = valB.split('/').reverse().join('-');
+                    compare = new Date(dateA) - new Date(dateB);
+                } else {
+                    compare = valA.localeCompare(valB, undefined, {numeric: true});
+                }
+                return newDirection === 'asc' ? compare : -compare;
+            });
+            
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+            saveState();
+        };
+
+        container.addEventListener('click', (e) => {
+            const addBtn = e.target.closest('.btn-add-row');
+            const removeBtn = e.target.closest('.btn-remove-row');
+            const tab = e.target.closest('.ai-tab-btn');
+            const sortHeader = e.target.closest('.sortable-header');
+
+            if (addBtn) {
+                const tableBody = addBtn.closest('table').querySelector('tbody');
+                if (tableBody) {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td contenteditable="true"></td>
+                        <td contenteditable="true"></td>
+                        <td contenteditable="true"></td>
+                        <td contenteditable="true"></td>
+                        <td contenteditable="true"></td>
+                        <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-trash3"></i></button></td>
+                    `;
+                    tableBody.appendChild(newRow);
+                    saveState();
+                }
+            }
+            if (removeBtn) {
+                removeBtn.closest('tr').remove();
+                saveState();
+            }
+            if (tab) {
+                if (tab.classList.contains('active')) return;
+                
+                const tabContainer = tab.closest('.ai-action-plan-container');
+                const tabs = tabContainer.querySelectorAll('.ai-tab-btn');
+                const panels = tabContainer.querySelectorAll('.ai-tabs-content > div');
+
+                tabs.forEach(t => t.classList.remove('active'));
+                panels.forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                const targetPanel = tabContainer.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
+                if (targetPanel) targetPanel.classList.add('active');
+            }
+            if (sortHeader) {
+                handleTableSort(sortHeader);
+            }
+        });
+
+        const observer = new MutationObserver((mutations) => {
+            const isTextChange = mutations.some(m => m.type === 'characterData');
+            if (isTextChange) {
+               saveState();
+            }
+        });
+        observer.observe(container, {
+            childList: false,
+            subtree: true,
+            characterData: true
+        });
+    }
+
+    async function handleAIActionPlan() {
+        const savedPlan = appState.planData.aiActionPlan;
+
         if (savedPlan) {
             openModal('aiActionPlan_view');
             const modalContent = document.getElementById('modal-content');
             modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${savedPlan}</div>`;
 
+            // Initialize history and setup interactivity
             undoStack = [];
             redoStack = [];
             saveState();
-
-            const container = modalContent.querySelector('#ai-printable-area');
-            if (container) {
-                // Dynamically ensure tables are sortable
-                makeTablesSortable(container);
-
-                const handleTableSort = (header) => {
-                    const table = header.closest('table');
-                    const tbody = table.querySelector('tbody');
-                    const columnIndex = parseInt(header.dataset.column, 10);
-                    const sortType = header.dataset.sortType || 'text';
-                    const currentDirection = header.dataset.sortDir || 'desc';
-                    const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
-
-                    table.querySelectorAll('.sortable-header').forEach(th => {
-                        th.removeAttribute('data-sort-dir');
-                    });
-                    header.dataset.sortDir = newDirection;
-
-                    const rows = Array.from(tbody.querySelectorAll('tr'));
-                    
-                    rows.sort((rowA, rowB) => {
-                        const cellA = rowA.querySelectorAll('td')[columnIndex];
-                        const cellB = rowB.querySelectorAll('td')[columnIndex];
-                        const valA = cellA ? cellA.innerText.trim() : '';
-                        const valB = cellB ? cellB.innerText.trim() : '';
-                        
-                        let compare = 0;
-                        if (sortType === 'date') {
-                            const dateA = valA.split('/').reverse().join('-');
-                            const dateB = valB.split('/').reverse().join('-');
-                            compare = new Date(dateA) - new Date(dateB);
-                        } else {
-                            compare = valA.localeCompare(valB, undefined, {numeric: true});
-                        }
-                        return newDirection === 'asc' ? compare : -compare;
-                    });
-                    
-                    tbody.innerHTML = '';
-                    rows.forEach(row => tbody.appendChild(row));
-                    saveState();
-                };
-
-                container.addEventListener('click', (e) => {
-                    const addBtn = e.target.closest('.btn-add-row');
-                    const removeBtn = e.target.closest('.btn-remove-row');
-                    const tab = e.target.closest('.ai-tab-btn');
-                    const sortHeader = e.target.closest('.sortable-header');
-
-                    if (addBtn) {
-                        const tableBody = addBtn.closest('table').querySelector('tbody');
-                        if (tableBody) {
-                            const newRow = document.createElement('tr');
-                            newRow.innerHTML = `
-                                <td contenteditable="true"></td>
-                                <td contenteditable="true"></td>
-                                <td contenteditable="true"></td>
-                                <td contenteditable="true"></td>
-                                <td contenteditable="true"></td>
-                                <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-trash3"></i></button></td>
-                            `;
-                            tableBody.appendChild(newRow);
-                            saveState();
-                        }
-                    }
-                    if (removeBtn) {
-                        removeBtn.closest('tr').remove();
-                        saveState();
-                    }
-                    if (tab) {
-                        if (tab.classList.contains('active')) return;
-                        
-                        const tabContainer = tab.closest('.ai-action-plan-container');
-                        const tabs = tabContainer.querySelectorAll('.ai-tab-btn');
-                        const panels = tabContainer.querySelectorAll('.ai-tabs-content > div');
-
-                        tabs.forEach(t => t.classList.remove('active'));
-                        panels.forEach(p => p.classList.remove('active'));
-                        tab.classList.add('active');
-                        const targetPanel = tabContainer.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
-                        if (targetPanel) targetPanel.classList.add('active');
-                    }
-                    if (sortHeader) {
-                        handleTableSort(sortHeader);
-                    }
-                });
-
-                const observer = new MutationObserver((mutations) => {
-                    const isTextChange = mutations.some(m => m.type === 'characterData');
-                    if (isTextChange) {
-                       saveState();
-                    }
-                });
-                observer.observe(container, {
-                    childList: false,
-                    subtree: true,
-                    characterData: true
-                });
-            }
+            setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
         } else {
             openModal('aiActionPlan_generate');
             try {
@@ -1068,9 +1069,7 @@ function runApp(app) {
         const hasUnsavedChanges = undoStack.length > 1;
 
         if (isAiModal && hasUnsavedChanges) {
-            if (confirm("You have unsaved changes that will be lost. Are you sure you want to close?")) {
-                closeModal();
-            }
+            openModal('confirmClose');
         } else {
             closeModal();
         }
@@ -1305,6 +1304,31 @@ function runApp(app) {
                 DOMElements.modalCancelBtn.textContent = 'Close';
                 
                 updateUndoRedoButtons(); // Set initial state
+                break;
+            case 'confirmClose':
+                DOMElements.modalTitle.textContent = "Discard Changes?";
+                DOMElements.modalContent.innerHTML = `<p>You have unsaved changes. Are you sure you want to close without saving?</p>`;
+                
+                DOMElements.modalActionBtn.textContent = "Discard";
+                DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+                DOMElements.modalActionBtn.onclick = closeModal;
+
+                DOMElements.modalCancelBtn.textContent = "Cancel";
+                DOMElements.modalCancelBtn.onclick = () => {
+                    // Get the last unsaved state from the history
+                    const lastUnsavedState = undoStack[undoStack.length - 1];
+
+                    // Re-open the AI modal with the correct buttons and footer
+                    openModal('aiActionPlan_view');
+                    
+                    // Restore the unsaved content
+                    const modalContent = document.getElementById('modal-content');
+                    modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${lastUnsavedState}</div>`;
+                    
+                    // Re-attach all the event listeners. The undo/redo stacks are still intact.
+                    setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
+                    updateUndoRedoButtons();
+                };
                 break;
         }
         DOMElements.modalOverlay.classList.remove('hidden');
