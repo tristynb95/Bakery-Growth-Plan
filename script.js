@@ -1276,7 +1276,7 @@ function runApp(app) {
                     `;
 
                     const printWindow = window.open('', '', 'height=800,width=1200');
-                    printWindow.document.write('<html><head><title>AI Action Plan</title>');
+                    printWindow.document.write('<html><head><title>Action Plan</title>');
                     printWindow.document.write(`<style>${printStyles}</style>`);
                     printWindow.document.write('</head><body>');
                     printWindow.document.write(`<div class="print-header"><h1>AI Action Plan</h1><p>${appState.planData.planName || 'Growth Plan'} | ${appState.planData.bakeryLocation || 'Your Bakery'}</p></div>`);
@@ -1699,3 +1699,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
