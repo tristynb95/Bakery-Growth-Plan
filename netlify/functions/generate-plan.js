@@ -11,7 +11,7 @@ exports.handler = async function(event, context) {
     
     // Securely get the API key from the environment variables you set in Netlify
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"});
 
      const prompt = `
       You are an expert bakery operations manager tasked with creating a best-practice action plan from a manager's 90-day growth plan.
