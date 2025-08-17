@@ -94,10 +94,11 @@ function runApp(app) {
     };
 
     // --- SESSION TIMEOUT ---
-    const SESSION_DURATION = 30 * 60 * 1000;
+    const SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
 
     function resetSessionTimeout() {
         clearTimeout(appState.sessionTimeout);
+        localStorage.setItem('lastActivity', new Date().getTime());
         appState.sessionTimeout = setTimeout(async () => {
             if (appState.currentUser) {
                 await saveData(true);
@@ -303,6 +304,14 @@ function runApp(app) {
     // --- AUTHENTICATION & APP FLOW ---
     auth.onAuthStateChanged(async (user) => {
         if (user) {
+            const lastActivity = localStorage.getItem('lastActivity');
+            const MAX_INACTIVITY_PERIOD = 8 * 60 * 60 * 1000; // 8 hours
+
+            if (lastActivity && (new Date().getTime() - lastActivity > MAX_INACTIVITY_PERIOD)) {
+                handleLogout(false, true); // Add a flag for revival logout
+                return;
+            }
+
             DOMElements.loginView.classList.add('hidden');
             DOMElements.registerView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
@@ -339,11 +348,16 @@ function runApp(app) {
         }
     });
 
-    const handleLogout = (isTimeout = false) => {
+    const handleLogout = (isTimeout = false, isRevival = false) => {
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
+        localStorage.removeItem('lastActivity');
         if (isTimeout) {
             openModal('timeout');
+        }
+        if (isRevival) {
+            DOMElements.authError.textContent = 'For your security, please sign in again.';
+            DOMElements.authError.style.display = 'block';
         }
         DOMElements.emailInput.value = '';
         DOMElements.passwordInput.value = '';
