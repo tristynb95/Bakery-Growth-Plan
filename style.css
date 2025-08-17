@@ -893,4 +893,12 @@ tr:hover .btn-remove-row {
     content: '\F128'; /* "arrow-down" */
 }
 
+/* 34. Sortable Table Headers
+-------------------------------------------------- */
+.sortable-header {
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+    text-align: inherit; /* Add this line */
+}
 
