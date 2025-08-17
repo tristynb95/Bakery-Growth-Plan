@@ -1100,12 +1100,15 @@ function runApp(app) {
         }, 2000);
     }
 
-    function handleRegenerateActionPlan() {
+   function handleRegenerateActionPlan() {
         // Hide the other footer buttons
         const regenButton = document.getElementById('modal-regen-btn');
         const printButton = document.getElementById('modal-print-btn');
+        const undoRedoContainer = document.querySelector('.undo-redo-container');
+
         if (regenButton) regenButton.style.display = 'none';
         if (printButton) printButton.style.display = 'none';
+        if (undoRedoContainer) undoRedoContainer.style.display = 'none'; // Hide the undo/redo buttons
 
         // Update modal content for confirmation
         DOMElements.modalTitle.textContent = "Are you sure?";
@@ -1635,6 +1638,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
