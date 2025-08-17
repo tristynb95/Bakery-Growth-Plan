@@ -899,6 +899,52 @@ tr:hover .btn-remove-row {
     cursor: pointer;
     position: relative;
     user-select: none;
-    text-align: inherit; /* Add this line */
+    text-align: inherit;
 }
+
+.sortable-header:hover {
+    background-color: var(--gails-red-light) !important;
+}
+
+.sortable-header .sort-icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-left: 0.5rem;
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.3;
+    transition: all 0.2s ease;
+}
+
+.sortable-header:hover .sort-icon {
+    opacity: 0.6;
+}
+
+/* Default state - sortable but not sorted */
+.sortable-header .sort-icon::before {
+    content: '\F229'; /* NEW: Bootstrap Icons "caret-down-fill" */
+    font-family: "bootstrap-icons";
+}
+
+/* Ascending sort state */
+.sortable-header[data-sort-dir="asc"] .sort-icon {
+    opacity: 1;
+    color: var(--gails-red);
+}
+.sortable-header[data-sort-dir="asc"] .sort-icon::before {
+    content: '\F236'; /* NEW: "caret-up-fill" */
+}
+
+/* Descending sort state */
+.sortable-header[data-sort-dir="desc"] .sort-icon {
+    opacity: 1;
+    color: var(--gails-red);
+}
+.sortable-header[data-sort-dir="desc"] .sort-icon::before {
+    content: '\F229'; /* NEW: "caret-down-fill" */
+}
+
 
