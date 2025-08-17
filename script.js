@@ -1100,62 +1100,8 @@ function runApp(app) {
         }, 2000);
     }
 
-  function handleRegenerateActionPlan() {
-        // Hide the other footer buttons
-        const regenButton = document.getElementById('modal-regen-btn');
-        const printButton = document.getElementById('modal-print-btn');
-        const undoRedoContainer = document.querySelector('.undo-redo-container');
-
-        if (regenButton) regenButton.style.display = 'none';
-        if (printButton) printButton.style.display = 'none';
-        if (undoRedoContainer) undoRedoContainer.style.display = 'none';
-
-        // Add a class to the footer to center the remaining buttons
-        const footer = DOMElements.modalActionBtn.parentNode;
-        footer.classList.add('is-confirming');
-
-        // Update modal content for confirmation
-        DOMElements.modalTitle.textContent = "Are you sure?";
-        const modalContent = document.getElementById('modal-content');
-        modalContent.innerHTML = `<div class="p-4 text-center">
-                                    <p class="text-gray-600 mt-2">Generating a new plan will overwrite your existing action plan and any edits you've made. This cannot be undone.</p>
-                                </div>`;
-
-        // Configure confirmation buttons
-        const confirmBtn = DOMElements.modalActionBtn;
-        const cancelBtn = DOMElements.modalCancelBtn;
-
-        confirmBtn.textContent = "Yes, Generate New Plan";
-        confirmBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
-        cancelBtn.textContent = "Cancel";
-
-        // Clear any old onclick handlers to prevent conflicts
-        confirmBtn.onclick = null;
-        cancelBtn.onclick = null;
-        
-        const handleConfirm = (e) => {
-            e.stopImmediatePropagation();
-            footer.classList.remove('is-confirming'); // Clean up class
-            delete appState.planData.aiActionPlan;
-            saveData(true).then(() => {
-                handleAIActionPlan();
-            });
-        };
-
-        const handleCancel = (e) => {
-            e.stopImmediatePropagation();
-            footer.classList.remove('is-confirming'); // Clean up class
-            const lastUnsavedState = undoStack[undoStack.length - 1];
-            openModal('aiActionPlan_view');
-            const modalContent = document.getElementById('modal-content');
-            modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${lastUnsavedState}</div>`;
-            setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
-            updateUndoRedoButtons();
-        };
-
-        // Use single-fire event listeners for safety
-        confirmBtn.addEventListener('click', handleConfirm, { once: true });
-        cancelBtn.addEventListener('click', handleCancel, { once: true });
+    function handleRegenerateActionPlan() {
+        openModal('confirmRegenerate');
     }
     
     async function handleShare() {
@@ -1208,6 +1154,7 @@ function runApp(app) {
         DOMElements.modalBox.dataset.planId = planId;
 
         const footer = DOMElements.modalActionBtn.parentNode;
+        footer.classList.remove('is-confirming');
         footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
         DOMElements.modalActionBtn.style.display = 'inline-flex';
         DOMElements.modalCancelBtn.style.display = 'inline-flex';
@@ -1253,7 +1200,15 @@ function runApp(app) {
                 DOMElements.modalActionBtn.style.display = 'none';
                 DOMElements.modalCancelBtn.textContent = 'Cancel';
                 break;
-          
+            case 'aiActionPlan_generate':
+                DOMElements.modalTitle.textContent = "Generating AI Action Plan";
+                DOMElements.modalContent.innerHTML = `<div class="flex flex-col items-center justify-center p-8">
+                                                          <div class="loading-spinner"></div>
+                                                          <p class="mt-4 text-gray-600">Please wait, the AI is creating your plan...</p>
+                                                      </div>`;
+                DOMElements.modalActionBtn.style.display = 'none';
+                DOMElements.modalCancelBtn.style.display = 'none';
+                break;
             case 'aiActionPlan_view':
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
                 
@@ -1280,13 +1235,27 @@ function runApp(app) {
                 regenButton.onclick = handleRegenerateActionPlan;
                 document.getElementById('undo-btn').onclick = undo;
                 document.getElementById('redo-btn').onclick = redo;
-                printBtn.onclick = () => { /* ... existing print logic ... */ };
+                printBtn.onclick = () => { 
+                    const printableArea = document.getElementById('ai-printable-area').innerHTML;
+                    const printWindow = window.open('', '', 'height=800,width=1200');
+                    printWindow.document.write('<html><head><title>AI Action Plan</title>');
+                    printWindow.document.write('<link rel="stylesheet" href="style.css">');
+                    printWindow.document.write('<style> @page { size: A4; margin: 20mm; } body { font-family: "DM Sans", sans-serif; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #D1D5DB; padding: 8px; text-align: left; } th { background-color: #F3F4F6; } .actions-cell { display: none; } </style>');
+                    printWindow.document.write('</head><body>');
+                    printWindow.document.write(`<h1>AI Action Plan for ${appState.planData.planName || 'the plan'}</h1>`);
+                    printWindow.document.write(printableArea);
+                    printWindow.document.write('</body></html>');
+                    printWindow.document.close();
+                    setTimeout(() => {
+                        printWindow.print();
+                    }, 500);
+                 };
 
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
                 DOMElements.modalActionBtn.onclick = saveActionPlan;
                 DOMElements.modalCancelBtn.textContent = 'Close';
-                DOMElements.modalCancelBtn.onclick = null;
+                DOMElements.modalCancelBtn.onclick = requestCloseModal;
                 
                 updateUndoRedoButtons();
                 break;
@@ -1325,6 +1294,44 @@ function runApp(app) {
                 cancelBtn.addEventListener('click', handleCancel, { once: true });
                 
                 break;
+            case 'confirmRegenerate':
+                DOMElements.modalTitle.textContent = "Are you sure?";
+                DOMElements.modalContent.innerHTML = `<div class="p-4 text-center">
+                                    <p class="text-gray-600 mt-2">Generating a new plan will overwrite your existing action plan and any edits you've made. This cannot be undone.</p>
+                                </div>`;
+
+                const confirmBtn = DOMElements.modalActionBtn;
+                const cancelBtn = DOMElements.modalCancelBtn;
+
+                confirmBtn.textContent = "Yes, Generate New Plan";
+                confirmBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+                cancelBtn.textContent = "Cancel";
+
+                // Temporarily remove other buttons and centre the confirmation buttons
+                footer.classList.add('is-confirming');
+                footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.style.display = 'none');
+
+
+                confirmBtn.onclick = () => {
+                    footer.classList.remove('is-confirming'); // Clean up class
+                    delete appState.planData.aiActionPlan;
+                    // Save the deletion, then generate the new plan
+                    saveData(true).then(() => {
+                        handleAIActionPlan();
+                    });
+                };
+
+                cancelBtn.onclick = () => {
+                    // Restore the previous view without making changes
+                    footer.classList.remove('is-confirming'); // Clean up class
+                    const lastUnsavedState = undoStack[undoStack.length - 1];
+                    openModal('aiActionPlan_view'); // Go back to the edit view
+                    const modalContent = document.getElementById('modal-content');
+                    modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${lastUnsavedState}</div>`;
+                    setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
+                    updateUndoRedoButtons();
+                };
+                break;
         }
         DOMElements.modalOverlay.classList.remove('hidden');
     }
@@ -1332,7 +1339,7 @@ function runApp(app) {
     function closeModal() {
         document.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
         DOMElements.modalActionBtn.onclick = handleModalAction;
-        DOMElements.modalCancelBtn.onclick = closeModal;
+        DOMElements.modalCancelBtn.onclick = requestCloseModal;
         DOMElements.modalActionBtn.style.display = 'inline-flex';
         DOMElements.modalOverlay.classList.add('hidden');
     }
@@ -1658,10 +1665,3 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
-
-
-
