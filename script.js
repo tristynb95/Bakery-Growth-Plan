@@ -1156,6 +1156,9 @@ function runApp(app) {
         footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
         DOMElements.modalActionBtn.style.display = 'inline-flex';
         DOMElements.modalCancelBtn.style.display = 'inline-flex';
+        DOMElements.modalActionBtn.onclick = handleModalAction;
+        DOMElements.modalCancelBtn.onclick = requestCloseModal;
+
 
         switch (type) {
             case 'create':
@@ -1165,7 +1168,6 @@ function runApp(app) {
                                                   <div id="modal-error-container" class="modal-error-container"></div>`;
                 DOMElements.modalActionBtn.textContent = "Create Plan";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
-                DOMElements.modalActionBtn.onclick = handleModalAction;
                 const newPlanNameInput = document.getElementById('newPlanName');
                 newPlanNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleModalAction(); });
                 break;
@@ -1174,7 +1176,6 @@ function runApp(app) {
                 DOMElements.modalContent.innerHTML = `<label for="editPlanName" class="font-semibold block mb-2">Plan Name:</label><input type="text" id="editPlanName" class="form-input" value="${currentName}">`;
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
-                DOMElements.modalActionBtn.onclick = handleModalAction;
                 document.getElementById('editPlanName').addEventListener('keyup', (e) => { if (e.key === 'Enter') handleModalAction(); });
                 break;
             case 'delete':
@@ -1182,7 +1183,6 @@ function runApp(app) {
                 DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete the plan: <strong class="font-bold">${planName}</strong>?</p><p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action is final and cannot be undone.</p>`;
                 DOMElements.modalActionBtn.textContent = "Confirm Delete";
                 DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
-                DOMElements.modalActionBtn.onclick = handleModalAction;
                 break;
             case 'timeout':
                 DOMElements.modalTitle.textContent = "Session Timed Out";
@@ -1280,8 +1280,6 @@ function runApp(app) {
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
                 DOMElements.modalActionBtn.onclick = saveActionPlan;
-                DOMElements.modalCancelBtn.textContent = 'Close';
-                DOMElements.modalCancelBtn.onclick = requestCloseModal;
                 
                 updateUndoRedoButtons();
                 break;
@@ -1290,18 +1288,15 @@ function runApp(app) {
                 DOMElements.modalTitle.textContent = "Discard Changes?";
                 DOMElements.modalContent.innerHTML = `<p>You have unsaved changes. Are you sure you want to close without saving?</p>`;
                 
-                const discardBtn = DOMElements.modalActionBtn;
-                const cancelBtn = DOMElements.modalCancelBtn;
+                DOMElements.modalActionBtn.textContent = "Discard";
+                DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+                DOMElements.modalCancelBtn.textContent = "Cancel";
 
-                discardBtn.textContent = "Discard";
-                discardBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
-                cancelBtn.textContent = "Cancel";
-
-                discardBtn.onclick = () => {
+                DOMElements.modalActionBtn.onclick = () => {
                     closeModal();
                 };
 
-                cancelBtn.onclick = () => {
+                DOMElements.modalCancelBtn.onclick = () => {
                     const lastUnsavedState = undoStack[undoStack.length - 1];
                     openModal('aiActionPlan_view');
                     const modalContent = document.getElementById('modal-content');
@@ -1353,8 +1348,8 @@ function runApp(app) {
 
     function closeModal() {
         document.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
-        DOMElements.modalActionBtn.onclick = handleModalAction;
-        DOMElements.modalCancelBtn.onclick = requestCloseModal;
+        DOMElements.modalActionBtn.onclick = null;
+        DOMElements.modalCancelBtn.onclick = null; 
         DOMElements.modalActionBtn.style.display = 'inline-flex';
         DOMElements.modalOverlay.classList.add('hidden');
     }
@@ -1622,19 +1617,10 @@ function runApp(app) {
     DOMElements.aiActionBtn.addEventListener('click', handleAIActionPlan);
 
     DOMElements.modalCloseBtn.addEventListener('click', requestCloseModal);
-    DOMElements.modalCancelBtn.addEventListener('click', requestCloseModal);
     DOMElements.modalOverlay.addEventListener('mousedown', (e) => {
         if (e.target === DOMElements.modalOverlay) {
             requestCloseModal();
         }
-    });
-    DOMElements.modalActionBtn.addEventListener('click', handleModalAction);
-
-    DOMElements.mobileMenuBtn.addEventListener('click', () => {
-        DOMElements.appView.classList.toggle('sidebar-open');
-    });
-    DOMElements.sidebarOverlay.addEventListener('click', () => {
-        DOMElements.appView.classList.remove('sidebar-open');
     });
 
     let touchStartX = 0;
