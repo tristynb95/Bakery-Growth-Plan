@@ -1064,8 +1064,22 @@ function runApp(app) {
     async function saveActionPlan() {
         const editedContent = document.getElementById('ai-printable-area').innerHTML;
         appState.planData.aiActionPlan = editedContent;
+        
+        // Provide user feedback directly on the button
+        const saveButton = DOMElements.modalActionBtn;
+        const originalHTML = saveButton.innerHTML;
+        saveButton.disabled = true;
+        saveButton.innerHTML = `<i class="bi bi-check-circle-fill"></i> Saved!`;
+
         await saveData(true);
-        closeModal();
+
+        // Restore the button after a short delay
+        setTimeout(() => {
+            saveButton.disabled = false;
+            saveButton.innerHTML = originalHTML;
+        }, 2000);
+
+        // closeModal(); // This line has been removed
     }
 
     function handleRegenerateActionPlan() {
@@ -1606,6 +1620,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
