@@ -1134,6 +1134,7 @@ function runApp(app) {
             updateUndoRedoButtons();
         };
     }
+    
     async function handleShare() {
         openModal('sharing');
         try {
@@ -1634,6 +1635,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
