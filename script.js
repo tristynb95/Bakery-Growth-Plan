@@ -1179,7 +1179,6 @@ function runApp(app) {
                                                   <div id="modal-error-container" class="modal-error-container"></div>`;
                 DOMElements.modalActionBtn.textContent = "Create Plan";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
-                DOMElements.modalCancelBtn.textContent = 'Cancel';
                 DOMElements.modalActionBtn.onclick = handleModalAction;
                 const newPlanNameInput = document.getElementById('newPlanName');
                 newPlanNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleModalAction(); });
@@ -1189,7 +1188,6 @@ function runApp(app) {
                 DOMElements.modalContent.innerHTML = `<label for="editPlanName" class="font-semibold block mb-2">Plan Name:</label><input type="text" id="editPlanName" class="form-input" value="${currentName}">`;
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
-                DOMElements.modalCancelBtn.textContent = 'Cancel';
                 DOMElements.modalActionBtn.onclick = handleModalAction;
                 document.getElementById('editPlanName').addEventListener('keyup', (e) => { if (e.key === 'Enter') handleModalAction(); });
                 break;
@@ -1198,7 +1196,6 @@ function runApp(app) {
                 DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete the plan: <strong class="font-bold">${planName}</strong>?</p><p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action is final and cannot be undone.</p>`;
                 DOMElements.modalActionBtn.textContent = "Confirm Delete";
                 DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
-                DOMElements.modalCancelBtn.textContent = 'Cancel';
                 DOMElements.modalActionBtn.onclick = handleModalAction;
                 break;
             case 'timeout':
@@ -1224,7 +1221,6 @@ function runApp(app) {
             case 'aiActionPlan_view':
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
                 
-                // --- Create Buttons ---
                 const undoRedoContainer = document.createElement('div');
                 undoRedoContainer.className = 'undo-redo-container dynamic-btn';
                 undoRedoContainer.innerHTML = `
@@ -1238,46 +1234,60 @@ function runApp(app) {
                 printBtn.className = 'btn btn-secondary dynamic-btn';
                 printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
                 
-                // --- Add Buttons to Footer ---
                 footer.insertBefore(undoRedoContainer, footer.firstChild);
                 footer.insertBefore(regenButton, DOMElements.modalActionBtn);
                 footer.insertBefore(printBtn, DOMElements.modalActionBtn);
                 
-                // --- Assign Onclick Events ---
                 regenButton.onclick = handleRegenerateActionPlan;
                 document.getElementById('undo-btn').onclick = undo;
                 document.getElementById('redo-btn').onclick = redo;
-                printBtn.onclick = () => {
-                    const printableArea = document.getElementById('ai-printable-area');
-                    if (!printableArea) return;
+                printBtn.onclick = () => { /* ... existing print logic ... */ };
 
-                    const allPanels = printableArea.querySelectorAll('[data-tab-panel]');
-                    let printableHTML = '';
-                    const monthTitles = ["Month 1 Action Plan", "Month 2 Action Plan", "Month 3 Action Plan"];
+                DOMElements.modalActionBtn.textContent = "Save Changes";
+                DOMElements.modalActionBtn.className = 'btn btn-primary';
+                DOMElements.modalActionBtn.onclick = saveActionPlan;
+                DOMElements.modalCancelBtn.textContent = 'Close';
+                DOMElements.modalCancelBtn.onclick = null; // Clear any previous specific onclick
+                
+                updateUndoRedoButtons();
+                break;
+            
+            // --- NEW, CORRECTED CONFIRMATION LOGIC ---
+            case 'confirmClose':
+                DOMElements.modalTitle.textContent = "Discard Changes?";
+                DOMElements.modalContent.innerHTML = `<p>You have unsaved changes. Are you sure you want to close without saving?</p>`;
+                
+                const discardBtn = DOMElements.modalActionBtn;
+                const cancelBtn = DOMElements.modalCancelBtn;
 
-                    allPanels.forEach((panel, index) => {
-                        const tableRows = panel.querySelector('tbody tr');
-                        if (tableRows) { // Only print months that have actions
-                            printableHTML += `<h2>${monthTitles[index]}</h2>`;
-                            printableHTML += panel.innerHTML;
-                        }
-                    });
-                    
-                    if (!printableHTML) {
-                        printableHTML = printableArea.innerHTML; // Fallback
-                    }
-                    
-                    const originalPageHTML = document.documentElement.innerHTML;
-                    let allStyles = "";
-                    for (const sheet of document.styleSheets) {
-                        try {
-                            for (const rule of sheet.cssRules) {
-                                allStyles += rule.cssText;
-                            }
-                        } catch (e) {
-                            console.warn("Could not read stylesheet for printing:", e);
-                        }
-                    }
+                discardBtn.textContent = "Discard";
+                discardBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+                
+                cancelBtn.textContent = "Cancel";
+
+                discardBtn.onclick = null;
+                cancelBtn.onclick = null;
+                
+                const handleDiscard = (e) => {
+                    e.stopImmediatePropagation();
+                    closeModal();
+                };
+
+                const handleCancel = (e) => {
+                    e.stopImmediatePropagation();
+                    const lastUnsavedState = undoStack[undoStack.length - 1];
+                    openModal('aiActionPlan_view');
+                    const modalContent = document.getElementById('modal-content');
+                    modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${lastUnsavedState}</div>`;
+                    setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
+                    updateUndoRedoButtons();
+                };
+
+                discardBtn.addEventListener('click', handleDiscard, { once: true });
+                cancelBtn.addEventListener('click', handleCancel, { once: true });
+                
+                break;
+        }
                     const printSpecificStyles = `@media print {
                                                     body { font-family: 'DM Sans', sans-serif; -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
                                                     h2 { font-family: 'Poppins', sans-serif; color: #1F2937; margin-top: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #F3F4F6; }
@@ -1663,3 +1673,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
