@@ -770,6 +770,10 @@ textarea.form-input {
 td.actions-cell {
     text-align: center;
     vertical-align: middle;
+    /* Added for robust centering */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-remove-row {
@@ -888,4 +892,5 @@ tr:hover .btn-remove-row {
 .sortable-header[data-sort-dir="desc"] .sort-icon::before {
     content: '\F128'; /* "arrow-down" */
 }
+
 
