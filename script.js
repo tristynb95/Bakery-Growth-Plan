@@ -875,34 +875,43 @@ function runApp(app) {
     async function handleAIActionPlan() {
     const savedPlan = appState.planData.aiActionPlan;
 
-    const makeTablesSortable = (container) => {
-        const tables = container.querySelectorAll('table');
-        tables.forEach(table => {
-            const headers = table.querySelectorAll('thead th');
-            const sortableColumns = {
-                'Action Step': { index: 0, type: 'text' },
-                'Owner': { index: 1, type: 'text' },
-                'Due Date': { index: 2, type: 'date' },
-                'Status': { index: 4, type: 'text' }
-            };
+   const makeTablesSortable = (container) => {
+            const tables = container.querySelectorAll('table');
+            tables.forEach(table => {
+                const headers = table.querySelectorAll('thead th');
+                const sortableColumns = {
+                    'Action Step': { index: 0, type: 'text' },
+                    'Owner': { index: 1, type: 'text' },
+                    'Due Date': { index: 2, type: 'date' },
+                    'Status': { index: 4, type: 'text' }
+                };
 
-            headers.forEach((th) => {
-                const headerText = th.innerText.trim();
-                if (sortableColumns[headerText]) {
-                    const config = sortableColumns[headerText];
-                    th.classList.add('sortable-header');
-                    th.dataset.column = config.index;
-                    th.dataset.sortType = config.type;
-                    
-                    if (!th.querySelector('.sort-icon')) {
+                headers.forEach((th) => {
+                    const headerText = th.innerText.trim();
+                    if (sortableColumns[headerText]) {
+                        const config = sortableColumns[headerText];
+                        th.classList.add('sortable-header');
+                        th.dataset.column = config.index;
+                        th.dataset.sortType = config.type;
+                        
+                        // Clear the header and rebuild it with a wrapper for Flexbox
+                        th.innerHTML = '';
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'header-flex-wrapper';
+
+                        const textSpan = document.createElement('span');
+                        textSpan.textContent = headerText;
+
                         const iconSpan = document.createElement('span');
                         iconSpan.className = 'sort-icon';
-                        th.appendChild(iconSpan);
+
+                        wrapper.appendChild(textSpan);
+                        wrapper.appendChild(iconSpan);
+                        th.appendChild(wrapper);
                     }
-                }
+                });
             });
-        });
-    };
+        };
 
     if (savedPlan) {
         openModal('aiActionPlan_view');
@@ -1597,6 +1606,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
