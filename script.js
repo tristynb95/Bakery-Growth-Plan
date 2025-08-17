@@ -836,6 +836,29 @@ function runApp(app) {
             openModal('aiActionPlan_view');
             const modalContent = document.getElementById('modal-content');
             modalContent.innerHTML = `<div id="ai-printable-area" contenteditable="true" class="editable-action-plan">${savedPlan}</div>`;
+
+            // Add tab functionality
+            const tabContainer = modalContent.querySelector('.ai-action-plan-container');
+            if (tabContainer) {
+                const tabs = tabContainer.querySelectorAll('.ai-tabs-nav a');
+                const panels = tabContainer.querySelectorAll('.ai-tabs-content > div');
+
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (tab.classList.contains('active')) return;
+                        
+                        tabs.forEach(t => t.classList.remove('active'));
+                        panels.forEach(p => p.classList.remove('active'));
+
+                        tab.classList.add('active');
+                        const targetPanel = tabContainer.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
+                        if (targetPanel) {
+                            targetPanel.classList.add('active');
+                        }
+                    });
+                });
+            }
         } else {
             openModal('aiActionPlan_generate');
             try {
@@ -991,17 +1014,37 @@ function runApp(app) {
                 DOMElements.modalActionBtn.style.display = 'none';
                 DOMElements.modalCancelBtn.textContent = 'Cancel';
                 break;
+            // ... inside the openModal function ...
             case 'aiActionPlan_view':
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
                 const regenButton = document.createElement('button');
                 regenButton.className = 'btn btn-secondary dynamic-btn';
                 regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
                 regenButton.onclick = handleRegenerateActionPlan;
+                
                 const printBtn = document.createElement('button');
                 printBtn.className = 'btn btn-secondary dynamic-btn';
-                printBtn.innerHTML = 'Print Plan';
+                printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
                 printBtn.onclick = () => {
-                    const printableAreaHTML = document.getElementById('ai-printable-area').innerHTML;
+                    const printableArea = document.getElementById('ai-printable-area');
+                    if (!printableArea) return;
+
+                    const allPanels = printableArea.querySelectorAll('[data-tab-panel]');
+                    let printableHTML = '';
+                    const monthTitles = ["Month 1 Action Plan", "Month 2 Action Plan", "Month 3 Action Plan"];
+
+                    allPanels.forEach((panel, index) => {
+                        const tableRows = panel.querySelector('tbody tr');
+                        if (tableRows) { // Only print months that have actions
+                            printableHTML += `<h2>${monthTitles[index]}</h2>`;
+                            printableHTML += panel.innerHTML;
+                        }
+                    });
+                    
+                    if (!printableHTML) {
+                        printableHTML = printableArea.innerHTML; // Fallback
+                    }
+                    
                     const originalPageHTML = document.documentElement.innerHTML;
                     let allStyles = "";
                     for (const sheet of document.styleSheets) {
@@ -1017,19 +1060,20 @@ function runApp(app) {
                                                     body { font-family: 'DM Sans', sans-serif; -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
                                                     h2 { font-family: 'Poppins', sans-serif; color: #1F2937; margin-top: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #F3F4F6; }
                                                     h2:not(:first-of-type) { page-break-before: always; }
-                                                    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+                                                    table { width: 100%; border-collapse: collapse; margin-top: 1rem; page-break-inside: avoid; }
                                                     th, td { padding: 0.75rem !important; text-align: left !important; vertical-align: middle !important; border: none !important; border-bottom: 1px solid #E5E7EB !important; }
                                                     th { background-color: transparent !important; color: #D10A11 !important; font-weight: 600 !important; border-bottom-width: 2px !important; }
                                                     td { color: #1F2937; }
                                                     tr:nth-child(even) td { background-color: #FDFDFC !important; }
                                                     @page { size: A4 portrait; margin: 0.75in; }
                                                 }`;
-                    const printPageHTML = `<html><head><title>AI Generated Action Plan</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@700;900&display=swap" rel="stylesheet"><style>${allStyles}${printSpecificStyles}</style></head><body>${printableAreaHTML}</body></html>`;
+                    const printPageHTML = `<html><head><title>AI Generated Action Plan</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@700;900&display=swap" rel="stylesheet"><style>${allStyles}${printSpecificStyles}</style></head><body>${printableHTML}</body></html>`;
                     document.documentElement.innerHTML = printPageHTML;
                     window.print();
                     document.documentElement.innerHTML = originalPageHTML;
                     window.location.reload();
                 };
+
                 footer.insertBefore(regenButton, DOMElements.modalActionBtn);
                 footer.insertBefore(printBtn, DOMElements.modalActionBtn);
                 DOMElements.modalActionBtn.textContent = "Save Changes";
@@ -1370,3 +1414,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
