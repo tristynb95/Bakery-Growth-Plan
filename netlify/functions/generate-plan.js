@@ -15,6 +15,7 @@ exports.handler = async function(event, context) {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"});
 
     // --- FINAL PROMPT FOR DYNAMIC, SORTABLE TABLES ---
+   // --- FINAL PROMPT FOR DYNAMIC, SORTABLE TABLES ---
     const prompt = `
       You are an expert bakery operations manager tasked with creating a best-practice action plan from a manager's 90-day growth plan.
       Your output must be a clean, self-contained HTML structure with tabs and dynamic, sortable tables.
