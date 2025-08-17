@@ -22,7 +22,7 @@ function runApp(app) {
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-   // --- GLOBAL STATE & DOM REFERENCES ---
+    // --- GLOBAL STATE & DOM REFERENCES ---
     const DOMElements = {
         initialLoadingView: document.getElementById('initial-loading-view'),
         loadingView: document.getElementById('loading-view'),
@@ -92,6 +92,9 @@ function runApp(app) {
         saveTimeout: null,
         sessionTimeout: null,
     };
+    
+    let undoStack = [];
+    let redoStack = [];
 
     // --- SESSION TIMEOUT ---
     const SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
@@ -830,33 +833,115 @@ function runApp(app) {
         return summary;
     }
 
+    // ====================================================================
+    // AI ACTION PLAN LOGIC (with Undo/Redo)
+    // ====================================================================
+
+    function updateUndoRedoButtons() {
+        const undoBtn = document.getElementById('undo-btn');
+        const redoBtn = document.getElementById('redo-btn');
+        if (undoBtn) undoBtn.disabled = undoStack.length <= 1;
+        if (redoBtn) redoBtn.disabled = redoStack.length === 0;
+    }
+
+    function saveState() {
+        const printableArea = document.getElementById('ai-printable-area');
+        if (printableArea) {
+            undoStack.push(printableArea.innerHTML);
+            redoStack = []; // Clear redo stack on new action
+            updateUndoRedoButtons();
+        }
+    }
+
+    function undo() {
+        if (undoStack.length > 1) {
+            const currentState = undoStack.pop();
+            redoStack.push(currentState);
+            const previousState = undoStack[undoStack.length - 1];
+            document.getElementById('ai-printable-area').innerHTML = previousState;
+            updateUndoRedoButtons();
+        }
+    }
+
+    function redo() {
+        if (redoStack.length > 0) {
+            const nextState = redoStack.pop();
+            undoStack.push(nextState);
+            document.getElementById('ai-printable-area').innerHTML = nextState;
+            updateUndoRedoButtons();
+        }
+    }
+    
     async function handleAIActionPlan() {
         const savedPlan = appState.planData.aiActionPlan;
         if (savedPlan) {
             openModal('aiActionPlan_view');
             const modalContent = document.getElementById('modal-content');
-            modalContent.innerHTML = `<div id="ai-printable-area" contenteditable="true" class="editable-action-plan">${savedPlan}</div>`;
+            modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${savedPlan}</div>`;
 
-            // Add tab functionality
-            const tabContainer = modalContent.querySelector('.ai-action-plan-container');
-            if (tabContainer) {
-                const tabs = tabContainer.querySelectorAll('.ai-tabs-nav a');
-                const panels = tabContainer.querySelectorAll('.ai-tabs-content > div');
+            // --- Initialize Undo/Redo History ---
+            undoStack = [];
+            redoStack = [];
+            saveState(); // Save the initial state
 
-                tabs.forEach(tab => {
-                    tab.addEventListener('click', (e) => {
+            const container = modalContent.querySelector('#ai-printable-area');
+            if (container) {
+                // --- Event Delegation for Table Actions & Tabs ---
+                container.addEventListener('click', (e) => {
+                    const addBtn = e.target.closest('.btn-add-row');
+                    const removeBtn = e.target.closest('.btn-remove-row');
+                    const tab = e.target.closest('.ai-tabs-nav a');
+
+                    if (addBtn) {
+                        const tableBody = addBtn.closest('table').querySelector('tbody');
+                        if (tableBody) {
+                            const newRow = document.createElement('tr');
+                            newRow.innerHTML = `
+                                <td contenteditable="true"></td>
+                                <td contenteditable="true"></td>
+                                <td contenteditable="true"></td>
+                                <td contenteditable="true"></td>
+                                <td contenteditable="true"></td>
+                                <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-trash3"></i></button></td>
+                            `;
+                            tableBody.appendChild(newRow);
+                            saveState(); // Save state after adding
+                        }
+                    }
+
+                    if (removeBtn) {
+                        removeBtn.closest('tr').remove();
+                        saveState(); // Save state after removing
+                    }
+                    
+                    if (tab) {
                         e.preventDefault();
                         if (tab.classList.contains('active')) return;
                         
+                        const tabContainer = tab.closest('.ai-action-plan-container');
+                        const tabs = tabContainer.querySelectorAll('.ai-tabs-nav a');
+                        const panels = tabContainer.querySelectorAll('.ai-tabs-content > div');
+
                         tabs.forEach(t => t.classList.remove('active'));
                         panels.forEach(p => p.classList.remove('active'));
-
                         tab.classList.add('active');
                         const targetPanel = tabContainer.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
-                        if (targetPanel) {
-                            targetPanel.classList.add('active');
-                        }
-                    });
+                        if (targetPanel) targetPanel.classList.add('active');
+                    }
+                });
+
+                // --- Observer for Content Changes (Typing) ---
+                const observer = new MutationObserver((mutations) => {
+                    // We only want to save state if it's a character data change
+                    const isTextChange = mutations.some(m => m.type === 'characterData');
+                    if (isTextChange) {
+                       saveState();
+                    }
+                });
+                observer.observe(container, {
+                    childList: false,
+                    subtree: true,
+                    characterData: true
                 });
             }
         } else {
@@ -1014,17 +1099,32 @@ function runApp(app) {
                 DOMElements.modalActionBtn.style.display = 'none';
                 DOMElements.modalCancelBtn.textContent = 'Cancel';
                 break;
-            // ... inside the openModal function ...
             case 'aiActionPlan_view':
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
+                
+                // --- Create Buttons ---
+                const undoRedoContainer = document.createElement('div');
+                undoRedoContainer.className = 'undo-redo-container dynamic-btn';
+                undoRedoContainer.innerHTML = `
+                    <button id="undo-btn" class="btn btn-secondary btn-icon" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button>
+                    <button id="redo-btn" class="btn btn-secondary btn-icon" title="Redo"><i class="bi bi-arrow-clockwise"></i></button>
+                `;
                 const regenButton = document.createElement('button');
                 regenButton.className = 'btn btn-secondary dynamic-btn';
                 regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
-                regenButton.onclick = handleRegenerateActionPlan;
-                
                 const printBtn = document.createElement('button');
                 printBtn.className = 'btn btn-secondary dynamic-btn';
                 printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
+                
+                // --- Add Buttons to Footer ---
+                footer.insertBefore(undoRedoContainer, footer.firstChild);
+                footer.insertBefore(regenButton, DOMElements.modalActionBtn);
+                footer.insertBefore(printBtn, DOMElements.modalActionBtn);
+                
+                // --- Assign Onclick Events ---
+                regenButton.onclick = handleRegenerateActionPlan;
+                document.getElementById('undo-btn').onclick = undo;
+                document.getElementById('redo-btn').onclick = redo;
                 printBtn.onclick = () => {
                     const printableArea = document.getElementById('ai-printable-area');
                     if (!printableArea) return;
@@ -1066,6 +1166,7 @@ function runApp(app) {
                                                     td { color: #1F2937; }
                                                     tr:nth-child(even) td { background-color: #FDFDFC !important; }
                                                     @page { size: A4 portrait; margin: 0.75in; }
+                                                    th:last-child, td:last-child { display: none !important; }
                                                 }`;
                     const printPageHTML = `<html><head><title>AI Generated Action Plan</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@700;900&display=swap" rel="stylesheet"><style>${allStyles}${printSpecificStyles}</style></head><body>${printableHTML}</body></html>`;
                     document.documentElement.innerHTML = printPageHTML;
@@ -1074,12 +1175,13 @@ function runApp(app) {
                     window.location.reload();
                 };
 
-                footer.insertBefore(regenButton, DOMElements.modalActionBtn);
-                footer.insertBefore(printBtn, DOMElements.modalActionBtn);
+                // --- Final Button Setup ---
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
                 DOMElements.modalActionBtn.onclick = saveActionPlan;
                 DOMElements.modalCancelBtn.textContent = 'Close';
+                
+                updateUndoRedoButtons(); // Set initial state
                 break;
         }
         DOMElements.modalOverlay.classList.remove('hidden');
@@ -1414,4 +1516,3 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
