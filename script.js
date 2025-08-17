@@ -1209,7 +1209,7 @@ function runApp(app) {
                 DOMElements.modalActionBtn.style.display = 'none';
                 DOMElements.modalCancelBtn.style.display = 'none';
                 break;
-            case 'aiActionPlan_view':
+            case 'aiActionPlan_view': {
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
                 
                 const undoRedoContainer = document.createElement('div');
@@ -1240,7 +1240,7 @@ function runApp(app) {
                     const printWindow = window.open('', '', 'height=800,width=1200');
                     printWindow.document.write('<html><head><title>AI Action Plan</title>');
                     printWindow.document.write('<link rel="stylesheet" href="style.css">');
-                    printWindow.document.write('<style> @page { size: A4; margin: 20mm; } body { font-family: "DM Sans", sans-serif; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #D1D5DB; padding: 8px; text-align: left; } th { background-color: #F3F4F6; } .actions-cell { display: none; } </style>');
+                    printWindow.document.write('<style> @page { size: A4; margin: 20mm; } body { font-family: "DM Sans", sans-serif; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #D1D5DB; padding: 8px; text-align: left; } th { background-color: #F3F4F6; } .actions-cell, .btn-remove-row { display: none; } </style>');
                     printWindow.document.write('</head><body>');
                     printWindow.document.write(`<h1>AI Action Plan for ${appState.planData.planName || 'the plan'}</h1>`);
                     printWindow.document.write(printableArea);
@@ -1259,8 +1259,8 @@ function runApp(app) {
                 
                 updateUndoRedoButtons();
                 break;
-            
-            case 'confirmClose':
+            }
+            case 'confirmClose': {
                 DOMElements.modalTitle.textContent = "Discard Changes?";
                 DOMElements.modalContent.innerHTML = `<p>You have unsaved changes. Are you sure you want to close without saving?</p>`;
                 
@@ -1294,7 +1294,8 @@ function runApp(app) {
                 cancelBtn.addEventListener('click', handleCancel, { once: true });
                 
                 break;
-            case 'confirmRegenerate':
+            }
+            case 'confirmRegenerate': {
                 DOMElements.modalTitle.textContent = "Are you sure?";
                 DOMElements.modalContent.innerHTML = `<div class="p-4 text-center">
                                     <p class="text-gray-600 mt-2">Generating a new plan will overwrite your existing action plan and any edits you've made. This cannot be undone.</p>
@@ -1307,31 +1308,29 @@ function runApp(app) {
                 confirmBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
                 cancelBtn.textContent = "Cancel";
 
-                // Temporarily remove other buttons and centre the confirmation buttons
                 footer.classList.add('is-confirming');
                 footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.style.display = 'none');
 
 
                 confirmBtn.onclick = () => {
-                    footer.classList.remove('is-confirming'); // Clean up class
+                    footer.classList.remove('is-confirming');
                     delete appState.planData.aiActionPlan;
-                    // Save the deletion, then generate the new plan
                     saveData(true).then(() => {
                         handleAIActionPlan();
                     });
                 };
 
                 cancelBtn.onclick = () => {
-                    // Restore the previous view without making changes
-                    footer.classList.remove('is-confirming'); // Clean up class
+                    footer.classList.remove('is-confirming');
                     const lastUnsavedState = undoStack[undoStack.length - 1];
-                    openModal('aiActionPlan_view'); // Go back to the edit view
+                    openModal('aiActionPlan_view');
                     const modalContent = document.getElementById('modal-content');
                     modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${lastUnsavedState}</div>`;
                     setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
                     updateUndoRedoButtons();
                 };
                 break;
+            }
         }
         DOMElements.modalOverlay.classList.remove('hidden');
     }
