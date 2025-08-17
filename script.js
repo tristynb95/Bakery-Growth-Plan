@@ -1236,25 +1236,17 @@ function runApp(app) {
                 
                 printBtn.onclick = () => {
                     const aiPlanContainer = document.getElementById('ai-printable-area');
-                    if (!aiPlanContainer) return;
+                    const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
+                    const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .btn.active');
 
-                    const printNode = aiPlanContainer.cloneNode(true);
-
-                    printNode.querySelector('.ai-tabs-nav')?.remove();
+                    if (!activeTabPanel || !activeTabButton) {
+                        alert("Could not find the active month to print.");
+                        return;
+                    }
+                    
+                    const monthTitle = `${activeTabButton.textContent} Action Plan`;
+                    const printNode = activeTabPanel.cloneNode(true);
                     printNode.querySelectorAll('.actions-cell, .btn-remove-row, tfoot').forEach(el => el.remove());
-
-                    printNode.querySelectorAll('.ai-tabs-content > div').forEach(panel => {
-                        panel.classList.add('active');
-                        panel.style.display = 'block';
-                    });
-
-                    const monthTitles = ["Month 1 Action Plan", "Month 2 Action Plan", "Month 3 Action Plan"];
-                    printNode.querySelectorAll('.ai-tabs-content > div').forEach((panel, index) => {
-                        const title = document.createElement('h2');
-                        title.textContent = monthTitles[index];
-                        title.className = 'month-title';
-                        panel.prepend(title);
-                    });
 
                     const printableHTML = printNode.innerHTML;
 
@@ -1264,22 +1256,20 @@ function runApp(app) {
                         body { font-family: 'DM Sans', sans-serif; color: #1F2937; }
                         .print-header { text-align: center; border-bottom: 2px solid #D10A11; padding-bottom: 15px; margin-bottom: 25px; }
                         .print-header h1 { font-family: 'Poppins', sans-serif; font-size: 24pt; color: #1F2937; margin: 0; }
+                        .print-header h2 { font-family: 'Poppins', sans-serif; font-size: 16pt; color: #D10A11; margin-top: 5px; margin-bottom: 5px; font-weight: 700; }
                         .print-header p { font-size: 11pt; color: #6B7280; margin: 5px 0 0; }
-                        .month-title { font-family: 'Poppins', sans-serif; font-size: 16pt; color: #D10A11; margin-top: 30px; margin-bottom: 15px; page-break-after: avoid; }
-                        .ai-tabs-content > div:first-child .month-title { margin-top: 0; }
                         table { width: 100%; border-collapse: collapse; font-size: 9pt; page-break-inside: auto; }
                         tr { page-break-inside: avoid; page-break-after: auto; }
                         th, td { border: 1px solid #E5E7EB; padding: 10px 12px; text-align: left; vertical-align: top; }
                         thead { display: table-header-group; }
                         th { background-color: #F9FAFB; font-weight: 600; color: #374151; }
-                        .ai-tabs-nav, .actions-cell, .btn-remove-row, .btn-add-row, tfoot { display: none !important; }
                     `;
 
                     const printWindow = window.open('', '', 'height=800,width=1200');
-                    printWindow.document.write('<html><head><title>Action Plan</title>');
+                    printWindow.document.write('<html><head><title>AI Action Plan</title>');
                     printWindow.document.write(`<style>${printStyles}</style>`);
                     printWindow.document.write('</head><body>');
-                    printWindow.document.write(`<div class="print-header"><h1>AI Action Plan</h1><p>${appState.planData.planName || 'Growth Plan'} | ${appState.planData.bakeryLocation || 'Your Bakery'}</p></div>`);
+                    printWindow.document.write(`<div class="print-header"><h1>AI Action Plan</h1><h2>${monthTitle}</h2><p>${appState.planData.planName || 'Growth Plan'} | ${appState.planData.bakeryLocation || 'Your Bakery'}</p></div>`);
                     printWindow.document.write(printableHTML);
                     printWindow.document.write('</body></html>');
                     printWindow.document.close();
@@ -1699,4 +1689,3 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
