@@ -681,5 +681,64 @@ textarea.form-input {
     display: none;
 }
 
+/* 31. AI Action Plan Tabs
+-------------------------------------------------- */
+.ai-action-plan-container {
+    padding: 0.5rem;
+}
+
+.ai-tabs-nav {
+    display: flex;
+    border-bottom: 2px solid var(--gails-grey-light);
+    margin-bottom: 1.5rem;
+}
+
+.ai-tabs-nav a {
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    color: var(--gails-text-secondary);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px; /* Overlaps the container's border */
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.ai-tabs-nav a:hover {
+    color: var(--gails-text-primary);
+    background-color: var(--gails-grey-light);
+}
+
+.ai-tabs-nav a.active {
+    color: var(--gails-red);
+    border-bottom-color: var(--gails-red);
+}
+
+.ai-tabs-content > div {
+    display: none;
+}
+
+.ai-tabs-content > div.active {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Override existing styles for the editable container to remove padding/border */
+.editable-action-plan {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    min-height: auto;
+}
+
+.editable-action-plan:focus {
+    border-color: transparent;
+    box-shadow: none;
+}
 
 
