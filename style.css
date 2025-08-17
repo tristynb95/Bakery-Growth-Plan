@@ -484,7 +484,8 @@ textarea.form-input {
 #modal-box[data-type="aiActionPlan"],
 #modal-box[data-type="aiActionPlan_view"],
 #modal-box[data-type="aiActionPlan_generate"] {
-    max-width: 1200px; /* Increased for better table readability */
+    max-width: 95vw; /* NEW: Use viewport width for a much wider modal */
+    width: 95vw;     /* NEW: Ensure it fills the new max-width */
 }
 
 /* 24. AI Action Plan Table Styles
@@ -944,5 +945,6 @@ tr:hover .btn-remove-row {
 .sortable-header[data-sort-dir="desc"] .sort-icon::before {
     content: '\F229'; /* "caret-down-fill" */
 }
+
 
 
