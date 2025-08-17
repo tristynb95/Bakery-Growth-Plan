@@ -946,5 +946,9 @@ tr:hover .btn-remove-row {
     content: '\F229'; /* "caret-down-fill" */
 }
 
+/* Center buttons for confirmation dialogs */
+.modal-footer.is-confirming {
+    justify-content: center;
+}
 
 
