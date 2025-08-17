@@ -1237,7 +1237,7 @@ function runApp(app) {
                 printBtn.onclick = () => {
                     const aiPlanContainer = document.getElementById('ai-printable-area');
                     const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
-                    const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .btn.active');
+                    const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
 
                     if (!activeTabPanel || !activeTabButton) {
                         alert("Could not find the active month to print.");
@@ -1295,19 +1295,13 @@ function runApp(app) {
 
                 discardBtn.textContent = "Discard";
                 discardBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
-                
                 cancelBtn.textContent = "Cancel";
 
-                discardBtn.onclick = null;
-                cancelBtn.onclick = null;
-                
-                const handleDiscard = (e) => {
-                    e.stopImmediatePropagation();
+                discardBtn.onclick = () => {
                     closeModal();
                 };
 
-                const handleCancel = (e) => {
-                    e.stopImmediatePropagation();
+                cancelBtn.onclick = () => {
                     const lastUnsavedState = undoStack[undoStack.length - 1];
                     openModal('aiActionPlan_view');
                     const modalContent = document.getElementById('modal-content');
@@ -1315,9 +1309,6 @@ function runApp(app) {
                     setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
                     updateUndoRedoButtons();
                 };
-
-                discardBtn.addEventListener('click', handleDiscard, { once: true });
-                cancelBtn.addEventListener('click', handleCancel, { once: true });
                 
                 break;
             }
