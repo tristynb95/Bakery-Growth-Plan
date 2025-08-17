@@ -886,11 +886,55 @@ function runApp(app) {
 
             const container = modalContent.querySelector('#ai-printable-area');
             if (container) {
-                // --- Event Delegation for Table Actions & Tabs ---
+
+                // --- Sorting Logic ---
+                const handleTableSort = (header) => {
+                    const table = header.closest('table');
+                    const tbody = table.querySelector('tbody');
+                    const columnIndex = parseInt(header.dataset.column, 10);
+                    const sortType = header.dataset.sortType || 'text';
+                    const currentDirection = header.dataset.sortDir || 'desc';
+                    const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+
+                    // Remove sort indicators from other columns
+                    table.querySelectorAll('.sortable-header').forEach(th => {
+                        th.removeAttribute('data-sort-dir');
+                    });
+                    header.dataset.sortDir = newDirection;
+
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    
+                    rows.sort((rowA, rowB) => {
+                        const cellA = rowA.querySelectorAll('td')[columnIndex];
+                        const cellB = rowB.querySelectorAll('td')[columnIndex];
+                        const valA = cellA ? cellA.innerText.trim() : '';
+                        const valB = cellB ? cellB.innerText.trim() : '';
+                        
+                        let compare = 0;
+                        if (sortType === 'date') {
+                            // Basic UK date parsing (DD/MM/YYYY)
+                            const dateA = valA.split('/').reverse().join('-');
+                            const dateB = valB.split('/').reverse().join('-');
+                            compare = new Date(dateA) - new Date(dateB);
+                        } else { // text sort
+                            compare = valA.localeCompare(valB, undefined, {numeric: true});
+                        }
+
+                        return newDirection === 'asc' ? compare : -compare;
+                    });
+                    
+                    tbody.innerHTML = '';
+                    rows.forEach(row => tbody.appendChild(row));
+                    saveState(); // Save state after sorting
+                };
+
+
+                // --- Event Delegation for All Actions ---
                 container.addEventListener('click', (e) => {
                     const addBtn = e.target.closest('.btn-add-row');
                     const removeBtn = e.target.closest('.btn-remove-row');
                     const tab = e.target.closest('.ai-tabs-nav a');
+                    const sortHeader = e.target.closest('.sortable-header');
 
                     if (addBtn) {
                         const tableBody = addBtn.closest('table').querySelector('tbody');
@@ -928,11 +972,14 @@ function runApp(app) {
                         const targetPanel = tabContainer.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
                         if (targetPanel) targetPanel.classList.add('active');
                     }
+                    
+                    if (sortHeader) {
+                        handleTableSort(sortHeader);
+                    }
                 });
 
                 // --- Observer for Content Changes (Typing) ---
                 const observer = new MutationObserver((mutations) => {
-                    // We only want to save state if it's a character data change
                     const isTextChange = mutations.some(m => m.type === 'characterData');
                     if (isTextChange) {
                        saveState();
@@ -1516,3 +1563,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
