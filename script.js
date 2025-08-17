@@ -1241,7 +1241,55 @@ function runApp(app) {
                 regenButton.onclick = handleRegenerateActionPlan;
                 document.getElementById('undo-btn').onclick = undo;
                 document.getElementById('redo-btn').onclick = redo;
-                printBtn.onclick = () => { /* ... existing print logic ... */ };
+                printBtn.onclick = () => {
+                    const printableArea = document.getElementById('ai-printable-area');
+                    if (!printableArea) return;
+
+                    const allPanels = printableArea.querySelectorAll('[data-tab-panel]');
+                    let printableHTML = '';
+                    const monthTitles = ["Month 1 Action Plan", "Month 2 Action Plan", "Month 3 Action Plan"];
+
+                    allPanels.forEach((panel, index) => {
+                        const tableRows = panel.querySelector('tbody tr');
+                        if (tableRows) { // Only print months that have actions
+                            printableHTML += `<h2>${monthTitles[index]}</h2>`;
+                            printableHTML += panel.innerHTML;
+                        }
+                    });
+                    
+                    if (!printableHTML) {
+                        printableHTML = printableArea.innerHTML; // Fallback
+                    }
+                    
+                    const originalPageHTML = document.documentElement.innerHTML;
+                    let allStyles = "";
+                    for (const sheet of document.styleSheets) {
+                        try {
+                            for (const rule of sheet.cssRules) {
+                                allStyles += rule.cssText;
+                            }
+                        } catch (e) {
+                            console.warn("Could not read stylesheet for printing:", e);
+                        }
+                    }
+                    const printSpecificStyles = `@media print {
+                                                    body { font-family: 'DM Sans', sans-serif; -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
+                                                    h2 { font-family: 'Poppins', sans-serif; color: #1F2937; margin-top: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #F3F4F6; }
+                                                    h2:not(:first-of-type) { page-break-before: always; }
+                                                    table { width: 100%; border-collapse: collapse; margin-top: 1rem; page-break-inside: avoid; }
+                                                    th, td { padding: 0.75rem !important; text-align: left !important; vertical-align: middle !important; border: none !important; border-bottom: 1px solid #E5E7EB !important; }
+                                                    th { background-color: transparent !important; color: #D10A11 !important; font-weight: 600 !important; border-bottom-width: 2px !important; }
+                                                    td { color: #1F2937; }
+                                                    tr:nth-child(even) td { background-color: #FDFDFC !important; }
+                                                    @page { size: A4 portrait; margin: 0.75in; }
+                                                    th:last-child, td:last-child { display: none !important; }
+                                                }`;
+                    const printPageHTML = `<html><head><title>AI Generated Action Plan</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@700;900&display=swap" rel="stylesheet"><style>${allStyles}${printSpecificStyles}</style></head><body>${printableHTML}</body></html>`;
+                    document.documentElement.innerHTML = printPageHTML;
+                    window.print();
+                    document.documentElement.innerHTML = originalPageHTML;
+                    window.location.reload();
+                };
 
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
@@ -1252,7 +1300,6 @@ function runApp(app) {
                 updateUndoRedoButtons();
                 break;
             
-            // --- NEW, CORRECTED CONFIRMATION LOGIC ---
             case 'confirmClose':
                 DOMElements.modalTitle.textContent = "Discard Changes?";
                 DOMElements.modalContent.innerHTML = `<p>You have unsaved changes. Are you sure you want to close without saving?</p>`;
@@ -1265,6 +1312,7 @@ function runApp(app) {
                 
                 cancelBtn.textContent = "Cancel";
 
+                // Clear any lingering generic listeners to prevent conflicts
                 discardBtn.onclick = null;
                 cancelBtn.onclick = null;
                 
@@ -1283,11 +1331,13 @@ function runApp(app) {
                     updateUndoRedoButtons();
                 };
 
+                // Use single-fire event listeners for safety
                 discardBtn.addEventListener('click', handleDiscard, { once: true });
                 cancelBtn.addEventListener('click', handleCancel, { once: true });
                 
                 break;
         }
+        
                     const printSpecificStyles = `@media print {
                                                     body { font-family: 'DM Sans', sans-serif; -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
                                                     h2 { font-family: 'Poppins', sans-serif; color: #1F2937; margin-top: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #F3F4F6; }
@@ -1673,4 +1723,5 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
