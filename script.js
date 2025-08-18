@@ -1814,6 +1814,8 @@ function runApp(app) {
     });
 
     // THIS IS THE NEW, CORRECTED CODE
+// File: script.js (replace the existing handleSaveToGoogleDoc function)
+
 async function handleSaveToGoogleDoc() {
     const saveButton = document.getElementById('modal-save-gdoc-btn');
     if (!saveButton) return;
@@ -1829,7 +1831,6 @@ async function handleSaveToGoogleDoc() {
         }
         
         // Convert the plan's HTML content into a plain text representation
-        // This creates a simpler, more readable format for the Google Doc
         let plainTextContent = `AI Action Plan: ${appState.planData.planName || 'Growth Plan'}\n`;
         plainTextContent += `Bakery: ${appState.planData.bakeryLocation || 'Your Bakery'}\n\n`;
 
@@ -1852,7 +1853,6 @@ async function handleSaveToGoogleDoc() {
                 plainTextContent += cells.join('\t|\t') + '\n';
             });
         } else {
-            // Fallback if no table is found, just use the inner text of the container
             plainTextContent = aiPlanContainer.innerText;
         }
 
@@ -1869,7 +1869,6 @@ async function handleSaveToGoogleDoc() {
             throw new Error(result.details || 'An unknown server error occurred.');
         }
         
-        // On success, notify the user and open the new document
         alert('Successfully created Google Doc!');
         window.open(result.url, '_blank');
         saveButton.innerHTML = `<i class="bi bi-check-circle-fill"></i> Saved!`;
@@ -1879,15 +1878,14 @@ async function handleSaveToGoogleDoc() {
         alert(`Failed to save to Google Docs: ${error.message}`);
         saveButton.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Error`;
     } finally {
-        // After 3 seconds, restore the button to its original state
         setTimeout(() => {
             saveButton.disabled = false;
             saveButton.innerHTML = originalHTML;
         }, 3000);
     }
 }
-
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
