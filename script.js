@@ -91,7 +91,6 @@ function runApp(app) {
         },
         saveTimeout: null,
         sessionTimeout: null,
-        // *** NEW: Add a variable to hold our real-time listener unsubscribe function
         planUnsubscribe: null,
     };
     
@@ -347,7 +346,6 @@ function runApp(app) {
 
     // --- AUTHENTICATION & APP FLOW ---
     auth.onAuthStateChanged(async (user) => {
-        // *** NEW: Unsubscribe from any active plan when auth state changes
         if (appState.planUnsubscribe) {
             appState.planUnsubscribe();
             appState.planUnsubscribe = null;
@@ -358,7 +356,7 @@ function runApp(app) {
             const MAX_INACTIVITY_PERIOD = 8 * 60 * 60 * 1000; // 8 hours
 
             if (lastActivity && (new Date().getTime() - lastActivity > MAX_INACTIVITY_PERIOD)) {
-                handleLogout(false, true); // Add a flag for revival logout
+                handleLogout(false, true);
                 return;
             }
 
@@ -399,7 +397,6 @@ function runApp(app) {
     });
 
     const handleLogout = (isTimeout = false, isRevival = false) => {
-        // *** NEW: Ensure we unsubscribe on logout
         if (appState.planUnsubscribe) {
             appState.planUnsubscribe();
             appState.planUnsubscribe = null;
@@ -422,7 +419,6 @@ function runApp(app) {
     // --- DASHBOARD LOGIC ---
     async function restoreLastView(planId, viewId) {
         appState.currentPlanId = planId;
-        // *** MODIFIED: This function will now set up the listener
         await setupPlanListener();
         DOMElements.dashboardView.classList.add('hidden');
         DOMElements.appView.classList.remove('hidden');
@@ -492,7 +488,6 @@ function runApp(app) {
 
     async function handleSelectPlan(planId) {
         appState.currentPlanId = planId;
-        // *** MODIFIED: This function will now set up the listener
         await setupPlanListener();
         DOMElements.dashboardView.classList.add('hidden');
         DOMElements.appView.classList.remove('hidden');
@@ -500,7 +495,6 @@ function runApp(app) {
     }
 
     function handleBackToDashboard() {
-        // *** NEW: Unsubscribe when going back to the dashboard
         if (appState.planUnsubscribe) {
             appState.planUnsubscribe();
             appState.planUnsubscribe = null;
@@ -515,10 +509,9 @@ function runApp(app) {
     }
 
     // --- DATA HANDLING ---
-    // *** NEW: This function replaces loadPlanFromFirestore and sets up the real-time listener
     function setupPlanListener() {
         if (appState.planUnsubscribe) {
-            appState.planUnsubscribe(); // Unsubscribe from previous listener if it exists
+            appState.planUnsubscribe();
         }
 
         if (!appState.currentUser || !appState.currentPlanId) {
@@ -532,9 +525,8 @@ function runApp(app) {
             if (doc.exists) {
                 const remoteData = doc.data();
                 appState.planData = remoteData;
-                // We call a new function to update the view, so we don't disrupt the user
                 updateViewWithRemoteData(remoteData); 
-                updateUI(); // Update sidebar, progress etc.
+                updateUI();
             } else {
                 console.log("No such document!");
                 appState.planData = {};
@@ -544,19 +536,15 @@ function runApp(app) {
         });
     }
 
-    // *** NEW: This function intelligently updates the UI from remote data
     function updateViewWithRemoteData(remoteData) {
-        // Only update if the app view is visible and we are not on the summary page
         if (DOMElements.appView.classList.contains('hidden') || appState.currentView === 'summary') {
             return;
         }
     
         document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
-            // *** CRITICAL: Only update the element if the user is NOT focused on it
             if (document.activeElement !== el) {
                 if (el.id && remoteData[el.id] !== undefined) {
                     if (el.isContentEditable) {
-                        // Avoid unnecessary UI flicker if content is the same
                         if (el.innerHTML !== remoteData[el.id]) {
                             el.innerHTML = remoteData[el.id];
                         }
@@ -567,11 +555,9 @@ function runApp(app) {
                     }
                 }
             }
-             // Always ensure placeholders are correctly managed
             if (el.isContentEditable) managePlaceholder(el);
         });
         
-        // Update pillar buttons
         document.querySelectorAll('.pillar-buttons').forEach(group => {
             const stepKey = group.dataset.stepKey;
             const dataKey = `${stepKey}_pillar`;
@@ -583,7 +569,6 @@ function runApp(app) {
             }
         });
 
-        // Update status buttons
         if (appState.currentView.startsWith('month-')) {
             const monthNum = appState.currentView.split('-')[1];
             document.querySelectorAll('.status-buttons').forEach(group => {
@@ -601,13 +586,11 @@ function runApp(app) {
 
 
     function saveData(forceImmediate = false) {
-        // This function's core logic remains largely the same, but it's now more of a "sender"
         if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
     
         const localChanges = {};
         const fieldsToDelete = {};
         
-        // Gather all current values from the DOM
         document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
             if (el.id) {
                 localChanges[el.id] = el.isContentEditable ? el.innerHTML : el.value;
@@ -639,7 +622,6 @@ function runApp(app) {
             });
         }
         
-        // *** OPTIMIZATION: Only save fields that have actually changed.
         const changedData = {};
         let hasChanges = false;
         for (const key in localChanges) {
@@ -649,7 +631,6 @@ function runApp(app) {
             }
         }
 
-        // Merge in any fields that need to be deleted
          for (const key in fieldsToDelete) {
             if(appState.planData[key] !== undefined){
                 changedData[key] = fieldsToDelete[key];
@@ -657,7 +638,6 @@ function runApp(app) {
             }
         }
         
-        // If nothing has changed, don't write to the database.
         if (!hasChanges && !forceImmediate) {
             return Promise.resolve();
         }
@@ -665,7 +645,7 @@ function runApp(app) {
         clearTimeout(appState.saveTimeout);
 
         const saveToFirestore = async () => {
-            if (Object.keys(changedData).length === 0) return; // Final check
+            if (Object.keys(changedData).length === 0) return;
 
             const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
             const dataToSave = {
@@ -673,11 +653,10 @@ function runApp(app) {
                 lastEdited: firebase.firestore.FieldValue.serverTimestamp()
             };
             
-            // We use `update` instead of `set` for efficiency, as we only send the changed fields.
             await docRef.update(dataToSave);
             
-            DOMElements.saveIndicator.classList.add('visible'); // Use a more explicit class
-            setTimeout(() => DOMElements.saveIndicator.classList.remove('visible'), 2000);
+            DOMElements.saveIndicator.classList.remove('opacity-0');
+            setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
         };
 
         if (forceImmediate) {
@@ -1035,9 +1014,10 @@ function runApp(app) {
                 const headers = table.querySelectorAll('thead th');
                 const sortableColumns = {
                     'Action Step': { index: 0, type: 'text' },
-                    'Owner': { index: 1, type: 'text' },
-                    'Due Date': { index: 2, type: 'date' },
-                    'Status': { index: 4, type: 'text' }
+                    'Pillar': { index: 1, type: 'text' },
+                    'Owner': { index: 2, type: 'text' },
+                    'Due Date': { index: 3, type: 'date' },
+                    'Status': { index: 5, type: 'text' }
                 };
 
                 headers.forEach((th) => {
@@ -1068,7 +1048,7 @@ function runApp(app) {
 
         makeTablesSortable(container);
 
-       const handleTableSort = (header) => {
+        const handleTableSort = (header) => {
             const table = header.closest('table');
             const tbody = table.querySelector('tbody');
             const columnIndex = parseInt(header.dataset.column, 10);
@@ -1095,30 +1075,24 @@ function runApp(app) {
                     const dateB = parseUkDate(valB);
 
                     if (dateA && dateB) {
-                        // Both dates are valid, compare them normally
                         compareResult = dateA.getTime() - dateB.getTime();
                     } else if (dateA && !dateB) {
-                        // A is valid, B is not. A comes first.
                         compareResult = -1;
                     } else if (!dateA && dateB) {
-                        // B is valid, A is not. B comes first.
                         compareResult = 1;
                     } else {
-                        // Both are invalid, so they are "equal" and stay in place.
                         compareResult = 0;
                     }
                 } else {
-                    // This is the original sorting for other columns
                     compareResult = valA.localeCompare(valB, undefined, {numeric: true});
                 }
                 
-                // Reverse the sort order if the direction is descending
                 return newDirection === 'asc' ? compareResult : -compareResult;
             });
             
             tbody.innerHTML = '';
             rows.forEach(row => tbody.appendChild(row));
-            saveState(); // Save the new sorted state
+            saveState();
         };
 
         container.addEventListener('click', (e) => {
@@ -1132,6 +1106,7 @@ function runApp(app) {
                 if (tableBody) {
                     const newRow = document.createElement('tr');
                     newRow.innerHTML = `
+                        <td contenteditable="true"></td>
                         <td contenteditable="true"></td>
                         <td contenteditable="true"></td>
                         <td contenteditable="true"></td>
@@ -1186,7 +1161,6 @@ function runApp(app) {
             const modalContent = document.getElementById('modal-content');
             modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${savedPlan}</div>`;
 
-            // Initialize history and setup interactivity
             undoStack = [];
             redoStack = [];
             saveState();
@@ -1836,4 +1810,3 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
