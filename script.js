@@ -91,6 +91,8 @@ function runApp(app) {
         },
         saveTimeout: null,
         sessionTimeout: null,
+        // *** NEW: Add a variable to hold our real-time listener unsubscribe function
+        planUnsubscribe: null,
     };
     
     let undoStack = [];
@@ -306,6 +308,12 @@ function runApp(app) {
 
     // --- AUTHENTICATION & APP FLOW ---
     auth.onAuthStateChanged(async (user) => {
+        // *** NEW: Unsubscribe from any active plan when auth state changes
+        if (appState.planUnsubscribe) {
+            appState.planUnsubscribe();
+            appState.planUnsubscribe = null;
+        }
+
         if (user) {
             const lastActivity = localStorage.getItem('lastActivity');
             const MAX_INACTIVITY_PERIOD = 8 * 60 * 60 * 1000; // 8 hours
@@ -352,6 +360,11 @@ function runApp(app) {
     });
 
     const handleLogout = (isTimeout = false, isRevival = false) => {
+        // *** NEW: Ensure we unsubscribe on logout
+        if (appState.planUnsubscribe) {
+            appState.planUnsubscribe();
+            appState.planUnsubscribe = null;
+        }
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         localStorage.removeItem('lastActivity');
@@ -370,11 +383,11 @@ function runApp(app) {
     // --- DASHBOARD LOGIC ---
     async function restoreLastView(planId, viewId) {
         appState.currentPlanId = planId;
-        await loadPlanFromFirestore();
+        // *** MODIFIED: This function will now set up the listener
+        await setupPlanListener();
         DOMElements.dashboardView.classList.add('hidden');
         DOMElements.appView.classList.remove('hidden');
         switchView(viewId);
-        updateUI();
     }
 
     async function renderDashboard() {
@@ -440,14 +453,19 @@ function runApp(app) {
 
     async function handleSelectPlan(planId) {
         appState.currentPlanId = planId;
-        await loadPlanFromFirestore();
+        // *** MODIFIED: This function will now set up the listener
+        await setupPlanListener();
         DOMElements.dashboardView.classList.add('hidden');
         DOMElements.appView.classList.remove('hidden');
         switchView('vision');
-        updateUI();
     }
 
     function handleBackToDashboard() {
+        // *** NEW: Unsubscribe when going back to the dashboard
+        if (appState.planUnsubscribe) {
+            appState.planUnsubscribe();
+            appState.planUnsubscribe = null;
+        }
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         appState.planData = {};
@@ -458,28 +476,102 @@ function runApp(app) {
     }
 
     // --- DATA HANDLING ---
-    async function loadPlanFromFirestore() {
+    // *** NEW: This function replaces loadPlanFromFirestore and sets up the real-time listener
+    function setupPlanListener() {
+        if (appState.planUnsubscribe) {
+            appState.planUnsubscribe(); // Unsubscribe from previous listener if it exists
+        }
+
         if (!appState.currentUser || !appState.currentPlanId) {
             appState.planData = {};
             return;
-        };
+        }
+
         const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
-        const docSnap = await docRef.get();
-        appState.planData = docSnap.exists ? docSnap.data() : {};
+        
+        appState.planUnsubscribe = docRef.onSnapshot((doc) => {
+            if (doc.exists) {
+                const remoteData = doc.data();
+                appState.planData = remoteData;
+                // We call a new function to update the view, so we don't disrupt the user
+                updateViewWithRemoteData(remoteData); 
+                updateUI(); // Update sidebar, progress etc.
+            } else {
+                console.log("No such document!");
+                appState.planData = {};
+            }
+        }, (error) => {
+            console.error("Error listening to plan changes:", error);
+        });
     }
 
+    // *** NEW: This function intelligently updates the UI from remote data
+    function updateViewWithRemoteData(remoteData) {
+        // Only update if the app view is visible and we are not on the summary page
+        if (DOMElements.appView.classList.contains('hidden') || appState.currentView === 'summary') {
+            return;
+        }
+    
+        document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
+            // *** CRITICAL: Only update the element if the user is NOT focused on it
+            if (document.activeElement !== el) {
+                if (el.id && remoteData[el.id] !== undefined) {
+                    if (el.isContentEditable) {
+                        // Avoid unnecessary UI flicker if content is the same
+                        if (el.innerHTML !== remoteData[el.id]) {
+                            el.innerHTML = remoteData[el.id];
+                        }
+                    } else {
+                        if (el.value !== remoteData[el.id]) {
+                            el.value = remoteData[el.id];
+                        }
+                    }
+                }
+            }
+             // Always ensure placeholders are correctly managed
+            if (el.isContentEditable) managePlaceholder(el);
+        });
+        
+        // Update pillar buttons
+        document.querySelectorAll('.pillar-buttons').forEach(group => {
+            const stepKey = group.dataset.stepKey;
+            const dataKey = `${stepKey}_pillar`;
+            const pillar = remoteData[dataKey];
+            group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+            if (pillar) {
+                const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
+                if (buttonToSelect) buttonToSelect.classList.add('selected');
+            }
+        });
+
+        // Update status buttons
+        if (appState.currentView.startsWith('month-')) {
+            const monthNum = appState.currentView.split('-')[1];
+            document.querySelectorAll('.status-buttons').forEach(group => {
+                const week = group.dataset.week;
+                const key = `m${monthNum}s5_w${week}_status`;
+                const status = remoteData[key];
+                group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+                if (status) {
+                    const buttonToSelect = group.querySelector(`[data-status="${status}"]`);
+                    if (buttonToSelect) buttonToSelect.classList.add('selected');
+                }
+            });
+        }
+    }
+
+
     function saveData(forceImmediate = false) {
+        // This function's core logic remains largely the same, but it's now more of a "sender"
         if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
-
+    
+        const localChanges = {};
         const fieldsToDelete = {};
-
+        
+        // Gather all current values from the DOM
         document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
             if (el.id) {
-                if (el.isContentEditable) {
-                    appState.planData[el.id] = el.innerHTML;
-                } else {
-                    appState.planData[el.id] = el.value;
-                }
+                localChanges[el.id] = el.isContentEditable ? el.innerHTML : el.value;
             }
         });
 
@@ -488,9 +580,8 @@ function runApp(app) {
             const selected = group.querySelector('.selected');
             const dataKey = `${stepKey}_pillar`;
             if (selected) {
-                appState.planData[dataKey] = selected.dataset.pillar;
+                localChanges[dataKey] = selected.dataset.pillar;
             } else {
-                delete appState.planData[dataKey];
                 fieldsToDelete[dataKey] = firebase.firestore.FieldValue.delete();
             }
         });
@@ -502,28 +593,52 @@ function runApp(app) {
                 const selected = group.querySelector('.selected');
                 const key = `m${monthNum}s5_w${week}_status`;
                 if (selected) {
-                    appState.planData[key] = selected.dataset.status;
+                    localChanges[key] = selected.dataset.status;
                 } else {
-                    delete appState.planData[key];
                     fieldsToDelete[key] = firebase.firestore.FieldValue.delete();
                 }
             });
         }
+        
+        // *** OPTIMIZATION: Only save fields that have actually changed.
+        const changedData = {};
+        let hasChanges = false;
+        for (const key in localChanges) {
+            if (localChanges[key] !== appState.planData[key]) {
+                changedData[key] = localChanges[key];
+                hasChanges = true;
+            }
+        }
 
-        updateUI();
+        // Merge in any fields that need to be deleted
+         for (const key in fieldsToDelete) {
+            if(appState.planData[key] !== undefined){
+                changedData[key] = fieldsToDelete[key];
+                hasChanges = true;
+            }
+        }
+        
+        // If nothing has changed, don't write to the database.
+        if (!hasChanges && !forceImmediate) {
+            return Promise.resolve();
+        }
 
         clearTimeout(appState.saveTimeout);
 
         const saveToFirestore = async () => {
+            if (Object.keys(changedData).length === 0) return; // Final check
+
             const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
             const dataToSave = {
-                ...appState.planData,
-                ...fieldsToDelete,
+                ...changedData,
                 lastEdited: firebase.firestore.FieldValue.serverTimestamp()
             };
-            await docRef.set(dataToSave, { merge: true });
-            DOMElements.saveIndicator.classList.remove('opacity-0');
-            setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
+            
+            // We use `update` instead of `set` for efficiency, as we only send the changed fields.
+            await docRef.update(dataToSave);
+            
+            DOMElements.saveIndicator.classList.add('visible'); // Use a more explicit class
+            setTimeout(() => DOMElements.saveIndicator.classList.remove('visible'), 2000);
         };
 
         if (forceImmediate) {
