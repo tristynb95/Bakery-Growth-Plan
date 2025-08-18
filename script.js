@@ -306,6 +306,45 @@ function runApp(app) {
         `,
     };
 
+    function parseUkDate(str) {
+        if (!str || str.trim() === '') return null;
+
+        // Tries to match various UK date formats like dd/mm/yyyy, d-m-yy, dd Mon yyyy
+        const dateRegex = /^\s*(\d{1,2})[\s\/-](\d{1,2}|[a-zA-Z]{3})[\s\/-](\d{2}|\d{4})\s*$/;
+        const match = str.trim().match(dateRegex);
+
+        if (!match) return null;
+
+        let [, day, month, year] = match;
+        
+        day = parseInt(day, 10);
+        year = parseInt(year, 10);
+
+        // Convert 2-digit years (e.g., 25 becomes 2025)
+        if (year < 100) {
+            year += 2000;
+        }
+
+        // Convert text months (e.g., 'Aug' to 7)
+        if (isNaN(month)) {
+            const monthMap = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+            month = monthMap[month.toLowerCase()];
+            if (month === undefined) return null;
+        } else {
+            // JS months are 0-indexed (e.g., January is 0)
+            month = parseInt(month, 10) - 1;
+        }
+        
+        const date = new Date(Date.UTC(year, month, day));
+
+        // Final check to ensure the constructed date is valid and its parts match the input
+        if (date.getUTCFullYear() === year && date.getUTCMonth() === month && date.getUTCDate() === day) {
+            return date;
+        }
+
+        return null;
+    }
+
     // --- AUTHENTICATION & APP FLOW ---
     auth.onAuthStateChanged(async (user) => {
         // *** NEW: Unsubscribe from any active plan when auth state changes
@@ -1029,7 +1068,7 @@ function runApp(app) {
 
         makeTablesSortable(container);
 
-        const handleTableSort = (header) => {
+       const handleTableSort = (header) => {
             const table = header.closest('table');
             const tbody = table.querySelector('tbody');
             const columnIndex = parseInt(header.dataset.column, 10);
@@ -1050,20 +1089,36 @@ function runApp(app) {
                 const valA = cellA ? cellA.innerText.trim() : '';
                 const valB = cellB ? cellB.innerText.trim() : '';
                 
-                let compare = 0;
+                let compareResult = 0;
                 if (sortType === 'date') {
-                    const dateA = valA.split('/').reverse().join('-');
-                    const dateB = valB.split('/').reverse().join('-');
-                    compare = new Date(dateA) - new Date(dateB);
+                    const dateA = parseUkDate(valA);
+                    const dateB = parseUkDate(valB);
+
+                    if (dateA && dateB) {
+                        // Both dates are valid, compare them normally
+                        compareResult = dateA.getTime() - dateB.getTime();
+                    } else if (dateA && !dateB) {
+                        // A is valid, B is not. A comes first.
+                        compareResult = -1;
+                    } else if (!dateA && dateB) {
+                        // B is valid, A is not. B comes first.
+                        compareResult = 1;
+                    } else {
+                        // Both are invalid, so they are "equal" and stay in place.
+                        compareResult = 0;
+                    }
                 } else {
-                    compare = valA.localeCompare(valB, undefined, {numeric: true});
+                    // This is the original sorting for other columns
+                    compareResult = valA.localeCompare(valB, undefined, {numeric: true});
                 }
-                return newDirection === 'asc' ? compare : -compare;
+                
+                // Reverse the sort order if the direction is descending
+                return newDirection === 'asc' ? compareResult : -compareResult;
             });
             
             tbody.innerHTML = '';
             rows.forEach(row => tbody.appendChild(row));
-            saveState();
+            saveState(); // Save the new sorted state
         };
 
         container.addEventListener('click', (e) => {
@@ -1781,3 +1836,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
