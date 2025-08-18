@@ -583,6 +583,10 @@ function runApp(app) {
                     if (buttonToSelect) buttonToSelect.classList.add('selected');
                 }
             });
+        // Add this block to the end of the updateViewWithRemoteData function
+        if (appState.currentView.startsWith('month-')) {
+            const monthNum = parseInt(appState.currentView.split('-')[1], 10);
+            updateWeeklyTabCompletion(monthNum, remoteData);
         }
     }
 
@@ -1870,6 +1874,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
