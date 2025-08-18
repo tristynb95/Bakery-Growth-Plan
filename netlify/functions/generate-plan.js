@@ -11,7 +11,7 @@ exports.handler = async function(event, context) {
     
     // Securely get the API key from the environment variables you set in Netlify
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"});
 
     // --- ENHANCED PROMPT FOR CONSISTENCY ---
     const prompt = `
@@ -98,7 +98,10 @@ exports.handler = async function(event, context) {
     });
 
     const response = await result.response;
-    const aiText = response.text();
+    let aiText = response.text();
+
+    // Clean the response on the server to remove markdown backticks
+    aiText = aiText.replace(/^```(html)?\s*/, '').replace(/```$/, '').trim();
 
     return {
       statusCode: 200,
