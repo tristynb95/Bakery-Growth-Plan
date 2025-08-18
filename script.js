@@ -541,7 +541,9 @@ function runApp(app) {
     function updateViewWithRemoteData(remoteData) {
         if (DOMElements.appView.classList.contains('hidden') || appState.currentView === 'summary') {
             return;
-            // Add this block to the end of the updateViewWithRemoteData function
+        }
+    
+        // Add this block to the end of the updateViewWithRemoteData function
         if (appState.currentView.startsWith('month-')) {
             const monthNum = parseInt(appState.currentView.split('-')[1], 10);
             updateWeeklyTabCompletion(monthNum, remoteData);
@@ -1880,6 +1882,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
