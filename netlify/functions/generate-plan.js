@@ -11,50 +11,92 @@ exports.handler = async function(event, context) {
     
     // Securely get the API key from the environment variables you set in Netlify
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"});
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
 
-    // --- UPDATED PROMPT TO ENFORCE BRITISH ENGLISH ---
+    // --- ENHANCED PROMPT FOR CONSISTENCY ---
     const prompt = `
-      You are an expert bakery operations manager tasked with creating a best-practice action plan from a manager's 90-day growth plan.
-      Your output must be a clean, self-contained HTML structure with tabs and three tables.
+      You are an expert bakery operations manager. Your task is to create a best-practice, tactical action plan from a manager's 90-day growth plan summary.
 
-      **Language Requirement:** You MUST write all responses and action steps using British English spelling and grammar (e.g., 'organise' instead of 'organize', 'centre' instead of 'center').
+      **Primary Goal:** Generate a clean, self-contained HTML structure with tabs and three tables (one for each month).
 
-      **Primary Goal:** Your main task is to generate three complete tables, one for each month of the 90-day plan, including a "Pillar" column populated with the correct value.
+      **Core Instructions:**
+      1.  **Language**: You MUST use British English spelling and grammar (e.g., 'organise', 'centre').
+      2.  **Analyse & Group**: Analyse the provided plan for Month 1, Month 2, and Month 3. Group similar or related tasks into single, actionable steps. For instance, 'Izzy to complete kitchen training' and 'Izzy to go into kitchen' should become one action like 'Organise kitchen training for Izzy'.
+      3.  **Assign Pillars**: For each action step, you MUST assign one of the following four pillars:
+          - **People**: Staff training, development, scheduling, morale.
+          - **Customer**: Customer experience, feedback, Net Promoter Score (NPS).
+          - **Product**: Product quality, availability, waste, delivery.
+          - **Place**: Bakery cleanliness, audits, presentation, maintenance, local marketing.
+      4.  **Strict HTML Structure**: The final output MUST be ONLY the HTML code block. Do not include markdown formatting like \`\`\`html.
 
-      **Pillar Definitions:**
-      You MUST assign one of the following four pillars to each action step:
-      - **People**: Use for anything related to staff, training, development, scheduling, or team morale.
-      - **Customer**: Use for anything directly relating to customers, customer experience, feedback, or Net Promoter Score (NPS).
-      - **Product**: Use for anything related to our products, quality, availability, waste, or delivery.
-      - **Place**: Use for anything related to the physical bakery, including cleanliness, audits, presentation, maintenance, or local marketing.
+      **Step-by-Step Thought Process (Chain-of-Thought):**
+      1.  First, I will read the entire plan summary to understand the key objectives for each month.
+      2.  Next, for each month, I will extract the specific tasks and goals.
+      3.  I will then consolidate related tasks into concise, clear action steps.
+      4.  For each action step, I will determine the most appropriate Pillar based on the definitions.
+      5.  Finally, I will construct the complete HTML response according to the exact structure specified in the example below, ensuring every required class, attribute, and element is present.
 
-      **Instructions:**
-      1.  Analyze the provided 90-day plan to find actions for Month 1, Month 2, and Month 3.
-      2.  The final output MUST be a single HTML block containing the full tabbed structure as described below.
-      3.  The HTML structure must be:
-          - A main container div: <div class="ai-action-plan-container">
-          - A tab navigation bar: <nav class="ai-tabs-nav">
-          - Three button elements for the tabs: "Month 1", "Month 2", and "Month 3".
-              - Each button should have the classes "btn btn-secondary ai-tab-btn", a "data-tab" attribute ("month1", "month2", "month3"), and the first button should also have the class "active".
-          - A tab content container: <div class="ai-tabs-content">
-          - Three tab panel divs, one for each month, with corresponding "data-tab-panel" attributes. The first panel should have the class "active".
-      4.  **Inside each of the three tab panels, you MUST create a complete HTML table (with <thead>, <tbody>, and <tfoot>).**
-      5.  The table header (<thead>) must contain the columns in this specific order: "Action Step", "Pillar", "Owner", "Due Date", "Resources / Support Needed", "Status", and "Actions".
-      6.  Populate the table body (<tbody>) with the action items for that specific month. Similar actions can be grouped (ie. "Izzy to complete kitchen training" and "Izzy to go into kitchen" would be 1 action.). 
-      7. For each row, you MUST assign the most appropriate pillar based on the definitions above.
-      8.  If a particular month has no actions, you must still generate the full table structure for that month, just with an empty <tbody>.
-      9.  For ALL table data cells (<td>) in the first six columns, add the attribute contenteditable="true".
-      10.  In the "Actions" column for each data row, add a delete button: <button class="btn-remove-row"><i class="bi bi-trash3"></i></button>.
-      11. Add a table footer (<tfoot>) to each of the three tables containing an "Add Row" button.
-      
+      **Output Format Example:**
+      <div class="ai-action-plan-container">
+        <nav class="ai-tabs-nav">
+          <button class="btn btn-secondary ai-tab-btn active" data-tab="month1">Month 1</button>
+          <button class="btn btn-secondary ai-tab-btn" data-tab="month2">Month 2</button>
+          <button class="btn btn-secondary ai-tab-btn" data-tab="month3">Month 3</button>
+        </nav>
+        <div class="ai-tabs-content">
+          <div class="active" data-tab-panel="month1">
+            <table>
+              <thead>
+                <tr>
+                  <th>Action Step</th>
+                  <th>Pillar</th>
+                  <th>Owner</th>
+                  <th>Due Date</th>
+                  <th>Resources / Support Needed</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td contenteditable="true">Review daily waste reports and adjust production pars.</td>
+                  <td contenteditable="true">Product</td>
+                  <td contenteditable="true">Manager</td>
+                  <td contenteditable="true">Ongoing</td>
+                  <td contenteditable="true">Waste reports, Production planning tool</td>
+                  <td contenteditable="true">To Do</td>
+                  <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-trash3"></i></button></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="7"><button class="btn-add-row"><i class="bi bi-plus-circle"></i> Add Row</button></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          </div>
+      </div>
+
       Here is the plan to analyse:
       ---
       ${planSummary}
       ---
     `;
 
-    const result = await model.generateContent(prompt);
+    // Added GenerationConfig for more predictable output
+    const generationConfig = {
+      temperature: 0.2,
+      topK: 1,
+      topP: 1,
+      maxOutputTokens: 8192,
+    };
+
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig,
+    });
+
     const response = await result.response;
     const aiText = response.text();
 
