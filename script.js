@@ -246,15 +246,13 @@ function runApp(app) {
                     <p class="text-gray-600 mb-6">Return here each week to log your progress, celebrate wins, and spotlight your team.</p>
                     
                     <div class="mb-6 border-b border-gray-200">
-<nav id="weekly-tabs" class="flex -mb-px space-x-6" aria-label="Tabs">
-    ${[1, 2, 3, 4].map(w => `
-        <a href="#" class="weekly-tab ${w === 1 ? 'active' : ''} flex items-center" data-week="${w}">
-            <span>Week ${w}</span>
-            <i class="bi bi-check-circle-fill week-complete-icon ml-2 hidden"></i>
-        </a>
-    `).join('')}
-</nav>
-</div>
+                        <nav id="weekly-tabs" class="flex -mb-px space-x-6" aria-label="Tabs">
+                            <a href="#" class="weekly-tab active" data-week="1">Week 1</a>
+                            <a href="#" class="weekly-tab" data-week="2">Week 2</a>
+                            <a href="#" class="weekly-tab" data-week="3">Week 3</a>
+                            <a href="#" class="weekly-tab" data-week="4">Week 4</a>
+                        </nav>
+                    </div>
 
                     <div id="weekly-tab-content">
                         ${[1, 2, 3, 4].map(w => `
@@ -511,8 +509,7 @@ function runApp(app) {
     }
 
     // --- DATA HANDLING ---
-   // New, more robust function to fetch initial data and then listen for changes.
-    async function setupPlanListener() {
+    function setupPlanListener() {
         if (appState.planUnsubscribe) {
             appState.planUnsubscribe();
         }
@@ -523,96 +520,20 @@ function runApp(app) {
         }
 
         const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
-
-        // FIX: First, explicitly GET the initial data and wait for it.
-        try {
-            const doc = await docRef.get();
-            if (doc.exists) {
-                appState.planData = doc.data();
-            } else {
-                console.log("No such document on initial load!");
-                appState.planData = {};
-                handleBackToDashboard(); // Or handle error appropriately
-            }
-        } catch (error) {
-            console.error("Error fetching initial plan data:", error);
-            handleBackToDashboard();
-        }
-
-        // THEN, set up the real-time listener for any subsequent updates.
+        
         appState.planUnsubscribe = docRef.onSnapshot((doc) => {
             if (doc.exists) {
                 const remoteData = doc.data();
-                // Only update if there are actual changes to avoid cursor jumps
-                if (JSON.stringify(remoteData) !== JSON.stringify(appState.planData)) {
-                    appState.planData = remoteData;
-                    updateViewWithRemoteData(remoteData);
-                    updateUI();
-                }
+                appState.planData = remoteData;
+                updateViewWithRemoteData(remoteData); 
+                updateUI();
+            } else {
+                console.log("No such document!");
+                appState.planData = {};
             }
         }, (error) => {
             console.error("Error listening to plan changes:", error);
         });
-    }
-
-    // Updated to handle summary view rendering correctly after data load.
-    function updateViewWithRemoteData(remoteData) {
-        // If the current view is summary, re-render it with the new data.
-        if (appState.currentView === 'summary') {
-            renderSummary();
-            return;
-        }
-
-        if (DOMElements.appView.classList.contains('hidden')) {
-            return;
-        }
-    
-        if (appState.currentView.startsWith('month-')) {
-            const monthNum = parseInt(appState.currentView.split('-')[1], 10);
-            updateWeeklyTabCompletion(monthNum, remoteData);
-        }
-    
-        document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
-            if (document.activeElement !== el) {
-                if (el.id && remoteData[el.id] !== undefined) {
-                    if (el.isContentEditable) {
-                        if (el.innerHTML !== remoteData[el.id]) {
-                            el.innerHTML = remoteData[el.id];
-                        }
-                    } else {
-                        if (el.value !== remoteData[el.id]) {
-                            el.value = remoteData[el.id];
-                        }
-                    }
-                }
-            }
-            if (el.isContentEditable) managePlaceholder(el);
-        });
-        
-        document.querySelectorAll('.pillar-buttons').forEach(group => {
-            const stepKey = group.dataset.stepKey;
-            const dataKey = `${stepKey}_pillar`;
-            const pillar = remoteData[dataKey];
-            group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
-            if (pillar) {
-                const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
-                if (buttonToSelect) buttonToSelect.classList.add('selected');
-            }
-        });
-
-        if (appState.currentView.startsWith('month-')) {
-            const monthNum = appState.currentView.split('-')[1];
-            document.querySelectorAll('.status-buttons').forEach(group => {
-                const week = group.dataset.week;
-                const key = `m${monthNum}s5_w${week}_status`;
-                const status = remoteData[key];
-                group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
-                if (status) {
-                    const buttonToSelect = group.querySelector(`[data-status="${status}"]`);
-                    if (buttonToSelect) buttonToSelect.classList.add('selected');
-                }
-            });
-        }
     }
 
     function updateViewWithRemoteData(remoteData) {
@@ -620,12 +541,6 @@ function runApp(app) {
             return;
         }
     
-        // Add this block to the end of the updateViewWithRemoteData function
-        if (appState.currentView.startsWith('month-')) {
-            const monthNum = parseInt(appState.currentView.split('-')[1], 10);
-            updateWeeklyTabCompletion(monthNum, remoteData);
-        }
-    
         document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
             if (document.activeElement !== el) {
                 if (el.id && remoteData[el.id] !== undefined) {
@@ -670,12 +585,12 @@ function runApp(app) {
     }
 
 
-  function saveData(forceImmediate = false, directPayload = null) {
+    function saveData(forceImmediate = false) {
         if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
-
+    
         const localChanges = {};
         const fieldsToDelete = {};
-
+        
         document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
             if (el.id) {
                 localChanges[el.id] = el.isContentEditable ? el.innerHTML : el.value;
@@ -706,7 +621,7 @@ function runApp(app) {
                 }
             });
         }
-
+        
         const changedData = {};
         let hasChanges = false;
         for (const key in localChanges) {
@@ -716,37 +631,30 @@ function runApp(app) {
             }
         }
 
-        for (const key in fieldsToDelete) {
-            if (appState.planData[key] !== undefined) {
+         for (const key in fieldsToDelete) {
+            if(appState.planData[key] !== undefined){
                 changedData[key] = fieldsToDelete[key];
                 hasChanges = true;
             }
         }
-
-        if (directPayload) {
-            for (const key in directPayload) {
-                if (directPayload[key] !== appState.planData[key]) {
-                    changedData[key] = directPayload[key];
-                    hasChanges = true;
-                }
-            }
-        }
-
-        if (!hasChanges) {
+        
+        if (!hasChanges && !forceImmediate) {
             return Promise.resolve();
         }
 
         clearTimeout(appState.saveTimeout);
 
         const saveToFirestore = async () => {
+            if (Object.keys(changedData).length === 0) return;
+
             const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
             const dataToSave = {
                 ...changedData,
                 lastEdited: firebase.firestore.FieldValue.serverTimestamp()
             };
-
+            
             await docRef.update(dataToSave);
-
+            
             DOMElements.saveIndicator.classList.remove('opacity-0');
             setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
         };
@@ -762,7 +670,7 @@ function runApp(app) {
             });
         }
     }
-    
+
     // --- UI & RENDER LOGIC ---
     function updateUI() {
         updateSidebarInfo();
@@ -797,36 +705,7 @@ function runApp(app) {
         const completed = requiredFields.filter(field => !isContentEmpty(data[field])).length;
         return { completed, total };
     }
-    
-function isWeekComplete(monthNum, weekNum, planData) {
-        const data = planData || appState.planData;
-        const status = data[`m${monthNum}s5_w${weekNum}_status`];
-        const win = data[`m${monthNum}s5_w${weekNum}_win`];
-        const spotlight = data[`m${monthNum}s5_w${weekNum}_spotlight`];
 
-        const isContentEmpty = (htmlContent) => {
-            if (!htmlContent) return true;
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlContent;
-            return tempDiv.innerText.trim() === '';
-        };
-
-        return !!status && !isContentEmpty(win) && !isContentEmpty(spotlight);
-    }
-
-    function updateWeeklyTabCompletion(monthNum, planData) {
-        for (let w = 1; w <= 4; w++) {
-            const isComplete = isWeekComplete(monthNum, w, planData);
-            const tab = document.querySelector(`.weekly-tab[data-week="${w}"]`);
-            if (tab) {
-                const tickIcon = tab.querySelector('.week-complete-icon');
-                if (tickIcon) {
-                    tickIcon.classList.toggle('hidden', !isComplete);
-                }
-            }
-        }
-    }
-    
     function getMonthProgress(monthNum, planData) {
         const data = planData || appState.planData;
         const isContentEmpty = (htmlContent) => {
@@ -841,14 +720,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
             `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
             `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
         ];
-
-        // FIX: Add all 12 weekly check-in fields to the progress calculation
-        for (let w = 1; w <= 4; w++) {
-            requiredFields.push(`m${monthNum}s5_w${w}_status`);
-            requiredFields.push(`m${monthNum}s5_w${w}_win`);
-            requiredFields.push(`m${monthNum}s5_w${w}_spotlight`);
-        }
-
         if (monthNum == 3) {
             requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
         }
@@ -992,18 +863,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
 
     function renderSummary() {
         const formData = appState.planData;
-
-        // FIX: Upgraded the 'e' helper to correctly handle empty HTML
-        const e = (html) => {
-            if (!html) return '...'; // Handles null, undefined, ""
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
-            if (tempDiv.innerText.trim() === '') {
-                return '...'; // Handles '<p></p>', '<br>', etc.
-            }
-            return html; // Return the original html if it has content
-        };
-
+        const e = (html) => (html || '...');
         const isContentEmpty = (htmlContent) => {
             if (!htmlContent) return true;
             const tempDiv = document.createElement('div');
@@ -1358,25 +1218,20 @@ function isWeekComplete(monthNum, weekNum, planData) {
         }
     }
 
-   async function saveActionPlan() {
+    async function saveActionPlan() {
         const editedContent = document.getElementById('ai-printable-area').innerHTML;
+        appState.planData.aiActionPlan = editedContent;
         
-        // DO NOT update the local state here. Send the change directly.
-        // appState.planData.aiActionPlan = editedContent; // This was the line causing the bug.
-
         const saveButton = DOMElements.modalActionBtn;
         const originalHTML = saveButton.innerHTML;
         saveButton.disabled = true;
         saveButton.innerHTML = `<i class="bi bi-check-circle-fill"></i> Saved!`;
 
-        // Pass the new content directly to our robust saveData function.
-        // It will compare it to the old state and save the change.
-        await saveData(true, { aiActionPlan: editedContent });
+        await saveData(true);
 
         const printableArea = document.getElementById('ai-printable-area');
         if (printableArea) {
-            // The undo stack should be reset after a successful save.
-            undoStack = [editedContent];
+            undoStack = [printableArea.innerHTML];
             redoStack = [];
             updateUndoRedoButtons();
         }
@@ -1386,6 +1241,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
             saveButton.innerHTML = originalHTML;
         }, 2000);
     }
+
     function handleRegenerateActionPlan() {
         openModal('confirmRegenerate');
     }
@@ -1439,21 +1295,14 @@ function isWeekComplete(monthNum, weekNum, planData) {
         DOMElements.modalBox.dataset.type = type;
         DOMElements.modalBox.dataset.planId = planId;
 
-        const modalHeader = DOMElements.modalTitle.parentNode;
         const footer = DOMElements.modalActionBtn.parentNode;
-        
-        // Clear any dynamic elements from previous modal openings
         footer.classList.remove('is-confirming');
         footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
-        modalHeader.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
-
-        // Reset default button states
         DOMElements.modalActionBtn.style.display = 'inline-flex';
         DOMElements.modalCancelBtn.style.display = 'inline-flex';
-        footer.style.justifyContent = 'flex-end'; // Default alignment
-
         DOMElements.modalActionBtn.onclick = handleModalAction;
         DOMElements.modalCancelBtn.onclick = requestCloseModal;
+
 
         switch (type) {
             case 'create':
@@ -1505,60 +1354,30 @@ function isWeekComplete(monthNum, weekNum, planData) {
             case 'aiActionPlan_view': {
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
                 
-                // --- FOOTER BUTTONS ---
-                footer.style.justifyContent = 'space-between'; // Space out left and right button groups
-                DOMElements.modalCancelBtn.style.display = 'none';
-
-                // 1. Create and place Undo/Redo buttons on the bottom left
-                const undoRedoFooterContainer = document.createElement('div');
-                undoRedoFooterContainer.className = 'flex items-center gap-2 dynamic-btn';
-
-                const undoBtn = document.createElement('button');
-                undoBtn.id = 'undo-btn';
-                undoBtn.className = 'btn btn-secondary !p-2';
-                undoBtn.title = 'Undo';
-                undoBtn.innerHTML = `<i class="bi bi-arrow-counterclockwise text-lg"></i>`;
-                undoBtn.onclick = undo;
-
-                const redoBtn = document.createElement('button');
-                redoBtn.id = 'redo-btn';
-                redoBtn.className = 'btn btn-secondary !p-2';
-                redoBtn.title = 'Redo';
-                redoBtn.innerHTML = `<i class="bi bi-arrow-clockwise text-lg"></i>`;
-                redoBtn.onclick = redo;
-
-                undoRedoFooterContainer.appendChild(undoBtn);
-                undoRedoFooterContainer.appendChild(redoBtn);
-                footer.insertBefore(undoRedoFooterContainer, footer.firstChild);
-
-                // 2. Group Generate New, Print, and Save buttons on the bottom right
-                const rightButtonsContainer = document.createElement('div');
-                rightButtonsContainer.className = 'flex items-center gap-2 dynamic-btn';
-
+                const undoRedoContainer = document.createElement('div');
+                undoRedoContainer.className = 'undo-redo-container dynamic-btn';
+                undoRedoContainer.innerHTML = `
+                    <button id="undo-btn" class="btn btn-secondary btn-icon" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button>
+                    <button id="redo-btn" class="btn btn-secondary btn-icon" title="Redo"><i class="bi bi-arrow-clockwise"></i></button>
+                `;
                 const regenButton = document.createElement('button');
                 regenButton.id = 'modal-regen-btn';
-                regenButton.className = 'btn btn-secondary';
+                regenButton.className = 'btn btn-secondary dynamic-btn';
                 regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
-                regenButton.onclick = handleRegenerateActionPlan;
 
                 const printBtn = document.createElement('button');
                 printBtn.id = 'modal-print-btn';
-                printBtn.className = 'btn btn-secondary';
+                printBtn.className = 'btn btn-secondary dynamic-btn';
                 printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
-
-                // Add buttons to the container
-                rightButtonsContainer.appendChild(regenButton);
-                rightButtonsContainer.appendChild(printBtn);
                 
-                // Move the existing "Save Changes" button into the container
-                DOMElements.modalActionBtn.textContent = "Save Changes";
-                DOMElements.modalActionBtn.className = 'btn btn-primary';
-                DOMElements.modalActionBtn.onclick = saveActionPlan;
-                rightButtonsContainer.appendChild(DOMElements.modalActionBtn);
+                footer.insertBefore(undoRedoContainer, footer.firstChild);
+                footer.insertBefore(regenButton, DOMElements.modalActionBtn);
+                footer.insertBefore(printBtn, DOMElements.modalActionBtn);
                 
-                // Add the whole container to the footer
-                footer.appendChild(rightButtonsContainer);
-
+                regenButton.onclick = handleRegenerateActionPlan;
+                document.getElementById('undo-btn').onclick = undo;
+                document.getElementById('redo-btn').onclick = redo;
+                
                 printBtn.onclick = () => {
                     const aiPlanContainer = document.getElementById('ai-printable-area');
                     const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
@@ -1588,7 +1407,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
                         th, td { border: 1px solid #E5E7EB; padding: 10px 12px; text-align: left; vertical-align: top; }
                         thead { display: table-header-group; }
                         th { background-color: #F9FAFB; font-weight: 600; color: #374151; }
-                        th:last-child, td:last-child { display: none !important; }
                     `;
 
                     const printWindow = window.open('', '', 'height=800,width=1200');
@@ -1602,6 +1420,10 @@ function isWeekComplete(monthNum, weekNum, planData) {
 
                     setTimeout(() => { printWindow.print(); }, 500);
                 };
+
+                DOMElements.modalActionBtn.textContent = "Save Changes";
+                DOMElements.modalActionBtn.className = 'btn btn-primary';
+                DOMElements.modalActionBtn.onclick = saveActionPlan;
                 
                 updateUndoRedoButtons();
                 break;
@@ -1988,19 +1810,3 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
