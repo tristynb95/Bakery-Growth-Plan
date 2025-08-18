@@ -1245,16 +1245,23 @@ function runApp(app) {
         const { planId, currentName, planName } = context;
         DOMElements.modalBox.dataset.type = type;
         DOMElements.modalBox.dataset.planId = planId;
+
         const modalHeader = DOMElements.modalTitle.parentNode;
         const footer = DOMElements.modalActionBtn.parentNode;
+        
+        // Clear any dynamic elements from previous modal openings
         footer.classList.remove('is-confirming');
         footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
         modalHeader.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
+
+        // Reset default button states
         DOMElements.modalActionBtn.style.display = 'inline-flex';
         DOMElements.modalCancelBtn.style.display = 'inline-flex';
-        footer.style.justifyContent = 'flex-end';
+        footer.style.justifyContent = 'flex-end'; // Default alignment
+
         DOMElements.modalActionBtn.onclick = handleModalAction;
         DOMElements.modalCancelBtn.onclick = requestCloseModal;
+
         switch (type) {
             case 'create':
                 DOMElements.modalTitle.textContent = "Create New Plan";
@@ -1304,49 +1311,61 @@ function runApp(app) {
                 break;
             case 'aiActionPlan_view': {
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
-                footer.style.justifyContent = 'space-between';
+                
+                // --- FOOTER BUTTONS ---
+                footer.style.justifyContent = 'space-between'; // Space out left and right button groups
                 DOMElements.modalCancelBtn.style.display = 'none';
+
+                // 1. Create and place Undo/Redo buttons on the bottom left
                 const undoRedoFooterContainer = document.createElement('div');
                 undoRedoFooterContainer.className = 'flex items-center gap-2 dynamic-btn';
+
                 const undoBtn = document.createElement('button');
                 undoBtn.id = 'undo-btn';
                 undoBtn.className = 'btn btn-secondary !p-2';
                 undoBtn.title = 'Undo';
                 undoBtn.innerHTML = `<i class="bi bi-arrow-counterclockwise text-lg"></i>`;
                 undoBtn.onclick = undo;
+
                 const redoBtn = document.createElement('button');
                 redoBtn.id = 'redo-btn';
                 redoBtn.className = 'btn btn-secondary !p-2';
                 redoBtn.title = 'Redo';
                 redoBtn.innerHTML = `<i class="bi bi-arrow-clockwise text-lg"></i>`;
                 redoBtn.onclick = redo;
+
                 undoRedoFooterContainer.appendChild(undoBtn);
                 undoRedoFooterContainer.appendChild(redoBtn);
                 footer.insertBefore(undoRedoFooterContainer, footer.firstChild);
+
+                // 2. Group Generate New, Print, and Save buttons on the bottom right
                 const rightButtonsContainer = document.createElement('div');
                 rightButtonsContainer.className = 'flex items-center gap-2 dynamic-btn';
+
                 const regenButton = document.createElement('button');
                 regenButton.id = 'modal-regen-btn';
                 regenButton.className = 'btn btn-secondary';
                 regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
                 regenButton.onclick = handleRegenerateActionPlan;
+
                 const printBtn = document.createElement('button');
                 printBtn.id = 'modal-print-btn';
                 printBtn.className = 'btn btn-secondary';
                 printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
-                const downloadBtn = document.createElement('button');
-                downloadBtn.id = 'modal-download-btn';
-                downloadBtn.className = 'btn btn-secondary';
-                downloadBtn.innerHTML = `<i class="bi bi-file-earmark-word-fill"></i> Download`;
-                downloadBtn.onclick = handleWordExport;
+
+                // Add buttons to the container
                 rightButtonsContainer.appendChild(regenButton);
                 rightButtonsContainer.appendChild(printBtn);
-                rightButtonsContainer.appendChild(downloadBtn);
+                
+                // Move the existing "Save Changes" button into the container
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
                 DOMElements.modalActionBtn.onclick = saveActionPlan;
                 rightButtonsContainer.appendChild(DOMElements.modalActionBtn);
+                
+                // Add the whole container to the footer
                 footer.appendChild(rightButtonsContainer);
+
                 printBtn.onclick = () => {
                     const aiPlanContainer = document.getElementById('ai-printable-area');
                     const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
@@ -1376,6 +1395,7 @@ function runApp(app) {
                     printWindow.document.close();
                     setTimeout(() => { printWindow.print(); }, 500);
                 };
+                
                 updateUndoRedoButtons();
                 break;
             }
@@ -1729,3 +1749,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
