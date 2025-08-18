@@ -1249,10 +1249,7 @@ function runApp(app) {
         const footer = DOMElements.modalActionBtn.parentNode;
         
         // --- ROBUST CLEANUP ---
-        // 1. Remove any buttons that were dynamically added in previous modal states
         footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
-        
-        // 2. Reset the default buttons to a clean state
         DOMElements.modalActionBtn.style.display = 'inline-flex';
         DOMElements.modalCancelBtn.style.display = 'inline-flex';
         DOMElements.modalActionBtn.className = 'btn btn-primary';
@@ -1261,9 +1258,9 @@ function runApp(app) {
         DOMElements.modalCancelBtn.textContent = 'Cancel';
         DOMElements.modalActionBtn.disabled = false;
         DOMElements.modalCancelBtn.disabled = false;
-        DOMElements.modalActionBtn.onclick = handleModalAction; // Re-assign default handler
-        DOMElements.modalCancelBtn.onclick = requestCloseModal; // Re-assign default handler
-        footer.style.justifyContent = 'flex-end'; // Reset alignment to default
+        DOMElements.modalActionBtn.onclick = handleModalAction;
+        DOMElements.modalCancelBtn.onclick = requestCloseModal;
+        footer.style.justifyContent = 'flex-end';
         // --- END CLEANUP ---
 
         switch (type) {
@@ -1309,11 +1306,10 @@ function runApp(app) {
                 break;
             case 'aiActionPlan_view': {
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
-                footer.style.justifyContent = 'space-between'; // Arrange buttons on left and right
+                footer.style.justifyContent = 'space-between';
                 
-                // Left side: Create Undo/Redo buttons dynamically
                 const undoRedoContainer = document.createElement('div');
-                undoRedoContainer.className = 'undo-redo-container dynamic-btn'; // Mark for cleanup
+                undoRedoContainer.className = 'undo-redo-container dynamic-btn';
                 
                 const undoBtn = document.createElement('button');
                 undoBtn.id = 'undo-btn';
@@ -1333,28 +1329,62 @@ function runApp(app) {
                 undoRedoContainer.appendChild(redoBtn);
                 footer.insertBefore(undoRedoContainer, footer.firstChild);
                 
-                // Right side: Create Generate/Print buttons dynamically
                 const regenButton = document.createElement('button');
                 regenButton.id = 'modal-regen-btn';
-                regenButton.className = 'btn btn-secondary dynamic-btn'; // Mark for cleanup
+                regenButton.className = 'btn btn-secondary dynamic-btn';
                 regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
                 regenButton.onclick = handleRegenerateActionPlan;
                 
                 const printBtn = document.createElement('button');
                 printBtn.id = 'modal-print-btn';
-                printBtn.className = 'btn btn-secondary dynamic-btn'; // Mark for cleanup
+                printBtn.className = 'btn btn-secondary dynamic-btn';
                 printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
-                printBtn.onclick = () => { /* Existing print logic remains unchanged */ };
+                printBtn.onclick = () => {
+                    const aiPlanContainer = document.getElementById('ai-printable-area');
+                    const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
+                    const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
 
-                // Modify the default action button to act as "Save Changes"
+                    if (!activeTabPanel || !activeTabButton) {
+                        alert("Could not find the active month to print.");
+                        return;
+                    }
+
+                    const monthTitle = `${activeTabButton.textContent} Action Plan`;
+                    const printNode = activeTabPanel.cloneNode(true);
+                    printNode.querySelectorAll('.actions-cell, .btn-remove-row, tfoot').forEach(el => el.remove());
+                    
+                    const printableHTML = printNode.innerHTML;
+                    
+                    const printStyles = `
+                        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@700;900&display=swap');
+                        @page { size: A4; margin: 25mm; } 
+                        body { font-family: 'DM Sans', sans-serif; color: #1F2937; }
+                        .print-header { text-align: center; border-bottom: 2px solid #D10A11; padding-bottom: 15px; margin-bottom: 25px; }
+                        .print-header h1 { font-family: 'Poppins', sans-serif; font-size: 24pt; color: #1F2937; margin: 0; }
+                        .print-header h2 { font-family: 'Poppins', sans-serif; font-size: 16pt; color: #D10A11; margin-top: 5px; margin-bottom: 5px; font-weight: 700; }
+                        .print-header p { font-size: 11pt; color: #6B7280; margin: 5px 0 0; }
+                        table { width: 100%; border-collapse: collapse; font-size: 9pt; page-break-inside: auto; }
+                        tr { page-break-inside: avoid; page-break-after: auto; }
+                        th, td { border: 1px solid #E5E7EB; padding: 10px 12px; text-align: left; vertical-align: top; }
+                        thead { display: table-header-group; } 
+                        th { background-color: #F9FAFB; font-weight: 600; color: #374151; }
+                        th:last-child, td:last-child { display: none !important; }`;
+                    
+                    const printWindow = window.open('', '', 'height=800,width=1200');
+                    printWindow.document.write(`<html><head><title>AI Action Plan</title><style>${printStyles}</style></head><body>`);
+                    printWindow.document.write(`<div class="print-header"><h1>AI Action Plan</h1><h2>${monthTitle}</h2><p>${appState.planData.planName || 'Growth Plan'} | ${appState.planData.bakeryLocation || 'Your Bakery'}</p></div>`);
+                    printWindow.document.write(printableHTML);
+                    printWindow.document.write('</body></html>');
+                    printWindow.document.close();
+                    setTimeout(() => { printWindow.print(); }, 500);
+                };
+
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.onclick = saveActionPlan;
                 
-                // Insert the new buttons before the "Save Changes" button
                 footer.insertBefore(regenButton, DOMElements.modalActionBtn);
                 footer.insertBefore(printBtn, DOMElements.modalActionBtn);
                 
-                // Hide the default cancel button, as the 'X' is used for closing this modal
                 DOMElements.modalCancelBtn.style.display = 'none';
                 
                 updateUndoRedoButtons();
@@ -1373,10 +1403,7 @@ function runApp(app) {
 
                 DOMElements.modalCancelBtn.textContent = "Cancel";
                 DOMElements.modalCancelBtn.onclick = () => {
-                    // Re-open the main AI view to go back
                     openModal('aiActionPlan_view'); 
-                    
-                    // Restore the user's unsaved content from the undo stack
                     const modalContent = document.getElementById('modal-content');
                     const lastUnsavedState = undoStack.length > 0 ? undoStack[undoStack.length - 1] : appState.planData.aiActionPlan || '';
                     modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${lastUnsavedState}</div>`;
@@ -1392,7 +1419,7 @@ function runApp(app) {
 
                 DOMElements.modalCancelBtn.textContent = "Cancel";
                 DOMElements.modalCancelBtn.onclick = () => {
-                    openModal('aiActionPlan_view'); // Go back to the editor
+                    openModal('aiActionPlan_view');
                     const lastUnsavedState = undoStack[undoStack.length - 1];
                     const modalContent = document.getElementById('modal-content');
                     modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${lastUnsavedState}</div>`;
@@ -1403,7 +1430,6 @@ function runApp(app) {
         }
         DOMElements.modalOverlay.classList.remove('hidden');
     }
-    
     function closeModal() {
         document.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
         DOMElements.modalActionBtn.onclick = null;
@@ -1709,4 +1735,5 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
