@@ -41,11 +41,12 @@ exports.handler = async function(event, context) {
           - Three tab panel divs, one for each month, with corresponding "data-tab-panel" attributes. The first panel should have the class "active".
       4.  **Inside each of the three tab panels, you MUST create a complete HTML table (with <thead>, <tbody>, and <tfoot>).**
       5.  The table header (<thead>) must contain the columns in this specific order: "Action Step", "Pillar", "Owner", "Due Date", "Resources / Support Needed", "Status", and "Actions".
-      6.  Populate the table body (<tbody>) with the action items for that specific month. For each row, you MUST assign the most appropriate pillar based on the definitions above.
-      7.  If a particular month has no actions, you must still generate the full table structure for that month, just with an empty <tbody>.
-      8.  For ALL table data cells (<td>) in the first six columns, add the attribute contenteditable="true".
-      9.  In the "Actions" column for each data row, add a delete button: <button class="btn-remove-row"><i class="bi bi-trash3"></i></button>.
-      10. Add a table footer (<tfoot>) to each of the three tables containing an "Add Row" button.
+      6.  Populate the table body (<tbody>) with the action items for that specific month. Similar actions can be grouped (ie. "Izzy to complete kitchen training" and "Izzy to go into kitchen" would be 1 action.). 
+      7. For each row, you MUST assign the most appropriate pillar based on the definitions above.
+      8.  If a particular month has no actions, you must still generate the full table structure for that month, just with an empty <tbody>.
+      9.  For ALL table data cells (<td>) in the first six columns, add the attribute contenteditable="true".
+      10.  In the "Actions" column for each data row, add a delete button: <button class="btn-remove-row"><i class="bi bi-trash3"></i></button>.
+      11. Add a table footer (<tfoot>) to each of the three tables containing an "Add Row" button.
       
       Here is the plan to analyse:
       ---
