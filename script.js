@@ -246,14 +246,15 @@ function runApp(app) {
                     <p class="text-gray-600 mb-6">Return here each week to log your progress, celebrate wins, and spotlight your team.</p>
                     
                     <div class="mb-6 border-b border-gray-200">
-    <nav id="weekly-tabs" class="flex -mb-px space-x-6" aria-label="Tabs">
-        ${[1, 2, 3, 4].map(w => `
-            <a href="#" class="weekly-tab ${w === 1 ? 'active' : ''} flex items-center" data-week="${w}">
-                <span>Week ${w}</span>
-                <i class="bi bi-check-circle-fill week-complete-icon text-green-500 ml-2 hidden"></i>
-            </a>
-        `).join('')}
-    </nav>
+    // This is inside the templates.month function
+<nav id="weekly-tabs" class="flex -mb-px space-x-6" aria-label="Tabs">
+    ${[1, 2, 3, 4].map(w => `
+        <a href="#" class="weekly-tab ${w === 1 ? 'active' : ''} flex items-center" data-week="${w}">
+            <span>Week ${w}</span>
+            <i class="bi bi-check-circle-fill week-complete-icon ml-2 hidden"></i>
+        </a>
+    `).join('')}
+</nav>
 </div>
 
                     <div id="weekly-tab-content">
@@ -1882,6 +1883,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
