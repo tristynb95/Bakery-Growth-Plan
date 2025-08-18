@@ -1,1 +1,1 @@
-https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.65.3/docxtemplater.js
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.65.3/docxtemplater.js" integrity="sha512-TPaCSWrJdMQxekz2H4E64yo88utk4qcUtkN3+ujdhWAzcdjrNR+Xb6UmDJ6VH1Afefg4IvcUlcGUKAwIf79Cew==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
