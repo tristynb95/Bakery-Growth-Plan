@@ -896,3 +896,18 @@ tr:hover .btn-remove-row {
 .modal-footer.is-confirming {
     justify-content: center;
 }
+
+/* 35. Weekly Tab Completion Tick
+-------------------------------------------------- */
+.week-complete-icon {
+    font-size: 0.9em; /* Make the icon slightly smaller */
+    line-height: 1;
+    transform: translateY(-1px); /* Nudge up for better alignment */
+    transition: color 0.2s ease-in-out;
+    color: var(--gails-green); /* Set the default color to green */
+}
+
+/* When a tab is active AND complete, make the tick red to match */
+.weekly-tab.active .week-complete-icon {
+    color: var(--gails-red);
+}
