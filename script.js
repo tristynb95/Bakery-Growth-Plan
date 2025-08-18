@@ -1218,19 +1218,17 @@ function runApp(app) {
         }
     }
 
-    async function saveActionPlan() {
+   async function saveActionPlan() {
     const editedContent = document.getElementById('ai-printable-area').innerHTML;
-    
-    // FIX: Update the local state immediately after grabbing the edited content.
-    appState.planData.aiActionPlan = editedContent; 
+    appState.planData.aiActionPlan = editedContent;
 
     const saveButton = DOMElements.modalActionBtn;
     const originalHTML = saveButton.innerHTML;
     saveButton.disabled = true;
     saveButton.innerHTML = `<i class="bi bi-check-circle-fill"></i> Saved!`;
 
-    // The saveData function will now pick up the updated local state and save it.
-    await saveData(true); 
+    // FIX: Await the saveData function to ensure it completes before proceeding.
+    await saveData(true);
 
     const printableArea = document.getElementById('ai-printable-area');
     if (printableArea) {
@@ -1813,4 +1811,5 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
