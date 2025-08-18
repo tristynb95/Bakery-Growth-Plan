@@ -1,11 +1,4 @@
-# Netlify Build & Deploy Settings
-
-[build]
-  # This tells Netlify to use the "public" folder as the root of your live website.
-  # All files inside this folder will be served directly.
-  publish = "public"
-
-  # This tells Netlify where to find your serverless functions.
-  [functions]
+[functions]
   directory = "netlify/functions"
+
 
