@@ -1459,7 +1459,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
         }
 
         // 3. Fetch the .docx template file from the project's root directory.
-        const response = await fetch('action-plan-template.docx');
+        const response = await fetch('/action-plan-template.docx');
         if (!response.ok) {
             throw new Error(`Could not load the Word template file. Status: ${response.statusText}`);
         }
@@ -2042,6 +2042,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
