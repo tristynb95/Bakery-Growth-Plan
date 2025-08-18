@@ -1242,6 +1242,79 @@ function runApp(app) {
         }, 2000);
     }
 
+    async function handleSaveToGoogleDoc() {
+        const saveButton = document.getElementById('modal-save-gdoc-btn');
+        if (!saveButton) return;
+    
+        const originalHTML = saveButton.innerHTML;
+        saveButton.disabled = true;
+        saveButton.innerHTML = `<div class="loading-spinner" style="width:20px;height:20px;border-width:3px;"></div> <span class="ml-2">Saving...</span>`;
+    
+        try {
+            const aiPlanContainer = document.getElementById('ai-printable-area');
+            const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
+            const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
+            
+            if (!activeTabPanel || !activeTabButton) {
+                throw new Error("Could not find the active month to save.");
+            }
+    
+            const monthTitle = `${activeTabButton.textContent} Action Plan`;
+            const table = activeTabPanel.querySelector('table');
+            const tableHeaders = Array.from(table.querySelectorAll('thead th'))
+                                      .slice(0, -1) // Exclude the "Actions" header
+                                      .map(th => th.innerText.trim());
+    
+            const tableRows = Array.from(table.querySelectorAll('tbody tr')).map(row => {
+                return Array.from(row.querySelectorAll('td'))
+                            .slice(0, -1) // Exclude the "Actions" cell
+                            .map(td => td.innerText.trim());
+            });
+    
+            // The user's email is needed to share the document with them
+            const userEmail = appState.currentUser.email;
+    
+            const payload = {
+                docTitle: `AI Action Plan: ${appState.planData.planName || 'Growth Plan'}`,
+                monthTitle: monthTitle,
+                bakeryInfo: `${appState.planData.bakeryLocation || 'Your Bakery'}`,
+                headers: tableHeaders,
+                rows: tableRows,
+                userEmail: userEmail
+            };
+            
+            const response = await fetch('/.netlify/functions/save-to-gdoc', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to save to Google Docs.");
+            }
+    
+            const result = await response.json();
+            
+            // Provide feedback and a link to the new document
+            saveButton.innerHTML = `<i class="bi bi-check-circle-fill"></i> Saved!`;
+            window.open(result.docUrl, '_blank'); // Open the doc in a new tab
+    
+            setTimeout(() => {
+                saveButton.disabled = false;
+                saveButton.innerHTML = originalHTML;
+            }, 3000);
+    
+        } catch (error) {
+            console.error('Error saving to Google Doc:', error);
+            saveButton.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Error`;
+             setTimeout(() => {
+                saveButton.disabled = false;
+                saveButton.innerHTML = originalHTML;
+            }, 4000);
+        }
+    }
+
     function handleRegenerateActionPlan() {
         openModal('confirmRegenerate');
     }
@@ -1370,13 +1443,20 @@ function runApp(app) {
                 printBtn.className = 'btn btn-secondary dynamic-btn';
                 printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
                 
+                const saveToGDocBtn = document.createElement('button');
+                saveToGDocBtn.id = 'modal-save-gdoc-btn';
+                saveToGDocBtn.className = 'btn btn-secondary dynamic-btn';
+                saveToGDocBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="mr-2"><path d="M19.5 2h-15A2.5 2.5 0 0 0 2 4.5v15A2.5 2.5 0 0 0 4.5 22h15a2.5 2.5 0 0 0 2.5-2.5v-15A2.5 2.5 0 0 0 19.5 2zM8 18H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V6h2v2zm10 8h-8v-2h8v2zm0-4h-8v-2h8v2zm0-4h-8V6h8v2z"></path></svg> Save to Google Doc`;
+
                 footer.insertBefore(undoRedoContainer, footer.firstChild);
                 footer.insertBefore(regenButton, DOMElements.modalActionBtn);
                 footer.insertBefore(printBtn, DOMElements.modalActionBtn);
+                footer.insertBefore(saveToGDocBtn, DOMElements.modalActionBtn);
                 
                 regenButton.onclick = handleRegenerateActionPlan;
                 document.getElementById('undo-btn').onclick = undo;
                 document.getElementById('redo-btn').onclick = redo;
+                saveToGDocBtn.onclick = handleSaveToGoogleDoc;
                 
                 printBtn.onclick = () => {
                     const aiPlanContainer = document.getElementById('ai-printable-area');
