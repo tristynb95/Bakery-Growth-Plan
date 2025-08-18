@@ -84,11 +84,6 @@ function runApp(app) {
         currentUser: null,
         currentPlanId: null,
         currentView: 'vision',
-        monthContext: {
-            'month-1': { totalSteps: 7 },
-            'month-2': { totalSteps: 7 },
-            'month-3': { totalSteps: 8 },
-        },
         saveTimeout: null,
         sessionTimeout: null,
         planUnsubscribe: null,
@@ -250,7 +245,7 @@ function runApp(app) {
                             ${[1, 2, 3, 4].map(w => `
                                 <a href="#" class="weekly-tab ${w === 1 ? 'active' : ''} flex items-center" data-week="${w}">
                                     <span>Week ${w}</span>
-                                    <i class="bi bi-check-circle-fill week-complete-icon text-green-500 ml-2 hidden"></i>
+                                    <i class="bi bi-check-circle-fill week-complete-icon ml-2 hidden"></i>
                                 </a>
                             `).join('')}
                         </nav>
@@ -309,40 +304,24 @@ function runApp(app) {
 
     function parseUkDate(str) {
         if (!str || str.trim() === '') return null;
-
-        // Tries to match various UK date formats like dd/mm/yyyy, d-m-yy, dd Mon yyyy
         const dateRegex = /^\s*(\d{1,2})[\s\/-](\d{1,2}|[a-zA-Z]{3})[\s\/-](\d{2}|\d{4})\s*$/;
         const match = str.trim().match(dateRegex);
-
         if (!match) return null;
-
         let [, day, month, year] = match;
-        
         day = parseInt(day, 10);
         year = parseInt(year, 10);
-
-        // Convert 2-digit years (e.g., 25 becomes 2025)
-        if (year < 100) {
-            year += 2000;
-        }
-
-        // Convert text months (e.g., 'Aug' to 7)
+        if (year < 100) { year += 2000; }
         if (isNaN(month)) {
             const monthMap = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
             month = monthMap[month.toLowerCase()];
             if (month === undefined) return null;
         } else {
-            // JS months are 0-indexed (e.g., January is 0)
             month = parseInt(month, 10) - 1;
         }
-        
         const date = new Date(Date.UTC(year, month, day));
-
-        // Final check to ensure the constructed date is valid and its parts match the input
         if (date.getUTCFullYear() === year && date.getUTCMonth() === month && date.getUTCDate() === day) {
             return date;
         }
-
         return null;
     }
 
@@ -356,39 +335,31 @@ function runApp(app) {
         if (user) {
             const lastActivity = localStorage.getItem('lastActivity');
             const MAX_INACTIVITY_PERIOD = 8 * 60 * 60 * 1000; // 8 hours
-
             if (lastActivity && (new Date().getTime() - lastActivity > MAX_INACTIVITY_PERIOD)) {
                 handleLogout(false, true);
                 return;
             }
-
             DOMElements.loginView.classList.add('hidden');
             DOMElements.registerView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
             DOMElements.initialLoadingView.classList.remove('hidden');
-
             appState.currentUser = user;
             setupActivityListeners();
             resetSessionTimeout();
-
             const lastPlanId = localStorage.getItem('lastPlanId');
             const lastViewId = localStorage.getItem('lastViewId');
-
             if (lastPlanId && lastViewId) {
                 await restoreLastView(lastPlanId, lastViewId);
             } else {
                 DOMElements.dashboardView.classList.remove('hidden');
                 await renderDashboard();
             }
-
             DOMElements.initialLoadingView.classList.add('hidden');
-
         } else {
             appState.currentUser = null;
             appState.planData = {};
             appState.currentPlanId = null;
             clearActivityListeners();
-
             DOMElements.initialLoadingView.classList.add('hidden');
             DOMElements.appView.classList.add('hidden');
             DOMElements.dashboardView.classList.add('hidden');
@@ -429,16 +400,13 @@ function runApp(app) {
 
     async function renderDashboard() {
         if (!appState.currentUser) return;
-
         let plans = [];
         try {
             const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
             const snapshot = await plansRef.orderBy('lastEdited', 'desc').get();
             plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         } catch (error) { console.error("Error fetching user plans:", error); }
-
         let dashboardHTML = `<div class="flex justify-between items-center"><h1 class="text-4xl font-black text-gray-900 font-poppins">Your Growth Plans</h1></div><div class="dashboard-grid">`;
-
         plans.forEach(plan => {
             const completion = calculatePlanCompletion(plan);
             const editedDate = plan.lastEdited?.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || 'N/A';
@@ -466,27 +434,17 @@ function runApp(app) {
                     </div>
                 </div>`;
         });
-
         dashboardHTML += `<div class="plan-card new-plan-card" id="create-new-plan-btn"><i class="bi bi-plus-circle-dotted text-4xl"></i><p class="mt-2 font-semibold">Create New Plan</p></div></div>`;
         DOMElements.dashboardContent.innerHTML = dashboardHTML;
-
         document.querySelectorAll('.progress-circle').forEach(circle => {
             const progress = circle.dataset.progress;
             circle.style.setProperty('--progress', progress);
         });
     }
 
-    function handleCreateNewPlan() {
-        openModal('create');
-    }
-
-    function handleEditPlanName(planId, currentName) {
-        openModal('edit', { planId, currentName });
-    }
-
-    function handleDeletePlan(planId, planName) {
-        openModal('delete', { planId, planName });
-    }
+    function handleCreateNewPlan() { openModal('create'); }
+    function handleEditPlanName(planId, currentName) { openModal('edit', { planId, currentName }); }
+    function handleDeletePlan(planId, planName) { openModal('delete', { planId, planName }); }
 
     async function handleSelectPlan(planId) {
         appState.currentPlanId = planId;
@@ -511,27 +469,36 @@ function runApp(app) {
     }
 
     // --- DATA HANDLING ---
-    function setupPlanListener() {
+    async function setupPlanListener() {
         if (appState.planUnsubscribe) {
             appState.planUnsubscribe();
         }
-
         if (!appState.currentUser || !appState.currentPlanId) {
             appState.planData = {};
             return;
         }
-
         const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
-        
+        try {
+            const doc = await docRef.get();
+            if (doc.exists) {
+                appState.planData = doc.data();
+            } else {
+                console.log("No such document on initial load!");
+                appState.planData = {};
+                handleBackToDashboard();
+            }
+        } catch (error) {
+            console.error("Error fetching initial plan data:", error);
+            handleBackToDashboard();
+        }
         appState.planUnsubscribe = docRef.onSnapshot((doc) => {
             if (doc.exists) {
                 const remoteData = doc.data();
-                appState.planData = remoteData;
-                updateViewWithRemoteData(remoteData); 
-                updateUI();
-            } else {
-                console.log("No such document!");
-                appState.planData = {};
+                if (JSON.stringify(remoteData) !== JSON.stringify(appState.planData)) {
+                    appState.planData = remoteData;
+                    updateViewWithRemoteData(remoteData);
+                    updateUI();
+                }
             }
         }, (error) => {
             console.error("Error listening to plan changes:", error);
@@ -539,10 +506,17 @@ function runApp(app) {
     }
 
     function updateViewWithRemoteData(remoteData) {
-        if (DOMElements.appView.classList.contains('hidden') || appState.currentView === 'summary') {
+        if (appState.currentView === 'summary') {
+            renderSummary();
             return;
         }
-    
+        if (DOMElements.appView.classList.contains('hidden')) {
+            return;
+        }
+        if (appState.currentView.startsWith('month-')) {
+            const monthNum = parseInt(appState.currentView.split('-')[1], 10);
+            updateWeeklyTabCompletion(monthNum, remoteData);
+        }
         document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
             if (document.activeElement !== el) {
                 if (el.id && remoteData[el.id] !== undefined) {
@@ -559,7 +533,6 @@ function runApp(app) {
             }
             if (el.isContentEditable) managePlaceholder(el);
         });
-        
         document.querySelectorAll('.pillar-buttons').forEach(group => {
             const stepKey = group.dataset.stepKey;
             const dataKey = `${stepKey}_pillar`;
@@ -570,7 +543,6 @@ function runApp(app) {
                 if (buttonToSelect) buttonToSelect.classList.add('selected');
             }
         });
-
         if (appState.currentView.startsWith('month-')) {
             const monthNum = appState.currentView.split('-')[1];
             document.querySelectorAll('.status-buttons').forEach(group => {
@@ -583,26 +555,18 @@ function runApp(app) {
                     if (buttonToSelect) buttonToSelect.classList.add('selected');
                 }
             });
-        // Add this block to the end of the updateViewWithRemoteData function
-        if (appState.currentView.startsWith('month-')) {
-            const monthNum = parseInt(appState.currentView.split('-')[1], 10);
-            updateWeeklyTabCompletion(monthNum, remoteData);
         }
     }
 
-
-    function saveData(forceImmediate = false) {
+    function saveData(forceImmediate = false, directPayload = null) {
         if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
-    
         const localChanges = {};
         const fieldsToDelete = {};
-        
         document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
             if (el.id) {
                 localChanges[el.id] = el.isContentEditable ? el.innerHTML : el.value;
             }
         });
-
         document.querySelectorAll('.pillar-buttons').forEach(group => {
             const stepKey = group.dataset.stepKey;
             const selected = group.querySelector('.selected');
@@ -613,7 +577,6 @@ function runApp(app) {
                 fieldsToDelete[dataKey] = firebase.firestore.FieldValue.delete();
             }
         });
-
         if (appState.currentView.startsWith('month-')) {
             const monthNum = appState.currentView.split('-')[1];
             document.querySelectorAll('.status-buttons').forEach(group => {
@@ -627,7 +590,6 @@ function runApp(app) {
                 }
             });
         }
-        
         const changedData = {};
         let hasChanges = false;
         for (const key in localChanges) {
@@ -636,35 +598,34 @@ function runApp(app) {
                 hasChanges = true;
             }
         }
-
-         for (const key in fieldsToDelete) {
-            if(appState.planData[key] !== undefined){
+        for (const key in fieldsToDelete) {
+            if (appState.planData[key] !== undefined) {
                 changedData[key] = fieldsToDelete[key];
                 hasChanges = true;
             }
         }
-        
-        if (!hasChanges && !forceImmediate) {
+        if (directPayload) {
+            for (const key in directPayload) {
+                if (directPayload[key] !== appState.planData[key]) {
+                    changedData[key] = directPayload[key];
+                    hasChanges = true;
+                }
+            }
+        }
+        if (!hasChanges) {
             return Promise.resolve();
         }
-
         clearTimeout(appState.saveTimeout);
-
         const saveToFirestore = async () => {
-            if (Object.keys(changedData).length === 0) return;
-
             const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
             const dataToSave = {
                 ...changedData,
                 lastEdited: firebase.firestore.FieldValue.serverTimestamp()
             };
-            
             await docRef.update(dataToSave);
-            
             DOMElements.saveIndicator.classList.remove('opacity-0');
             setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
         };
-
         if (forceImmediate) {
             return saveToFirestore();
         } else {
@@ -676,7 +637,7 @@ function runApp(app) {
             });
         }
     }
-
+    
     // --- UI & RENDER LOGIC ---
     function updateUI() {
         updateSidebarInfo();
@@ -712,19 +673,17 @@ function runApp(app) {
         return { completed, total };
     }
     
-function isWeekComplete(monthNum, weekNum, planData) {
+    function isWeekComplete(monthNum, weekNum, planData) {
         const data = planData || appState.planData;
         const status = data[`m${monthNum}s5_w${weekNum}_status`];
         const win = data[`m${monthNum}s5_w${weekNum}_win`];
         const spotlight = data[`m${monthNum}s5_w${weekNum}_spotlight`];
-
         const isContentEmpty = (htmlContent) => {
             if (!htmlContent) return true;
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlContent;
             return tempDiv.innerText.trim() === '';
         };
-
         return !!status && !isContentEmpty(win) && !isContentEmpty(spotlight);
     }
 
@@ -755,14 +714,11 @@ function isWeekComplete(monthNum, weekNum, planData) {
             `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
             `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
         ];
-
-        // FIX: Add all 12 weekly check-in fields to the progress calculation
         for (let w = 1; w <= 4; w++) {
             requiredFields.push(`m${monthNum}s5_w${w}_status`);
             requiredFields.push(`m${monthNum}s5_w${w}_win`);
             requiredFields.push(`m${monthNum}s5_w${w}_spotlight`);
         }
-
         if (monthNum == 3) {
             requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
         }
@@ -771,27 +727,12 @@ function isWeekComplete(monthNum, weekNum, planData) {
         return { completed, total };
     }
 
-    function isStepComplete(stepKey, data) {
-        if (stepKey === 'vision') {
-            const progress = getVisionProgress(data);
-            return progress.total > 0 && progress.completed === progress.total;
-        }
-        return false;
-    }
-
-    function isMonthComplete(monthNum, data) {
-        const progress = getMonthProgress(monthNum, data);
-        return progress.total > 0 && progress.completed === progress.total;
-    }
-
     function updateSidebarNavStatus() {
         const updateNavItem = (navId, progress) => {
             const navLink = document.querySelector(navId);
             if (!navLink) return;
-
             const isComplete = progress.total > 0 && progress.completed === progress.total;
             navLink.classList.toggle('completed', isComplete);
-
             const progressCircle = navLink.querySelector('.progress-donut__progress');
             if (progressCircle) {
                 const radius = progressCircle.r.baseVal.value;
@@ -802,7 +743,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
                 progressCircle.style.strokeDashoffset = offset;
             }
         };
-
         updateNavItem('#nav-vision', getVisionProgress());
         for (let m = 1; m <= 3; m++) {
             updateNavItem(`#nav-month-${m}`, getMonthProgress(m));
@@ -866,12 +806,10 @@ function isWeekComplete(monthNum, weekNum, planData) {
     function switchView(viewId) {
         DOMElements.mainContent.scrollTop = 0;
         appState.currentView = viewId;
-
         if (appState.currentPlanId) {
             localStorage.setItem('lastPlanId', appState.currentPlanId);
             localStorage.setItem('lastViewId', viewId);
         }
-
         const titles = {
             vision: { title: 'Bakery Growth Plan', subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.'},
             'month-1': { title: 'Month 1 Sprint', subtitle: 'Lay the foundations for success.'},
@@ -881,7 +819,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
         };
         DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
         DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
-
         if (viewId === 'summary') {
             DOMElements.desktopHeaderButtons.classList.remove('hidden');
             DOMElements.printBtn.classList.remove('hidden');
@@ -899,32 +836,25 @@ function isWeekComplete(monthNum, weekNum, planData) {
         }
         document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
         document.querySelector(`#nav-${viewId}`)?.classList.add('active');
-
         DOMElements.appView.classList.remove('sidebar-open');
         initializeCharCounters();
     }
 
-   function renderSummary() {
+    function renderSummary() {
         const formData = appState.planData;
-
-        // FIX: Upgraded the 'e' helper to correctly handle empty HTML
         const e = (html) => {
-            if (!html) return '...'; // Handles null, undefined, ""
+            if (!html) return '...';
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
-            if (tempDiv.innerText.trim() === '') {
-                return '...'; // Handles '<p></p>', '<br>', etc.
-            }
-            return html; // Return the original html if it has content
+            if (tempDiv.innerText.trim() === '') { return '...'; }
+            return html;
         };
-
         const isContentEmpty = (htmlContent) => {
             if (!htmlContent) return true;
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlContent;
             return tempDiv.innerText.trim() === '';
         };
-
         const renderMonthSummary = (monthNum) => {
             let weeklyCheckinHTML = '<ul>';
             let hasLoggedWeeks = false;
@@ -1061,7 +991,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
     
     function setupAiModalInteractivity(container) {
         if (!container) return;
-
         const makeTablesSortable = (container) => {
             const tables = container.querySelectorAll('table');
             tables.forEach(table => {
@@ -1073,7 +1002,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
                     'Due Date': { index: 3, type: 'date' },
                     'Status': { index: 5, type: 'text' }
                 };
-
                 headers.forEach((th) => {
                     const headerText = th.innerText.trim();
                     if (sortableColumns[headerText]) {
@@ -1081,17 +1009,13 @@ function isWeekComplete(monthNum, weekNum, planData) {
                         th.classList.add('sortable-header');
                         th.dataset.column = config.index;
                         th.dataset.sortType = config.type;
-                        
                         th.innerHTML = '';
                         const wrapper = document.createElement('div');
                         wrapper.className = 'header-flex-wrapper';
-
                         const textSpan = document.createElement('span');
                         textSpan.textContent = headerText;
-
                         const iconSpan = document.createElement('span');
                         iconSpan.className = 'sort-icon';
-
                         wrapper.appendChild(textSpan);
                         wrapper.appendChild(iconSpan);
                         th.appendChild(wrapper);
@@ -1099,9 +1023,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
                 });
             });
         };
-
         makeTablesSortable(container);
-
         const handleTableSort = (header) => {
             const table = header.closest('table');
             const tbody = table.querySelector('tbody');
@@ -1109,25 +1031,20 @@ function isWeekComplete(monthNum, weekNum, planData) {
             const sortType = header.dataset.sortType || 'text';
             const currentDirection = header.dataset.sortDir || 'desc';
             const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
-
             table.querySelectorAll('.sortable-header').forEach(th => {
                 th.removeAttribute('data-sort-dir');
             });
             header.dataset.sortDir = newDirection;
-
             const rows = Array.from(tbody.querySelectorAll('tr'));
-            
             rows.sort((rowA, rowB) => {
                 const cellA = rowA.querySelectorAll('td')[columnIndex];
                 const cellB = rowB.querySelectorAll('td')[columnIndex];
                 const valA = cellA ? cellA.innerText.trim() : '';
                 const valB = cellB ? cellB.innerText.trim() : '';
-                
                 let compareResult = 0;
                 if (sortType === 'date') {
                     const dateA = parseUkDate(valA);
                     const dateB = parseUkDate(valB);
-
                     if (dateA && dateB) {
                         compareResult = dateA.getTime() - dateB.getTime();
                     } else if (dateA && !dateB) {
@@ -1140,21 +1057,17 @@ function isWeekComplete(monthNum, weekNum, planData) {
                 } else {
                     compareResult = valA.localeCompare(valB, undefined, {numeric: true});
                 }
-                
                 return newDirection === 'asc' ? compareResult : -compareResult;
             });
-            
             tbody.innerHTML = '';
             rows.forEach(row => tbody.appendChild(row));
             saveState();
         };
-
         container.addEventListener('click', (e) => {
             const addBtn = e.target.closest('.btn-add-row');
             const removeBtn = e.target.closest('.btn-remove-row');
             const tab = e.target.closest('.ai-tab-btn');
             const sortHeader = e.target.closest('.sortable-header');
-
             if (addBtn) {
                 const tableBody = addBtn.closest('table').querySelector('tbody');
                 if (tableBody) {
@@ -1178,11 +1091,9 @@ function isWeekComplete(monthNum, weekNum, planData) {
             }
             if (tab) {
                 if (tab.classList.contains('active')) return;
-                
                 const tabContainer = tab.closest('.ai-action-plan-container');
                 const tabs = tabContainer.querySelectorAll('.ai-tab-btn');
                 const panels = tabContainer.querySelectorAll('.ai-tabs-content > div');
-
                 tabs.forEach(t => t.classList.remove('active'));
                 panels.forEach(p => p.classList.remove('active'));
                 tab.classList.add('active');
@@ -1193,7 +1104,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
                 handleTableSort(sortHeader);
             }
         });
-
         const observer = new MutationObserver((mutations) => {
             const isTextChange = mutations.some(m => m.type === 'characterData');
             if (isTextChange) {
@@ -1209,12 +1119,10 @@ function isWeekComplete(monthNum, weekNum, planData) {
 
     async function handleAIActionPlan() {
         const savedPlan = appState.planData.aiActionPlan;
-
         if (savedPlan) {
             openModal('aiActionPlan_view');
             const modalContent = document.getElementById('modal-content');
             modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${savedPlan}</div>`;
-
             undoStack = [];
             redoStack = [];
             saveState();
@@ -1228,7 +1136,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ planSummary })
                 });
-
                 if (!response.ok) {
                     let errorResult;
                     try {
@@ -1238,16 +1145,12 @@ function isWeekComplete(monthNum, weekNum, planData) {
                     }
                     throw new Error(errorResult.error || 'The AI assistant failed to generate a response.');
                 }
-                
                 const textResponse = await response.text();
                 if (!textResponse) {
                     throw new Error("The AI assistant returned an empty plan. Please try regenerating.");
                 }
-
                 const data = JSON.parse(textResponse);
-                
                 const cleanedHTML = data.actionPlan.replace(/^```(html)?\s*/, '').replace(/```$/, '').trim();
-
                 appState.planData.aiActionPlan = cleanedHTML;
                 await saveData(true);
                 handleAIActionPlan();
@@ -1264,7 +1167,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
     function requestCloseModal() {
         const isAiModal = DOMElements.modalBox.dataset.type === 'aiActionPlan_view';
         const hasUnsavedChanges = undoStack.length > 1;
-
         if (isAiModal && hasUnsavedChanges) {
             openModal('confirmClose');
         } else {
@@ -1274,27 +1176,17 @@ function isWeekComplete(monthNum, weekNum, planData) {
 
    async function saveActionPlan() {
         const editedContent = document.getElementById('ai-printable-area').innerHTML;
-        
-        // DO NOT update the local state here. Send the change directly.
-        // appState.planData.aiActionPlan = editedContent; // This was the line causing the bug.
-
         const saveButton = DOMElements.modalActionBtn;
         const originalHTML = saveButton.innerHTML;
         saveButton.disabled = true;
         saveButton.innerHTML = `<i class="bi bi-check-circle-fill"></i> Saved!`;
-
-        // Pass the new content directly to our robust saveData function.
-        // It will compare it to the old state and save the change.
         await saveData(true, { aiActionPlan: editedContent });
-
         const printableArea = document.getElementById('ai-printable-area');
         if (printableArea) {
-            // The undo stack should be reset after a successful save.
             undoStack = [editedContent];
             redoStack = [];
             updateUndoRedoButtons();
         }
-
         setTimeout(() => {
             saveButton.disabled = false;
             saveButton.innerHTML = originalHTML;
@@ -1353,16 +1245,16 @@ function isWeekComplete(monthNum, weekNum, planData) {
         const { planId, currentName, planName } = context;
         DOMElements.modalBox.dataset.type = type;
         DOMElements.modalBox.dataset.planId = planId;
-
+        const modalHeader = DOMElements.modalTitle.parentNode;
         const footer = DOMElements.modalActionBtn.parentNode;
         footer.classList.remove('is-confirming');
         footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
+        modalHeader.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
         DOMElements.modalActionBtn.style.display = 'inline-flex';
         DOMElements.modalCancelBtn.style.display = 'inline-flex';
+        footer.style.justifyContent = 'flex-end';
         DOMElements.modalActionBtn.onclick = handleModalAction;
         DOMElements.modalCancelBtn.onclick = requestCloseModal;
-
-
         switch (type) {
             case 'create':
                 DOMElements.modalTitle.textContent = "Create New Plan";
@@ -1412,51 +1304,61 @@ function isWeekComplete(monthNum, weekNum, planData) {
                 break;
             case 'aiActionPlan_view': {
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
-                
-                const undoRedoContainer = document.createElement('div');
-                undoRedoContainer.className = 'undo-redo-container dynamic-btn';
-                undoRedoContainer.innerHTML = `
-                    <button id="undo-btn" class="btn btn-secondary btn-icon" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button>
-                    <button id="redo-btn" class="btn btn-secondary btn-icon" title="Redo"><i class="bi bi-arrow-clockwise"></i></button>
-                `;
+                footer.style.justifyContent = 'space-between';
+                DOMElements.modalCancelBtn.style.display = 'none';
+                const undoRedoFooterContainer = document.createElement('div');
+                undoRedoFooterContainer.className = 'flex items-center gap-2 dynamic-btn';
+                const undoBtn = document.createElement('button');
+                undoBtn.id = 'undo-btn';
+                undoBtn.className = 'btn btn-secondary !p-2';
+                undoBtn.title = 'Undo';
+                undoBtn.innerHTML = `<i class="bi bi-arrow-counterclockwise text-lg"></i>`;
+                undoBtn.onclick = undo;
+                const redoBtn = document.createElement('button');
+                redoBtn.id = 'redo-btn';
+                redoBtn.className = 'btn btn-secondary !p-2';
+                redoBtn.title = 'Redo';
+                redoBtn.innerHTML = `<i class="bi bi-arrow-clockwise text-lg"></i>`;
+                redoBtn.onclick = redo;
+                undoRedoFooterContainer.appendChild(undoBtn);
+                undoRedoFooterContainer.appendChild(redoBtn);
+                footer.insertBefore(undoRedoFooterContainer, footer.firstChild);
+                const rightButtonsContainer = document.createElement('div');
+                rightButtonsContainer.className = 'flex items-center gap-2 dynamic-btn';
                 const regenButton = document.createElement('button');
                 regenButton.id = 'modal-regen-btn';
-                regenButton.className = 'btn btn-secondary dynamic-btn';
+                regenButton.className = 'btn btn-secondary';
                 regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
-
+                regenButton.onclick = handleRegenerateActionPlan;
                 const printBtn = document.createElement('button');
                 printBtn.id = 'modal-print-btn';
-                printBtn.className = 'btn btn-secondary dynamic-btn';
+                printBtn.className = 'btn btn-secondary';
                 printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
-                
-                footer.insertBefore(undoRedoContainer, footer.firstChild);
-                footer.insertBefore(regenButton, DOMElements.modalActionBtn);
-                footer.insertBefore(printBtn, DOMElements.modalActionBtn);
-                
-                regenButton.onclick = handleRegenerateActionPlan;
-                document.getElementById('undo-btn').onclick = undo;
-                document.getElementById('redo-btn').onclick = redo;
-                
+                const downloadBtn = document.createElement('button');
+                downloadBtn.id = 'modal-download-btn';
+                downloadBtn.className = 'btn btn-secondary';
+                downloadBtn.innerHTML = `<i class="bi bi-file-earmark-word-fill"></i> Download`;
+                downloadBtn.onclick = handleWordExport;
+                rightButtonsContainer.appendChild(regenButton);
+                rightButtonsContainer.appendChild(printBtn);
+                rightButtonsContainer.appendChild(downloadBtn);
+                DOMElements.modalActionBtn.textContent = "Save Changes";
+                DOMElements.modalActionBtn.className = 'btn btn-primary';
+                DOMElements.modalActionBtn.onclick = saveActionPlan;
+                rightButtonsContainer.appendChild(DOMElements.modalActionBtn);
+                footer.appendChild(rightButtonsContainer);
                 printBtn.onclick = () => {
                     const aiPlanContainer = document.getElementById('ai-printable-area');
                     const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
                     const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
-
-                    if (!activeTabPanel || !activeTabButton) {
-                        alert("Could not find the active month to print.");
-                        return;
-                    }
-                    
+                    if (!activeTabPanel || !activeTabButton) { alert("Could not find the active month to print."); return; }
                     const monthTitle = `${activeTabButton.textContent} Action Plan`;
                     const printNode = activeTabPanel.cloneNode(true);
                     printNode.querySelectorAll('.actions-cell, .btn-remove-row, tfoot').forEach(el => el.remove());
-
                     const printableHTML = printNode.innerHTML;
-
                     const printStyles = `
                         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@700;900&display=swap');
-                        @page { size: A4; margin: 25mm; }
-                        body { font-family: 'DM Sans', sans-serif; color: #1F2937; }
+                        @page { size: A4; margin: 25mm; } body { font-family: 'DM Sans', sans-serif; color: #1F2937; }
                         .print-header { text-align: center; border-bottom: 2px solid #D10A11; padding-bottom: 15px; margin-bottom: 25px; }
                         .print-header h1 { font-family: 'Poppins', sans-serif; font-size: 24pt; color: #1F2937; margin: 0; }
                         .print-header h2 { font-family: 'Poppins', sans-serif; font-size: 16pt; color: #D10A11; margin-top: 5px; margin-bottom: 5px; font-weight: 700; }
@@ -1464,46 +1366,26 @@ function isWeekComplete(monthNum, weekNum, planData) {
                         table { width: 100%; border-collapse: collapse; font-size: 9pt; page-break-inside: auto; }
                         tr { page-break-inside: avoid; page-break-after: auto; }
                         th, td { border: 1px solid #E5E7EB; padding: 10px 12px; text-align: left; vertical-align: top; }
-                        thead { display: table-header-group; }
-                        th { background-color: #F9FAFB; font-weight: 600; color: #374151; }
-                        
-                        /* FIX: Hide the last column (Actions) when printing */
-                        th:last-child, td:last-child {
-                            display: none !important;
-                        }
-                    `;
-
+                        thead { display: table-header-group; } th { background-color: #F9FAFB; font-weight: 600; color: #374151; }
+                        th:last-child, td:last-child { display: none !important; }`;
                     const printWindow = window.open('', '', 'height=800,width=1200');
-                    printWindow.document.write('<html><head><title>AI Action Plan</title>');
-                    printWindow.document.write(`<style>${printStyles}</style>`);
-                    printWindow.document.write('</head><body>');
+                    printWindow.document.write(`<html><head><title>AI Action Plan</title><style>${printStyles}</style></head><body>`);
                     printWindow.document.write(`<div class="print-header"><h1>AI Action Plan</h1><h2>${monthTitle}</h2><p>${appState.planData.planName || 'Growth Plan'} | ${appState.planData.bakeryLocation || 'Your Bakery'}</p></div>`);
                     printWindow.document.write(printableHTML);
                     printWindow.document.write('</body></html>');
                     printWindow.document.close();
-
                     setTimeout(() => { printWindow.print(); }, 500);
                 };
-
-                DOMElements.modalActionBtn.textContent = "Save Changes";
-                DOMElements.modalActionBtn.className = 'btn btn-primary';
-                DOMElements.modalActionBtn.onclick = saveActionPlan;
-                
                 updateUndoRedoButtons();
                 break;
             }
-            case 'confirmClose': {
+            case 'confirmClose':
                 DOMElements.modalTitle.textContent = "Discard Changes?";
                 DOMElements.modalContent.innerHTML = `<p>You have unsaved changes. Are you sure you want to close without saving?</p>`;
-                
                 DOMElements.modalActionBtn.textContent = "Discard";
                 DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
                 DOMElements.modalCancelBtn.textContent = "Cancel";
-
-                DOMElements.modalActionBtn.onclick = () => {
-                    closeModal();
-                };
-
+                DOMElements.modalActionBtn.onclick = () => closeModal();
                 DOMElements.modalCancelBtn.onclick = () => {
                     const lastUnsavedState = undoStack[undoStack.length - 1];
                     openModal('aiActionPlan_view');
@@ -1512,33 +1394,22 @@ function isWeekComplete(monthNum, weekNum, planData) {
                     setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
                     updateUndoRedoButtons();
                 };
-                
                 break;
-            }
-            case 'confirmRegenerate': {
+            case 'confirmRegenerate':
                 DOMElements.modalTitle.textContent = "Are you sure?";
-                DOMElements.modalContent.innerHTML = `<div class="p-4 text-center">
-                                    <p class="text-gray-600 mt-2">Generating a new plan will overwrite your existing action plan and any edits you've made. This cannot be undone.</p>
-                                </div>`;
-
+                DOMElements.modalContent.innerHTML = `<div class="p-4 text-center"><p class="text-gray-600 mt-2">Generating a new plan will overwrite your existing action plan and any edits you've made. This cannot be undone.</p></div>`;
                 const confirmBtn = DOMElements.modalActionBtn;
                 const cancelBtn = DOMElements.modalCancelBtn;
-
                 confirmBtn.textContent = "Yes, Generate New Plan";
                 confirmBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
                 cancelBtn.textContent = "Cancel";
-
                 footer.classList.add('is-confirming');
                 footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.style.display = 'none');
-
                 confirmBtn.onclick = () => {
                     footer.classList.remove('is-confirming');
                     delete appState.planData.aiActionPlan;
-                    saveData(true).then(() => {
-                        handleAIActionPlan();
-                    });
+                    saveData(true).then(() => { handleAIActionPlan(); });
                 };
-
                 cancelBtn.onclick = () => {
                     footer.classList.remove('is-confirming');
                     const lastUnsavedState = undoStack[undoStack.length - 1];
@@ -1549,7 +1420,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
                     updateUndoRedoButtons();
                 };
                 break;
-            }
         }
         DOMElements.modalOverlay.classList.remove('hidden');
     }
@@ -1655,7 +1525,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
                 DOMElements.authError.style.display = 'block';
             });
     };
-
     DOMElements.loginBtn.addEventListener('click', handleLoginAttempt);
     const loginOnEnter = (event) => {
         if (event.key === 'Enter') {
@@ -1665,7 +1534,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
     };
     DOMElements.emailInput.addEventListener('keyup', loginOnEnter);
     DOMElements.passwordInput.addEventListener('keyup', loginOnEnter);
-
     DOMElements.createAccountBtn.addEventListener('click', () => {
         const email = DOMElements.registerEmail.value;
         const password = DOMElements.registerPassword.value;
@@ -1694,7 +1562,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
                 errorContainer.style.display = 'block';
             });
     });
-
     DOMElements.showRegisterViewBtn.addEventListener('click', (e) => {
         e.preventDefault();
         DOMElements.loginView.classList.add('hidden');
@@ -1745,11 +1612,9 @@ function isWeekComplete(monthNum, weekNum, planData) {
                 }, 3000);
             });
     });
-
     DOMElements.logoutBtn.addEventListener('click', () => handleLogout(false));
     DOMElements.dashboardLogoutBtn.addEventListener('click', () => handleLogout(false));
     DOMElements.backToDashboardBtn.addEventListener('click', handleBackToDashboard);
-
     DOMElements.dashboardContent.addEventListener('click', (e) => {
         const createBtn = e.target.closest('#create-new-plan-btn');
         const mainCard = e.target.closest('.plan-card-main');
@@ -1760,9 +1625,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
         else if (createBtn) { handleCreateNewPlan(); }
         else if (mainCard) { handleSelectPlan(mainCard.dataset.planId); }
     });
-
     DOMElements.mainNav.addEventListener('click', (e) => { e.preventDefault(); const navLink = e.target.closest('a'); if (navLink) { switchView(navLink.id.replace('nav-', '')); }});
-
     DOMElements.contentArea.addEventListener('keydown', (e) => {
         const editor = e.target.closest('[contenteditable="true"]');
         if (!editor) return;
@@ -1778,7 +1641,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
             }
         }
     });
-
     DOMElements.contentArea.addEventListener('input', (e) => {
         if (e.target.matches('input, [contenteditable="true"]')) {
             saveData();
@@ -1787,7 +1649,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
             managePlaceholder(e.target);
         }
     });
-
     DOMElements.contentArea.addEventListener('click', (e) => {
         const target = e.target;
         const pillarButton = target.closest('.pillar-button');
@@ -1819,22 +1680,18 @@ function isWeekComplete(monthNum, weekNum, planData) {
             });
         }
     });
-
     DOMElements.printBtn.addEventListener('click', () => window.print());
     DOMElements.shareBtn.addEventListener('click', handleShare);
     DOMElements.aiActionBtn.addEventListener('click', handleAIActionPlan);
-
     DOMElements.modalCloseBtn.addEventListener('click', requestCloseModal);
     DOMElements.modalOverlay.addEventListener('mousedown', (e) => {
         if (e.target === DOMElements.modalOverlay) {
             requestCloseModal();
         }
     });
-
     let touchStartX = 0;
     let touchEndX = 0;
     const swipeThreshold = 50;
-
     DOMElements.mainContent.addEventListener('touchstart', e => {
         touchStartX = e.changedTouches[0].screenX;
     }, { passive: true });
@@ -1853,8 +1710,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
             DOMElements.appView.classList.remove('sidebar-open');
         }
     });
-
-    // --- COOKIE CONSENT ---
     const cookieBanner = document.getElementById('cookie-consent-banner');
     const acceptBtn = document.getElementById('cookie-accept-btn');
     const declineBtn = document.getElementById('cookie-decline-btn');
@@ -1874,11 +1729,3 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
-
-
-
-
