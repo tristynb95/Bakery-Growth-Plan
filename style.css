@@ -803,6 +803,8 @@ tr:hover .btn-remove-row {
 
 /* style.css */
 
+/* style.css */
+
 @media print {
     /* ... other print styles ... */
 
@@ -917,4 +919,5 @@ tr:hover .btn-remove-row {
 .weekly-tab.active .week-complete-icon {
     color: var(--gails-red);
 }
+
 
