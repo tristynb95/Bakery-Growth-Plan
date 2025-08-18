@@ -3,7 +3,6 @@
 const { google } = require('googleapis');
 
 exports.handler = async (event) => {
-    // We only want to handle POST requests
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
@@ -11,14 +10,13 @@ exports.handler = async (event) => {
     try {
         const { content } = JSON.parse(event.body);
         if (!content) {
-            return { statusCode: 400, body: 'JSON body with a "content" key is required.' };
+            return { statusCode: 400, body: 'JSON body with "content" key is required.' };
         }
 
-        // Step 1: Authenticate with the Google API
+        // 1. Authenticate with Google
         const auth = new google.auth.GoogleAuth({
             credentials: {
                 client_email: process.env.GOOGLE_CLIENT_EMAIL,
-                // Ensure private key's newline characters are correctly formatted for authentication
                 private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
             },
             scopes: ['https://www.googleapis.com/auth/documents'],
@@ -26,29 +24,28 @@ exports.handler = async (event) => {
 
         const authClient = await auth.getClient();
 
-        // Step 2: Initialize the Google Docs API client with authentication
+        // 2. Initialize the Google Docs API client
         const docs = google.docs({
             version: 'v1',
             auth: authClient,
         });
 
-        // Step 3: Create a new Google Doc with a title
+        // 3. Create the document with a title
         const createResponse = await docs.documents.create({
             resource: {
-                title: 'Your Bakery Growth Plan',
+                title: 'Bakery Growth Plan',
             },
         });
 
         const documentId = createResponse.data.documentId;
 
-        // Step 4: Add the plan content to the newly created document
+        // 4. Insert the content into the new document
         await docs.documents.batchUpdate({
             documentId,
             resource: {
                 requests: [
                     {
                         insertText: {
-                            // Insert the text at the beginning of the document body
                             location: {
                                 index: 1,
                             },
@@ -59,7 +56,7 @@ exports.handler = async (event) => {
             },
         });
         
-        // Step 5: Construct the URL for the new document to send back to the user
+        // 5. Generate a link to the new document
         const docUrl = `https://docs.google.com/document/d/${documentId}/edit`;
 
         return {
@@ -71,7 +68,6 @@ exports.handler = async (event) => {
         };
 
     } catch (error) {
-        // Log the error for debugging and return a user-friendly error message
         console.error('Error creating Google Doc:', error.response ? error.response.data : error.message);
         return {
             statusCode: 500,
