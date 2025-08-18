@@ -803,10 +803,10 @@ tr:hover .btn-remove-row {
 
 /* Ensure actions column in print is hidden */
 @media print {
-    .actions-cell {
-        display: none !important;
-    }
+    th.actions-cell, td.actions-cell { 
+    display: none !important; 
 }
+
 
 /* 33. Undo/Redo Buttons
 -------------------------------------------------- */
@@ -910,4 +910,5 @@ tr:hover .btn-remove-row {
 .weekly-tab.active .week-complete-icon {
     color: var(--gails-red);
 }
+
 
