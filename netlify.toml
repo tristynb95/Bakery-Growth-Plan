@@ -6,4 +6,6 @@
   publish = "public"
 
   # This tells Netlify where to find your serverless functions.
-  functions = "functions"
+  [functions]
+  directory = "netlify/functions"
+
