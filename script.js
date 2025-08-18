@@ -1434,33 +1434,36 @@ function isWeekComplete(monthNum, weekNum, planData) {
         }
     }
 
-    async function handleWordExport() {
+    // Replace the old handleWordExport function with this corrected version
+
+async function handleWordExport() {
+    try {
         const { Packer, Document, Table, TableRow, TableCell, Paragraph, TextRun, HeadingLevel, AlignmentType, WidthType } = docx;
-    
+
         const aiPlanContainer = document.getElementById('ai-printable-area');
         if (!aiPlanContainer) return;
-    
+
         const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
         const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
-    
+
         if (!activeTabPanel || !activeTabButton) {
             alert("Could not find the active month to export.");
             return;
         }
-    
+
         const monthTitle = activeTabButton.innerText.trim();
         const tableNode = activeTabPanel.querySelector('table');
         if (!tableNode) {
             alert("Could not find the table to export.");
             return;
         }
-    
+
         const planName = appState.planData.planName || 'AI Action Plan';
         const bakeryName = appState.planData.bakeryLocation || 'Your Bakery';
         const quarterlyTheme = appState.planData.quarterlyTheme ? new DOMParser().parseFromString(appState.planData.quarterlyTheme, "text/html").body.textContent : 'Laying foundations for success';
-    
+
         const headerCells = Array.from(tableNode.querySelectorAll('thead th'))
-            .slice(0, -1) 
+            .slice(0, -1)
             .map(th => new TableCell({
                 children: [new Paragraph({
                     children: [new TextRun({ text: th.innerText.trim(), bold: true })],
@@ -1469,24 +1472,26 @@ function isWeekComplete(monthNum, weekNum, planData) {
                 shading: { fill: "F8F8F8" },
             }));
         const tableHeader = new TableRow({ children: headerCells, tableHeader: true });
-    
+
         const bodyRows = Array.from(tableNode.querySelectorAll('tbody tr')).map(row => {
             const rowCells = Array.from(row.querySelectorAll('td'))
                 .slice(0, -1)
                 .map(td => new TableCell({
-                    children: [new Paragraph(td.innerText.trim())],
+                    // THIS IS THE FIX: Using the { text: ... } format is more robust.
+                    children: [new Paragraph({ text: td.innerText.trim() })],
                 }));
             return new TableRow({ children: rowCells });
         });
-    
+
         const table = new Table({
             rows: [tableHeader, ...bodyRows],
             width: { size: 100, type: WidthType.PERCENTAGE },
         });
-    
+
         const doc = new Document({
             sections: [{
                 children: [
+                    // THIS IS ALSO FIXED for consistency
                     new Paragraph({
                         text: "AI Action Plan",
                         heading: HeadingLevel.TITLE,
@@ -1514,11 +1519,16 @@ function isWeekComplete(monthNum, weekNum, planData) {
                 ],
             }],
         });
-    
+
         Packer.toBlob(doc).then(blob => {
             saveAs(blob, `${planName} - ${monthTitle}.docx`);
         });
+
+    } catch (error) {
+        console.error("Error generating Word document:", error);
+        alert("Sorry, an error occurred while creating the document. Please check the console for details.");
     }
+}
 
     function openModal(type, context = {}) {
         const { planId, currentName, planName } = context;
@@ -2042,3 +2052,4 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
