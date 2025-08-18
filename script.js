@@ -1376,73 +1376,7 @@ function runApp(app) {
                     printNode.querySelectorAll('.actions-cell, .btn-remove-row, tfoot').forEach(el => el.remove());
                     const printableHTML = printNode.innerHTML;
                     const printStyles = `
-                        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@700;900&display=swap');
-                        @page { size: A4; margin: 25mm; } body { font-family: 'DM Sans', sans-serif; color: #1F2937; }
-                        .print-header { text-align: center; border-bottom: 2px solid #D10A11; padding-bottom: 15px; margin-bottom: 25px; }
-                        .print-header h1 { font-family: 'Poppins', sans-serif; font-size: 24pt; color: #1F2937; margin: 0; }
-                        .print-header h2 { font-family: 'Poppins', sans-serif; font-size: 16pt; color: #D10A11; margin-top: 5px; margin-bottom: 5px; font-weight: 700; }
-                        .print-header p { font-size: 11pt; color: #6B7280; margin: 5px 0 0; }
-                        table { width: 100%; border-collapse: collapse; font-size: 9pt; page-break-inside: auto; }
-                        tr { page-break-inside: avoid; page-break-after: auto; }
-                        th, td { border: 1px solid #E5E7EB; padding: 10px 12px; text-align: left; vertical-align: top; }
-                        thead { display: table-header-group; } th { background-color: #F9FAFB; font-weight: 600; color: #374151; }
-                        th:last-child, td:last-child { display: none !important; }`;
-                    const printWindow = window.open('', '', 'height=800,width=1200');
-                    printWindow.document.write(`<html><head><title>AI Action Plan</title><style>${printStyles}</style></head><body>`);
-                    printWindow.document.write(`<div class="print-header"><h1>AI Action Plan</h1><h2>${monthTitle}</h2><p>${appState.planData.planName || 'Growth Plan'} | ${appState.planData.bakeryLocation || 'Your Bakery'}</p></div>`);
-                    printWindow.document.write(printableHTML);
-                    printWindow.document.write('</body></html>');
-                    printWindow.document.close();
-                    setTimeout(() => { printWindow.print(); }, 500);
-                };
-                
-                updateUndoRedoButtons();
-                break;
-            }
-            case 'confirmClose':
-                DOMElements.modalTitle.textContent = "Discard Changes?";
-                DOMElements.modalContent.innerHTML = `<p>You have unsaved changes. Are you sure you want to close without saving?</p>`;
-                DOMElements.modalActionBtn.textContent = "Discard";
-                DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
-                DOMElements.modalCancelBtn.textContent = "Cancel";
-                DOMElements.modalActionBtn.onclick = () => closeModal();
-                DOMElements.modalCancelBtn.onclick = () => {
-                    const lastUnsavedState = undoStack[undoStack.length - 1];
-                    openModal('aiActionPlan_view');
-                    const modalContent = document.getElementById('modal-content');
-                    modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${lastUnsavedState}</div>`;
-                    setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
-                    updateUndoRedoButtons();
-                };
-                break;
-            case 'confirmRegenerate':
-                DOMElements.modalTitle.textContent = "Are you sure?";
-                DOMElements.modalContent.innerHTML = `<div class="p-4 text-center"><p class="text-gray-600 mt-2">Generating a new plan will overwrite your existing action plan and any edits you've made. This cannot be undone.</p></div>`;
-                const confirmBtn = DOMElements.modalActionBtn;
-                const cancelBtn = DOMElements.modalCancelBtn;
-                confirmBtn.textContent = "Yes, Generate New Plan";
-                confirmBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
-                cancelBtn.textContent = "Cancel";
-                footer.classList.add('is-confirming');
-                footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.style.display = 'none');
-                confirmBtn.onclick = () => {
-                    footer.classList.remove('is-confirming');
-                    delete appState.planData.aiActionPlan;
-                    saveData(true).then(() => { handleAIActionPlan(); });
-                };
-                cancelBtn.onclick = () => {
-                    footer.classList.remove('is-confirming');
-                    const lastUnsavedState = undoStack[undoStack.length - 1];
-                    openModal('aiActionPlan_view');
-                    const modalContent = document.getElementById('modal-content');
-                    modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${lastUnsavedState}</div>`;
-                    setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
-                    updateUndoRedoButtons();
-                };
-                break;
-        }
-        DOMElements.modalOverlay.classList.remove('hidden');
-    }
+                        @import url('
 
     function closeModal() {
         document.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
@@ -1749,4 +1683,5 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
