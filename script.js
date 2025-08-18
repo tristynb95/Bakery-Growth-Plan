@@ -1423,6 +1423,11 @@ function runApp(app) {
                         th, td { border: 1px solid #E5E7EB; padding: 10px 12px; text-align: left; vertical-align: top; }
                         thead { display: table-header-group; }
                         th { background-color: #F9FAFB; font-weight: 600; color: #374151; }
+                        
+                        /* FIX: Hide the last column (Actions) when printing */
+                        th:last-child, td:last-child {
+                            display: none !important;
+                        }
                     `;
 
                     const printWindow = window.open('', '', 'height=800,width=1200');
@@ -1826,5 +1831,6 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
