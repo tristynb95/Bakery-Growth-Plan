@@ -345,28 +345,25 @@ function runApp(app) {
     }
 
     // --- AUTHENTICATION & APP FLOW ---
-    // This is the NEW, corrected code
-auth.onAuthStateChanged(async (user) => {
-    if (appState.planUnsubscribe) {
-        appState.planUnsubscribe();
-        appState.planUnsubscribe = null;
-    }
+    auth.onAuthStateChanged(async (user) => {
+        if (appState.planUnsubscribe) {
+            appState.planUnsubscribe();
+            appState.planUnsubscribe = null;
+        }
 
-    try {
         if (user) {
             const lastActivity = localStorage.getItem('lastActivity');
             const MAX_INACTIVITY_PERIOD = 8 * 60 * 60 * 1000; // 8 hours
 
             if (lastActivity && (new Date().getTime() - lastActivity > MAX_INACTIVITY_PERIOD)) {
                 handleLogout(false, true);
-                return; // Exit early
+                return;
             }
 
-            // Ensure loading view is visible while we work
-            DOMElements.initialLoadingView.classList.remove('hidden');
             DOMElements.loginView.classList.add('hidden');
             DOMElements.registerView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
+            DOMElements.initialLoadingView.classList.remove('hidden');
 
             appState.currentUser = user;
             setupActivityListeners();
@@ -382,32 +379,22 @@ auth.onAuthStateChanged(async (user) => {
                 await renderDashboard();
             }
 
+            DOMElements.initialLoadingView.classList.add('hidden');
+
         } else {
-            // No user is logged in, show the login page
             appState.currentUser = null;
             appState.planData = {};
             appState.currentPlanId = null;
             clearActivityListeners();
 
+            DOMElements.initialLoadingView.classList.add('hidden');
             DOMElements.appView.classList.add('hidden');
             DOMElements.dashboardView.classList.add('hidden');
             DOMElements.registerView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
             DOMElements.loginView.classList.remove('hidden');
         }
-    } catch (error) {
-        console.error("Critical error during app startup:", error);
-        // Display a user-friendly error message instead of a frozen screen
-        document.body.innerHTML = `<div style="text-align: center; padding: 40px; font-family: sans-serif;">
-                                      <h1>Application Error</h1>
-                                      <p>Could not load your data. Please try again later or contact support.</p>
-                                      <p style="color: #666; font-size: 0.8em; margin-top: 20px;">Error: ${error.message}</p>
-                                  </div>`;
-    } finally {
-        // This GUARANTEES the loading screen is hidden, no matter what happens
-        DOMElements.initialLoadingView.classList.add('hidden');
-    }
-});
+    });
 
     const handleLogout = (isTimeout = false, isRevival = false) => {
         if (appState.planUnsubscribe) {
@@ -1383,20 +1370,13 @@ auth.onAuthStateChanged(async (user) => {
                 printBtn.className = 'btn btn-secondary dynamic-btn';
                 printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
                 
-                const saveToGDocBtn = document.createElement('button');
-                saveToGDocBtn.id = 'modal-save-gdoc-btn';
-                saveToGDocBtn.className = 'btn btn-secondary dynamic-btn';
-                saveToGDocBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="mr-2"><path d="M19.5 2h-15A2.5 2.5 0 0 0 2 4.5v15A2.5 2.5 0 0 0 4.5 22h15a2.5 2.5 0 0 0 2.5-2.5v-15A2.5 2.5 0 0 0 19.5 2zM8 18H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V6h2v2zm10 8h-8v-2h8v2zm0-4h-8v-2h8v2zm0-4h-8V6h8v2z"></path></svg> Save to Google Doc`;
-
                 footer.insertBefore(undoRedoContainer, footer.firstChild);
                 footer.insertBefore(regenButton, DOMElements.modalActionBtn);
                 footer.insertBefore(printBtn, DOMElements.modalActionBtn);
-                footer.insertBefore(saveToGDocBtn, DOMElements.modalActionBtn);
                 
                 regenButton.onclick = handleRegenerateActionPlan;
                 document.getElementById('undo-btn').onclick = undo;
                 document.getElementById('redo-btn').onclick = redo;
-                saveToGDocBtn.onclick = handleSaveToGoogleDoc;
                 
                 printBtn.onclick = () => {
                     const aiPlanContainer = document.getElementById('ai-printable-area');
@@ -1825,81 +1805,8 @@ auth.onAuthStateChanged(async (user) => {
         localStorage.setItem('gails_cookie_consent', 'false');
         cookieBanner.classList.add('hidden');
     });
-
-    // THIS IS THE NEW, CORRECTED CODE
-// File: script.js (replace the existing handleSaveToGoogleDoc function)
-
-async function handleSaveToGoogleDoc() {
-    const saveButton = document.getElementById('modal-save-gdoc-btn');
-    if (!saveButton) return;
-
-    const originalHTML = saveButton.innerHTML;
-    saveButton.disabled = true;
-    saveButton.innerHTML = `<div class="loading-spinner" style="width:20px;height:20px;border-width:3px;"></div> <span class="ml-2">Saving...</span>`;
-
-    try {
-        const aiPlanContainer = document.getElementById('ai-printable-area');
-        if (!aiPlanContainer) {
-            throw new Error('Could not find the AI plan content.');
-        }
-        
-        // Convert the plan's HTML content into a plain text representation
-        let plainTextContent = `AI Action Plan: ${appState.planData.planName || 'Growth Plan'}\n`;
-        plainTextContent += `Bakery: ${appState.planData.bakeryLocation || 'Your Bakery'}\n\n`;
-
-        const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
-        if (activeTabButton) {
-            plainTextContent += `--- ${activeTabButton.textContent} ---\n\n`;
-        }
-
-        const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
-        const table = activeTabPanel ? activeTabPanel.querySelector('table') : null;
-
-        if (table) {
-            const headers = Array.from(table.querySelectorAll('thead th')).slice(0, -1).map(th => th.innerText.trim());
-            plainTextContent += headers.join('\t|\t') + '\n';
-            plainTextContent += '-'.repeat(plainTextContent.length) + '\n';
-
-            const rows = Array.from(table.querySelectorAll('tbody tr'));
-            rows.forEach(row => {
-                const cells = Array.from(row.querySelectorAll('td')).slice(0, -1).map(td => td.innerText.trim());
-                plainTextContent += cells.join('\t|\t') + '\n';
-            });
-        } else {
-            plainTextContent = aiPlanContainer.innerText;
-        }
-
-        // Call the Netlify function with the plain text content
-        const response = await fetch('/.netlify/functions/save-to-gdoc', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: plainTextContent })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.details || 'An unknown server error occurred.');
-        }
-        
-        alert('Successfully created Google Doc!');
-        window.open(result.url, '_blank');
-        saveButton.innerHTML = `<i class="bi bi-check-circle-fill"></i> Saved!`;
-
-    } catch (error) {
-        console.error('Error saving to Google Doc:', error);
-        alert(`Failed to save to Google Docs: ${error.message}`);
-        saveButton.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Error`;
-    } finally {
-        setTimeout(() => {
-            saveButton.disabled = false;
-            saveButton.innerHTML = originalHTML;
-        }, 3000);
-    }
 }
+
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
