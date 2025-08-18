@@ -9,21 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google/generative-ai": "^0.11.3"
-  }
-},
-{
-  "name": "bakery-growth-planner",
-  "version": "1.0.0",
-  "description": "Netlify functions for the bakery growth planner",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
     "@google/generative-ai": "^0.11.3",
-    "googleapis": "^140.0.0" 
+    "googleapis": "^140.0.0"
   }
 }
