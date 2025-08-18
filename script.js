@@ -585,12 +585,13 @@ function runApp(app) {
     }
 
 
-    function saveData(forceImmediate = false) {
+   function saveData(forceImmediate = false, directPayload = null) {
         if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
     
         const localChanges = {};
         const fieldsToDelete = {};
         
+        // This part still captures changes from the main page
         document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
             if (el.id) {
                 localChanges[el.id] = el.isContentEditable ? el.innerHTML : el.value;
@@ -637,6 +638,16 @@ function runApp(app) {
                 hasChanges = true;
             }
         }
+
+        // FIX: If a directPayload is provided, merge it into our changedData
+        if (directPayload) {
+            for (const key in directPayload) {
+                if (directPayload[key] !== appState.planData[key]) {
+                    changedData[key] = directPayload[key];
+                    hasChanges = true;
+                }
+            }
+        }
         
         if (!hasChanges && !forceImmediate) {
             return Promise.resolve();
@@ -645,7 +656,7 @@ function runApp(app) {
         clearTimeout(appState.saveTimeout);
 
         const saveToFirestore = async () => {
-            if (Object.keys(changedData).length === 0) return;
+            if (Object.keys(changedData).length === 0 && !directPayload) return;
 
             const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
             const dataToSave = {
@@ -670,7 +681,7 @@ function runApp(app) {
             });
         }
     }
-
+    
     // --- UI & RENDER LOGIC ---
     function updateUI() {
         updateSidebarInfo();
@@ -1219,29 +1230,29 @@ function runApp(app) {
     }
 
    async function saveActionPlan() {
-    const editedContent = document.getElementById('ai-printable-area').innerHTML;
-    appState.planData.aiActionPlan = editedContent;
+        const editedContent = document.getElementById('ai-printable-area').innerHTML;
+        appState.planData.aiActionPlan = editedContent;
+        
+        const saveButton = DOMElements.modalActionBtn;
+        const originalHTML = saveButton.innerHTML;
+        saveButton.disabled = true;
+        saveButton.innerHTML = `<i class="bi bi-check-circle-fill"></i> Saved!`;
 
-    const saveButton = DOMElements.modalActionBtn;
-    const originalHTML = saveButton.innerHTML;
-    saveButton.disabled = true;
-    saveButton.innerHTML = `<i class="bi bi-check-circle-fill"></i> Saved!`;
+        // FIX: Pass the plan content directly to the saveData function
+        await saveData(true, { aiActionPlan: editedContent });
 
-    // FIX: Await the saveData function to ensure it completes before proceeding.
-    await saveData(true);
+        const printableArea = document.getElementById('ai-printable-area');
+        if (printableArea) {
+            undoStack = [printableArea.innerHTML];
+            redoStack = [];
+            updateUndoRedoButtons();
+        }
 
-    const printableArea = document.getElementById('ai-printable-area');
-    if (printableArea) {
-        undoStack = [printableArea.innerHTML];
-        redoStack = [];
-        updateUndoRedoButtons();
+        setTimeout(() => {
+            saveButton.disabled = false;
+            saveButton.innerHTML = originalHTML;
+        }, 2000);
     }
-
-    setTimeout(() => {
-        saveButton.disabled = false;
-        saveButton.innerHTML = originalHTML;
-    }, 2000);
-}
 
     function handleRegenerateActionPlan() {
         openModal('confirmRegenerate');
@@ -1811,5 +1822,6 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
