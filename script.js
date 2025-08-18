@@ -511,7 +511,8 @@ function runApp(app) {
     }
 
     // --- DATA HANDLING ---
-    function setupPlanListener() {
+   // New, more robust function to fetch initial data and then listen for changes.
+    async function setupPlanListener() {
         if (appState.planUnsubscribe) {
             appState.planUnsubscribe();
         }
@@ -522,20 +523,96 @@ function runApp(app) {
         }
 
         const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
-        
+
+        // FIX: First, explicitly GET the initial data and wait for it.
+        try {
+            const doc = await docRef.get();
+            if (doc.exists) {
+                appState.planData = doc.data();
+            } else {
+                console.log("No such document on initial load!");
+                appState.planData = {};
+                handleBackToDashboard(); // Or handle error appropriately
+            }
+        } catch (error) {
+            console.error("Error fetching initial plan data:", error);
+            handleBackToDashboard();
+        }
+
+        // THEN, set up the real-time listener for any subsequent updates.
         appState.planUnsubscribe = docRef.onSnapshot((doc) => {
             if (doc.exists) {
                 const remoteData = doc.data();
-                appState.planData = remoteData;
-                updateViewWithRemoteData(remoteData); 
-                updateUI();
-            } else {
-                console.log("No such document!");
-                appState.planData = {};
+                // Only update if there are actual changes to avoid cursor jumps
+                if (JSON.stringify(remoteData) !== JSON.stringify(appState.planData)) {
+                    appState.planData = remoteData;
+                    updateViewWithRemoteData(remoteData);
+                    updateUI();
+                }
             }
         }, (error) => {
             console.error("Error listening to plan changes:", error);
         });
+    }
+
+    // Updated to handle summary view rendering correctly after data load.
+    function updateViewWithRemoteData(remoteData) {
+        // If the current view is summary, re-render it with the new data.
+        if (appState.currentView === 'summary') {
+            renderSummary();
+            return;
+        }
+
+        if (DOMElements.appView.classList.contains('hidden')) {
+            return;
+        }
+    
+        if (appState.currentView.startsWith('month-')) {
+            const monthNum = parseInt(appState.currentView.split('-')[1], 10);
+            updateWeeklyTabCompletion(monthNum, remoteData);
+        }
+    
+        document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
+            if (document.activeElement !== el) {
+                if (el.id && remoteData[el.id] !== undefined) {
+                    if (el.isContentEditable) {
+                        if (el.innerHTML !== remoteData[el.id]) {
+                            el.innerHTML = remoteData[el.id];
+                        }
+                    } else {
+                        if (el.value !== remoteData[el.id]) {
+                            el.value = remoteData[el.id];
+                        }
+                    }
+                }
+            }
+            if (el.isContentEditable) managePlaceholder(el);
+        });
+        
+        document.querySelectorAll('.pillar-buttons').forEach(group => {
+            const stepKey = group.dataset.stepKey;
+            const dataKey = `${stepKey}_pillar`;
+            const pillar = remoteData[dataKey];
+            group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+            if (pillar) {
+                const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
+                if (buttonToSelect) buttonToSelect.classList.add('selected');
+            }
+        });
+
+        if (appState.currentView.startsWith('month-')) {
+            const monthNum = appState.currentView.split('-')[1];
+            document.querySelectorAll('.status-buttons').forEach(group => {
+                const week = group.dataset.week;
+                const key = `m${monthNum}s5_w${week}_status`;
+                const status = remoteData[key];
+                group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+                if (status) {
+                    const buttonToSelect = group.querySelector(`[data-status="${status}"]`);
+                    if (buttonToSelect) buttonToSelect.classList.add('selected');
+                }
+            });
+        }
     }
 
     function updateViewWithRemoteData(remoteData) {
@@ -1911,6 +1988,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
