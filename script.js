@@ -1389,92 +1389,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
     function handleRegenerateActionPlan() {
         openModal('confirmRegenerate');
     }
-
-    async function handleWordExport() {
-        const { Packer, Document, Table, TableRow, TableCell, Paragraph, TextRun, HeadingLevel, AlignmentType, WidthType, BorderStyle } = docx;
-
-        const aiPlanContainer = document.getElementById('ai-printable-area');
-        const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
-        const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
-
-        if (!activeTabPanel || !activeTabButton) {
-            alert("Could not find the active month to export.");
-            return;
-        }
-
-        const monthTitle = activeTabButton.innerText.trim();
-        const planName = appState.planData.planName || 'AI Action Plan';
-        const bakeryName = appState.planData.bakeryLocation || 'Your Bakery';
-        const quarterlyTheme = appState.planData.quarterlyTheme ? new DOMParser().parseFromString(appState.planData.quarterlyTheme, "text/html").body.textContent : 'Laying foundations for success';
-
-        const tableNode = activeTabPanel.querySelector('table');
-        if (!tableNode) {
-            alert("Could not find the table to export.");
-            return;
-        }
-
-        const headerRows = Array.from(tableNode.querySelectorAll('thead tr'));
-        const bodyRows = Array.from(tableNode.querySelectorAll('tbody tr'));
-
-        const tableHeader = new TableRow({
-            children: headerRows[0].querySelectorAll('th').slice(0, -1) // Exclude "Actions" column
-                .map(th => new TableCell({
-                    children: [new Paragraph({
-                        children: [new TextRun({ text: th.innerText, bold: true })],
-                        alignment: AlignmentType.CENTER,
-                    })],
-                    shading: { fill: "F8F8F8" },
-                })),
-        });
-
-        const tableBody = bodyRows.map(row => new TableRow({
-            children: row.querySelectorAll('td').slice(0, -1) // Exclude "Actions" column
-                .map(td => new TableCell({
-                    children: [new Paragraph(td.innerText)],
-                })),
-        }));
-
-        const table = new Table({
-            rows: [tableHeader, ...tableBody],
-            width: { size: 100, type: WidthType.PERCENTAGE },
-        });
-
-        const doc = new Document({
-            sections: [{
-                children: [
-                    new Paragraph({
-                        text: planName,
-                        heading: HeadingLevel.TITLE,
-                        alignment: AlignmentType.CENTER,
-                    }),
-                    new Paragraph({
-                        children: [new TextRun({
-                            text: `${monthTitle} Action Plan`,
-                            color: "D10A11", // Gail's Red
-                            bold: true,
-                        })],
-                        alignment: AlignmentType.CENTER,
-                    }),
-                    new Paragraph({
-                        children: [new TextRun({
-                            text: `${quarterlyTheme} | ${bakeryName}`,
-                            color: "808080", // Grey
-                            size: 20, // 10pt font size
-                        })],
-                        alignment: AlignmentType.CENTER,
-                    }),
-                    new Paragraph({
-                        children: [], // Empty paragraph for spacing
-                    }),
-                    table,
-                ],
-            }],
-        });
-
-        Packer.toBlob(doc).then(blob => {
-            saveAs(blob, `${planName} - ${monthTitle}.docx`);
-        });
-    }
     
     async function handleShare() {
         openModal('sharing');
@@ -1519,6 +1433,106 @@ function isWeekComplete(monthNum, weekNum, planData) {
             modalContent.innerHTML = `<p class="text-red-600">Could not create a shareable link. Please try again later.</p>`;
         }
     }
+
+    // Add this new function to script.js
+async function handleWordExport() {
+    // Destructure the necessary components from the global 'docx' object
+    const { Packer, Document, Table, TableRow, TableCell, Paragraph, TextRun, HeadingLevel, AlignmentType, WidthType } = docx;
+
+    const aiPlanContainer = document.getElementById('ai-printable-area');
+    if (!aiPlanContainer) return;
+
+    // Find the currently visible tab and table
+    const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
+    const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
+
+    if (!activeTabPanel || !activeTabButton) {
+        alert("Could not find the active month to export.");
+        return;
+    }
+
+    const monthTitle = activeTabButton.innerText.trim();
+    const tableNode = activeTabPanel.querySelector('table');
+    if (!tableNode) {
+        alert("Could not find the table to export.");
+        return;
+    }
+
+    // Get context from the application's state
+    const planName = appState.planData.planName || 'AI Action Plan';
+    const bakeryName = appState.planData.bakeryLocation || 'Your Bakery';
+    // Safely get plain text from the quarterlyTheme which might contain HTML
+    const quarterlyTheme = appState.planData.quarterlyTheme ? new DOMParser().parseFromString(appState.planData.quarterlyTheme, "text/html").body.textContent : 'Laying foundations for success';
+
+
+    // --- Build the DOCX structure ---
+
+    // 1. Create the table header row from the DOM
+    const headerCells = Array.from(tableNode.querySelectorAll('thead th'))
+        .slice(0, -1) // Exclude the "Actions" column
+        .map(th => new TableCell({
+            children: [new Paragraph({
+                children: [new TextRun({ text: th.innerText.trim(), bold: true })],
+                alignment: AlignmentType.CENTER,
+            })],
+            shading: { fill: "F8F8F8" }, // Light grey background for header
+        }));
+    const tableHeader = new TableRow({ children: headerCells, tableHeader: true });
+
+    // 2. Create the table body rows from the DOM
+    const bodyRows = Array.from(tableNode.querySelectorAll('tbody tr')).map(row => {
+        const rowCells = Array.from(row.querySelectorAll('td'))
+            .slice(0, -1) // Exclude the "Actions" column
+            .map(td => new TableCell({
+                children: [new Paragraph(td.innerText.trim())],
+            }));
+        return new TableRow({ children: rowCells });
+    });
+
+    // 3. Assemble the table
+    const table = new Table({
+        rows: [tableHeader, ...bodyRows],
+        width: { size: 100, type: WidthType.PERCENTAGE },
+    });
+
+    // 4. Create the main document with titles and the table
+    const doc = new Document({
+        sections: [{
+            children: [
+                new Paragraph({
+                    text: "AI Action Plan",
+                    heading: HeadingLevel.TITLE,
+                    alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                    children: [new TextRun({
+                        text: `${monthTitle} Action Plan`,
+                        color: "D10A11", // Gail's Red
+                        bold: true,
+                        size: 32, // 16pt font size
+                    })],
+                    alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({
+                    children: [new TextRun({
+                        text: `${quarterlyTheme} | ${bakeryName}`,
+                        color: "808080", // Grey
+                        size: 22, // 11pt font size
+                    })],
+                    alignment: AlignmentType.CENTER,
+                }),
+                new Paragraph({ children: [] }), // Empty paragraph for spacing
+                table,
+            ],
+        }],
+    });
+
+    // 5. Use Packer and FileSaver to generate and download the file
+    Packer.toBlob(doc).then(blob => {
+        // The global 'saveAs' function is provided by FileSaver.js
+        saveAs(blob, `${planName} - ${monthTitle}.docx`);
+    });
+}
 
     function openModal(type, context = {}) {
         const { planId, currentName, planName } = context;
@@ -1586,6 +1600,8 @@ function isWeekComplete(monthNum, weekNum, planData) {
                 DOMElements.modalActionBtn.style.display = 'none';
                 DOMElements.modalCancelBtn.style.display = 'none';
                 break;
+            // Replace the 'case 'aiActionPlan_view':' block in your openModal function with this
+
             case 'aiActionPlan_view': {
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
                 
@@ -1627,16 +1643,18 @@ function isWeekComplete(monthNum, weekNum, planData) {
                 printBtn.className = 'btn btn-secondary';
                 printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
 
-                // Create the new Download button
+                // --- MODIFICATION START ---
+                // Create the new Download button and assign its function
                 const downloadBtn = document.createElement('button');
                 downloadBtn.id = 'modal-download-btn';
                 downloadBtn.className = 'btn btn-secondary';
                 downloadBtn.innerHTML = `<i class="bi bi-file-earmark-word-fill"></i> Download`;
-                downloadBtn.onclick = handleWordExport;
+                downloadBtn.onclick = handleWordExport; // Assign the new function here
 
                 rightButtonsContainer.appendChild(regenButton);
                 rightButtonsContainer.appendChild(printBtn);
-                rightButtonsContainer.appendChild(downloadBtn); // Add new button here
+                rightButtonsContainer.appendChild(downloadBtn); // Add the new button to the container
+                // --- MODIFICATION END ---
                 
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
@@ -1677,6 +1695,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
                 
                 updateUndoRedoButtons();
                 break;
+            }
             }
             case 'confirmClose':
                 DOMElements.modalTitle.textContent = "Discard Changes?";
@@ -2043,6 +2062,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
