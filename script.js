@@ -727,6 +727,14 @@ function runApp(app) {
             `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
             `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
         ];
+
+        // FIX: Add all 12 weekly check-in fields to the progress calculation
+        for (let w = 1; w <= 4; w++) {
+            requiredFields.push(`m${monthNum}s5_w${w}_status`);
+            requiredFields.push(`m${monthNum}s5_w${w}_win`);
+            requiredFields.push(`m${monthNum}s5_w${w}_spotlight`);
+        }
+
         if (monthNum == 3) {
             requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
         }
@@ -1837,6 +1845,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
