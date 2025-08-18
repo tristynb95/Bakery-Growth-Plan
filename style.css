@@ -1,5 +1,5 @@
 /* Gail's Bakery 30-60-90 Plan Stylesheet */
-/* v10.4 - Uniform Dashboard Card Sizing */
+/* v10.5 - Improved AI Action Plan Modal Styling */
 
 /* 1. Root Variables & Base Styles
 -------------------------------------------------- */
@@ -58,7 +58,7 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 .loading-wrapper .auth-logo { margin-bottom: 0; }
 .loading-overlay {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(253, 253, 252, 0.85); /* Updated to match new BG */
+    background-color: rgba(253, 253, 252, 0.85);
     backdrop-filter: blur(5px); z-index: 1000;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
@@ -71,7 +71,6 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Enhanced Creation Loader */
 .creation-loader-step {
     display: flex;
     align-items: center;
@@ -123,20 +122,20 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 .dashboard-grid { 
     display: grid; 
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
-    gap: 2rem; /* Increased gap */
+    gap: 2rem;
     margin-top: 2.5rem; 
 }
 .plan-card {
     background-color: var(--gails-white);
     border: 1px solid #E5E7EB;
-    border-radius: 1.25rem; /* Slightly more rounded */
-    padding: 2rem; /* Increased padding */
+    border-radius: 1.25rem;
+    padding: 2rem;
     box-shadow: var(--shadow-md);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
     position: relative;
-    min-height: 250px; /* This is the fix */
+    min-height: 250px;
 }
 .plan-card:hover { 
     transform: translateY(-6px); 
@@ -158,7 +157,6 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 .plan-card.new-plan-card .bi-plus-circle-dotted { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .plan-card.new-plan-card:hover .bi-plus-circle-dotted { transform: scale(1.15) rotate(90deg); }
 
-/* Dashboard Progress Circle */
 .progress-circle {
     width: 44px; height: 44px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -178,10 +176,10 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 main { grid-area: main; }
 .sidebar-nav a { 
     display: flex; align-items: center; padding: 0.85rem 1rem; border-radius: 0.75rem; 
-    font-weight: 600; /* Bolder font */
+    font-weight: 600;
     color: var(--gails-text-secondary); 
     transition: all 0.25s ease; border-left: 4px solid transparent; 
-    transform: perspective(1px) translateZ(0); /* Promotes to its own layer */
+    transform: perspective(1px) translateZ(0);
 }
 .sidebar-nav a:hover { 
     background-color: var(--gails-grey-light); 
@@ -201,43 +199,38 @@ main { grid-area: main; }
 
 /* 5. Core Components
 -------------------------------------------------- */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: 0.75rem; /* More rounded */ font-weight: 600; transition: all 0.2s ease-in-out; padding: 0.75rem 1.5rem; /* More padding */ border: 1px solid transparent; cursor: pointer; white-space: nowrap; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: 0.75rem; font-weight: 600; transition: all 0.2s ease-in-out; padding: 0.75rem 1.5rem; border: 1px solid transparent; cursor: pointer; white-space: nowrap; }
 .btn-primary { background-color: var(--gails-red); color: var(--gails-white); box-shadow: var(--shadow-sm); }
 .btn-primary:hover { background-color: var(--gails-red-dark); transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .btn-secondary { background-color: var(--gails-white); color: var(--gails-text-primary); border-color: var(--gails-grey-mid); }
 .btn-secondary:hover { border-color: #4B5563; background-color: var(--gails-grey-light); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
 .btn:active { transform: scale(0.98) translateY(0); box-shadow: none; }
-/* style.css */
 
 .form-input { 
     width: 100%; 
-    padding: 1rem 1.15rem; /* Increased vertical and horizontal padding */
+    padding: 1rem 1.15rem;
     border-radius: 0.5rem; 
     border: 1px solid var(--gails-grey-mid); 
     background-color: var(--gails-white); 
     transition: all 0.2s; 
-    font-size: 1.05rem; /* Slightly larger font */
+    font-size: 1.05rem;
 }
-
-/* Add this new rule for better textarea sizing */
 textarea.form-input {
-    min-height: 120px; /* Sets a larger default height */
-    line-height: 1.6;  /* Improves readability of multi-line text */
+    min-height: 120px;
+    line-height: 1.6;
 }
-
 .form-input:focus { 
     outline: none; 
     border-color: var(--gails-red); 
     box-shadow: var(--shadow-focus); 
 }
-.content-card { background-color: var(--gails-white); border-radius: 1.25rem; box-shadow: var(--shadow-sm); border: 1px solid #E5E7EB; padding: 2rem; /* Increased padding */ }
+.content-card { background-color: var(--gails-white); border-radius: 1.25rem; box-shadow: var(--shadow-sm); border: 1px solid #E5E7EB; padding: 2rem; }
 
-/* Character Counter Styles */
 .textarea-wrapper { position: relative; }
 .char-counter {
     position: absolute; bottom: 8px; right: 12px;
     font-size: 0.8rem; font-weight: 500; color: var(--gails-text-secondary);
-    background-color: rgba(253, 253, 252, 0.8); /* Updated to new BG color */
+    background-color: rgba(253, 253, 252, 0.8);
     backdrop-filter: blur(2px); padding: 2px 8px; border-radius: 6px;
     opacity: 0; transition: opacity 0.2s ease-in-out; pointer-events: none;
 }
@@ -247,28 +240,6 @@ textarea.form-input {
 
 /* 6. Interactive Elements & Enhancements
 -------------------------------------------------- */
-/* Enhanced Stepper */
-.stepper-item {
-    padding: 0.5rem;
-    border-radius: 0.75rem;
-    transition: background-color 0.2s ease, transform 0.2s ease;
-}
-.stepper-item:hover {
-    background-color: var(--gails-grey-light);
-    transform: translateX(4px);
-}
-.stepper-item .step-circle { position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background-color: var(--gails-grey-mid); color: var(--gails-white); }
-.stepper-item.active .step-circle { background-color: var(--gails-red); transform: scale(1.1); }
-.stepper-item.completed .step-circle { background-color: var(--gails-green); }
-
-.stepper-item .step-line { background-color: var(--gails-grey-mid); transition: background-color 0.3s; }
-.stepper-item.completed .step-line { background-color: var(--gails-green); }
-.stepper-item .step-label { transition: color 0.3s, font-weight 0.3s; }
-.stepper-item.active .step-label { color: var(--gails-red); font-weight: 600; }
-.stepper-item:hover:not(.active) .step-label {
-    color: var(--gails-text-primary);
-}
-
 .progress-bar-container { width: 100%; height: 10px; background-color: var(--gails-grey-light); border-radius: 5px; overflow: hidden; }
 .progress-bar-fill { width: 0%; height: 100%; background-color: var(--gails-red); border-radius: 5px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
 
@@ -278,7 +249,6 @@ textarea.form-input {
 .status-button[data-status="issues"].selected { background-color: var(--status-issues-bg); color: var(--status-issues-text); border-color: var(--status-issues-border); }
 .status-button[data-status="off-track"].selected { background-color: var(--status-off-track-bg); color: var(--status-off-track-text); border-color: var(--status-off-track-border); }
 
-/* Enhanced Save Indicator */
 #save-indicator {
     transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform: translateY(10px);
@@ -348,7 +318,6 @@ textarea.form-input {
     .main-header #header-subtitle { font-size: 1rem; }
     .dashboard-grid { grid-template-columns: 1fr; }
     .content-card .grid-cols-3, .content-card .grid-cols-2 { grid-template-columns: 1fr; }
-    .stepper-item { align-items: flex-start; }
 }
 
 /* 13. Cookie Consent Banner */
@@ -371,7 +340,7 @@ textarea.form-input {
 }
 .btn-subtle:hover { background-color: var(--gails-grey-light); color: var(--gails-text-primary); }
 
-/* 16. Pillar Button Styles (Add to end of file)
+/* 16. Pillar Button Styles
 -------------------------------------------------- */
 .pillar-button {
     background-color: var(--gails-white);
@@ -384,13 +353,11 @@ textarea.form-input {
     font-weight: 600;
     transition: all 0.2s ease-in-out;
 }
-
 .pillar-button:hover {
     border-color: var(--gails-text-primary);
     color: var(--gails-text-primary);
     background-color: var(--gails-grey-light);
 }
-
 .pillar-button.selected {
     background-color: var(--gails-red);
     color: var(--gails-white);
@@ -398,7 +365,6 @@ textarea.form-input {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
-
 .pillar-badge {
     display: inline-block;
     padding: 0.25rem 0.75rem;
@@ -409,87 +375,76 @@ textarea.form-input {
     color: var(--gails-red);
 }
 
-/* 17. Icon & SVG Adjustments
--------------------------------------------------- */
-.pillar-icon-svg {
-    vertical-align: -0.125em; /* Aligns custom SVG with text baseline like Bootstrap Icons */
-}
-
-/* 18. Rich Text Editing Styles
+/* 17. Rich Text Editing Styles
 -------------------------------------------------- */
 [contenteditable="true"].form-input {
-    min-height: 120px; /* Sets a larger default height */
-    line-height: 1.6;  /* Improves readability of multi-line text */
-    position: relative; /* Add this line */
+    min-height: 120px;
+    line-height: 1.6;
+    position: relative;
 }
-
-/* Replicates placeholder text for contenteditable divs using a JS-managed class */
 [contenteditable="true"].form-input.is-placeholder-showing::before {
     content: attr(data-placeholder);
-    color: #9CA3AF; /* Standard placeholder text colour */
-    pointer-events: none; /* Allows clicking through the placeholder */
-
-    /* New positioning rules */
+    color: #9CA3AF;
+    pointer-events: none;
     position: absolute;
-    top: 1rem;        /* Match parent's top padding */
-    left: 1.15rem;    /* Match parent's left padding */
-    right: 1.15rem;   /* Allow text to wrap correctly */
+    top: 1rem;
+    left: 1.15rem;
+    right: 1.15rem;
 }
+.weekly-check-in-input { min-height: 80px; }
+.key-levers-input { min-height: 360px; }
 
-/* 19. Custom Height for Weekly Check-in Text Boxes
--------------------------------------------------- */
-.weekly-check-in-container [contenteditable="true"].form-input {
-    min-height: 60px;
-}
-/* 20. Stepper Completion Checkmark Icon
--------------------------------------------------- */
-.stepper-item.completed .step-circle .bi-check-lg {
-    font-size: 1.2rem;
-    line-height: 1;
-}
 
-/* 21. Stepper Progress Text (Subtle Version)
+/* 18. Sidebar Donut Progress Indicator
 -------------------------------------------------- */
-.step-progress {
-    font-size: 0.85em; /* Slightly smaller than the title */
-    font-weight: 500;  /* Lighter than the title */
-    color: var(--gails-text-secondary);
-    margin-left: 0.5rem; /* Space between title and counter */
+.sidebar-nav a .nav-icon { display: inline-block; }
+.nav-progress-donut-container {
+    width: 20px;
+    height: 20px;
+    margin-left: auto;
 }
+.progress-donut {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+    overflow: visible;
+}
+.progress-donut__track { stroke: var(--gails-grey-light); }
+.progress-donut__progress {
+    stroke: var(--gails-red);
+    transition: stroke-dashoffset 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.sidebar-nav a.completed .nav-progress-donut-container { display: none; }
 
-/* 22. AI Action Plan Modal Styles
--------------------------------------------------- */
-#ai-printable-area ul {
-    list-style-type: none;
-    padding-left: 0;
-}
-#ai-printable-area .task-category {
-    padding-left: 1rem;
-    border-left: 3px solid var(--gails-grey-light);
-}
 
-/* 23. Modal Content Scrolling Fix
+/* 19. AI Action Plan Modal Styles
 -------------------------------------------------- */
 .modal-box {
-    max-height: 85vh; /* Limit the modal's height to 85% of the screen height */
+    max-height: 85vh;
     display: flex;
     flex-direction: column;
 }
-
-.modal-content {
-    overflow-y: auto; /* Make the content area scrollable if it overflows */
-}
-
-/* Give the AI modal a bit more width to better display the plan */
-#modal-box[data-type="aiActionPlan"],
-#modal-box[data-type="aiActionPlan_view"],
-#modal-box[data-type="aiActionPlan_generate"] {
+.modal-content { overflow-y: auto; }
+#modal-box[data-type="aiActionPlan_view"] {
     max-width: 95vw;
-    width: 1100px; /* Set a fixed large width, but max-width will constrain it */
+    width: 1100px;
 }
-
-/* 24. AI Action Plan Table Styles
--------------------------------------------------- */
+.editable-action-plan {
+    border: 1px solid var(--gails-grey-mid);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    min-height: 200px;
+    outline: none;
+    transition: all 0.2s;
+}
+.editable-action-plan:focus {
+    border-color: var(--gails-red);
+    box-shadow: var(--shadow-focus);
+}
+#modal-box[data-type="aiActionPlan_view"] .editable-action-plan {
+    padding: 0;
+    border: none;
+}
 #ai-printable-area table {
     width: 100%;
     border-collapse: collapse;
@@ -505,30 +460,19 @@ textarea.form-input {
     background-color: var(--gails-grey-light);
     font-weight: 600;
 }
-#ai-printable-area h2 {
-    margin-top: 2rem;
-    border-bottom: 2px solid var(--gails-red-light);
-    padding-bottom: 0.5rem;
-}
 
-/* 25. Redesigned Summary Page Styles
+/* 20. Summary Page Styles
 -------------------------------------------------- */
 .summary-grid {
     display: grid;
-    grid-template-columns: 1fr; /* Default to single column on mobile */
+    grid-template-columns: 1fr;
 }
-
-/* Two-column layout for wider screens */
 @media (min-width: 768px) {
     .summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
-
-.summary-section:not(:first-child) {
-    margin-top: 2rem;
-}
-
+.summary-section:not(:first-child) { margin-top: 2rem; }
 .summary-heading {
     font-size: 0.875rem;
     font-weight: 700;
@@ -537,214 +481,23 @@ textarea.form-input {
     letter-spacing: 0.05em;
     margin-bottom: 0.75rem;
 }
-
-/* 26. Summary Page Status Badges
--------------------------------------------------- */
 .summary-status-badge {
-    padding: 0.25rem 0.625rem; /* 4px 10px */
+    padding: 0.25rem 0.625rem;
     border-radius: 9999px;
-    font-size: 0.625rem; /* 10px */
+    font-size: 0.625rem;
     font-weight: 700;
     line-height: 1;
     text-transform: uppercase;
     border: 1px solid transparent;
 }
-
-.summary-status-badge.status-on-track {
-    background-color: var(--status-on-track-bg);
-    color: var(--status-on-track-text);
-    border-color: var(--status-on-track-border);
-}
-.summary-status-badge.status-issues {
-    background-color: var(--status-issues-bg);
-    color: var(--status-issues-text);
-    border-color: var(--status-issues-border);
-}
-.summary-status-badge.status-off-track {
-    background-color: var(--status-off-track-bg);
-    color: var(--status-off-track-text);
-    border-color: var(--status-off-track-border);
-}
-
-/* Add some spacing for the new two-line weekly win layout */
-.summary-section ul {
-    list-style: none;
-    padding: 0;
-}
-.summary-section ul li:not(:first-child) {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--gails-grey-light);
-}
-
-/* 27. Editable AI Action Plan Styles
--------------------------------------------------- */
-.editable-action-plan {
-    border: 1px solid var(--gails-grey-mid);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    min-height: 200px;
-    outline: none;
-    transition: all 0.2s;
-}
-
-.editable-action-plan:focus {
-    border-color: var(--gails-red);
-    box-shadow: var(--shadow-focus);
-}
-
-/* ===== NEW RULE TO WIDEN TABLE CONTAINER ===== */
-#modal-box[data-type="aiActionPlan_view"] .editable-action-plan {
-    padding: 0;
-    border: none;
-}
+.summary-status-badge.status-on-track { background-color: var(--status-on-track-bg); color: var(--status-on-track-text); border-color: var(--status-on-track-border); }
+.summary-status-badge.status-issues { background-color: var(--status-issues-bg); color: var(--status-issues-text); border-color: var(--status-issues-border); }
+.summary-status-badge.status-off-track { background-color: var(--status-off-track-bg); color: var(--status-off-track-text); border-color: var(--status-off-track-border); }
+.summary-section ul { list-style: none; padding: 0; }
+.summary-section ul li:not(:first-child) { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gails-grey-light); }
 
 
-/* Ensure the new buttons in the modal footer look good */
-.modal-footer {
-    flex-wrap: wrap; /* Allow buttons to wrap on small screens */
-}
-
-/* 28. Redesigned Monthly Dashboard Styles
--------------------------------------------------- */
-
-/* Weekly Check-in Tab Styles */
-.weekly-tab {
-    padding: 0.75rem 0.25rem; /* 12px 4px */
-    font-size: 1rem; /* 16px */
-    font-weight: 600;
-    color: var(--gails-text-secondary);
-    border-bottom: 3px solid transparent;
-    transition: all 0.2s ease-in-out;
-    text-decoration: none;
-}
-
-.weekly-tab:hover {
-    color: var(--gails-text-primary);
-    border-bottom-color: var(--gails-grey-mid);
-}
-
-.weekly-tab.active {
-    color: var(--gails-red);
-    border-bottom-color: var(--gails-red);
-}
-
-/* Custom Height for Weekly Check-in Text Boxes */
-.weekly-check-in-input {
-    min-height: 80px;
-}
-
-/* 29. Taller Key Levers Text Box
--------------------------------------------------- */
-.key-levers-input {
-    min-height: 360px; /* Adjust this value as needed */
-}
-
-/* 30. Sidebar Navigation Progress Counter
--------------------------------------------------- */
-.nav-progress {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--gails-text-secondary);
-    margin-left: 0.5rem;
-    display: none; /* Hidden by default, JS will show it */
-}
-
-.sidebar-nav a.active .nav-progress {
-    color: var(--gails-red);
-}
-
-/* 30. Sidebar Donut Progress Indicator (Revised)
--------------------------------------------------- */
-/* Restore original nav icons that were hidden */
-.sidebar-nav a .nav-icon {
-    display: inline-block;
-}
-
-/* This container pushes the donut to the far right */
-.nav-progress-donut-container {
-    width: 20px;
-    height: 20px;
-    margin-left: auto;
-}
-
-.progress-donut {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-    overflow: visible;
-}
-
-.progress-donut__track {
-    stroke: var(--gails-grey-light);
-}
-
-.progress-donut__progress {
-    stroke: var(--gails-red);
-    transition: stroke-dashoffset 0.5s cubic-bezier(0.65, 0, 0.35, 1);
-}
-
-/* Hide the donut when the section is 100% complete */
-.sidebar-nav a.completed .nav-progress-donut-container {
-    display: none;
-}
-
-/* 31. AI Action Plan Tabs
--------------------------------------------------- */
-.ai-action-plan-container {
-    padding: 0;
-}
-
-.ai-tabs-nav {
-    display: flex;
-    border-bottom: 2px solid var(--gails-grey-light);
-    margin-bottom: 1.5rem;
-    padding: 0 1rem; /* Add some horizontal padding to the tabs */
-}
-
-.ai-tabs-nav .btn {
-    border-radius: 0.5rem 0.5rem 0 0;
-    border-bottom-width: 0;
-    margin-bottom: -2px;
-    background-color: transparent;
-    border-color: transparent;
-}
-
-.ai-tabs-nav .btn.active {
-    background-color: var(--gails-white);
-    border-color: var(--gails-grey-mid);
-    color: var(--gails-red);
-}
-
-
-.ai-tabs-content > div {
-    display: none;
-}
-
-.ai-tabs-content > div.active {
-    display: block;
-    animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Override existing styles for the editable container to remove padding/border */
-.editable-action-plan {
-    padding: 0;
-    border: none;
-    border-radius: 0;
-    min-height: auto;
-}
-
-.editable-action-plan:focus {
-    border-color: transparent;
-    box-shadow: none;
-}
-
-/* 32. Dynamic Table Action Buttons
+/* 21. Dynamic Table Action Buttons
 -------------------------------------------------- */
 .btn-add-row {
     display: inline-flex;
@@ -760,22 +513,15 @@ textarea.form-input {
     cursor: pointer;
     transition: all 0.2s ease;
 }
-
 .btn-add-row:hover {
     background-color: var(--gails-grey-light);
     color: var(--gails-text-primary);
 }
-
-.btn-add-row .bi {
-    font-size: 1.2rem;
-}
-
 td.actions-cell {
     text-align: center;
     vertical-align: middle;
-    width: 50px; /* Give it a fixed width */
+    width: 50px;
 }
-
 .btn-remove-row {
     background: none;
     border: none;
@@ -788,76 +534,57 @@ td.actions-cell {
     align-items: center;
     justify-content: center;
     font-size: 1rem;
-    opacity: 0; /* Hidden by default */
+    opacity: 0;
     transition: all 0.2s ease;
 }
+tr:hover .btn-remove-row { opacity: 1; }
+.btn-remove-row:hover { background-color: var(--gails-red-light); color: var(--gails-red); }
 
-tr:hover .btn-remove-row {
-    opacity: 1; /* Show on row hover */
-}
-
-.btn-remove-row:hover {
-    background-color: var(--gails-red-light);
-    color: var(--gails-red);
-}
-
-/* Ensure actions column in print is hidden */
 @media print {
-    th:last-child,
-    td:last-child {
+    th.actions-cell,
+    td.actions-cell {
         display: none !important;
     }
 }
 
-/* 33. Undo/Redo Buttons
+/* 22. Undo/Redo & Modal Footer Buttons
 -------------------------------------------------- */
 .undo-redo-container {
     display: flex;
     gap: 0.5rem;
-    margin-right: auto; /* Pushes this group to the left */
+    margin-right: auto;
 }
-
 .btn-icon {
-    padding: 0.75rem; /* Make it square */
+    padding: 0.75rem;
     font-size: 1.1rem;
     line-height: 1;
 }
-
-.btn-icon .bi {
-    margin: 0; /* Remove default gap */
-}
-
+.btn-icon .bi { margin: 0; }
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
 }
-
-/* Adjust modal footer for new button layout */
 .modal-footer {
     justify-content: space-between;
     flex-wrap: nowrap;
 }
+.modal-footer.is-confirming { justify-content: center; }
 
-/* 34. Sortable Table Headers
+/* 23. Sortable Table Headers
 -------------------------------------------------- */
 .sortable-header {
     cursor: pointer;
     user-select: none;
 }
-
 .header-flex-wrapper {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
 }
-
-.sortable-header:hover {
-    background-color: var(--gails-red-light) !important;
-}
-
+.sortable-header:hover { background-color: var(--gails-red-light) !important; }
 .sortable-header .sort-icon {
     display: inline-block;
     width: 1em;
@@ -867,32 +594,75 @@ tr:hover .btn-remove-row {
     transition: all 0.2s ease;
     flex-shrink: 0;
 }
-
-/* Default state icon */
 .sortable-header .sort-icon::before {
-    content: '\F229'; /* Bootstrap Icons "caret-down-fill" */
+    content: '\\F229';
     font-family: "bootstrap-icons";
 }
-
-/* Ascending sort state */
 .sortable-header[data-sort-dir="asc"] .sort-icon {
     opacity: 1;
     color: var(--gails-red);
 }
-.sortable-header[data-sort-dir="asc"] .sort-icon::before {
-    content: '\F236'; /* "caret-up-fill" */
-}
-
-/* Descending sort state */
+.sortable-header[data-sort-dir="asc"] .sort-icon::before { content: '\\F236'; }
 .sortable-header[data-sort-dir="desc"] .sort-icon {
     opacity: 1;
     color: var(--gails-red);
 }
-.sortable-header[data-sort-dir="desc"] .sort-icon::before {
-    content: '\F229'; /* "caret-down-fill" */
+.sortable-header[data-sort-dir="desc"] .sort-icon::before { content: '\\F229'; }
+
+/* ====================================================================
+   24. REVISED AI ACTION PLAN TABS (for better visibility & branding)
+   ====================================================================
+*/
+.ai-action-plan-container { padding: 0; }
+
+.ai-tabs-nav {
+    display: flex;
+    border-bottom: 2px solid var(--gails-red); /* Stronger red line below tabs */
+    margin: 0 1rem 1.5rem 1rem;
+    padding: 0;
 }
 
-/* Center buttons for confirmation dialogs */
-.modal-footer.is-confirming {
-    justify-content: center;
+.ai-tabs-nav .ai-tab-btn, 
+.ai-tabs-nav .ai-tab-btn:hover {
+    border: 2px solid transparent; /* Reserve space for border */
+    border-bottom: none;
+    border-radius: 0.75rem 0.75rem 0 0; /* Match site's rounded style */
+    padding: 0.75rem 1.5rem;
+    margin-bottom: -2px; /* Sits the tab on top of the red line */
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    background-clip: padding-box; /* Ensures background doesn't go under border */
+}
+
+/* Inactive Tab */
+.ai-tabs-nav .ai-tab-btn:not(.active) {
+    background-color: var(--gails-grey-light);
+    color: var(--gails-text-secondary);
+    border-color: var(--gails-grey-mid);
+}
+
+/* Hover on Inactive Tab */
+.ai-tabs-nav .ai-tab-btn:not(.active):hover {
+    background-color: var(--gails-red-light);
+    color: var(--gails-red);
+    border-color: #FCA5A5; /* Lighter red from design system */
+}
+
+/* Active Tab */
+.ai-tabs-nav .ai-tab-btn.active {
+    background-color: var(--gails-white); /* Seamlessly connects to content area */
+    color: var(--gails-red);
+    border-color: var(--gails-red);
+    border-bottom-color: var(--gails-white); /* Hides bottom border for connection */
+}
+
+.ai-tabs-content > div { display: none; }
+.ai-tabs-content > div.active {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
