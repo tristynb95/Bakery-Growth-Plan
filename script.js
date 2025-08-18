@@ -1498,7 +1498,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
         };
 
         // 6. Initialize PizZip and docxtemplater, then render the document.
-        const zip = new PizZip(templateBlob);
+        const zip = new JSZip(templateBlob);
         const doc = new docxtemplater(zip, {
             paragraphLoop: true,
             linebreaks: true,
@@ -2044,6 +2044,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
