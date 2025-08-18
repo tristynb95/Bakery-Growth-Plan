@@ -1362,14 +1362,21 @@ function isWeekComplete(monthNum, weekNum, planData) {
         DOMElements.modalBox.dataset.type = type;
         DOMElements.modalBox.dataset.planId = planId;
 
+        const modalHeader = DOMElements.modalTitle.parentNode;
         const footer = DOMElements.modalActionBtn.parentNode;
+        
+        // Clear any dynamic elements from previous modal openings
         footer.classList.remove('is-confirming');
         footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
+        modalHeader.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
+
+        // Reset default button states
         DOMElements.modalActionBtn.style.display = 'inline-flex';
         DOMElements.modalCancelBtn.style.display = 'inline-flex';
+        footer.style.justifyContent = 'flex-end'; // Default alignment
+
         DOMElements.modalActionBtn.onclick = handleModalAction;
         DOMElements.modalCancelBtn.onclick = requestCloseModal;
-
 
         switch (type) {
             case 'create':
@@ -1421,30 +1428,58 @@ function isWeekComplete(monthNum, weekNum, planData) {
             case 'aiActionPlan_view': {
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
                 
-                const undoRedoContainer = document.createElement('div');
-                undoRedoContainer.className = 'undo-redo-container dynamic-btn';
-                undoRedoContainer.innerHTML = `
-                    <button id="undo-btn" class="btn btn-secondary btn-icon" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button>
-                    <button id="redo-btn" class="btn btn-secondary btn-icon" title="Redo"><i class="bi bi-arrow-clockwise"></i></button>
-                `;
+                // 1. Get rid of the cancel button
+                DOMElements.modalCancelBtn.style.display = 'none';
+                
+                // Set footer to space buttons between left and right
+                footer.style.justifyContent = 'space-between';
+
+                // 2. Create and place "Generate New" button on the left
                 const regenButton = document.createElement('button');
                 regenButton.id = 'modal-regen-btn';
                 regenButton.className = 'btn btn-secondary dynamic-btn';
                 regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
+                regenButton.onclick = handleRegenerateActionPlan;
+                footer.insertBefore(regenButton, footer.firstChild);
 
+                // Create a container for all right-side buttons to keep them grouped
+                const rightButtonsContainer = document.createElement('div');
+                rightButtonsContainer.className = 'flex items-center gap-2 dynamic-btn';
+
+                // 3 & 4. Create, restyle, and add Undo/Redo and Print buttons
                 const printBtn = document.createElement('button');
                 printBtn.id = 'modal-print-btn';
-                printBtn.className = 'btn btn-secondary dynamic-btn';
+                printBtn.className = 'btn btn-secondary';
                 printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
                 
-                footer.insertBefore(undoRedoContainer, footer.firstChild);
-                footer.insertBefore(regenButton, DOMElements.modalActionBtn);
-                footer.insertBefore(printBtn, DOMElements.modalActionBtn);
+                const undoBtn = document.createElement('button');
+                undoBtn.id = 'undo-btn';
+                undoBtn.className = 'btn btn-secondary !p-2'; // Style for icon-only
+                undoBtn.title = 'Undo';
+                undoBtn.innerHTML = `<i class="bi bi-arrow-counterclockwise text-lg"></i>`;
+                undoBtn.onclick = undo;
+
+                const redoBtn = document.createElement('button');
+                redoBtn.id = 'redo-btn';
+                redoBtn.className = 'btn btn-secondary !p-2'; // Style for icon-only
+                redoBtn.title = 'Redo';
+                redoBtn.innerHTML = `<i class="bi bi-arrow-clockwise text-lg"></i>`;
+                redoBtn.onclick = redo;
+
+                // Add buttons to the right container in visual order
+                rightButtonsContainer.appendChild(printBtn);
+                rightButtonsContainer.appendChild(undoBtn);
+                rightButtonsContainer.appendChild(redoBtn);
                 
-                regenButton.onclick = handleRegenerateActionPlan;
-                document.getElementById('undo-btn').onclick = undo;
-                document.getElementById('redo-btn').onclick = redo;
+                // Move the existing "Save Changes" button into the container
+                DOMElements.modalActionBtn.textContent = "Save Changes";
+                DOMElements.modalActionBtn.className = 'btn btn-primary';
+                DOMElements.modalActionBtn.onclick = saveActionPlan;
+                rightButtonsContainer.appendChild(DOMElements.modalActionBtn);
                 
+                // Add the whole right-side container to the footer
+                footer.appendChild(rightButtonsContainer);
+
                 printBtn.onclick = () => {
                     const aiPlanContainer = document.getElementById('ai-printable-area');
                     const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
@@ -1474,11 +1509,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
                         th, td { border: 1px solid #E5E7EB; padding: 10px 12px; text-align: left; vertical-align: top; }
                         thead { display: table-header-group; }
                         th { background-color: #F9FAFB; font-weight: 600; color: #374151; }
-                        
-                        /* FIX: Hide the last column (Actions) when printing */
-                        th:last-child, td:last-child {
-                            display: none !important;
-                        }
+                        th:last-child, td:last-child { display: none !important; }
                     `;
 
                     const printWindow = window.open('', '', 'height=800,width=1200');
@@ -1492,10 +1523,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
 
                     setTimeout(() => { printWindow.print(); }, 500);
                 };
-
-                DOMElements.modalActionBtn.textContent = "Save Changes";
-                DOMElements.modalActionBtn.className = 'btn btn-primary';
-                DOMElements.modalActionBtn.onclick = saveActionPlan;
                 
                 updateUndoRedoButtons();
                 break;
@@ -1882,6 +1909,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
