@@ -1434,102 +1434,6 @@ function isWeekComplete(monthNum, weekNum, planData) {
         }
     }
 
-    // Replace the old handleWordExport function with this corrected version
-
-async function handleWordExport() {
-    try {
-        const { Packer, Document, Table, TableRow, TableCell, Paragraph, TextRun, HeadingLevel, AlignmentType, WidthType } = docx;
-
-        const aiPlanContainer = document.getElementById('ai-printable-area');
-        if (!aiPlanContainer) return;
-
-        const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
-        const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
-
-        if (!activeTabPanel || !activeTabButton) {
-            alert("Could not find the active month to export.");
-            return;
-        }
-
-        const monthTitle = activeTabButton.innerText.trim();
-        const tableNode = activeTabPanel.querySelector('table');
-        if (!tableNode) {
-            alert("Could not find the table to export.");
-            return;
-        }
-
-        const planName = appState.planData.planName || 'AI Action Plan';
-        const bakeryName = appState.planData.bakeryLocation || 'Your Bakery';
-        const quarterlyTheme = appState.planData.quarterlyTheme ? new DOMParser().parseFromString(appState.planData.quarterlyTheme, "text/html").body.textContent : 'Laying foundations for success';
-
-        const headerCells = Array.from(tableNode.querySelectorAll('thead th'))
-            .slice(0, -1)
-            .map(th => new TableCell({
-                children: [new Paragraph({
-                    children: [new TextRun({ text: th.innerText.trim(), bold: true })],
-                    alignment: AlignmentType.CENTER,
-                })],
-                shading: { fill: "F8F8F8" },
-            }));
-        const tableHeader = new TableRow({ children: headerCells, tableHeader: true });
-
-        const bodyRows = Array.from(tableNode.querySelectorAll('tbody tr')).map(row => {
-            const rowCells = Array.from(row.querySelectorAll('td'))
-                .slice(0, -1)
-                .map(td => new TableCell({
-                    // THIS IS THE FIX: Using the { text: ... } format is more robust.
-                    children: [new Paragraph({ text: td.innerText.trim() })],
-                }));
-            return new TableRow({ children: rowCells });
-        });
-
-        const table = new Table({
-            rows: [tableHeader, ...bodyRows],
-            width: { size: 100, type: WidthType.PERCENTAGE },
-        });
-
-        const doc = new Document({
-            sections: [{
-                children: [
-                    // THIS IS ALSO FIXED for consistency
-                    new Paragraph({
-                        text: "AI Action Plan",
-                        heading: HeadingLevel.TITLE,
-                        alignment: AlignmentType.CENTER,
-                    }),
-                    new Paragraph({
-                        children: [new TextRun({
-                            text: `${monthTitle} Action Plan`,
-                            color: "D10A11",
-                            bold: true,
-                            size: 32,
-                        })],
-                        alignment: AlignmentType.CENTER,
-                    }),
-                    new Paragraph({
-                        children: [new TextRun({
-                            text: `${quarterlyTheme} | ${bakeryName}`,
-                            color: "808080",
-                            size: 22,
-                        })],
-                        alignment: AlignmentType.CENTER,
-                    }),
-                    new Paragraph({ children: [] }),
-                    table,
-                ],
-            }],
-        });
-
-        Packer.toBlob(doc).then(blob => {
-            saveAs(blob, `${planName} - ${monthTitle}.docx`);
-        });
-
-    } catch (error) {
-        console.error("Error generating Word document:", error);
-        alert("Sorry, an error occurred while creating the document. Please check the console for details.");
-    }
-}
-
     function openModal(type, context = {}) {
         const { planId, currentName, planName } = context;
         DOMElements.modalBox.dataset.type = type;
@@ -1538,13 +1442,15 @@ async function handleWordExport() {
         const modalHeader = DOMElements.modalTitle.parentNode;
         const footer = DOMElements.modalActionBtn.parentNode;
         
+        // Clear any dynamic elements from previous modal openings
         footer.classList.remove('is-confirming');
         footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
         modalHeader.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
 
+        // Reset default button states
         DOMElements.modalActionBtn.style.display = 'inline-flex';
         DOMElements.modalCancelBtn.style.display = 'inline-flex';
-        footer.style.justifyContent = 'flex-end';
+        footer.style.justifyContent = 'flex-end'; // Default alignment
 
         DOMElements.modalActionBtn.onclick = handleModalAction;
         DOMElements.modalCancelBtn.onclick = requestCloseModal;
@@ -1599,9 +1505,11 @@ async function handleWordExport() {
             case 'aiActionPlan_view': {
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
                 
-                footer.style.justifyContent = 'space-between';
+                // --- FOOTER BUTTONS ---
+                footer.style.justifyContent = 'space-between'; // Space out left and right button groups
                 DOMElements.modalCancelBtn.style.display = 'none';
 
+                // 1. Create and place Undo/Redo buttons on the bottom left
                 const undoRedoFooterContainer = document.createElement('div');
                 undoRedoFooterContainer.className = 'flex items-center gap-2 dynamic-btn';
 
@@ -1623,6 +1531,7 @@ async function handleWordExport() {
                 undoRedoFooterContainer.appendChild(redoBtn);
                 footer.insertBefore(undoRedoFooterContainer, footer.firstChild);
 
+                // 2. Group Generate New, Print, and Save buttons on the bottom right
                 const rightButtonsContainer = document.createElement('div');
                 rightButtonsContainer.className = 'flex items-center gap-2 dynamic-btn';
 
@@ -1637,35 +1546,39 @@ async function handleWordExport() {
                 printBtn.className = 'btn btn-secondary';
                 printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
 
-                const downloadBtn = document.createElement('button');
-                downloadBtn.id = 'modal-download-btn';
-                downloadBtn.className = 'btn btn-secondary';
-                downloadBtn.innerHTML = `<i class="bi bi-file-earmark-word-fill"></i> Download`;
-                downloadBtn.onclick = handleWordExport;
-
+                // Add buttons to the container
                 rightButtonsContainer.appendChild(regenButton);
                 rightButtonsContainer.appendChild(printBtn);
-                rightButtonsContainer.appendChild(downloadBtn);
                 
+                // Move the existing "Save Changes" button into the container
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
                 DOMElements.modalActionBtn.onclick = saveActionPlan;
                 rightButtonsContainer.appendChild(DOMElements.modalActionBtn);
                 
+                // Add the whole container to the footer
                 footer.appendChild(rightButtonsContainer);
 
                 printBtn.onclick = () => {
                     const aiPlanContainer = document.getElementById('ai-printable-area');
                     const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
                     const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
-                    if (!activeTabPanel || !activeTabButton) { alert("Could not find the active month to print."); return; }
+
+                    if (!activeTabPanel || !activeTabButton) {
+                        alert("Could not find the active month to print.");
+                        return;
+                    }
+                    
                     const monthTitle = `${activeTabButton.textContent} Action Plan`;
                     const printNode = activeTabPanel.cloneNode(true);
                     printNode.querySelectorAll('.actions-cell, .btn-remove-row, tfoot').forEach(el => el.remove());
+
                     const printableHTML = printNode.innerHTML;
+
                     const printStyles = `
                         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@700;900&display=swap');
-                        @page { size: A4; margin: 25mm; } body { font-family: 'DM Sans', sans-serif; color: #1F2937; }
+                        @page { size: A4; margin: 25mm; }
+                        body { font-family: 'DM Sans', sans-serif; color: #1F2937; }
                         .print-header { text-align: center; border-bottom: 2px solid #D10A11; padding-bottom: 15px; margin-bottom: 25px; }
                         .print-header h1 { font-family: 'Poppins', sans-serif; font-size: 24pt; color: #1F2937; margin: 0; }
                         .print-header h2 { font-family: 'Poppins', sans-serif; font-size: 16pt; color: #D10A11; margin-top: 5px; margin-bottom: 5px; font-weight: 700; }
@@ -1673,27 +1586,38 @@ async function handleWordExport() {
                         table { width: 100%; border-collapse: collapse; font-size: 9pt; page-break-inside: auto; }
                         tr { page-break-inside: avoid; page-break-after: auto; }
                         th, td { border: 1px solid #E5E7EB; padding: 10px 12px; text-align: left; vertical-align: top; }
-                        thead { display: table-header-group; } th { background-color: #F9FAFB; font-weight: 600; color: #374151; }
-                        th:last-child, td:last-child { display: none !important; }`;
+                        thead { display: table-header-group; }
+                        th { background-color: #F9FAFB; font-weight: 600; color: #374151; }
+                        th:last-child, td:last-child { display: none !important; }
+                    `;
+
                     const printWindow = window.open('', '', 'height=800,width=1200');
-                    printWindow.document.write(`<html><head><title>AI Action Plan</title><style>${printStyles}</style></head><body>`);
+                    printWindow.document.write('<html><head><title>AI Action Plan</title>');
+                    printWindow.document.write(`<style>${printStyles}</style>`);
+                    printWindow.document.write('</head><body>');
                     printWindow.document.write(`<div class="print-header"><h1>AI Action Plan</h1><h2>${monthTitle}</h2><p>${appState.planData.planName || 'Growth Plan'} | ${appState.planData.bakeryLocation || 'Your Bakery'}</p></div>`);
                     printWindow.document.write(printableHTML);
                     printWindow.document.write('</body></html>');
                     printWindow.document.close();
+
                     setTimeout(() => { printWindow.print(); }, 500);
                 };
                 
                 updateUndoRedoButtons();
                 break;
             }
-            case 'confirmClose':
+            case 'confirmClose': {
                 DOMElements.modalTitle.textContent = "Discard Changes?";
                 DOMElements.modalContent.innerHTML = `<p>You have unsaved changes. Are you sure you want to close without saving?</p>`;
+                
                 DOMElements.modalActionBtn.textContent = "Discard";
                 DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
                 DOMElements.modalCancelBtn.textContent = "Cancel";
-                DOMElements.modalActionBtn.onclick = () => closeModal();
+
+                DOMElements.modalActionBtn.onclick = () => {
+                    closeModal();
+                };
+
                 DOMElements.modalCancelBtn.onclick = () => {
                     const lastUnsavedState = undoStack[undoStack.length - 1];
                     openModal('aiActionPlan_view');
@@ -1702,22 +1626,33 @@ async function handleWordExport() {
                     setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
                     updateUndoRedoButtons();
                 };
+                
                 break;
-            case 'confirmRegenerate':
+            }
+            case 'confirmRegenerate': {
                 DOMElements.modalTitle.textContent = "Are you sure?";
-                DOMElements.modalContent.innerHTML = `<div class="p-4 text-center"><p class="text-gray-600 mt-2">Generating a new plan will overwrite your existing action plan and any edits you've made. This cannot be undone.</p></div>`;
+                DOMElements.modalContent.innerHTML = `<div class="p-4 text-center">
+                                    <p class="text-gray-600 mt-2">Generating a new plan will overwrite your existing action plan and any edits you've made. This cannot be undone.</p>
+                                </div>`;
+
                 const confirmBtn = DOMElements.modalActionBtn;
                 const cancelBtn = DOMElements.modalCancelBtn;
+
                 confirmBtn.textContent = "Yes, Generate New Plan";
                 confirmBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
                 cancelBtn.textContent = "Cancel";
+
                 footer.classList.add('is-confirming');
                 footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.style.display = 'none');
+
                 confirmBtn.onclick = () => {
                     footer.classList.remove('is-confirming');
                     delete appState.planData.aiActionPlan;
-                    saveData(true).then(() => { handleAIActionPlan(); });
+                    saveData(true).then(() => {
+                        handleAIActionPlan();
+                    });
                 };
+
                 cancelBtn.onclick = () => {
                     footer.classList.remove('is-confirming');
                     const lastUnsavedState = undoStack[undoStack.length - 1];
@@ -1728,6 +1663,7 @@ async function handleWordExport() {
                     updateUndoRedoButtons();
                 };
                 break;
+            }
         }
         DOMElements.modalOverlay.classList.remove('hidden');
     }
@@ -2052,3 +1988,19 @@ async function handleWordExport() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
