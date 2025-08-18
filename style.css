@@ -803,8 +803,7 @@ tr:hover .btn-remove-row {
 
 /* Ensure actions column in print is hidden */
 @media print {
-    th:last-child,
-    td:last-child {
+    .actions-cell {
         display: none !important;
     }
 }
@@ -911,3 +910,4 @@ tr:hover .btn-remove-row {
 .weekly-tab.active .week-complete-icon {
     color: var(--gails-red);
 }
+
