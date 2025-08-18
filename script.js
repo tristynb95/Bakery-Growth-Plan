@@ -1218,20 +1218,25 @@ function runApp(app) {
         }
     }
 
-    async function saveActionPlan() {
+   async function saveActionPlan() {
         const editedContent = document.getElementById('ai-printable-area').innerHTML;
-        appState.planData.aiActionPlan = editedContent;
         
+        // DO NOT update the local state here. Send the change directly.
+        // appState.planData.aiActionPlan = editedContent; // This was the line causing the bug.
+
         const saveButton = DOMElements.modalActionBtn;
         const originalHTML = saveButton.innerHTML;
         saveButton.disabled = true;
         saveButton.innerHTML = `<i class="bi bi-check-circle-fill"></i> Saved!`;
 
-        await saveData(true);
+        // Pass the new content directly to our robust saveData function.
+        // It will compare it to the old state and save the change.
+        await saveData(true, { aiActionPlan: editedContent });
 
         const printableArea = document.getElementById('ai-printable-area');
         if (printableArea) {
-            undoStack = [printableArea.innerHTML];
+            // The undo stack should be reset after a successful save.
+            undoStack = [editedContent];
             redoStack = [];
             updateUndoRedoButtons();
         }
@@ -1810,3 +1815,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
