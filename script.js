@@ -1434,36 +1434,99 @@ function isWeekComplete(monthNum, weekNum, planData) {
         }
     }
 
-   async function handleWordExport() {
-    // Check that html-docx-js and FileSaver are loaded
-    if (typeof window.htmlDocx === "undefined" || typeof saveAs === "undefined") {
-        alert("Error: Download libraries not loaded. Please refresh the page.");
-        return;
-    }
+    // Replace the old handleWordExport function with this corrected version
 
+async function handleWordExport() {
     try {
-        // Find the active tab (month) of your AI Action Plan modal
+        const { Packer, Document, Table, TableRow, TableCell, Paragraph, TextRun, HeadingLevel, AlignmentType, WidthType } = docx;
+
         const aiPlanContainer = document.getElementById('ai-printable-area');
-        if (!aiPlanContainer) throw new Error("No AI Action Plan to download.");
+        if (!aiPlanContainer) return;
 
         const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
         const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
-        if (!activeTabPanel || !activeTabButton) throw new Error("No active month found.");
 
-        // Get the HTML for the table
-        const tableHTML = activeTabPanel.innerHTML;
-        // Convert HTML to Word docx
-        const docxBlob = window.htmlDocx.asBlob(tableHTML);
+        if (!activeTabPanel || !activeTabButton) {
+            alert("Could not find the active month to export.");
+            return;
+        }
 
-        // Name the file nicely
-        const planName = (window.appState && window.appState.planData && window.appState.planData.planName) || "AI Action Plan";
-        const monthTitle = activeTabButton.textContent.trim();
-        const fileName = `${planName} - ${monthTitle}.docx`;
+        const monthTitle = activeTabButton.innerText.trim();
+        const tableNode = activeTabPanel.querySelector('table');
+        if (!tableNode) {
+            alert("Could not find the table to export.");
+            return;
+        }
 
-        // Download!
-        saveAs(docxBlob, fileName);
+        const planName = appState.planData.planName || 'AI Action Plan';
+        const bakeryName = appState.planData.bakeryLocation || 'Your Bakery';
+        const quarterlyTheme = appState.planData.quarterlyTheme ? new DOMParser().parseFromString(appState.planData.quarterlyTheme, "text/html").body.textContent : 'Laying foundations for success';
+
+        const headerCells = Array.from(tableNode.querySelectorAll('thead th'))
+            .slice(0, -1)
+            .map(th => new TableCell({
+                children: [new Paragraph({
+                    children: [new TextRun({ text: th.innerText.trim(), bold: true })],
+                    alignment: AlignmentType.CENTER,
+                })],
+                shading: { fill: "F8F8F8" },
+            }));
+        const tableHeader = new TableRow({ children: headerCells, tableHeader: true });
+
+        const bodyRows = Array.from(tableNode.querySelectorAll('tbody tr')).map(row => {
+            const rowCells = Array.from(row.querySelectorAll('td'))
+                .slice(0, -1)
+                .map(td => new TableCell({
+                    // THIS IS THE FIX: Using the { text: ... } format is more robust.
+                    children: [new Paragraph({ text: td.innerText.trim() })],
+                }));
+            return new TableRow({ children: rowCells });
+        });
+
+        const table = new Table({
+            rows: [tableHeader, ...bodyRows],
+            width: { size: 100, type: WidthType.PERCENTAGE },
+        });
+
+        const doc = new Document({
+            sections: [{
+                children: [
+                    // THIS IS ALSO FIXED for consistency
+                    new Paragraph({
+                        text: "AI Action Plan",
+                        heading: HeadingLevel.TITLE,
+                        alignment: AlignmentType.CENTER,
+                    }),
+                    new Paragraph({
+                        children: [new TextRun({
+                            text: `${monthTitle} Action Plan`,
+                            color: "D10A11",
+                            bold: true,
+                            size: 32,
+                        })],
+                        alignment: AlignmentType.CENTER,
+                    }),
+                    new Paragraph({
+                        children: [new TextRun({
+                            text: `${quarterlyTheme} | ${bakeryName}`,
+                            color: "808080",
+                            size: 22,
+                        })],
+                        alignment: AlignmentType.CENTER,
+                    }),
+                    new Paragraph({ children: [] }),
+                    table,
+                ],
+            }],
+        });
+
+        Packer.toBlob(doc).then(blob => {
+            saveAs(blob, `${planName} - ${monthTitle}.docx`);
+        });
+
     } catch (error) {
-        alert(error.message || "Could not download the plan.");
+        console.error("Error generating Word document:", error);
+        alert("Sorry, an error occurred while creating the document. Please check the console for details.");
     }
 }
 
@@ -1989,10 +2052,3 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
-
-
-
