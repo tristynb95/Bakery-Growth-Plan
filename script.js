@@ -870,7 +870,18 @@ function runApp(app) {
 
     function renderSummary() {
         const formData = appState.planData;
-        const e = (html) => (html || '...');
+
+        // FIX: Upgraded the 'e' helper to correctly handle empty HTML
+        const e = (html) => {
+            if (!html) return '...'; // Handles null, undefined, ""
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            if (tempDiv.innerText.trim() === '') {
+                return '...'; // Handles '<p></p>', '<br>', etc.
+            }
+            return html; // Return the original html if it has content
+        };
+
         const isContentEmpty = (htmlContent) => {
             if (!htmlContent) return true;
             const tempDiv = document.createElement('div');
@@ -1821,6 +1832,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
