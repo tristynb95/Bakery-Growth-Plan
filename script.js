@@ -723,6 +723,19 @@ function isWeekComplete(monthNum, weekNum, planData) {
 
         return !!status && !isContentEmpty(win) && !isContentEmpty(spotlight);
     }
+
+    function updateWeeklyTabCompletion(monthNum, planData) {
+        for (let w = 1; w <= 4; w++) {
+            const isComplete = isWeekComplete(monthNum, w, planData);
+            const tab = document.querySelector(`.weekly-tab[data-week="${w}"]`);
+            if (tab) {
+                const tickIcon = tab.querySelector('.week-complete-icon');
+                if (tickIcon) {
+                    tickIcon.classList.toggle('hidden', !isComplete);
+                }
+            }
+        }
+    }
     
     function getMonthProgress(monthNum, planData) {
         const data = planData || appState.planData;
@@ -1857,6 +1870,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
