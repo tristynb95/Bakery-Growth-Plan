@@ -1428,10 +1428,13 @@ function isWeekComplete(monthNum, weekNum, planData) {
             case 'aiActionPlan_view': {
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
                 
-                // --- HEADER BUTTONS ---
-                // 1. Move Undo/Redo buttons to the top right
-                const undoRedoHeaderContainer = document.createElement('div');
-                undoRedoHeaderContainer.className = 'flex items-center gap-2 dynamic-btn';
+                // --- FOOTER BUTTONS ---
+                footer.style.justifyContent = 'space-between'; // Space out left and right button groups
+                DOMElements.modalCancelBtn.style.display = 'none';
+
+                // 1. Create and place Undo/Redo buttons on the bottom left
+                const undoRedoFooterContainer = document.createElement('div');
+                undoRedoFooterContainer.className = 'flex items-center gap-2 dynamic-btn';
 
                 const undoBtn = document.createElement('button');
                 undoBtn.id = 'undo-btn';
@@ -1447,34 +1450,37 @@ function isWeekComplete(monthNum, weekNum, planData) {
                 redoBtn.innerHTML = `<i class="bi bi-arrow-clockwise text-lg"></i>`;
                 redoBtn.onclick = redo;
 
-                undoRedoHeaderContainer.appendChild(undoBtn);
-                undoRedoHeaderContainer.appendChild(redoBtn);
-                modalHeader.insertBefore(undoRedoHeaderContainer, DOMElements.modalCloseBtn);
+                undoRedoFooterContainer.appendChild(undoBtn);
+                undoRedoFooterContainer.appendChild(redoBtn);
+                footer.insertBefore(undoRedoFooterContainer, footer.firstChild);
 
-                // --- FOOTER BUTTONS ---
                 // 2. Group Generate New, Print, and Save buttons on the bottom right
-                footer.style.justifyContent = 'flex-end';
-                DOMElements.modalCancelBtn.style.display = 'none';
+                const rightButtonsContainer = document.createElement('div');
+                rightButtonsContainer.className = 'flex items-center gap-2 dynamic-btn';
 
                 const regenButton = document.createElement('button');
                 regenButton.id = 'modal-regen-btn';
-                regenButton.className = 'btn btn-secondary dynamic-btn';
+                regenButton.className = 'btn btn-secondary';
                 regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
                 regenButton.onclick = handleRegenerateActionPlan;
 
                 const printBtn = document.createElement('button');
                 printBtn.id = 'modal-print-btn';
-                printBtn.className = 'btn btn-secondary dynamic-btn';
+                printBtn.className = 'btn btn-secondary';
                 printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
+
+                // Add buttons to the container
+                rightButtonsContainer.appendChild(regenButton);
+                rightButtonsContainer.appendChild(printBtn);
                 
-                // Insert new buttons before the existing "Save" button
-                footer.insertBefore(regenButton, DOMElements.modalActionBtn);
-                footer.insertBefore(printBtn, DOMElements.modalActionBtn);
-                
-                // Configure the existing Save button
+                // Move the existing "Save Changes" button into the container
                 DOMElements.modalActionBtn.textContent = "Save Changes";
                 DOMElements.modalActionBtn.className = 'btn btn-primary';
                 DOMElements.modalActionBtn.onclick = saveActionPlan;
+                rightButtonsContainer.appendChild(DOMElements.modalActionBtn);
+                
+                // Add the whole container to the footer
+                footer.appendChild(rightButtonsContainer);
 
                 printBtn.onclick = () => {
                     const aiPlanContainer = document.getElementById('ai-printable-area');
@@ -1905,6 +1911,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
