@@ -705,7 +705,23 @@ function runApp(app) {
         const completed = requiredFields.filter(field => !isContentEmpty(data[field])).length;
         return { completed, total };
     }
+    
+function isWeekComplete(monthNum, weekNum, planData) {
+        const data = planData || appState.planData;
+        const status = data[`m${monthNum}s5_w${weekNum}_status`];
+        const win = data[`m${monthNum}s5_w${weekNum}_win`];
+        const spotlight = data[`m${monthNum}s5_w${weekNum}_spotlight`];
 
+        const isContentEmpty = (htmlContent) => {
+            if (!htmlContent) return true;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            return tempDiv.innerText.trim() === '';
+        };
+
+        return !!status && !isContentEmpty(win) && !isContentEmpty(spotlight);
+    }
+    
     function getMonthProgress(monthNum, planData) {
         const data = planData || appState.planData;
         const isContentEmpty = (htmlContent) => {
@@ -1839,6 +1855,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
