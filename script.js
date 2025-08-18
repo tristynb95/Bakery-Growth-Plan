@@ -1434,101 +1434,104 @@ function isWeekComplete(monthNum, weekNum, planData) {
         }
     }
 
-    // Replace the old handleWordExport function with this corrected version
-
-async function handleWordExport() {
-    try {
-        const { Packer, Document, Table, TableRow, TableCell, Paragraph, TextRun, HeadingLevel, AlignmentType, WidthType } = docx;
-
-        const aiPlanContainer = document.getElementById('ai-printable-area');
-        if (!aiPlanContainer) return;
-
-        const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
-        const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
-
-        if (!activeTabPanel || !activeTabButton) {
-            alert("Could not find the active month to export.");
+    async function handleWordExport() {
+        // THIS IS THE FIX: Check if the library is loaded before using it.
+        if (typeof docx === 'undefined') {
+            alert("Error: The document generator library is not available. Please refresh the page and try again.");
+            console.error("`docx` object is not defined. The external library may have failed to load.");
             return;
         }
 
-        const monthTitle = activeTabButton.innerText.trim();
-        const tableNode = activeTabPanel.querySelector('table');
-        if (!tableNode) {
-            alert("Could not find the table to export.");
-            return;
-        }
-
-        const planName = appState.planData.planName || 'AI Action Plan';
-        const bakeryName = appState.planData.bakeryLocation || 'Your Bakery';
-        const quarterlyTheme = appState.planData.quarterlyTheme ? new DOMParser().parseFromString(appState.planData.quarterlyTheme, "text/html").body.textContent : 'Laying foundations for success';
-
-        const headerCells = Array.from(tableNode.querySelectorAll('thead th'))
-            .slice(0, -1)
-            .map(th => new TableCell({
-                children: [new Paragraph({
-                    children: [new TextRun({ text: th.innerText.trim(), bold: true })],
-                    alignment: AlignmentType.CENTER,
-                })],
-                shading: { fill: "F8F8F8" },
-            }));
-        const tableHeader = new TableRow({ children: headerCells, tableHeader: true });
-
-        const bodyRows = Array.from(tableNode.querySelectorAll('tbody tr')).map(row => {
-            const rowCells = Array.from(row.querySelectorAll('td'))
+        try {
+            const { Packer, Document, Table, TableRow, TableCell, Paragraph, TextRun, HeadingLevel, AlignmentType, WidthType } = docx;
+    
+            const aiPlanContainer = document.getElementById('ai-printable-area');
+            if (!aiPlanContainer) return;
+    
+            const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
+            const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
+    
+            if (!activeTabPanel || !activeTabButton) {
+                alert("Could not find the active month to export.");
+                return;
+            }
+    
+            const monthTitle = activeTabButton.innerText.trim();
+            const tableNode = activeTabPanel.querySelector('table');
+            if (!tableNode) {
+                alert("Could not find the table to export.");
+                return;
+            }
+    
+            const planName = appState.planData.planName || 'AI Action Plan';
+            const bakeryName = appState.planData.bakeryLocation || 'Your Bakery';
+            const quarterlyTheme = appState.planData.quarterlyTheme ? new DOMParser().parseFromString(appState.planData.quarterlyTheme, "text/html").body.textContent : 'Laying foundations for success';
+    
+            const headerCells = Array.from(tableNode.querySelectorAll('thead th'))
                 .slice(0, -1)
-                .map(td => new TableCell({
-                    // THIS IS THE FIX: Using the { text: ... } format is more robust.
-                    children: [new Paragraph({ text: td.innerText.trim() })],
+                .map(th => new TableCell({
+                    children: [new Paragraph({
+                        children: [new TextRun({ text: th.innerText.trim(), bold: true })],
+                        alignment: AlignmentType.CENTER,
+                    })],
+                    shading: { fill: "F8F8F8" },
                 }));
-            return new TableRow({ children: rowCells });
-        });
-
-        const table = new Table({
-            rows: [tableHeader, ...bodyRows],
-            width: { size: 100, type: WidthType.PERCENTAGE },
-        });
-
-        const doc = new Document({
-            sections: [{
-                children: [
-                    // THIS IS ALSO FIXED for consistency
-                    new Paragraph({
-                        text: "AI Action Plan",
-                        heading: HeadingLevel.TITLE,
-                        alignment: AlignmentType.CENTER,
-                    }),
-                    new Paragraph({
-                        children: [new TextRun({
-                            text: `${monthTitle} Action Plan`,
-                            color: "D10A11",
-                            bold: true,
-                            size: 32,
-                        })],
-                        alignment: AlignmentType.CENTER,
-                    }),
-                    new Paragraph({
-                        children: [new TextRun({
-                            text: `${quarterlyTheme} | ${bakeryName}`,
-                            color: "808080",
-                            size: 22,
-                        })],
-                        alignment: AlignmentType.CENTER,
-                    }),
-                    new Paragraph({ children: [] }),
-                    table,
-                ],
-            }],
-        });
-
-        Packer.toBlob(doc).then(blob => {
-            saveAs(blob, `${planName} - ${monthTitle}.docx`);
-        });
-
-    } catch (error) {
-        console.error("Error generating Word document:", error);
-        alert("Sorry, an error occurred while creating the document. Please check the console for details.");
+            const tableHeader = new TableRow({ children: headerCells, tableHeader: true });
+    
+            const bodyRows = Array.from(tableNode.querySelectorAll('tbody tr')).map(row => {
+                const rowCells = Array.from(row.querySelectorAll('td'))
+                    .slice(0, -1)
+                    .map(td => new TableCell({
+                        children: [new Paragraph({ text: td.innerText.trim() })],
+                    }));
+                return new TableRow({ children: rowCells });
+            });
+    
+            const table = new Table({
+                rows: [tableHeader, ...bodyRows],
+                width: { size: 100, type: WidthType.PERCENTAGE },
+            });
+    
+            const doc = new Document({
+                sections: [{
+                    children: [
+                        new Paragraph({
+                            text: "AI Action Plan",
+                            heading: HeadingLevel.TITLE,
+                            alignment: AlignmentType.CENTER,
+                        }),
+                        new Paragraph({
+                            children: [new TextRun({
+                                text: `${monthTitle} Action Plan`,
+                                color: "D10A11",
+                                bold: true,
+                                size: 32,
+                            })],
+                            alignment: AlignmentType.CENTER,
+                        }),
+                        new Paragraph({
+                            children: [new TextRun({
+                                text: `${quarterlyTheme} | ${bakeryName}`,
+                                color: "808080",
+                                size: 22,
+                            })],
+                            alignment: AlignmentType.CENTER,
+                        }),
+                        new Paragraph({ children: [] }),
+                        table,
+                    ],
+                }],
+            });
+    
+            Packer.toBlob(doc).then(blob => {
+                saveAs(blob, `${planName} - ${monthTitle}.docx`);
+            });
+    
+        } catch (error) {
+            console.error("Error generating Word document:", error);
+            alert("Sorry, an error occurred while creating the document. Please check the console for details.");
+        }
     }
-}
 
     function openModal(type, context = {}) {
         const { planId, currentName, planName } = context;
@@ -2052,4 +2055,3 @@ async function handleWordExport() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
