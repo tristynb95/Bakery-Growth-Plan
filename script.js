@@ -539,6 +539,10 @@ function runApp(app) {
     function updateViewWithRemoteData(remoteData) {
         if (DOMElements.appView.classList.contains('hidden') || appState.currentView === 'summary') {
             return;
+            // Add this block to the end of the updateViewWithRemoteData function
+        if (appState.currentView.startsWith('month-')) {
+            const monthNum = parseInt(appState.currentView.split('-')[1], 10);
+            updateWeeklyTabCompletion(monthNum, remoteData);
         }
     
         document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
@@ -712,7 +716,36 @@ function runApp(app) {
         const completed = requiredFields.filter(field => !isContentEmpty(data[field])).length;
         return { completed, total };
     }
+    
+function isWeekComplete(monthNum, weekNum, planData) {
+        const data = planData || appState.planData;
+        const status = data[`m${monthNum}s5_w${weekNum}_status`];
+        const win = data[`m${monthNum}s5_w${weekNum}_win`];
+        const spotlight = data[`m${monthNum}s5_w${weekNum}_spotlight`];
 
+        const isContentEmpty = (htmlContent) => {
+            if (!htmlContent) return true;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            return tempDiv.innerText.trim() === '';
+        };
+
+        return !!status && !isContentEmpty(win) && !isContentEmpty(spotlight);
+    }
+
+    function updateWeeklyTabCompletion(monthNum, planData) {
+        for (let w = 1; w <= 4; w++) {
+            const isComplete = isWeekComplete(monthNum, w, planData);
+            const tab = document.querySelector(`.weekly-tab[data-week="${w}"]`);
+            if (tab) {
+                const tickIcon = tab.querySelector('.week-complete-icon');
+                if (tickIcon) {
+                    tickIcon.classList.toggle('hidden', !isComplete);
+                }
+            }
+        }
+    }
+    
     function getMonthProgress(monthNum, planData) {
         const data = planData || appState.planData;
         const isContentEmpty = (htmlContent) => {
@@ -1845,6 +1878,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
