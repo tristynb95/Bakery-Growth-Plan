@@ -1,140 +1,84 @@
+// File: netlify/functions/save-to-gdoc.js
+
 const { google } = require('googleapis');
 
-exports.handler = async function(event) {
+exports.handler = async (event) => {
+    // We only want to handle POST requests
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
     try {
-        const { docTitle, monthTitle, bakeryInfo, headers, rows, userEmail } = JSON.parse(event.body);
+        const { content } = JSON.parse(event.body);
+        if (!content) {
+            return { statusCode: 400, body: 'JSON body with a "content" key is required.' };
+        }
 
-        // 1. AUTHENTICATION
+        // Step 1: Authenticate with the Google API
         const auth = new google.auth.GoogleAuth({
             credentials: {
-                client_email: process.env.GCP_CLIENT_EMAIL,
-                project_id: process.env.GCP_PROJECT_ID,
-                private_key: process.env.GCP_PRIVATE_KEY.replace(/\\n/g, '\n'),
+                client_email: process.env.GOOGLE_CLIENT_EMAIL,
+                // Ensure private key's newline characters are correctly formatted for authentication
+                private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
             },
-            scopes: [
-                'https://www.googleapis.com/auth/documents',
-                'https://www.googleapis.com/auth/drive.file'
-            ],
+            scopes: ['https://www.googleapis.com/auth/documents'],
         });
 
-        const docs = google.docs({ version: 'v1', auth });
-        const drive = google.drive({ version: 'v3', auth });
+        const authClient = await auth.getClient();
 
-        // 2. CREATE THE GOOGLE DOC
+        // Step 2: Initialize the Google Docs API client with authentication
+        const docs = google.docs({
+            version: 'v1',
+            auth: authClient,
+        });
+
+        // Step 3: Create a new Google Doc with a title
         const createResponse = await docs.documents.create({
-            requestBody: {
-                title: docTitle,
+            resource: {
+                title: 'Your Bakery Growth Plan',
             },
         });
 
         const documentId = createResponse.data.documentId;
 
-        // 3. BUILD THE DOCUMENT CONTENT REQUESTS
-        const requests = [
-            // Insert Header
-            {
-                insertText: {
-                    location: { index: 1 },
-                    text: `${docTitle}\n`,
-                },
-            },
-            {
-                updateParagraphStyle: {
-                    range: { startIndex: 1, endIndex: docTitle.length + 1 },
-                    paragraphStyle: { namedStyleType: 'TITLE' },
-                    fields: 'namedStyleType',
-                },
-            },
-            {
-                insertText: {
-                    location: { index: docTitle.length + 1 },
-                    text: `${monthTitle}\n`,
-                },
-            },
-            {
-                updateParagraphStyle: {
-                    range: { startIndex: docTitle.length + 1, endIndex: docTitle.length + monthTitle.length + 2 },
-                    paragraphStyle: { namedStyleType: 'SUBTITLE' },
-                    fields: 'namedStyleType',
-                },
-            },
-             {
-                insertText: {
-                    location: { index: docTitle.length + monthTitle.length + 2 },
-                    text: `${bakeryInfo}\n\n`,
-                },
-            },
-            // Create Table
-            {
-                insertTable: {
-                    location: { index: docTitle.length + monthTitle.length + bakeryInfo.length + 4 },
-                    rows: rows.length + 1, // +1 for header row
-                    columns: headers.length,
-                },
-            },
-        ];
-
-        // 4. POPULATE TABLE
-        let currentIndex = docTitle.length + monthTitle.length + bakeryInfo.length + 4 + 4; // Start index inside the first cell
-        
-        // Populate Header Row
-        headers.forEach(header => {
-            requests.push({ insertText: { location: { index: currentIndex }, text: header } });
-            requests.push({
-                updateTextStyle: {
-                    range: { startIndex: currentIndex, endIndex: currentIndex + header.length },
-                    textStyle: { bold: true },
-                    fields: 'bold',
-                },
-            });
-            currentIndex += header.length + 2; // Move to next cell
-        });
-
-        // Populate Data Rows
-        rows.forEach(row => {
-            row.forEach(cellText => {
-                requests.push({ insertText: { location: { index: currentIndex }, text: cellText } });
-                currentIndex += cellText.length + 2; // Move to next cell
-            });
-        });
-
-
-        // 5. EXECUTE BATCH UPDATE
+        // Step 4: Add the plan content to the newly created document
         await docs.documents.batchUpdate({
-            documentId: documentId,
-            requestBody: {
-                requests: requests,
+            documentId,
+            resource: {
+                requests: [
+                    {
+                        insertText: {
+                            // Insert the text at the beginning of the document body
+                            location: {
+                                index: 1,
+                            },
+                            text: content,
+                        },
+                    },
+                ],
             },
         });
-
-        // 6. SHARE THE DOCUMENT WITH THE USER
-        await drive.permissions.create({
-            fileId: documentId,
-            requestBody: {
-                role: 'writer',
-                type: 'user',
-                emailAddress: userEmail,
-            },
-        });
-
+        
+        // Step 5: Construct the URL for the new document to send back to the user
+        const docUrl = `https://docs.google.com/document/d/${documentId}/edit`;
 
         return {
             statusCode: 200,
-            body: JSON.stringify({
-                message: 'Document created successfully!',
-                docUrl: `https://docs.google.com/document/d/${documentId}/edit`,
+            body: JSON.stringify({ 
+                message: 'Successfully created Google Doc!',
+                url: docUrl
             }),
         };
 
     } catch (error) {
-        console.error('Error creating Google Doc:', error);
+        // Log the error for debugging and return a user-friendly error message
+        console.error('Error creating Google Doc:', error.response ? error.response.data : error.message);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'An internal error occurred while creating the Google Doc.' }),
+            body: JSON.stringify({
+                error: 'Failed to create Google Doc.',
+                details: error.response ? error.response.data.error.message : error.message,
+            }),
         };
     }
 };
