@@ -1458,10 +1458,12 @@ function isWeekComplete(monthNum, weekNum, planData) {
             return;
         }
 
-        // 3. Fetch the .docx template file from the project's root directory.
+        // 3. Fetch the .docx template file from the public directory.
+        // THIS IS THE CORRECTED LINE:
         const response = await fetch('/action-plan-template.docx');
+        
         if (!response.ok) {
-            throw new Error(`Could not load the Word template file. Status: ${response.statusText}`);
+            throw new Error(`Could not load the Word template file. Make sure it is in the 'public' folder. Status: ${response.statusText}`);
         }
         const templateBlob = await response.arrayBuffer();
 
@@ -2042,6 +2044,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
