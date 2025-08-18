@@ -1435,90 +1435,35 @@ function isWeekComplete(monthNum, weekNum, planData) {
     }
 
    async function handleWordExport() {
-    // 1. Verify that the necessary libraries are loaded.
-    if (typeof JSZip === 'undefined' || typeof docxtemplater === 'undefined' || typeof saveAs === 'undefined') {
-        alert("Error: A required library (JSZip, docxtemplater, or FileSaver) is not available. Please refresh the page and try again.");
-        console.error("Dependency missing: JSZip, docxtemplater, or FileSaver is not defined.");
+    // Check that html-docx-js and FileSaver are loaded
+    if (typeof window.htmlDocx === "undefined" || typeof saveAs === "undefined") {
+        alert("Error: Download libraries not loaded. Please refresh the page.");
         return;
     }
 
     try {
-        // 2. Precisely locate the active tab and table in the modal.
+        // Find the active tab (month) of your AI Action Plan modal
         const aiPlanContainer = document.getElementById('ai-printable-area');
-        if (!aiPlanContainer) {
-            throw new Error("Could not find the AI action plan container in the modal.");
-        }
+        if (!aiPlanContainer) throw new Error("No AI Action Plan to download.");
 
         const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
         const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
-        const tableNode = activeTabPanel ? activeTabPanel.querySelector('table') : null;
+        if (!activeTabPanel || !activeTabButton) throw new Error("No active month found.");
 
-        if (!activeTabPanel || !activeTabButton || !tableNode) {
-            alert("Could not find an active action plan table to export. Please ensure a month is selected.");
-            return;
-        }
+        // Get the HTML for the table
+        const tableHTML = activeTabPanel.innerHTML;
+        // Convert HTML to Word docx
+        const docxBlob = window.htmlDocx.asBlob(tableHTML);
 
-        // 3. Fetch the .docx template file from the public directory.
-        // THIS IS THE CORRECTED LINE:
-        const response = await fetch('/action-plan-template.docx');
-        
-        if (!response.ok) {
-            throw new Error(`Could not load the Word template file. Make sure it is in the 'public' folder. Status: ${response.statusText}`);
-        }
-        const templateBlob = await response.arrayBuffer();
+        // Name the file nicely
+        const planName = (window.appState && window.appState.planData && window.appState.planData.planName) || "AI Action Plan";
+        const monthTitle = activeTabButton.textContent.trim();
+        const fileName = `${planName} - ${monthTitle}.docx`;
 
-        // 4. Extract data from the HTML table into a structured format for the template.
-        const tableData = Array.from(tableNode.querySelectorAll('tbody tr')).map(row => {
-            const cells = row.querySelectorAll('td');
-            // Helper to safely get text content from a cell.
-            const getCellText = (index) => cells[index] ? cells[index].innerText.trim() : '';
-            return {
-                action_step: getCellText(0),
-                pillar: getCellText(1),
-                owner: getCellText(2),
-                due_date: getCellText(3),
-                resources: getCellText(4),
-                status: getCellText(5),
-            };
-        });
-        
-        // Helper to strip HTML from contenteditable fields for clean text in the document.
-        const stripHtml = (html) => {
-           if (!html) return '';
-           const doc = new DOMParser().parseFromString(html, 'text/html');
-           return doc.body.textContent || "";
-        }
-
-        // 5. Gather all data needed for the template, including headers.
-        const dataForDoc = {
-            month_title: activeTabButton.innerText.trim(),
-            quarterly_theme: stripHtml(appState.planData.quarterlyTheme) || 'N/A',
-            bakery_name: appState.planData.bakeryLocation || 'N/A',
-            action_steps: tableData
-        };
-
-        // 6. Initialize JSZip and docxtemplater, then render the document.
-        const zip = new JSZip(templateBlob);
-        const doc = new docxtemplater(zip, {
-            paragraphLoop: true,
-            linebreaks: true,
-        });
-        
-        doc.render(dataForDoc);
-
-        // 7. Generate the final .docx file as a blob.
-        const out = doc.getZip().generate({
-            type: "blob",
-            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        });
-        
-        // 8. Use FileSaver.js to trigger the download with a user-friendly filename.
-        const fileName = `${appState.planData.planName || 'AI Action Plan'} - ${dataForDoc.month_title}.docx`;
-        saveAs(out, fileName);
-
+        // Download!
+        saveAs(docxBlob, fileName);
     } catch (error) {
-        console.error("Error generating Word document:", error);
-        alert(`An unexpected error occurred while creating the document: ${error.message}`);
+        alert(error.message || "Could not download the plan.");
     }
 }
 
@@ -2044,6 +1989,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
