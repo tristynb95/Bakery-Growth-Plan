@@ -345,25 +345,28 @@ function runApp(app) {
     }
 
     // --- AUTHENTICATION & APP FLOW ---
-    auth.onAuthStateChanged(async (user) => {
-        if (appState.planUnsubscribe) {
-            appState.planUnsubscribe();
-            appState.planUnsubscribe = null;
-        }
+    // This is the NEW, corrected code
+auth.onAuthStateChanged(async (user) => {
+    if (appState.planUnsubscribe) {
+        appState.planUnsubscribe();
+        appState.planUnsubscribe = null;
+    }
 
+    try {
         if (user) {
             const lastActivity = localStorage.getItem('lastActivity');
             const MAX_INACTIVITY_PERIOD = 8 * 60 * 60 * 1000; // 8 hours
 
             if (lastActivity && (new Date().getTime() - lastActivity > MAX_INACTIVITY_PERIOD)) {
                 handleLogout(false, true);
-                return;
+                return; // Exit early
             }
 
+            // Ensure loading view is visible while we work
+            DOMElements.initialLoadingView.classList.remove('hidden');
             DOMElements.loginView.classList.add('hidden');
             DOMElements.registerView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
-            DOMElements.initialLoadingView.classList.remove('hidden');
 
             appState.currentUser = user;
             setupActivityListeners();
@@ -379,22 +382,32 @@ function runApp(app) {
                 await renderDashboard();
             }
 
-            DOMElements.initialLoadingView.classList.add('hidden');
-
         } else {
+            // No user is logged in, show the login page
             appState.currentUser = null;
             appState.planData = {};
             appState.currentPlanId = null;
             clearActivityListeners();
 
-            DOMElements.initialLoadingView.classList.add('hidden');
             DOMElements.appView.classList.add('hidden');
             DOMElements.dashboardView.classList.add('hidden');
             DOMElements.registerView.classList.add('hidden');
             DOMElements.resetView.classList.add('hidden');
             DOMElements.loginView.classList.remove('hidden');
         }
-    });
+    } catch (error) {
+        console.error("Critical error during app startup:", error);
+        // Display a user-friendly error message instead of a frozen screen
+        document.body.innerHTML = `<div style="text-align: center; padding: 40px; font-family: sans-serif;">
+                                      <h1>Application Error</h1>
+                                      <p>Could not load your data. Please try again later or contact support.</p>
+                                      <p style="color: #666; font-size: 0.8em; margin-top: 20px;">Error: ${error.message}</p>
+                                  </div>`;
+    } finally {
+        // This GUARANTEES the loading screen is hidden, no matter what happens
+        DOMElements.initialLoadingView.classList.add('hidden');
+    }
+});
 
     const handleLogout = (isTimeout = false, isRevival = false) => {
         if (appState.planUnsubscribe) {
@@ -1887,5 +1900,6 @@ async function handleSaveToGoogleDoc() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
