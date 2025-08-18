@@ -1436,9 +1436,9 @@ function isWeekComplete(monthNum, weekNum, planData) {
 
    async function handleWordExport() {
     // 1. Verify that the necessary libraries are loaded.
-    if (typeof PizZip === 'undefined' || typeof docxtemplater === 'undefined' || typeof saveAs === 'undefined') {
-        alert("Error: A required library (PizZip, docxtemplater, or FileSaver) is not available. Please refresh the page and try again.");
-        console.error("Dependency missing: PizZip, docxtemplater, or FileSaver is not defined.");
+    if (typeof JSZip === 'undefined' || typeof docxtemplater === 'undefined' || typeof saveAs === 'undefined') {
+        alert("Error: A required library (JSZip, docxtemplater, or FileSaver) is not available. Please refresh the page and try again.");
+        console.error("Dependency missing: JSZip, docxtemplater, or FileSaver is not defined.");
         return;
     }
 
@@ -1497,7 +1497,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
             action_steps: tableData
         };
 
-        // 6. Initialize PizZip and docxtemplater, then render the document.
+        // 6. Initialize JSZip and docxtemplater, then render the document.
         const zip = new JSZip(templateBlob);
         const doc = new docxtemplater(zip, {
             paragraphLoop: true,
@@ -2044,6 +2044,7 @@ function isWeekComplete(monthNum, weekNum, planData) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
