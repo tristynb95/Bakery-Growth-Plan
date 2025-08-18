@@ -1242,79 +1242,6 @@ function runApp(app) {
         }, 2000);
     }
 
-    async function handleSaveToGoogleDoc() {
-        const saveButton = document.getElementById('modal-save-gdoc-btn');
-        if (!saveButton) return;
-    
-        const originalHTML = saveButton.innerHTML;
-        saveButton.disabled = true;
-        saveButton.innerHTML = `<div class="loading-spinner" style="width:20px;height:20px;border-width:3px;"></div> <span class="ml-2">Saving...</span>`;
-    
-        try {
-            const aiPlanContainer = document.getElementById('ai-printable-area');
-            const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
-            const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
-            
-            if (!activeTabPanel || !activeTabButton) {
-                throw new Error("Could not find the active month to save.");
-            }
-    
-            const monthTitle = `${activeTabButton.textContent} Action Plan`;
-            const table = activeTabPanel.querySelector('table');
-            const tableHeaders = Array.from(table.querySelectorAll('thead th'))
-                                      .slice(0, -1) // Exclude the "Actions" header
-                                      .map(th => th.innerText.trim());
-    
-            const tableRows = Array.from(table.querySelectorAll('tbody tr')).map(row => {
-                return Array.from(row.querySelectorAll('td'))
-                            .slice(0, -1) // Exclude the "Actions" cell
-                            .map(td => td.innerText.trim());
-            });
-    
-            // The user's email is needed to share the document with them
-            const userEmail = appState.currentUser.email;
-    
-            const payload = {
-                docTitle: `AI Action Plan: ${appState.planData.planName || 'Growth Plan'}`,
-                monthTitle: monthTitle,
-                bakeryInfo: `${appState.planData.bakeryLocation || 'Your Bakery'}`,
-                headers: tableHeaders,
-                rows: tableRows,
-                userEmail: userEmail
-            };
-            
-            const response = await fetch('/.netlify/functions/save-to-gdoc', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-    
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to save to Google Docs.");
-            }
-    
-            const result = await response.json();
-            
-            // Provide feedback and a link to the new document
-            saveButton.innerHTML = `<i class="bi bi-check-circle-fill"></i> Saved!`;
-            window.open(result.docUrl, '_blank'); // Open the doc in a new tab
-    
-            setTimeout(() => {
-                saveButton.disabled = false;
-                saveButton.innerHTML = originalHTML;
-            }, 3000);
-    
-        } catch (error) {
-            console.error('Error saving to Google Doc:', error);
-            saveButton.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Error`;
-             setTimeout(() => {
-                saveButton.disabled = false;
-                saveButton.innerHTML = originalHTML;
-            }, 4000);
-        }
-    }
-
     function handleRegenerateActionPlan() {
         openModal('confirmRegenerate');
     }
@@ -1885,7 +1812,81 @@ function runApp(app) {
         localStorage.setItem('gails_cookie_consent', 'false');
         cookieBanner.classList.add('hidden');
     });
-}
+
+    // THIS IS THE NEW FUNCTION, MOVED TO THE CORRECT LOCATION
+    async function handleSaveToGoogleDoc() {
+        const saveButton = document.getElementById('modal-save-gdoc-btn');
+        if (!saveButton) return;
+
+        const originalHTML = saveButton.innerHTML;
+        saveButton.disabled = true;
+        saveButton.innerHTML = `<div class="loading-spinner" style="width:20px;height:20px;border-width:3px;"></div> <span class="ml-2">Saving...</span>`;
+
+        try {
+            const aiPlanContainer = document.getElementById('ai-printable-area');
+            const activeTabPanel = aiPlanContainer.querySelector('.ai-tabs-content > div.active');
+            const activeTabButton = aiPlanContainer.querySelector('.ai-tabs-nav .ai-tab-btn.active');
+            
+            if (!activeTabPanel || !activeTabButton) {
+                throw new Error("Could not find the active month to save.");
+            }
+
+            const monthTitle = `${activeTabButton.textContent} Action Plan`;
+            const table = activeTabPanel.querySelector('table');
+            const tableHeaders = Array.from(table.querySelectorAll('thead th'))
+                                      .slice(0, -1) // Exclude the "Actions" header
+                                      .map(th => th.innerText.trim());
+
+            const tableRows = Array.from(table.querySelectorAll('tbody tr')).map(row => {
+                return Array.from(row.querySelectorAll('td'))
+                            .slice(0, -1) // Exclude the "Actions" cell
+                            .map(td => td.innerText.trim());
+            });
+
+            // The user's email is needed to share the document with them
+            const userEmail = appState.currentUser.email;
+
+            const payload = {
+                docTitle: `AI Action Plan: ${appState.planData.planName || 'Growth Plan'}`,
+                monthTitle: monthTitle,
+                bakeryInfo: `${appState.planData.bakeryLocation || 'Your Bakery'}`,
+                headers: tableHeaders,
+                rows: tableRows,
+                userEmail: userEmail
+            };
+            
+            const response = await fetch('/.netlify/functions/save-to-gdoc', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to save to Google Docs.");
+            }
+
+            const result = await response.json();
+            
+            // Provide feedback and a link to the new document
+            saveButton.innerHTML = `<i class="bi bi-check-circle-fill"></i> Saved!`;
+            window.open(result.docUrl, '_blank'); // Open the doc in a new tab
+
+            setTimeout(() => {
+                saveButton.disabled = false;
+                saveButton.innerHTML = originalHTML;
+            }, 3000);
+
+        } catch (error) {
+            console.error('Error saving to Google Doc:', error);
+            saveButton.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Error`;
+             setTimeout(() => {
+                saveButton.disabled = false;
+                saveButton.innerHTML = originalHTML;
+            }, 4000);
+        }
+    }
+} // <-- IMPORTANT: The function above is now INSIDE this closing brace
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
