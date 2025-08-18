@@ -585,13 +585,12 @@ function runApp(app) {
     }
 
 
-   function saveData(forceImmediate = false, directPayload = null) {
+  function saveData(forceImmediate = false, directPayload = null) {
         if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
-    
+
         const localChanges = {};
         const fieldsToDelete = {};
-        
-        // This part still captures changes from the main page
+
         document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
             if (el.id) {
                 localChanges[el.id] = el.isContentEditable ? el.innerHTML : el.value;
@@ -622,7 +621,7 @@ function runApp(app) {
                 }
             });
         }
-        
+
         const changedData = {};
         let hasChanges = false;
         for (const key in localChanges) {
@@ -632,14 +631,13 @@ function runApp(app) {
             }
         }
 
-         for (const key in fieldsToDelete) {
-            if(appState.planData[key] !== undefined){
+        for (const key in fieldsToDelete) {
+            if (appState.planData[key] !== undefined) {
                 changedData[key] = fieldsToDelete[key];
                 hasChanges = true;
             }
         }
 
-        // FIX: If a directPayload is provided, merge it into our changedData
         if (directPayload) {
             for (const key in directPayload) {
                 if (directPayload[key] !== appState.planData[key]) {
@@ -648,24 +646,22 @@ function runApp(app) {
                 }
             }
         }
-        
-        if (!hasChanges && !forceImmediate) {
+
+        if (!hasChanges) {
             return Promise.resolve();
         }
 
         clearTimeout(appState.saveTimeout);
 
         const saveToFirestore = async () => {
-            if (Object.keys(changedData).length === 0 && !directPayload) return;
-
             const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
             const dataToSave = {
                 ...changedData,
                 lastEdited: firebase.firestore.FieldValue.serverTimestamp()
             };
-            
+
             await docRef.update(dataToSave);
-            
+
             DOMElements.saveIndicator.classList.remove('opacity-0');
             setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
         };
@@ -1822,6 +1818,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
