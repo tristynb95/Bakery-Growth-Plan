@@ -637,7 +637,7 @@ textarea.form-input {
 /* 29. Taller Key Levers Text Box
 -------------------------------------------------- */
 .key-levers-input {
-    min-height: 500px; /* Adjusted from 360px */
+    min-height: 360px; /* Adjust this value as needed */
 }
 
 /* 30. Sidebar Navigation Progress Counter
@@ -919,5 +919,3 @@ tr:hover .btn-remove-row {
 .weekly-tab.active .week-complete-icon {
     color: var(--gails-red);
 }
-
-
