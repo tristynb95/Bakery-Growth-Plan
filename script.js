@@ -179,8 +179,8 @@ function runApp(app) {
             html: `<div class="space-y-8">
                         <div class="content-card p-6 md:p-8"><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="managerName" class="font-semibold block mb-2">Manager:</label><input type="text" id="managerName" class="form-input" placeholder="e.g., Tristen Bayley"></div><div><label for="bakeryLocation" class="font-semibold block mb-2">Bakery:</label><input type="text" id="bakeryLocation" class="form-input" placeholder="e.g., Marlow"></div><div><label for="quarter" class="font-semibold block mb-2">Quarter:</label><input type="text" id="quarter" class="form-input" placeholder="e.g., Q3 FY26"></div></div></div>
                         <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-sm"><h3 class="font-bold text-lg text-amber-900 mb-2">Our Mission</h3><p class="text-xl font-semibold text-gray-800">"To make world-class, craft baking a part of every neighbourhood."</p></div>
-                        <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">This Quarter's Vision: <i class="bi bi-info-circle info-icon" title="The big, overarching mission for the next 90 days."></i></label><div id="quarterlyTheme" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., To become the undisputed neighbourhood favourite by mastering our afternoon availability." data-maxlength="400"></div></div>
-                        <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1 Sprint Goal: <i class="bi bi-info-circle info-icon" title="The high-level goal for the first 30-day sprint."></i></label><div id="month1Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PRODUCT: Master afternoon availability and reduce waste to below 4.5%." data-maxlength="300"></div></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2 Sprint Goal: <i class="bi bi-info-circle info-icon" title="The high-level goal for the second 30-day sprint."></i></label><div id="month2Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PLACE: Embed new production processes and daily travel paths to achieve a 95% pass rate on our standards audit." data-maxlength="300"></div></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3 Sprint Goal: <i class="bi bi-info-circle info-icon" title="The high-level goal for the third 30-day sprint."></i></label><div id="month3Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PEOPLE: Develop our team's skills through cross-training to ensure every member is signed off on both coffee and kitchen basics." data-maxlength="300"></div></div></div></div>
+                        <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">This Quarter's Narrative: <i class="bi bi-info-circle info-icon" title="The big, overarching mission for the next 90 days."></i></label><div id="quarterlyTheme" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., 'To become the heart of our neighbourhood by perfecting our afternoon experience and making every customer feel like a regular.'" data-maxlength="400"></div></div>
+                        <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Your Monthly Missions</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1 Mission: <i class="bi bi-info-circle info-icon" title="The high-level goal for the first 30-day mission."></i></label><div id="month1Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Product: To have beautiful afternoon availability that delights our customers and brings our waste below 4.5%." data-maxlength="300"></div></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2 Mission: <i class="bi bi-info-circle info-icon" title="The high-level goal for the second 30-day mission."></i></label><div id="month2Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Place: Embed new production processes and daily travel paths to achieve a 95% pass rate on our standards audit." data-maxlength="300"></div></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3 Mission: <i class="bi bi-info-circle info-icon" title="The high-level goal for the third 30-day mission."></i></label><div id="month3Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., People: Develop our team's skills through cross-training to ensure every member is signed off on both coffee and kitchen basics." data-maxlength="300"></div></div></div></div>
                    </div>`,
             requiredFields: ['managerName', 'bakeryLocation', 'quarter', 'quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
         },
@@ -188,10 +188,10 @@ function runApp(app) {
             <div class="space-y-8">
                 <div class="content-card p-6 md:p-8">
                     <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation Plan</h2>
-                    <p class="text-gray-600 mb-6">Complete these sections at the start of your month to set a clear direction.</p>
+                    <p class="text-gray-600 mb-6">Complete these sections at the start of your month to set a clear direction and inspire your team.</p>
                     <div class="space-y-6">
                         <div>
-                            <label class="font-semibold text-lg block mb-2 text-gray-800">This Month's Must-Win Battle:</label>
+                            <label class="font-semibold text-lg block mb-2 text-gray-800">This Month's Must-Win Battle: <i class="bi bi-info-circle info-icon" title="Think of this as your top priority. If you could only achieve one big thing this month, what would it be?"></i></label>
                             <div id="m${monthNum}s1_battle" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Achieve >80% afternoon availability by embedding the production matrix and coaching the team on waste reduction." data-maxlength="500"></div>
                             <div class="mt-4">
                                 <label class="font-semibold block mb-3 text-sm text-gray-600">Monthly Pillar Focus:</label>
@@ -205,13 +205,13 @@ function runApp(app) {
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
                             <div class="flex flex-col">
-                                <label for="m${monthNum}s2_levers" class="font-semibold text-lg block mb-2 text-gray-800">My Key Levers to Win:</label>
-                                <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing flex-grow key-levers-input" contenteditable="true" data-placeholder="What specific actions will you take?&#10;1. Review the ordering report daily with Emily.&#10;2. Coach the team on the 'why' behind the production matrix.&#10;3. Complete a daily travel path, focusing on merchandising." data-maxlength="600"></div>
+                                <label for="m${monthNum}s2_levers" class="font-semibold text-lg block mb-2 text-gray-800">How I'll Make It Happen:</label>
+                                <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing flex-grow key-levers-input" contenteditable="true" data-placeholder="What are the 3-5 key actions you will personally take to achieve your Must-Win Battle?&#10;1. Review the ordering report daily with Emily.&#10;2. Coach the team on the 'why' behind the production matrix.&#10;3. Complete a daily travel path, focusing on merchandising." data-maxlength="600"></div>
                             </div>
                             <div class="space-y-4">
                                 <div>
                                     <label for="m${monthNum}s2_powerup_q" class="font-semibold text-lg block mb-2 text-gray-800">Team Power-Up Question:</label>
-                                    <div id="m${monthNum}s2_powerup_q" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="A great question to ask the team, e.g., 'What is one thing that slows us down before 8am?'" data-maxlength="300"></div>
+                                    <div id="m${monthNum}s2_powerup_q" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., 'What's one thing we could do to make our mornings less stressful?' or 'What's your favourite thing about working here?'" data-maxlength="300"></div>
                                 </div>
                                 <div>
                                     <label for="m${monthNum}s2_powerup_a" class="font-semibold text-lg block mb-2 text-gray-800">Our Team's Winning Idea:</label>
@@ -224,7 +224,7 @@ function runApp(app) {
                             <div id="m${monthNum}s3_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="How will you grow your team's skills and confidence?&#10;e.g., Sarah: Coach on the production matrix to build her confidence for her upcoming Head Baker sign-off." data-maxlength="600"></div>
                         </div>
                         <div class="pt-6 border-t">
-                            <label class="font-semibold text-lg block mb-2 text-gray-800">Protecting Our Core (SHINE):</label>
+                            <label class="font-semibold text-lg block mb-2 text-gray-800">Upholding Our Standards:</label>
                             <p class="text-gray-600 mb-4 -mt-2 text-sm">One key behaviour for each pillar to ensure our standards never slip.</p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                                 <div><label for="m${monthNum}s4_people" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-people-fill"></i> PEOPLE</label><div id="m${monthNum}s4_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Conduct meaningful 1-2-1s with my two keyholders, focusing on their SPARK competencies." data-maxlength="300"></div></div>
@@ -259,7 +259,7 @@ function runApp(app) {
                                         <label class="font-semibold block mb-3 text-gray-700">How are we tracking against our Must-Win Battle?</label>
                                         <div class="flex items-center space-x-2 status-buttons" data-week="${w}">
                                             <button class="status-button" data-status="on-track">ON TRACK</button>
-                                            <button class="status-button" data-status="issues">FACING CHALLENGES</button>
+                                            <button class="status-button" data-status="issues">WORKING THROUGH IT</button>
                                             <button class="status-button" data-status="off-track">OFF TRACK</button>
                                         </div>
                                     </div>
@@ -816,10 +816,10 @@ function runApp(app) {
             localStorage.setItem('lastViewId', viewId);
         }
         const titles = {
-            vision: { title: 'Vision & Sprints', subtitle: appState.planData.planName || 'Your 90-Day Plan to a Better Bakery.'},
-            'month-1': { title: 'Month 1 Sprint', subtitle: 'Lay the foundations for success.'},
-            'month-2': { title: 'Month 2 Sprint', subtitle: 'Build momentum and embed processes.'},
-            'month-3': { title: 'Month 3 Sprint', subtitle: 'Refine execution and review the quarter.'},
+            vision: { title: 'Vision & Missions', subtitle: appState.planData.planName || 'Your 90-Day journey to a brilliant bakery.'},
+            'month-1': { title: 'Month 1 Mission', subtitle: 'Lay the foundations for success.'},
+            'month-2': { title: 'Month 2 Mission', subtitle: 'Build momentum and embed processes.'},
+            'month-3': { title: 'Month 3 Mission', subtitle: 'Refine execution and review the quarter.'},
             summary: { title: 'Full Summary', subtitle: 'A complete overview of your quarterly plan.'}
         };
         DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
@@ -907,16 +907,16 @@ function runApp(app) {
             }
 
             return `<div class="content-card p-0 overflow-hidden mt-8">
-                        <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">Month ${monthNum} Sprint</h2>
+                        <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">Month ${monthNum} Mission</h2>
                         <div class="summary-grid">
                             <div class="p-6">
                                 ${pillarHTML}
                                 <div class="summary-section"><h3 class="summary-heading">Must-Win Battle</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div></div>
-                                <div class="summary-section"><h3 class="summary-heading">Key Levers</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div>
+                                <div class="summary-section"><h3 class="summary-heading">How I'll Make It Happen</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div>
                                 <div class="summary-section"><h3 class="summary-heading">People Growth</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div></div>
                             </div>
                             <div class="p-6 bg-gray-50/70 border-l">
-                                <div class="summary-section"><h3 class="summary-heading">Protect the Core</h3><ul class="space-y-3 mt-2"><li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-heart-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_customer`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-shop w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_place`])}</span></li></ul></div>
+                                <div class="summary-section"><h3 class="summary-heading">Upholding Our Standards</h3><ul class="space-y-3 mt-2"><li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-heart-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_customer`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-shop w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_place`])}</span></li></ul></div>
                                 <div class="summary-section"><h3 class="summary-heading">Weekly Momentum Wins & Learnings</h3>${weeklyCheckinHTML}</div>
                                 <div class="summary-section"><h3 class="summary-heading">End of Month Review</h3><ul class="space-y-3 mt-2"><li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Challenge:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Next:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li></ul></div>
                             </div>
@@ -925,14 +925,14 @@ function runApp(app) {
         };
         DOMElements.contentArea.innerHTML = `<div class="space-y-8 summary-content">
                                                 <div class="content-card p-6">
-                                                    <h2 class="text-2xl font-bold font-poppins mb-4">Quarterly Vision & Sprints</h2>
+                                                    <h2 class="text-2xl font-bold font-poppins mb-4">Quarterly Vision & Missions</h2>
                                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4">
                                                         <div><h4 class="font-semibold text-sm text-gray-500">Manager</h4><p class="text-gray-800 font-medium">${formData.managerName || '...'}</p></div>
                                                         <div><h4 class="font-semibold text-sm text-gray-500">Bakery</h4><p class="text-gray-800 font-medium">${formData.bakeryLocation || '...'}</p></div>
                                                         <div><h4 class="font-semibold text-sm text-gray-500">Quarter</h4><p class="text-gray-800 font-medium">${formData.quarter || '...'}</p></div>
                                                     </div>
-                                                    <div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Theme</h4><div class="text-gray-800 prose prose-sm">${e(formData.quarterlyTheme)}</div></div>
-                                                    <div><h3 class="text-lg font-bold border-b pb-2 mb-3">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm"><div><strong class="font-semibold text-gray-600 block">Month 1 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month1Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 2 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month2Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 3 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month3Goal)}</div></div></div></div>
+                                                    <div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Narrative</h4><div class="text-gray-800 prose prose-sm">${e(formData.quarterlyTheme)}</div></div>
+                                                    <div><h3 class="text-lg font-bold border-b pb-2 mb-3">Monthly Missions</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm"><div><strong class="font-semibold text-gray-600 block">Month 1 Mission:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month1Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 2 Mission:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month2Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 3 Mission:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month3Goal)}</div></div></div></div>
                                                 </div>
                                                 ${renderMonthSummary(1)}
                                                 ${renderMonthSummary(2)}
@@ -951,14 +951,14 @@ function runApp(app) {
         let summary = `QUARTERLY NARRATIVE: ${e(planData.quarterlyTheme)}\n\n`;
         for (let m = 1; m <= 3; m++) {
             summary += `--- MONTH ${m} ---\n`;
-            summary += `GOAL: ${e(planData[`month${m}Goal`])}\n`;
+            summary += `MISSION: ${e(planData[`month${m}Goal`])}\n`;
             summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
-            summary += `KEY LEVERS: ${e(planData[`m${m}s2_levers`])}\n`;
+            summary += `HOW I'LL MAKE IT HAPPEN: ${e(planData[`m${m}s2_levers`])}\n`;
             summary += `PEOPLE GROWTH: ${e(planData[`m${m}s3_people`])}\n`;
-            summary += `PROTECT THE CORE (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
-            summary += `PROTECT THE CORE (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
-            summary += `PROTECT THE CORE (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
-            summary += `PROTECT THE CORE (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
+            summary += `UPHOLDING OUR STANDARDS (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
+            summary += `UPHOLDING OUR STANDARDS (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
+            summary += `UPHOLDING OUR STANDARDS (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
+            summary += `UPHOLDING OUR STANDARDS (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
         }
         return summary;
     }
@@ -1744,4 +1744,3 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
