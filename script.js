@@ -846,6 +846,17 @@ function runApp(app) {
         }
     }
 
+    // script.js
+
+async function restoreLastView(planId, viewId) {
+    appState.currentPlanId = planId;
+    await setupPlanListener();
+    DOMElements.dashboardView.classList.add('hidden');
+    DOMElements.appView.classList.remove('hidden');
+    DOMElements.calendarFab.classList.add('visible'); // <-- ADD THIS LINE
+    switchView(viewId);
+}
+
     function switchView(viewId) {
         DOMElements.mainContent.scrollTop = 0;
         appState.currentView = viewId;
@@ -1827,3 +1838,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
