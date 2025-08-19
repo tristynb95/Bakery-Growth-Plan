@@ -21,7 +21,7 @@ exports.handler = async function(event, context) {
 
       **Core Instructions:**
       1.  **Language**: You MUST use British English spelling and grammar (e.g., 'organise', 'centre').
-      2.  **Analyse & Group**: Analyse the provided plan for Month 1, Month 2, and Month 3. Group similar or related tasks into single, actionable steps. For instance, 'Izzy to complete kitchen training' and 'Izzy to go into kitchen' should become one action like 'Organise kitchen training for Izzy'.
+      2.  **Analyse & Group**: Analyse the provided plan for Month 1, Month 2, and Month 3. Group similar or related tasks into single, actionable steps. For instance, 'Izzy to complete kitchen training' and 'Izzy to go into kitchen' should become one action like 'Organise kitchen training for Izzy'. Where multiple actions are grouped into 1 goal, split the goals into seperate actionable steps.
       3.  **Assign Pillars**: For each action step, you MUST assign one of the following four pillars:
           - **People**: Staff training, development, scheduling, morale.
           - **Customer**: Customer experience, feedback, Net Promoter Score (NPS).
