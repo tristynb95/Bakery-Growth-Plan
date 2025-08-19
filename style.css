@@ -982,4 +982,45 @@ tr:hover .btn-remove-row {
     transform: scale(1.05);
 }
 
+/* 37. Floating Action Button (FAB) Styles
+-------------------------------------------------- */
+.calendar-fab {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 56px;
+    height: 56px;
+    background-color: var(--gails-red);
+    color: var(--gails-white);
+    border-radius: 50%;
+    border: none;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 990;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-in-out;
+    opacity: 0;
+    transform: scale(0.8);
+    pointer-events: none; /* Hidden by default */
+}
+
+.calendar-fab.visible {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto; /* Clickable when visible */
+}
+
+.calendar-fab:hover {
+    background-color: var(--gails-red-dark);
+    transform: scale(1.1);
+}
+
+/* Adjust modal size for calendar */
+#modal-box[data-type="calendar"] {
+    max-width: 90vw;
+    width: 800px;
+}
 
