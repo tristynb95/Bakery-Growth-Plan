@@ -194,7 +194,7 @@ function runApp(app) {
                             <label class="font-semibold text-lg block mb-2 text-gray-800">Must-Win Battle:</label>
                             <div id="m${monthNum}s1_battle" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly...'" data-maxlength="500"></div>
                             <div class="mt-4">
-                                <label class="font-semibold block mb-3 text-sm text-gray-600">Monthly Pillar Focus:</label>
+                                <label class="font-semibold block mb-3 text-sm text-gray-600">Pillar Focus:</label>
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m${monthNum}s1">
                                     <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
                                     <button class="btn pillar-button" data-pillar="product"><i class="bi bi-cup-hot-fill"></i> Product</button>
@@ -1744,3 +1744,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
