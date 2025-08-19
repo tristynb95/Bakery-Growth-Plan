@@ -179,22 +179,22 @@ function runApp(app) {
             html: `<div class="space-y-8">
                         <div class="content-card p-6 md:p-8"><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="managerName" class="font-semibold block mb-2">Manager:</label><input type="text" id="managerName" class="form-input" placeholder="e.g., Tristen Bayley"></div><div><label for="bakeryLocation" class="font-semibold block mb-2">Bakery:</label><input type="text" id="bakeryLocation" class="form-input" placeholder="e.g., Marlow"></div><div><label for="quarter" class="font-semibold block mb-2">Quarter:</label><input type="text" id="quarter" class="form-input" placeholder="e.g., Q3 FY26"></div></div></div>
                         <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-sm"><h3 class="font-bold text-lg text-amber-900 mb-2">Our Mission</h3><p class="text-xl font-semibold text-gray-800">"To make world-class, craft baking a part of every neighbourhood."</p></div>
-                        <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">This Quarter's Vision: <i class="bi bi-info-circle info-icon" title="The big, overarching mission for the next 90 days."></i></label><div id="quarterlyTheme" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., 'To become the heart of our neighbourhood by perfecting our afternoon experience and making every customer feel like a regular.'" data-maxlength="400"></div></div>
-                        <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Your Monthly Goals</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1: <i class="bi bi-info-circle info-icon" title="The high-level goal for the first 30-day mission."></i></label><div id="month1Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Product: To have beautiful afternoon availability that delights our customers and brings our waste below 4.5%." data-maxlength="300"></div></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2: <i class="bi bi-info-circle info-icon" title="The high-level goal for the second 30-day mission."></i></label><div id="month2Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Place: Embed new production processes and daily travel paths to achieve a 95% pass rate on our standards audit." data-maxlength="300"></div></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3: <i class="bi bi-info-circle info-icon" title="The high-level goal for the third 30-day mission."></i></label><div id="month3Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., People: Develop our team's skills through cross-training to ensure every member is signed off on both coffee and kitchen basics." data-maxlength="300"></div></div></div></div>
+                        <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">This Quarter's Narrative: <i class="bi bi-info-circle info-icon" title="The big, overarching mission for the next 90 days."></i></label><div id="quarterlyTheme" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Become the undisputed neighbourhood favourite by mastering our availability." data-maxlength="400"></div></div>
+                        <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the first 30-day sprint."></i></label><div id="month1Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PRODUCT: Master afternoon availability and reduce waste." data-maxlength="300"></div></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the second 30-day sprint."></i></label><div id="month2Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PLACE: Embed new production processes and daily checks." data-maxlength="300"></div></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3 Goal: <i class="bi bi-info-circle info-icon" title="High-level goal for the third 30-day sprint."></i></label><div id="month3Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PEOPLE: Develop team skills for consistent execution." data-maxlength="300"></div></div></div></div>
                    </div>`,
             requiredFields: ['managerName', 'bakeryLocation', 'quarter', 'quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
         },
         month: (monthNum) => `
             <div class="space-y-8">
                 <div class="content-card p-6 md:p-8">
-                    <h2 class="text-2xl font-bold font-poppins mb-1">Your Plan</h2>
-                    <p class="text-gray-600 mb-6">Complete these sections at the start of your month to set a clear direction and inspire your team.</p>
+                    <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation Plan</h2>
+                    <p class="text-gray-600 mb-6">Complete these sections at the start of your month to set a clear direction.</p>
                     <div class="space-y-6">
                         <div>
-                            <label class="font-semibold text-lg block mb-2 text-gray-800">This Month's Must-Win Battle: <i class="bi bi-info-circle info-icon" title="Think of this as your top priority. If you could only achieve one big thing this month, what would it be?"></i></label>
-                            <div id="m${monthNum}s1_battle" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Achieve >80% afternoon availability by embedding the production matrix and coaching the team on waste reduction." data-maxlength="500"></div>
+                            <label class="font-semibold text-lg block mb-2 text-gray-800">Must-Win Battle:</label>
+                            <div id="m${monthNum}s1_battle" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly...'" data-maxlength="500"></div>
                             <div class="mt-4">
-                                <label class="font-semibold block mb-3 text-sm text-gray-600">Monthly Pillar Focus:</label>
+                                <label class="font-semibold block mb-3 text-sm text-gray-600">Pillar Focus:</label>
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m${monthNum}s1">
                                     <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
                                     <button class="btn pillar-button" data-pillar="product"><i class="bi bi-cup-hot-fill"></i> Product</button>
@@ -205,40 +205,40 @@ function runApp(app) {
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
                             <div class="flex flex-col">
-                                <label for="m${monthNum}s2_levers" class="font-semibold text-lg block mb-2 text-gray-800">How I'll Make It Happen:</label>
-                                <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing flex-grow key-levers-input" contenteditable="true" data-placeholder="What are the 3-5 key actions you will personally take to achieve your Must-Win Battle?" data-maxlength="600"></div>
+                                <label for="m${monthNum}s2_levers" class="font-semibold text-lg block mb-2 text-gray-800">My Key Levers:</label>
+                                <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing flex-grow key-levers-input" contenteditable="true" data-placeholder="1. Review ordering report daily.&#10;2. Coach the team on the 'why'..." data-maxlength="600"></div>
                             </div>
                             <div class="space-y-4">
                                 <div>
                                     <label for="m${monthNum}s2_powerup_q" class="font-semibold text-lg block mb-2 text-gray-800">Team Power-Up Question:</label>
-                                    <div id="m${monthNum}s2_powerup_q" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., 'What's one thing we could do to make our mornings less stressful?' or 'What's your favourite thing about working here?'" data-maxlength="300"></div>
+                                    <div id="m${monthNum}s2_powerup_q" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., 'What is one thing that slows us down before 8am?'" data-maxlength="300"></div>
                                 </div>
                                 <div>
                                     <label for="m${monthNum}s2_powerup_a" class="font-semibold text-lg block mb-2 text-gray-800">Our Team's Winning Idea:</label>
-                                    <div id="m${monthNum}s2_powerup_a" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Capture the best idea from your team." data-maxlength="300"></div>
+                                    <div id="m${monthNum}s2_powerup_a" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Pre-portioning key ingredients the night before." data-maxlength="300"></div>
                                 </div>
                             </div>
                         </div>
                         <div class="pt-6 border-t">
-                            <label class="font-semibold text-lg block mb-2 text-gray-800">Who I Will Develop:</label>
-                            <div id="m${monthNum}s3_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="How will you grow your team's skills and confidence?&#10;e.g., Sarah: Coach on the production matrix to build her confidence for her upcoming Head Baker sign-off." data-maxlength="600"></div>
+                            <label class="font-semibold text-lg block mb-2 text-gray-800">People Growth:</label>
+                            <div id="m${monthNum}s3_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" data-maxlength="600"></div>
                         </div>
                         <div class="pt-6 border-t">
-                            <label class="font-semibold text-lg block mb-2 text-gray-800">Upholding Our Standards:</label>
-                            <p class="text-gray-600 mb-4 -mt-2 text-sm">One key behaviour for each pillar to ensure our standards never slip.</p>
+                            <label class="font-semibold text-lg block mb-2 text-gray-800">Protect the Core:</label>
+                            <p class="text-gray-600 mb-4 -mt-2 text-sm">One key behaviour for each pillar to ensure standards don't slip.</p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                                <div><label for="m${monthNum}s4_people" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-people-fill"></i> PEOPLE</label><div id="m${monthNum}s4_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Conduct meaningful 1-2-1s with my two keyholders, focusing on their SPARK competencies." data-maxlength="300"></div></div>
-                                <div><label for="m${monthNum}s4_product" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-cup-hot-fill"></i> PRODUCT</label><div id="m${monthNum}s4_product" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Perform daily quality checks of the first bake and first coffee with the opening team." data-maxlength="300"></div></div>
-                                <div><label for="m${monthNum}s4_customer" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-heart-fill"></i> CUSTOMER</label><div id="m${monthNum}s4_customer" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Action all customer feedback within 24 hours and use it as a coaching tool in team briefs." data-maxlength="300"></div></div>
-                                <div><label for="m${monthNum}s4_place" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-shop"></i> PLACE</label><div id="m${monthNum}s4_place" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Complete the Baker's Dozen Travel Path twice a day, focusing on cleanliness and merchandising." data-maxlength="300"></div></div>
+                                <div><label for="m${monthNum}s4_people" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-people-fill"></i> PEOPLE</label><div id="m${monthNum}s4_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Meaningful 1-2-1s with my two keyholders." data-maxlength="300"></div></div>
+                                <div><label for="m${monthNum}s4_product" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-cup-hot-fill"></i> PRODUCT</label><div id="m${monthNum}s4_product" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Daily quality checks of the first bake." data-maxlength="300"></div></div>
+                                <div><label for="m${monthNum}s4_customer" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-heart-fill"></i> CUSTOMER</label><div id="m${monthNum}s4_customer" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Action all customer feedback within 24 hours." data-maxlength="300"></div></div>
+                                <div><label for="m${monthNum}s4_place" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-shop"></i> PLACE</label><div id="m${monthNum}s4_place" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Complete a bakery travel path twice a day." data-maxlength="300"></div></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="content-card p-6 md:p-8">
-                    <h2 class="text-2xl font-bold font-poppins mb-1">Weekly Momentum Check-in</h2>
-                    <p class="text-gray-600 mb-6">Log your progress and celebrate wins here each week to build momentum.</p>
+                    <h2 class="text-2xl font-bold font-poppins mb-1">Weekly Momentum</h2>
+                    <p class="text-gray-600 mb-6">Return here each week to log your progress, celebrate wins, and spotlight your team.</p>
                     
                     <div class="mb-6 border-b border-gray-200">
                         <nav id="weekly-tabs" class="flex -mb-px space-x-6" aria-label="Tabs">
@@ -256,7 +256,7 @@ function runApp(app) {
                             <div class="weekly-tab-panel ${w !== 1 ? 'hidden' : ''}" data-week-panel="${w}">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
                                     <div class="md:col-span-2">
-                                        <label class="font-semibold block mb-3 text-gray-700">How are we tracking against our Must-Win Battle?</label>
+                                        <label class="font-semibold block mb-3 text-gray-700">Progress:</label>
                                         <div class="flex items-center space-x-2 status-buttons" data-week="${w}">
                                             <button class="status-button" data-status="on-track">ON TRACK</button>
                                             <button class="status-button" data-status="issues">ISSUES</button>
@@ -264,12 +264,12 @@ function runApp(app) {
                                         </div>
                                     </div>
                                     <div>
-                                        <label for="m${monthNum}s5_w${w}_win" class="font-semibold block mb-2 text-gray-700">This Week's Big Win or Learning:</label>
-                                        <div id="m${monthNum}s5_w${w}_win" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., The team hit our 80% availability target on Thursday by following production matrix" data-maxlength="400"></div>
+                                        <label for="m${monthNum}s5_w${w}_win" class="font-semibold block mb-2 text-gray-700">A Win or Learning:</label>
+                                        <div id="m${monthNum}s5_w${w}_win" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., The team hit 80% availability on Thursday!" data-maxlength="400"></div>
                                     </div>
                                     <div>
                                         <label for="m${monthNum}s5_w${w}_spotlight" class="font-semibold block mb-2 text-gray-700">Team Member Spotlight:</label>
-                                        <div id="m${monthNum}s5_w${w}_spotlight" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="Who has shone this week? e.g., A huge shout-out to Sarah for her excellent SHINE on Saturday." data-maxlength="400"></div>
+                                        <div id="m${monthNum}s5_w${w}_spotlight" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., Sarah for her excellent attention to detail during the bake." data-maxlength="400"></div>
                                     </div>
                                 </div>
                             </div>
@@ -279,23 +279,23 @@ function runApp(app) {
 
                 <div class="content-card p-6 md:p-8 bg-red-50 border border-red-100">
                     <h2 class="text-2xl font-bold font-poppins mb-1">End of Month Review</h2>
-                    <p class="text-gray-600 mb-6">At the end of the month, reflect on your performance to prepare for your conversation with your manager.</p>
+                    <p class="text-gray-600 mb-6">At the end of the month, reflect on your performance to prepare for your line manager conversation.</p>
                     <div class="space-y-6">
-                        <div><label for="m${monthNum}s6_win" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-trophy-fill"></i> Our Biggest Win This Month:</label><div id="m${monthNum}s6_win" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="What are you most proud of?"></div></div>
-                        <div><label for="m${monthNum}s6_challenge" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-lightbulb-fill"></i> Toughest Challenge & What We Learned:</label><div id="m${monthNum}s6_challenge" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="What was the biggest hurdle and what was the key takeaway?"></div></div>
-                        <div><label for="m${monthNum}s6_next" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-rocket-takeoff-fill"></i> Our Main Focus for Next Month:</label><div id="m${monthNum}s6_next" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="What is the key priority moving forward?"></div></div>
+                        <div><label for="m${monthNum}s6_win" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-trophy-fill"></i> Biggest Win:</label><div id="m${monthNum}s6_win" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
+                        <div><label for="m${monthNum}s6_challenge" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-lightbulb-fill"></i> Toughest Challenge & What I Learned:</label><div id="m${monthNum}s6_challenge" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
+                        <div><label for="m${monthNum}s6_next" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-rocket-takeoff-fill"></i> Focus for Next Month:</label><div id="m${monthNum}s6_next" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
                     </div>
                 </div>
                 
                 ${monthNum == 3 ? `
                 <div class="content-card p-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);">
                     <h2 class="text-2xl font-bold font-poppins mb-1" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2>
-                    <p class="text-gray-600 mb-6">A deep dive into the quarter's performance for your end-of-quarter review.</p>
+                    <p class="text-gray-600 mb-6">A deep dive into the quarter's performance for your review.</p>
                     <div class="space-y-6">
-                        <div><label for="m3s7_achievements" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> The Quarter's Biggest Achievements:</label><div id="m3s7_achievements" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
-                        <div><label for="m3s7_challenges" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> The Biggest Challenges & Key Learnings:</label><div id="m3s7_challenges" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
-                        <div><label for="m3s7_narrative" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> How We Performed vs. Our Quarterly Vision:</label><div id="m3s7_narrative" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
-                        <div><label for="m3s7_next_quarter" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Our Primary Focus for Next Quarter:</label><div id="m3s7_next_quarter" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
+                        <div><label for="m3s7_achievements" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Quarter's Biggest Achievements:</label><div id="m3s7_achievements" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
+                        <div><label for="m3s7_challenges" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings:</label><div id="m3s7_challenges" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
+                        <div><label for="m3s7_narrative" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Quarterly Narrative:</label><div id="m3s7_narrative" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
+                        <div><label for="m3s7_next_quarter" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Primary Focus for Next Quarter:</label><div id="m3s7_next_quarter" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
                     </div>
                 </div>` : ''}
             </div>
@@ -816,11 +816,11 @@ function runApp(app) {
             localStorage.setItem('lastViewId', viewId);
         }
         const titles = {
-            vision: { title: 'Vision & Missions', subtitle: appState.planData.planName || 'Your 90-Day journey to a brilliant bakery.'},
-            'month-1': { title: 'Month 1', subtitle: 'Lay the foundations for success.'},
-            'month-2': { title: 'Month 2', subtitle: 'Build momentum and embed processes.'},
-            'month-3': { title: 'Month 3', subtitle: 'Refine execution and review the quarter.'},
-            summary: { title: 'Full Summary', subtitle: 'A complete overview of your quarterly plan.'}
+            vision: { title: 'Bakery Growth Plan', subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.'},
+            'month-1': { title: 'Month 1 Sprint', subtitle: 'Lay the foundations for success.'},
+            'month-2': { title: 'Month 2 Sprint', subtitle: 'Build momentum and embed processes.'},
+            'month-3': { title: 'Month 3 Sprint', subtitle: 'Refine execution and review the quarter.'},
+            summary: { title: '90-Day Plan Summary', subtitle: 'A complete overview of your quarterly plan.'}
         };
         DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
         DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
@@ -907,16 +907,16 @@ function runApp(app) {
             }
 
             return `<div class="content-card p-0 overflow-hidden mt-8">
-                        <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">Month ${monthNum} Mission</h2>
+                        <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">Month ${monthNum} Sprint</h2>
                         <div class="summary-grid">
                             <div class="p-6">
                                 ${pillarHTML}
                                 <div class="summary-section"><h3 class="summary-heading">Must-Win Battle</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div></div>
-                                <div class="summary-section"><h3 class="summary-heading">How I'll Make It Happen</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div>
-                                <div class="summary-section"><h3 class="summary-heading">Who I Will Develop</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div></div>
+                                <div class="summary-section"><h3 class="summary-heading">Key Levers</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div>
+                                <div class="summary-section"><h3 class="summary-heading">People Growth</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div></div>
                             </div>
                             <div class="p-6 bg-gray-50/70 border-l">
-                                <div class="summary-section"><h3 class="summary-heading">Upholding Our Standards</h3><ul class="space-y-3 mt-2"><li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-heart-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_customer`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-shop w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_place`])}</span></li></ul></div>
+                                <div class="summary-section"><h3 class="summary-heading">Protect the Core</h3><ul class="space-y-3 mt-2"><li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-heart-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_customer`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-shop w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_place`])}</span></li></ul></div>
                                 <div class="summary-section"><h3 class="summary-heading">Weekly Momentum Wins & Learnings</h3>${weeklyCheckinHTML}</div>
                                 <div class="summary-section"><h3 class="summary-heading">End of Month Review</h3><ul class="space-y-3 mt-2"><li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Challenge:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Next:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li></ul></div>
                             </div>
@@ -925,19 +925,19 @@ function runApp(app) {
         };
         DOMElements.contentArea.innerHTML = `<div class="space-y-8 summary-content">
                                                 <div class="content-card p-6">
-                                                    <h2 class="text-2xl font-bold font-poppins mb-4">Quarterly Vision & Missions</h2>
+                                                    <h2 class="text-2xl font-bold font-poppins mb-4">Quarterly Vision & Sprints</h2>
                                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4">
                                                         <div><h4 class="font-semibold text-sm text-gray-500">Manager</h4><p class="text-gray-800 font-medium">${formData.managerName || '...'}</p></div>
                                                         <div><h4 class="font-semibold text-sm text-gray-500">Bakery</h4><p class="text-gray-800 font-medium">${formData.bakeryLocation || '...'}</p></div>
                                                         <div><h4 class="font-semibold text-sm text-gray-500">Quarter</h4><p class="text-gray-800 font-medium">${formData.quarter || '...'}</p></div>
                                                     </div>
-                                                    <div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Vision</h4><div class="text-gray-800 prose prose-sm">${e(formData.quarterlyTheme)}</div></div>
-                                                    <div><h3 class="text-lg font-bold border-b pb-2 mb-3">Monthly Goals</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm"><div><strong class="font-semibold text-gray-600 block">Month 1:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month1Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 2:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month2Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 3:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month3Goal)}</div></div></div></div>
+                                                    <div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Theme</h4><div class="text-gray-800 prose prose-sm">${e(formData.quarterlyTheme)}</div></div>
+                                                    <div><h3 class="text-lg font-bold border-b pb-2 mb-3">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm"><div><strong class="font-semibold text-gray-600 block">Month 1 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month1Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 2 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month2Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 3 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month3Goal)}</div></div></div></div>
                                                 </div>
                                                 ${renderMonthSummary(1)}
                                                 ${renderMonthSummary(2)}
                                                 ${renderMonthSummary(3)}
-                                                <div class="content-card p-6 mt-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);"><h2 class="text-2xl font-bold mb-4" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2><div class="space-y-4"><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Biggest Achievements</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_achievements)}</div></div><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_challenges)}</div></div><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Vision</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_narrative)}</div></div><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Focus For Next Quarter</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_next_quarter)}</div></div></div></div>
+                                                <div class="content-card p-6 mt-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);"><h2 class="text-2xl font-bold mb-4" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2><div class="space-y-4"><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Biggest Achievements</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_achievements)}</div></div><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_challenges)}</div></div><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Narrative</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_narrative)}</div></div><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Focus For Next Quarter</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_next_quarter)}</div></div></div></div>
                                             </div>`;
     }
 
@@ -948,17 +948,17 @@ function runApp(app) {
             tempDiv.innerHTML = text;
             return tempDiv.innerText.trim();
         };
-        let summary = `QUARTERLY VISION: ${e(planData.quarterlyTheme)}\n\n`;
+        let summary = `QUARTERLY NARRATIVE: ${e(planData.quarterlyTheme)}\n\n`;
         for (let m = 1; m <= 3; m++) {
             summary += `--- MONTH ${m} ---\n`;
-            summary += `MISSION: ${e(planData[`month${m}Goal`])}\n`;
+            summary += `GOAL: ${e(planData[`month${m}Goal`])}\n`;
             summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
-            summary += `HOW I'LL MAKE IT HAPPEN: ${e(planData[`m${m}s2_levers`])}\n`;
+            summary += `KEY LEVERS: ${e(planData[`m${m}s2_levers`])}\n`;
             summary += `PEOPLE GROWTH: ${e(planData[`m${m}s3_people`])}\n`;
-            summary += `UPHOLDING OUR STANDARDS (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
-            summary += `UPHOLDING OUR STANDARDS (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
-            summary += `UPHOLDING OUR STANDARDS (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
-            summary += `UPHOLDING OUR STANDARDS (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
+            summary += `PROTECT THE CORE (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
+            summary += `PROTECT THE CORE (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
+            summary += `PROTECT THE CORE (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
+            summary += `PROTECT THE CORE (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
         }
         return summary;
     }
@@ -1744,9 +1744,3 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
-
-
