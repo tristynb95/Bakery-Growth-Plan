@@ -7,89 +7,68 @@ exports.handler = async function(event, context) {
   }
 
   try {
-    const planSummary = JSON.parse(event.body).planSummary;
+    const { planSummary, managerName } = JSON.parse(event.body);
+
+    if (!planSummary || !managerName) {
+      return { statusCode: 400, body: JSON.stringify({ error: "Request must include planSummary and managerName." }) };
+    }
     
-    // Securely get the API key from the environment variables you set in Netlify
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"});
+    // For highest quality, consider switching to a more powerful model if your budget allows.
+    // For now, we will optimise the prompt for the current model.
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); 
 
-    // --- ENHANCED PROMPT FOR CONSISTENCY ---
+    // --- NEW PROMPT FOCUSED ON OUTPUT QUALITY ---
     const prompt = `
-      You are an expert bakery operations manager. Your task is to create a best-practice, tactical action plan from a manager's 90-day growth plan summary.
+      **Your Persona:** You are a world-class Operations Manager for a premium artisanal bakery brand like GAIL's. You are an expert at translating a manager's high-level notes into a formal, actionable, and professional tactical plan.
 
-      **Primary Goal:** Generate a clean, self-contained HTML structure with tabs and three tables (one for each month).
+      **Your Task:** Transform the provided 'Plan Summary' into a structured HTML action plan. Do not just rephrase the input; synthesize it into concrete, professional operational tasks.
 
-      **Core Instructions:**
-      1.  **Language**: You MUST use British English spelling and grammar (e.g., 'organise', 'centre').
-      2.  **Analyse & Group**: Analyse the provided plan for Month 1, Month 2, and Month 3. Group similar or related tasks into single, actionable steps. For instance, 'Izzy to complete kitchen training' and 'Izzy to go into kitchen' should become one action like 'Organise kitchen training for Izzy'. Where multiple actions are grouped into 1 goal, split the goals into seperate actionable steps.
-      3.  **Assign Pillars**: For each action step, you MUST assign one of the following four pillars:
-          - **People**: Staff training, development, scheduling, morale.
-          - **Customer**: Customer experience, feedback, Net Promoter Score (NPS).
-          - **Product**: Product quality, availability, waste, delivery.
-          - **Place**: Bakery cleanliness, audits, presentation, maintenance, local marketing.
-      4.  **Strict HTML Structure**: The final output MUST be ONLY the HTML code block. Do not include markdown formatting like \`\`\`html.
-      5. **Managers Name**: When referring to the manager in the action plan, you will use the manager name found at the top of the tab titled 'Vision & Sprints'
-      6. **Responses**: My responses will be clear, concise and actionable. 
+      **Guiding Principles:**
+      1.  **Strategic Synthesis:** Look beyond the literal tasks. What is the underlying goal? Formulate actions that strategically achieve that goal. For instance, if the note says "check waste," your action should be "Implement and monitor a daily waste tracking system to identify trends and adjust production pars."
+      2.  **Actionability & Clarity:** Every action step must be a specific, verifiable task. Use strong, active verbs (e.g., "Implement," "Schedule," "Analyse," "Develop").
+      3.  **Professional Language:** Use industry-standard, professional British English. The output should sound like it comes from an experienced senior manager.
 
-      **Step-by-Step Thought Process (Chain-of-Thought):**
-      1.  First, I will read the entire plan summary to understand the key objectives for each month.
-      2.  Next, for each month, I will extract the specific tasks and goals.
-      3.  I will then consolidate related tasks into concise, clear action steps.
-      4.  For each action step, I will determine the most appropriate Pillar based on the definitions.
-      5.  Finally, I will construct the complete HTML response according to the exact structure specified in the example below, ensuring every required class, attribute, and element is present. I will leave the cells for 'Status' empty so the user can fill it themselves.
+      **High-Quality Transformation Example:**
+      * **IF THE INPUT IS:** "Month 1 Goal: Get better at afternoons. Izzy kitchen training. Check waste."
+      * **YOUR OUTPUT SHOULD BE (like this):**
+          <tr>
+            <td contenteditable="true">Develop and implement a new afternoon bake schedule to ensure 90% availability of key products between 2 PM and 4 PM.</td>
+            <td contenteditable="true">Product</td>
+            <td contenteditable="true">${managerName}</td>
+            <td contenteditable="true">Wk 2</td>
+            <td contenteditable="true">Sales data, Production capacity charts</td>
+            <td contenteditable="true"></td>
+            <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-trash3"></i></button></td>
+          </tr>
+          <tr>
+            <td contenteditable="true">Schedule and conduct a comprehensive kitchen skills assessment for Izzy to identify and bridge any training gaps.</td>
+            <td contenteditable="true">People</td>
+            <td contenteditable="true">${managerName}</td>
+            <td contenteditable="true">Wk 1</td>
+            <td contenteditable="true">Training checklist, Senior Baker's time</td>
+            <td contenteditable="true"></td>
+            <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-trash3"></i></button></td>
+          </tr>
 
-      **Output Format Example:**
-      <div class="ai-action-plan-container">
-        <nav class="ai-tabs-nav">
-          <button class="btn btn-secondary ai-tab-btn active" data-tab="month1">Month 1</button>
-          <button class="btn btn-secondary ai-tab-btn" data-tab="month2">Month 2</button>
-          <button class="btn btn-secondary ai-tab-btn" data-tab="month3">Month 3</button>
-        </nav>
-        <div class="ai-tabs-content">
-          <div class="active" data-tab-panel="month1">
-            <table>
-              <thead>
-                <tr>
-                  <th>Action Step</th>
-                  <th>Pillar</th>
-                  <th>Owner</th>
-                  <th>Due Date</th>
-                  <th>Resources / Support Needed</th>
-                  <th>Status</th>
-                  <th class="actions-cell">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td contenteditable="true">Review daily waste reports and adjust production pars.</td>
-                  <td contenteditable="true">Product</td>
-                  <td contenteditable="true">Manager</td>
-                  <td contenteditable="true">Ongoing</td>
-                  <td contenteditable="true">Waste reports, Production planning tool</td>
-                  <td contenteditable="true">To Do</td>
-                  <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-trash3"></i></button></td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="7"><button class="btn-add-row"><i class="bi bi-plus-circle"></i> Add Row</button></td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-          </div>
-      </div>
+      **Strict Rules:**
+      - **Pillar Assignment:** You MUST assign one pillar to each action: **People**, **Customer**, **Product**, or **Place**.
+      - **HTML Only:** The entire output MUST be only the HTML code block, starting with \`<div class="ai-action-plan-container">\` and ending with \`</div>\`. Do not include \`\`\`html markdown.
+      - **Manager's Name:** The 'Owner' column must be filled with the manager's name: **${managerName}**.
 
-      Here is the plan to analyse:
       ---
+      **Manager's Name for this Plan:** ${managerName}
+      **Plan Summary to Transform:**
       ${planSummary}
       ---
+
+      Now, generate the complete, high-quality HTML action plan.
     `;
 
-    // Added GenerationConfig for more predictable output
+    // Increased temperature slightly to allow for more nuanced, professional language
     const generationConfig = {
-      temperature: 0.2,
-      topK: 1,
+      temperature: 0.4,
+      topK: 32,
       topP: 1,
       maxOutputTokens: 8192,
     };
@@ -99,10 +78,9 @@ exports.handler = async function(event, context) {
       generationConfig,
     });
 
-    const response = await result.response;
+    const response = result.response;
     let aiText = response.text();
 
-    // Clean the response on the server to remove markdown backticks
     aiText = aiText.replace(/^```(html)?\s*/, '').replace(/```$/, '').trim();
 
     return {
