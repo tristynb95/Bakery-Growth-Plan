@@ -986,7 +986,7 @@ function runApp(app) {
 
     const firstDay = new Date(year, month, 1);
     const lastDay = new D
-
+    }
     // ====================================================================
     // AI ACTION PLAN LOGIC (with Undo/Redo)
     // ====================================================================
@@ -1772,6 +1772,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
