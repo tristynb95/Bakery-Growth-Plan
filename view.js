@@ -108,17 +108,17 @@ function runViewScript(app) {
                                 <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div>
                             </div>
                             <div class="summary-section">
-                                <h3 class="summary-heading">How I'll Make It Happen</h3>
+                                <h3 class="summary-heading">Key Levers</h3>
                                 <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div>
                             </div>
                             <div class="summary-section">
-                                <h3 class="summary-heading">Who I Will Develop</h3>
+                                <h3 class="summary-heading">People Growth</h3>
                                 <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div>
                             </div>
                         </div>
                         <div class="p-6 bg-gray-50/70 border-l">
                             <div class="summary-section">
-                                <h3 class="summary-heading">Upholding Our Standards</h3>
+                                <h3 class="summary-heading">Protect the Core</h3>
                                 <ul class="space-y-3 mt-2">
                                     <li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li>
                                     <li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li>
@@ -127,15 +127,15 @@ function runViewScript(app) {
                                 </ul>
                             </div>
                             <div class="summary-section">
-                                <h3 class="summary-heading">Weekly Momentum Check-in</h3>
+                                <h3 class="summary-heading">Weekly Momentum Wins & Learnings</h3>
                                 ${weeklyCheckinHTML}
                             </div>
                             <div class="summary-section">
                                 <h3 class="summary-heading">End of Month Review</h3>
                                  <ul class="space-y-3 mt-2">
-                                    <li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Biggest Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li>
-                                    <li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Toughest Challenge:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li>
-                                    <li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Next Month's Focus:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li>
+                                    <li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li>
+                                    <li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Challenge:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li>
+                                    <li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Next:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li>
                                 </ul>
                             </div>
                         </div>
@@ -155,7 +155,7 @@ function runViewScript(app) {
                         <div><h4 class="font-semibold text-sm text-gray-500">Bakery</h4><p class="text-gray-800 font-medium">${formData.bakeryLocation || '...'}</p></div>
                         <div><h4 class="font-semibold text-sm text-gray-500">Quarter</h4><p class="text-gray-800 font-medium">${formData.quarter || '...'}</p></div>
                     </div>
-                    <div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Narrative</h4><div class="text-gray-800 prose prose-sm">${e(formData.quarterlyTheme)}</div></div>
+                    <div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Theme</h4><div class="text-gray-800 prose prose-sm">${e(formData.quarterlyTheme)}</div></div>
                     <div><h3 class="text-lg font-bold border-b pb-2 mb-3">Proposed Monthly Sprints</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm">
                         <div><strong class="font-semibold text-gray-600 block">Month 1 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month1Goal)}</div></div>
                         <div><strong class="font-semibold text-gray-600 block">Month 2 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month2Goal)}</div></div>
