@@ -180,7 +180,7 @@ function runApp(app) {
                         <div class="content-card p-6 md:p-8"><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="managerName" class="font-semibold block mb-2">Manager:</label><input type="text" id="managerName" class="form-input" placeholder="e.g., Tristen Bayley"></div><div><label for="bakeryLocation" class="font-semibold block mb-2">Bakery:</label><input type="text" id="bakeryLocation" class="form-input" placeholder="e.g., Marlow"></div><div><label for="quarter" class="font-semibold block mb-2">Quarter:</label><input type="text" id="quarter" class="form-input" placeholder="e.g., Q3 FY26"></div></div></div>
                         <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-sm"><h3 class="font-bold text-lg text-amber-900 mb-2">Our Mission</h3><p class="text-xl font-semibold text-gray-800">"To make world-class, craft baking a part of every neighbourhood."</p></div>
                         <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">This Quarter's Narrative: <i class="bi bi-info-circle info-icon" title="The big, overarching mission for the next 90 days."></i></label><div id="quarterlyTheme" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., 'To become the heart of our neighbourhood by perfecting our afternoon experience and making every customer feel like a regular.'" data-maxlength="400"></div></div>
-                        <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Your Monthly Missions</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1 Mission: <i class="bi bi-info-circle info-icon" title="The high-level goal for the first 30-day mission."></i></label><div id="month1Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Product: To have beautiful afternoon availability that delights our customers and brings our waste below 4.5%." data-maxlength="300"></div></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2 Mission: <i class="bi bi-info-circle info-icon" title="The high-level goal for the second 30-day mission."></i></label><div id="month2Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Place: Embed new production processes and daily travel paths to achieve a 95% pass rate on our standards audit." data-maxlength="300"></div></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3 Mission: <i class="bi bi-info-circle info-icon" title="The high-level goal for the third 30-day mission."></i></label><div id="month3Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., People: Develop our team's skills through cross-training to ensure every member is signed off on both coffee and kitchen basics." data-maxlength="300"></div></div></div></div>
+                        <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Your Monthly Goals</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1 Mission: <i class="bi bi-info-circle info-icon" title="The high-level goal for the first 30-day mission."></i></label><div id="month1Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Product: To have beautiful afternoon availability that delights our customers and brings our waste below 4.5%." data-maxlength="300"></div></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2 Mission: <i class="bi bi-info-circle info-icon" title="The high-level goal for the second 30-day mission."></i></label><div id="month2Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Place: Embed new production processes and daily travel paths to achieve a 95% pass rate on our standards audit." data-maxlength="300"></div></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3 Mission: <i class="bi bi-info-circle info-icon" title="The high-level goal for the third 30-day mission."></i></label><div id="month3Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., People: Develop our team's skills through cross-training to ensure every member is signed off on both coffee and kitchen basics." data-maxlength="300"></div></div></div></div>
                    </div>`,
             requiredFields: ['managerName', 'bakeryLocation', 'quarter', 'quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
         },
@@ -206,7 +206,7 @@ function runApp(app) {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
                             <div class="flex flex-col">
                                 <label for="m${monthNum}s2_levers" class="font-semibold text-lg block mb-2 text-gray-800">How I'll Make It Happen:</label>
-                                <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing flex-grow key-levers-input" contenteditable="true" data-placeholder="What are the 3-5 key actions you will personally take to achieve your Must-Win Battle?&#10;1. Review the ordering report daily with Emily.&#10;2. Coach the team on the 'why' behind the production matrix.&#10;3. Complete a daily travel path, focusing on merchandising." data-maxlength="600"></div>
+                                <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing flex-grow key-levers-input" contenteditable="true" data-placeholder="What are the 3-5 key actions you will personally take to achieve your Must-Win Battle?" data-maxlength="600"></div>
                             </div>
                             <div class="space-y-4">
                                 <div>
@@ -215,7 +215,7 @@ function runApp(app) {
                                 </div>
                                 <div>
                                     <label for="m${monthNum}s2_powerup_a" class="font-semibold text-lg block mb-2 text-gray-800">Our Team's Winning Idea:</label>
-                                    <div id="m${monthNum}s2_powerup_a" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Capture the best idea from your team, e.g., Pre-portioning key ingredients the night before." data-maxlength="300"></div>
+                                    <div id="m${monthNum}s2_powerup_a" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Capture the best idea from your team." data-maxlength="300"></div>
                                 </div>
                             </div>
                         </div>
@@ -259,17 +259,17 @@ function runApp(app) {
                                         <label class="font-semibold block mb-3 text-gray-700">How are we tracking against our Must-Win Battle?</label>
                                         <div class="flex items-center space-x-2 status-buttons" data-week="${w}">
                                             <button class="status-button" data-status="on-track">ON TRACK</button>
-                                            <button class="status-button" data-status="issues">WORKING THROUGH IT</button>
+                                            <button class="status-button" data-status="issues">ISSUES</button>
                                             <button class="status-button" data-status="off-track">OFF TRACK</button>
                                         </div>
                                     </div>
                                     <div>
                                         <label for="m${monthNum}s5_w${w}_win" class="font-semibold block mb-2 text-gray-700">This Week's Big Win or Learning:</label>
-                                        <div id="m${monthNum}s5_w${w}_win" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., The team hit our 80% availability target on Thursday after we reorganised the pastry display!" data-maxlength="400"></div>
+                                        <div id="m${monthNum}s5_w${w}_win" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., The team hit our 80% availability target on Thursday by following production matrix" data-maxlength="400"></div>
                                     </div>
                                     <div>
                                         <label for="m${monthNum}s5_w${w}_spotlight" class="font-semibold block mb-2 text-gray-700">Team Member Spotlight:</label>
-                                        <div id="m${monthNum}s5_w${w}_spotlight" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="Who has shone this week? e.g., A huge shout-out to Sarah for her excellent attention to detail during the bake." data-maxlength="400"></div>
+                                        <div id="m${monthNum}s5_w${w}_spotlight" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="Who has shone this week? e.g., A huge shout-out to Sarah for her excellent SHINE on Saturday." data-maxlength="400"></div>
                                     </div>
                                 </div>
                             </div>
@@ -294,7 +294,7 @@ function runApp(app) {
                     <div class="space-y-6">
                         <div><label for="m3s7_achievements" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> The Quarter's Biggest Achievements:</label><div id="m3s7_achievements" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
                         <div><label for="m3s7_challenges" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> The Biggest Challenges & Key Learnings:</label><div id="m3s7_challenges" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
-                        <div><label for="m3s7_narrative" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> How We Performed vs. Our Quarterly Narrative:</label><div id="m3s7_narrative" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
+                        <div><label for="m3s7_narrative" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> How We Performed vs. Our Quarterly Vision:</label><div id="m3s7_narrative" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
                         <div><label for="m3s7_next_quarter" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Our Primary Focus for Next Quarter:</label><div id="m3s7_next_quarter" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
                     </div>
                 </div>` : ''}
@@ -817,9 +817,9 @@ function runApp(app) {
         }
         const titles = {
             vision: { title: 'Vision & Missions', subtitle: appState.planData.planName || 'Your 90-Day journey to a brilliant bakery.'},
-            'month-1': { title: 'Month 1 Mission', subtitle: 'Lay the foundations for success.'},
-            'month-2': { title: 'Month 2 Mission', subtitle: 'Build momentum and embed processes.'},
-            'month-3': { title: 'Month 3 Mission', subtitle: 'Refine execution and review the quarter.'},
+            'month-1': { title: 'Month 1', subtitle: 'Lay the foundations for success.'},
+            'month-2': { title: 'Month 2', subtitle: 'Build momentum and embed processes.'},
+            'month-3': { title: 'Month 3', subtitle: 'Refine execution and review the quarter.'},
             summary: { title: 'Full Summary', subtitle: 'A complete overview of your quarterly plan.'}
         };
         DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
@@ -931,7 +931,7 @@ function runApp(app) {
                                                         <div><h4 class="font-semibold text-sm text-gray-500">Bakery</h4><p class="text-gray-800 font-medium">${formData.bakeryLocation || '...'}</p></div>
                                                         <div><h4 class="font-semibold text-sm text-gray-500">Quarter</h4><p class="text-gray-800 font-medium">${formData.quarter || '...'}</p></div>
                                                     </div>
-                                                    <div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Narrative</h4><div class="text-gray-800 prose prose-sm">${e(formData.quarterlyTheme)}</div></div>
+                                                    <div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Vision</h4><div class="text-gray-800 prose prose-sm">${e(formData.quarterlyTheme)}</div></div>
                                                     <div><h3 class="text-lg font-bold border-b pb-2 mb-3">Monthly Missions</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm"><div><strong class="font-semibold text-gray-600 block">Month 1 Mission:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month1Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 2 Mission:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month2Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 3 Mission:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month3Goal)}</div></div></div></div>
                                                 </div>
                                                 ${renderMonthSummary(1)}
@@ -1744,3 +1744,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
