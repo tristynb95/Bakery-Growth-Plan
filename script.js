@@ -220,7 +220,7 @@ function runApp(app) {
                             </div>
                         </div>
                         <div class="pt-6 border-t">
-                            <label class="font-semibold text-lg block mb-2 text-gray-800">Developing Our People:</label>
+                            <label class="font-semibold text-lg block mb-2 text-gray-800">Who I Will Develop:</label>
                             <div id="m${monthNum}s3_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="How will you grow your team's skills and confidence?&#10;e.g., Sarah: Coach on the production matrix to build her confidence for her upcoming Head Baker sign-off." data-maxlength="600"></div>
                         </div>
                         <div class="pt-6 border-t">
@@ -1744,6 +1744,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
