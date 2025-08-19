@@ -825,41 +825,74 @@ function runApp(app) {
     }
     
     function switchView(viewId) {
-        DOMElements.mainContent.scrollTop = 0;
-        appState.currentView = viewId;
-        if (appState.currentPlanId) {
-            localStorage.setItem('lastPlanId', appState.currentPlanId);
-            localStorage.setItem('lastViewId', viewId);
-        }
-        const titles = {
-            vision: { title: 'Bakery Growth Plan', subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.'},
-            'month-1': { title: 'Month 1 Sprint', subtitle: 'Lay the foundations for success.'},
-            'month-2': { title: 'Month 2 Sprint', subtitle: 'Build momentum and embed processes.'},
-            'month-3': { title: 'Month 3 Sprint', subtitle: 'Refine execution and review the quarter.'},
-            summary: { title: '90-Day Plan Summary', subtitle: 'A complete overview of your quarterly plan.'}
-        };
-        DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
-        DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
-        if (viewId === 'summary') {
-            DOMElements.desktopHeaderButtons.classList.remove('hidden');
-            DOMElements.printBtn.classList.remove('hidden');
-            DOMElements.shareBtn.classList.remove('hidden');
-            DOMElements.aiActionBtn.classList.remove('hidden');
-            renderSummary();
-        } else {
-            DOMElements.desktopHeaderButtons.classList.add('hidden');
-            DOMElements.printBtn.classList.add('hidden');
-            DOMElements.shareBtn.classList.add('hidden');
-            DOMElements.aiActionBtn.classList.add('hidden');
-            const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
-            DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
-            populateViewWithData();
-        }
-        document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
-        document.querySelector(`#nav-${viewId}`)?.classList.add('active');
-        DOMElements.appView.classList.remove('sidebar-open');
-        initializeCharCounters();
+    DOMElements.mainContent.scrollTop = 0;
+    appState.currentView = viewId;
+    if (appState.currentPlanId) {
+        localStorage.setItem('lastPlanId', appState.currentPlanId);
+        localStorage.setItem('lastViewId', viewId);
     }
+    const titles = {
+        vision: { title: 'Bakery Growth Plan', subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.'},
+        'month-1': { title: 'Month 1 Sprint', subtitle: 'Lay the foundations for success.'},
+        'month-2': { title: 'Month 2 Sprint', subtitle: 'Build momentum and embed processes.'},
+        'month-3': { title: 'Month 3 Sprint', subtitle: 'Refine execution and review the quarter.'},
+        calendar: { title: 'Planning Calendar', subtitle: 'A monthly overview of your key dates and deadlines.'},
+        summary: { title: '90-Day Plan Summary', subtitle: 'A complete overview of your quarterly plan.'}
+    };
+    DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
+    DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
+    
+    // Hide header buttons by default, show them only for the summary view
+    DOMElements.desktopHeaderButtons.classList.add('hidden');
+    DOMElements.printBtn.classList.add('hidden');
+    DOMElements.shareBtn.classList.add('hidden');
+    DOMElements.aiActionBtn.classList.add('hidden');
+
+    if (viewId === 'summary') {
+        DOMElements.desktopHeaderButtons.classList.remove('hidden');
+        DOMElements.printBtn.classList.remove('hidden');
+        DOMElements.shareBtn.classList.remove('hidden');
+        DOMElements.aiActionBtn.classList.remove('hidden');
+        renderSummary();
+    } else if (viewId === 'calendar') {
+        DOMElements.contentArea.innerHTML = templates.calendar;
+        const now = new Date();
+        let currentYear = now.getFullYear();
+        let currentMonth = now.getMonth();
+
+        const setupCalendar = () => {
+            renderCalendar(currentYear, currentMonth);
+        };
+        
+        setupCalendar();
+
+        document.getElementById('calendar-prev-month').addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            setupCalendar();
+        });
+        document.getElementById('calendar-next-month').addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            setupCalendar();
+        });
+    } else {
+        const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
+        DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
+        populateViewWithData();
+    }
+    
+    document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
+    document.querySelector(`#nav-${viewId}`)?.classList.add('active');
+    DOMElements.appView.classList.remove('sidebar-open');
+    initializeCharCounters();
+}
 
     function renderSummary() {
         const formData = appState.planData;
@@ -1772,6 +1805,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
