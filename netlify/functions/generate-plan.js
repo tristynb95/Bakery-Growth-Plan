@@ -35,7 +35,7 @@ exports.handler = async function(event, context) {
       2.  Next, for each month, I will extract the specific tasks and goals.
       3.  I will then consolidate related tasks into concise, clear action steps.
       4.  For each action step, I will determine the most appropriate Pillar based on the definitions.
-      5.  Finally, I will construct the complete HTML response according to the exact structure specified in the example below, ensuring every required class, attribute, and element is present.
+      5.  Finally, I will construct the complete HTML response according to the exact structure specified in the example below, ensuring every required class, attribute, and element is present. I will leave the cells for 'Status' empty so the user can fill it themselves.
 
       **Output Format Example:**
       <div class="ai-action-plan-container">
