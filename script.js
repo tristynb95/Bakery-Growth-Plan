@@ -77,7 +77,6 @@ function runApp(app) {
         termsAgreeCheckbox: document.getElementById('terms-agree'),
         createAccountBtn: document.getElementById('create-account-btn'),
         registerError: document.getElementById('register-error'),
-        calendarFab: document.getElementById('calendar-fab')
     };
 
     const appState = {
@@ -396,7 +395,6 @@ function runApp(app) {
         await setupPlanListener();
         DOMElements.dashboardView.classList.add('hidden');
         DOMElements.appView.classList.remove('hidden');
-        DOMElements.calendarFab.classList.add('visible');
         switchView(viewId);
     }
 
@@ -453,7 +451,6 @@ function runApp(app) {
         await setupPlanListener();
         DOMElements.dashboardView.classList.add('hidden');
         DOMElements.appView.classList.remove('hidden');
-        DOMElements.calendarFab.classList.add('visible');
         switchView('vision');
     }
 
@@ -468,7 +465,6 @@ function runApp(app) {
         appState.currentPlanId = null;
         DOMElements.appView.classList.add('hidden');
         DOMElements.dashboardView.classList.remove('hidden');
-        DOMElements.calendarFab.classList.remove('visible');
         renderDashboard();
     }
 
@@ -807,56 +803,6 @@ function runApp(app) {
         document.querySelectorAll('#app-view [contenteditable="true"]').forEach(managePlaceholder);
     }
     
-    function renderCalendar(year, month) {
-        const calendarGrid = document.getElementById('calendar-grid');
-        const monthYearEl = document.getElementById('calendar-month-year');
-        if (!calendarGrid || !monthYearEl) return;
-    
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-    
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        monthYearEl.textContent = `${monthNames[month]} ${year}`;
-    
-        calendarGrid.innerHTML = '';
-    
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-    
-        const startDayOfWeek = (firstDay.getDay() + 6) % 7; // Monday is 0
-        const totalDays = lastDay.getDate();
-    
-        // Add blank days for the start of the month
-        for (let i = 0; i < startDayOfWeek; i++) {
-            calendarGrid.innerHTML += `<div class="calendar-day is-other-month"></div>`;
-        }
-    
-        // Add days of the month
-        for (let i = 1; i <= totalDays; i++) {
-            const date = new Date(year, month, i);
-            let dayClasses = 'calendar-day';
-            if (date.getTime() === today.getTime()) {
-                dayClasses += ' is-today';
-            }
-    
-            calendarGrid.innerHTML += `<div class="${dayClasses}" data-date="${date.toISOString().split('T')[0]}">
-                                          <div class="calendar-day-number">${i}</div>
-                                          <div class="calendar-events"></div>
-                                       </div>`;
-        }
-    }
-
-    // script.js
-
-async function restoreLastView(planId, viewId) {
-    appState.currentPlanId = planId;
-    await setupPlanListener();
-    DOMElements.dashboardView.classList.add('hidden');
-    DOMElements.appView.classList.remove('hidden');
-    DOMElements.calendarFab.classList.add('visible'); // <-- ADD THIS LINE
-    switchView(viewId);
-}
-
     function switchView(viewId) {
         DOMElements.mainContent.scrollTop = 0;
         appState.currentView = viewId;
@@ -873,13 +819,6 @@ async function restoreLastView(planId, viewId) {
         };
         DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
         DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
-        
-        // Hide header buttons by default, show them only for the summary view
-        DOMElements.desktopHeaderButtons.classList.add('hidden');
-        DOMElements.printBtn.classList.add('hidden');
-        DOMElements.shareBtn.classList.add('hidden');
-        DOMElements.aiActionBtn.classList.add('hidden');
-    
         if (viewId === 'summary') {
             DOMElements.desktopHeaderButtons.classList.remove('hidden');
             DOMElements.printBtn.classList.remove('hidden');
@@ -887,11 +826,14 @@ async function restoreLastView(planId, viewId) {
             DOMElements.aiActionBtn.classList.remove('hidden');
             renderSummary();
         } else {
+            DOMElements.desktopHeaderButtons.classList.add('hidden');
+            DOMElements.printBtn.classList.add('hidden');
+            DOMElements.shareBtn.classList.add('hidden');
+            DOMElements.aiActionBtn.classList.add('hidden');
             const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
             DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
             populateViewWithData();
         }
-        
         document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
         document.querySelector(`#nav-${viewId}`)?.classList.add('active');
         DOMElements.appView.classList.remove('sidebar-open');
@@ -1362,48 +1304,6 @@ async function restoreLastView(planId, viewId) {
                 DOMElements.modalActionBtn.style.display = 'none';
                 DOMElements.modalCancelBtn.style.display = 'none';
                 break;
-            case 'calendar':
-                DOMElements.modalTitle.textContent = "Planning Calendar";
-                const calendarHTML = `
-                    <div class="flex justify-between items-center mb-6">
-                        <button id="calendar-prev-month" class="btn btn-secondary"><i class="bi bi-arrow-left"></i></button>
-                        <h2 id="calendar-month-year" class="text-2xl font-bold font-poppins"></h2>
-                        <button id="calendar-next-month" class="btn btn-secondary"><i class="bi bi-arrow-right"></i></button>
-                    </div>
-                    <div id="calendar-container" class="space-y-2">
-                        <div class="calendar-grid">
-                            <div class="calendar-header">Mon</div><div class="calendar-header">Tue</div><div class="calendar-header">Wed</div><div class="calendar-header">Thu</div><div class="calendar-header">Fri</div><div class="calendar-header">Sat</div><div class="calendar-header">Sun</div>
-                        </div>
-                        <div id="calendar-grid" class="calendar-grid"></div>
-                    </div>`;
-                DOMElements.modalContent.innerHTML = calendarHTML;
-                // Hide the default footer buttons
-                DOMElements.modalActionBtn.style.display = 'none';
-                DOMElements.modalCancelBtn.style.display = 'none';
-    
-                const now = new Date();
-                let currentYear = now.getFullYear();
-                let currentMonth = now.getMonth();
-    
-                const setupCalendar = () => {
-                    renderCalendar(currentYear, currentMonth);
-                    // Future logic to add events to the calendar can go here
-                };
-                
-                setupCalendar();
-    
-                // Add event listeners to the new buttons inside the modal
-                document.getElementById('calendar-prev-month').addEventListener('click', () => {
-                    currentMonth--;
-                    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-                    setupCalendar();
-                });
-                document.getElementById('calendar-next-month').addEventListener('click', () => {
-                    currentMonth++;
-                    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-                    setupCalendar();
-                });
-                break;
             case 'aiActionPlan_view': {
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
                 footer.style.justifyContent = 'space-between';
@@ -1794,9 +1694,6 @@ async function restoreLastView(planId, viewId) {
         if (e.target === DOMElements.modalOverlay) {
             requestCloseModal();
         }
-    });
-    DOMElements.calendarFab.addEventListener('click', () => {
-        openModal('calendar');
     });
     let touchStartX = 0;
     let touchEndX = 0;
