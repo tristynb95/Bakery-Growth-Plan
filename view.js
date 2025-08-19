@@ -75,19 +75,27 @@ function runViewScript(app) {
                 weeklyCheckinHTML += '</ul>';
             }
 
-            const pillar = formData[`m${monthNum}s1_pillar`];
+            const pillars = formData[`m${monthNum}s1_pillar`];
             const pillarIcons = {
                 'people': '<i class="bi bi-people-fill"></i>',
                 'product': '<i class="bi bi-cup-hot-fill"></i>',
                 'customer': '<i class="bi bi-heart-fill"></i>',
                 'place': '<i class="bi bi-shop"></i>'
             };
-            let pillarHTML = '';
-            if (pillar) {
-                const pillarIcon = pillarIcons[pillar] || '';
-                const pillarText = pillar.charAt(0).toUpperCase() + pillar.slice(1);
-                pillarHTML = `<div class="flex items-center gap-2 mb-4"><span class="font-semibold text-sm text-gray-500">Focus Pillar:</span><span class="pillar-badge">${pillarIcon} ${pillarText}</span></div>`;
+            let pillarBadgesHTML = '';
+            if (Array.isArray(pillars) && pillars.length > 0) {
+                pillarBadgesHTML = pillars.map(pillar => {
+                    const pillarIcon = pillarIcons[pillar] || '';
+                    const pillarText = pillar.charAt(0).toUpperCase() + pillar.slice(1);
+                    return `<span class="pillar-badge">${pillarIcon} ${pillarText}</span>`;
+                }).join('');
             }
+            
+            let pillarHTML = '';
+            if (pillarBadgesHTML) {
+                pillarHTML = `<div class="flex items-center gap-2 mb-4 flex-wrap"><span class="font-semibold text-sm text-gray-500">Pillar Focus:</span>${pillarBadgesHTML}</div>`;
+            }
+
 
             return `
                 <div class="content-card p-0 overflow-hidden mt-8">
