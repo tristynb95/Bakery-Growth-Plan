@@ -194,7 +194,7 @@ function runApp(app) {
                             <label class="font-semibold text-lg block mb-2 text-gray-800">Must-Win Battle:</label>
                             <div id="m${monthNum}s1_battle" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly...'" data-maxlength="500"></div>
                             <div class="mt-4">
-                                <label class="font-semibold block mb-3 text-sm text-gray-600">Monthly Focus Pillar:</label>
+                                <label class="font-semibold block mb-3 text-sm text-gray-600">Monthly Pillar Focus:</label>
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m${monthNum}s1">
                                     <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
                                     <button class="btn pillar-button" data-pillar="product"><i class="bi bi-cup-hot-fill"></i> Product</button>
@@ -536,11 +536,13 @@ function runApp(app) {
         document.querySelectorAll('.pillar-buttons').forEach(group => {
             const stepKey = group.dataset.stepKey;
             const dataKey = `${stepKey}_pillar`;
-            const pillar = remoteData[dataKey];
+            const pillars = remoteData[dataKey]; // This will be an array or undefined
             group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
-            if (pillar) {
-                const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
-                if (buttonToSelect) buttonToSelect.classList.add('selected');
+            if (Array.isArray(pillars)) {
+                pillars.forEach(pillar => {
+                    const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
+                    if (buttonToSelect) buttonToSelect.classList.add('selected');
+                });
             }
         });
         if (appState.currentView.startsWith('month-')) {
@@ -569,10 +571,11 @@ function runApp(app) {
         });
         document.querySelectorAll('.pillar-buttons').forEach(group => {
             const stepKey = group.dataset.stepKey;
-            const selected = group.querySelector('.selected');
             const dataKey = `${stepKey}_pillar`;
-            if (selected) {
-                localChanges[dataKey] = selected.dataset.pillar;
+            const selectedButtons = group.querySelectorAll('.selected');
+            if (selectedButtons.length > 0) {
+                const selectedPillars = Array.from(selectedButtons).map(btn => btn.dataset.pillar).sort();
+                localChanges[dataKey] = selectedPillars;
             } else {
                 fieldsToDelete[dataKey] = firebase.firestore.FieldValue.delete();
             }
@@ -593,7 +596,7 @@ function runApp(app) {
         const changedData = {};
         let hasChanges = false;
         for (const key in localChanges) {
-            if (localChanges[key] !== appState.planData[key]) {
+            if (JSON.stringify(localChanges[key]) !== JSON.stringify(appState.planData[key])) {
                 changedData[key] = localChanges[key];
                 hasChanges = true;
             }
@@ -780,11 +783,13 @@ function runApp(app) {
         document.querySelectorAll('.pillar-buttons').forEach(group => {
             const stepKey = group.dataset.stepKey;
             const dataKey = `${stepKey}_pillar`;
-            const pillar = appState.planData[dataKey];
+            const pillars = appState.planData[dataKey]; // This is an array now
             group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
-            if (pillar) {
-                const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
-                if (buttonToSelect) buttonToSelect.classList.add('selected');
+            if (Array.isArray(pillars)) {
+                 pillars.forEach(pillar => {
+                    const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
+                    if (buttonToSelect) buttonToSelect.classList.add('selected');
+                });
             }
         });
         if (appState.currentView.startsWith('month-')) {
@@ -880,19 +885,27 @@ function runApp(app) {
             } else {
                 weeklyCheckinHTML += '</ul>';
             }
-            const pillar = formData[`m${monthNum}s1_pillar`];
+            const pillars = formData[`m${monthNum}s1_pillar`];
             const pillarIcons = {
                 'people': '<i class="bi bi-people-fill"></i>',
                 'product': '<i class="bi bi-cup-hot-fill"></i>',
                 'customer': '<i class="bi bi-heart-fill"></i>',
                 'place': '<i class="bi bi-shop"></i>'
             };
-            let pillarHTML = '';
-            if (pillar) {
-                const pillarIcon = pillarIcons[pillar] || '';
-                const pillarText = pillar.charAt(0).toUpperCase() + pillar.slice(1);
-                pillarHTML = `<div class="flex items-center gap-2 mb-4"><span class="font-semibold text-sm text-gray-500">Focus Pillar:</span><span class="pillar-badge">${pillarIcon} ${pillarText}</span></div>`;
+            let pillarBadgesHTML = '';
+            if (Array.isArray(pillars) && pillars.length > 0) {
+                pillarBadgesHTML = pillars.map(pillar => {
+                    const pillarIcon = pillarIcons[pillar] || '';
+                    const pillarText = pillar.charAt(0).toUpperCase() + pillar.slice(1);
+                    return `<span class="pillar-badge">${pillarIcon} ${pillarText}</span>`;
+                }).join('');
             }
+
+            let pillarHTML = '';
+            if (pillarBadgesHTML) {
+                pillarHTML = `<div class="flex items-center gap-2 mb-4 flex-wrap"><span class="font-semibold text-sm text-gray-500">Pillar Focus:</span>${pillarBadgesHTML}</div>`;
+            }
+
             return `<div class="content-card p-0 overflow-hidden mt-8">
                         <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">Month ${monthNum} Sprint</h2>
                         <div class="summary-grid">
@@ -1659,11 +1672,7 @@ function runApp(app) {
         const target = e.target;
         const pillarButton = target.closest('.pillar-button');
         if (pillarButton) {
-            const alreadySelected = pillarButton.classList.contains('selected');
-            pillarButton.parentElement.querySelectorAll('.pillar-button').forEach(btn => btn.classList.remove('selected'));
-            if (!alreadySelected) {
-                pillarButton.classList.add('selected');
-            }
+            pillarButton.classList.toggle('selected');
             saveData(true);
             return;
         }
@@ -1735,4 +1744,3 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
