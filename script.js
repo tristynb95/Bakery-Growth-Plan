@@ -300,6 +300,27 @@ function runApp(app) {
                 </div>` : ''}
             </div>
         `,
+        calendar: `
+        <div class="content-card p-6 md:p-8">
+            <div class="flex justify-between items-center mb-6">
+                <button id="calendar-prev-month" class="btn btn-secondary"><i class="bi bi-arrow-left"></i></button>
+                <h2 id="calendar-month-year" class="text-2xl font-bold font-poppins"></h2>
+                <button id="calendar-next-month" class="btn btn-secondary"><i class="bi bi-arrow-right"></i></button>
+            </div>
+            <div id="calendar-container" class="space-y-2">
+                <div class="calendar-grid">
+                    <div class="calendar-header">Mon</div>
+                    <div class="calendar-header">Tue</div>
+                    <div class="calendar-header">Wed</div>
+                    <div class="calendar-header">Thu</div>
+                    <div class="calendar-header">Fri</div>
+                    <div class="calendar-header">Sat</div>
+                    <div class="calendar-header">Sun</div>
+                </div>
+                <div id="calendar-grid" class="calendar-grid"></div>
+            </div>
+        </div>
+    `
     };
 
     function parseUkDate(str) {
@@ -949,6 +970,22 @@ function runApp(app) {
         }
         return summary;
     }
+
+    function renderCalendar(year, month) {
+    const calendarGrid = document.getElementById('calendar-grid');
+    const monthYearEl = document.getElementById('calendar-month-year');
+    if (!calendarGrid || !monthYearEl) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    monthYearEl.textContent = `${monthNames[month]} ${year}`;
+
+    calendarGrid.innerHTML = '';
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new D
 
     // ====================================================================
     // AI ACTION PLAN LOGIC (with Undo/Redo)
@@ -1735,5 +1772,6 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
