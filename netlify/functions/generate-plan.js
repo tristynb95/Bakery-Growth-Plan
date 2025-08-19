@@ -29,6 +29,7 @@ exports.handler = async function(event, context) {
           - **Place**: Bakery cleanliness, audits, presentation, maintenance, local marketing.
       4.  **Strict HTML Structure**: The final output MUST be ONLY the HTML code block. Do not include markdown formatting like \`\`\`html.
       5. **Managers Name**: When referring to the manager in the action plan, you will use the manager name found at the top of the tab titled 'Vision & Sprints'
+      6. **Responses**: My responses will be clear, concise and actionable. 
 
       **Step-by-Step Thought Process (Chain-of-Thought):**
       1.  First, I will read the entire plan summary to understand the key objectives for each month.
