@@ -920,4 +920,66 @@ tr:hover .btn-remove-row {
     color: var(--gails-red);
 }
 
+/* 36. Planning Calendar Styles
+-------------------------------------------------- */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+}
+
+.calendar-header {
+    text-align: center;
+    font-weight: 600;
+    color: var(--gails-text-secondary);
+    padding-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.calendar-day {
+    border: 1px solid var(--gails-grey-mid);
+    border-radius: 0.75rem;
+    min-height: 120px;
+    padding: 0.5rem;
+    background-color: var(--gails-white);
+    transition: all 0.2s ease-in-out;
+}
+
+.calendar-day.is-today {
+    border-color: var(--gails-red);
+    box-shadow: var(--shadow-focus);
+}
+
+.calendar-day.is-other-month {
+    background-color: var(--gails-grey-light);
+    opacity: 0.6;
+}
+
+.calendar-day-number {
+    font-weight: 700;
+    color: var(--gails-text-primary);
+}
+
+.calendar-day.is-today .calendar-day-number {
+    color: var(--gails-red);
+}
+
+.calendar-event {
+    background-color: var(--gails-red-light);
+    color: var(--gails-red);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    border-left: 4px solid var(--gails-red);
+}
+
+.calendar-event:hover {
+    transform: scale(1.05);
+}
+
 
