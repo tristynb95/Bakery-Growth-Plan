@@ -220,7 +220,7 @@ function runApp(app) {
                             </div>
                         </div>
                         <div class="pt-6 border-t">
-                            <label class="font-semibold text-lg block mb-2 text-gray-800">People Growth:</label>
+                            <label class="font-semibold text-lg block mb-2 text-gray-800">Developing Our Breadheads:</label>
                             <div id="m${monthNum}s3_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" data-maxlength="600"></div>
                         </div>
                         <div class="pt-6 border-t">
@@ -936,7 +936,7 @@ function runApp(app) {
                                 ${pillarHTML}
                                 <div class="summary-section"><h3 class="summary-heading">Must-Win Battle</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div></div>
                                 <div class="summary-section"><h3 class="summary-heading">Key Actions</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div>
-                                <div class="summary-section"><h3 class="summary-heading">People Growth</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div></div>
+                                <div class="summary-section"><h3 class="summary-heading">Developing Our Breadheads</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div></div>
                             </div>
                             <div class="p-6 bg-gray-50/70 border-l">
                                 <div class="summary-section"><h3 class="summary-heading">Upholding Our Pillars</h3><ul class="space-y-3 mt-2"><li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-heart-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_customer`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-shop w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_place`])}</span></li></ul></div>
@@ -977,7 +977,7 @@ function runApp(app) {
             summary += `GOAL: ${e(planData[`month${m}Goal`])}\n`;
             summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
             summary += `KEY ACTIONS: ${e(planData[`m${m}s2_levers`])}\n`;
-            summary += `PEOPLE GROWTH: ${e(planData[`m${m}s3_people`])}\n`;
+            summary += `DEVELOPING OUR BREADHEADS: ${e(planData[`m${m}s3_people`])}\n`;
             summary += `PROTECT THE CORE (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
             summary += `PROTECT THE CORE (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
             summary += `PROTECT THE CORE (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
