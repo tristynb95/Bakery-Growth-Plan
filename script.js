@@ -205,7 +205,7 @@ function runApp(app) {
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
                             <div class="flex flex-col">
-                                <label for="m${monthNum}s2_levers" class="font-semibold text-lg block mb-2 text-gray-800">My Key Levers:</label>
+                                <label for="m${monthNum}s2_levers" class="font-semibold text-lg block mb-2 text-gray-800">My Key Actions:</label>
                                 <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing flex-grow key-levers-input" contenteditable="true" data-placeholder="1. Review ordering report daily.&#10;2. Coach the team on the 'why'..." data-maxlength="600"></div>
                             </div>
                             <div class="space-y-4">
@@ -935,7 +935,7 @@ function runApp(app) {
                             <div class="p-6">
                                 ${pillarHTML}
                                 <div class="summary-section"><h3 class="summary-heading">Must-Win Battle</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div></div>
-                                <div class="summary-section"><h3 class="summary-heading">Key Levers</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div>
+                                <div class="summary-section"><h3 class="summary-heading">Key Actions</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div>
                                 <div class="summary-section"><h3 class="summary-heading">People Growth</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div></div>
                             </div>
                             <div class="p-6 bg-gray-50/70 border-l">
@@ -976,7 +976,7 @@ function runApp(app) {
             summary += `--- MONTH ${m} ---\n`;
             summary += `GOAL: ${e(planData[`month${m}Goal`])}\n`;
             summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
-            summary += `KEY LEVERS: ${e(planData[`m${m}s2_levers`])}\n`;
+            summary += `KEY ACTIONS: ${e(planData[`m${m}s2_levers`])}\n`;
             summary += `PEOPLE GROWTH: ${e(planData[`m${m}s3_people`])}\n`;
             summary += `PROTECT THE CORE (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
             summary += `PROTECT THE CORE (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
