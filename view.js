@@ -118,7 +118,7 @@ function runViewScript(app) {
                         </div>
                         <div class="p-6 bg-gray-50/70 border-l">
                             <div class="summary-section">
-                                <h3 class="summary-heading">Protect the Core</h3>
+                                <h3 class="summary-heading">Upholding Our Pillars</h3>
                                 <ul class="space-y-3 mt-2">
                                     <li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li>
                                     <li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li>
