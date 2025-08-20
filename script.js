@@ -187,7 +187,7 @@ function runApp(app) {
         month: (monthNum) => `
             <div class="space-y-8">
                 <div class="content-card p-6 md:p-8">
-                    <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation Plan</h2>
+                    <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation</h2>
                     <p class="text-gray-600 mb-6">Complete these sections at the start of your month to set a clear direction.</p>
                     <div class="space-y-6">
                         <div>
@@ -270,6 +270,10 @@ function runApp(app) {
                                     <div>
                                         <label for="m${monthNum}s5_w${w}_spotlight" class="font-semibold block mb-2 text-gray-700">Team Member Spotlight:</label>
                                         <div id="m${monthNum}s5_w${w}_spotlight" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., Sarah for her excellent attention to detail during the bake." data-maxlength="400"></div>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label for="m${monthNum}s5_w${w}_shine" class="font-semibold block mb-2 text-gray-700">This Week's SHINE Focus:</label>
+                                        <div id="m${monthNum}s5_w${w}_shine" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., Ensuring every customer is greeted within 30 seconds." data-maxlength="400"></div>
                                     </div>
                                 </div>
                             </div>
@@ -681,13 +685,14 @@ function runApp(app) {
         const status = data[`m${monthNum}s5_w${weekNum}_status`];
         const win = data[`m${monthNum}s5_w${weekNum}_win`];
         const spotlight = data[`m${monthNum}s5_w${weekNum}_spotlight`];
+        const shine = data[`m${monthNum}s5_w${weekNum}_shine`];
         const isContentEmpty = (htmlContent) => {
             if (!htmlContent) return true;
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlContent;
             return tempDiv.innerText.trim() === '';
         };
-        return !!status && !isContentEmpty(win) && !isContentEmpty(spotlight);
+        return !!status && !isContentEmpty(win) && !isContentEmpty(spotlight) && !isContentEmpty(shine);
     }
 
     function updateWeeklyTabCompletion(monthNum, planData) {
@@ -721,6 +726,7 @@ function runApp(app) {
             requiredFields.push(`m${monthNum}s5_w${w}_status`);
             requiredFields.push(`m${monthNum}s5_w${w}_win`);
             requiredFields.push(`m${monthNum}s5_w${w}_spotlight`);
+            requiredFields.push(`m${monthNum}s5_w${w}_shine`);
         }
         if (monthNum == 3) {
             requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
@@ -817,9 +823,9 @@ function runApp(app) {
         }
         const titles = {
             vision: { title: 'Bakery Growth Plan', subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.'},
-            'month-1': { title: 'Month 1 Sprint', subtitle: 'Lay the foundations for success.'},
-            'month-2': { title: 'Month 2 Sprint', subtitle: 'Build momentum and embed processes.'},
-            'month-3': { title: 'Month 3 Sprint', subtitle: 'Refine execution and review the quarter.'},
+            'month-1': { title: '30 Day Plan', subtitle: 'Lay the foundations for success.'},
+            'month-2': { title: '60 Day Plan', subtitle: 'Build momentum and embed processes.'},
+            'month-3': { title: '90 Day Plan', subtitle: 'Refine execution and review the quarter.'},
             summary: { title: '90-Day Plan Summary', subtitle: 'A complete overview of your quarterly plan.'}
         };
         DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
@@ -866,17 +872,34 @@ function runApp(app) {
             for (let w = 1; w <= 4; w++) {
                 const status = formData[`m${monthNum}s5_w${w}_status`];
                 const win = formData[`m${monthNum}s5_w${w}_win`];
+                const spotlight = formData[`m${monthNum}s5_w${w}_spotlight`];
+                const shine = formData[`m${monthNum}s5_w${w}_shine`];
+
                 if (status) {
                     hasLoggedWeeks = true;
                     const statusText = status.replace('-', ' ').toUpperCase();
                     const statusBadgeHTML = `<span class="summary-status-badge status-${status}">${statusText}</span>`;
-                    const winText = !isContentEmpty(win) ? e(win) : '<em>No win/learning logged.</em>';
-                    weeklyCheckinHTML += `<li>
-                                            <div class="flex justify-between items-center mb-1">
+
+                    let checkinContent = '';
+                    if (!isContentEmpty(win)) {
+                        checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Win/Learning:</strong> ${e(win)}</p>`;
+                    }
+                    if (!isContentEmpty(spotlight)) {
+                        checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Spotlight:</strong> ${e(spotlight)}</p>`;
+                    }
+                    if (!isContentEmpty(shine)) {
+                        checkinContent += `<p class="text-sm text-gray-600"><strong>SHINE Focus:</strong> ${e(shine)}</p>`;
+                    }
+                    if (checkinContent === '') {
+                        checkinContent = '<p class="text-sm text-gray-500 italic">No details logged for this week.</p>';
+                    }
+
+                    weeklyCheckinHTML += `<li class="mb-3 pb-3 border-b last:border-b-0">
+                                            <div class="flex justify-between items-center mb-2">
                                                 <strong class="font-semibold text-gray-700">Week ${w}</strong>
                                                 ${statusBadgeHTML}
                                             </div>
-                                            <p class="text-sm text-gray-600">${winText}</p>
+                                            ${checkinContent}
                                           </li>`;
                 }
             }
@@ -907,7 +930,7 @@ function runApp(app) {
             }
 
             return `<div class="content-card p-0 overflow-hidden mt-8">
-                        <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">Month ${monthNum} Sprint</h2>
+                        <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">${monthNum * 30} Day Plan</h2>
                         <div class="summary-grid">
                             <div class="p-6">
                                 ${pillarHTML}
