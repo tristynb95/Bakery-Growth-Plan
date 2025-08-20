@@ -817,9 +817,9 @@ function runApp(app) {
         }
         const titles = {
             vision: { title: 'Bakery Growth Plan', subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.'},
-            'month-1': { title: 'Month 1 Sprint', subtitle: 'Lay the foundations for success.'},
-            'month-2': { title: 'Month 2 Sprint', subtitle: 'Build momentum and embed processes.'},
-            'month-3': { title: 'Month 3 Sprint', subtitle: 'Refine execution and review the quarter.'},
+            'month-1': { title: '30 Day Plan', subtitle: 'Lay the foundations for success.'},
+            'month-2': { title: '60 Day Plan', subtitle: 'Build momentum and embed processes.'},
+            'month-3': { title: '90 Day Plan', subtitle: 'Refine execution and review the quarter.'},
             summary: { title: '90-Day Plan Summary', subtitle: 'A complete overview of your quarterly plan.'}
         };
         DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
@@ -907,7 +907,7 @@ function runApp(app) {
             }
 
             return `<div class="content-card p-0 overflow-hidden mt-8">
-                        <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">Month ${monthNum} Sprint</h2>
+                        <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">${monthNum * 30} Day Plan</h2>
                         <div class="summary-grid">
                             <div class="p-6">
                                 ${pillarHTML}
