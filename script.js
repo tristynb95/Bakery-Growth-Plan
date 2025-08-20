@@ -187,7 +187,7 @@ function runApp(app) {
         month: (monthNum) => `
             <div class="space-y-8">
                 <div class="content-card p-6 md:p-8">
-                    <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation Plan</h2>
+                    <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation</h2>
                     <p class="text-gray-600 mb-6">Complete these sections at the start of your month to set a clear direction.</p>
                     <div class="space-y-6">
                         <div>
