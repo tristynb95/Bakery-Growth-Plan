@@ -394,6 +394,29 @@ function runApp(app) {
     };
 
     // --- DASHBOARD LOGIC ---
+    function formatLastEditedDate(lastEditedDate) {
+        if (!lastEditedDate) {
+            return 'N/A';
+        }
+
+        const now = new Date();
+        const editedDate = lastEditedDate.toDate();
+
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const startOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+
+        if (editedDate >= startOfToday) {
+            return `Today at ${editedDate.getHours().toString().padStart(2, '0')}:${editedDate.getMinutes().toString().padStart(2, '0')}`;
+        } else if (editedDate >= startOfYesterday) {
+            return `Yesterday at ${editedDate.getHours().toString().padStart(2, '0')}:${editedDate.getMinutes().toString().padStart(2, '0')}`;
+        } else {
+            const day = editedDate.getDate();
+            const month = editedDate.toLocaleString('en-GB', { month: 'short' });
+            const year = editedDate.getFullYear();
+            return `${day} ${month} ${year}`;
+        }
+    }
+
     async function restoreLastView(planId, viewId) {
         appState.currentPlanId = planId;
         await setupPlanListener();
@@ -413,7 +436,7 @@ function runApp(app) {
         let dashboardHTML = `<div class="flex justify-between items-center"><h1 class="text-4xl font-black text-gray-900 font-poppins">Your Growth Plans</h1></div><div class="dashboard-grid">`;
         plans.forEach(plan => {
             const completion = calculatePlanCompletion(plan);
-            const editedDate = plan.lastEdited?.toDate().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) || 'N/A';
+            const editedDate = formatLastEditedDate(plan.lastEdited);
             const planName = plan.planName || 'Untitled Plan';
             dashboardHTML += `
                 <div class="plan-card">
