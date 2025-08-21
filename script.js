@@ -1654,6 +1654,14 @@ function runApp(app) {
                 }, 3000);
             });
     });
+    DOMElements.mobileMenuBtn.addEventListener('click', () => {
+        DOMElements.appView.classList.toggle('sidebar-open');
+    });
+
+    DOMElements.sidebarOverlay.addEventListener('click', () => {
+        DOMElements.appView.classList.remove('sidebar-open');
+    });
+
     DOMElements.logoutBtn.addEventListener('click', () => handleLogout(false));
     DOMElements.dashboardLogoutBtn.addEventListener('click', () => handleLogout(false));
     DOMElements.backToDashboardBtn.addEventListener('click', handleBackToDashboard);
