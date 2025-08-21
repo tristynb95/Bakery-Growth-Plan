@@ -413,7 +413,7 @@ function runApp(app) {
         let dashboardHTML = `<div class="flex justify-between items-center"><h1 class="text-4xl font-black text-gray-900 font-poppins">Your Growth Plans</h1></div><div class="dashboard-grid">`;
         plans.forEach(plan => {
             const completion = calculatePlanCompletion(plan);
-            const editedDate = plan.lastEdited?.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || 'N/A';
+            const editedDate = plan.lastEdited?.toDate().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) || 'N/A';
             const planName = plan.planName || 'Untitled Plan';
             dashboardHTML += `
                 <div class="plan-card">
