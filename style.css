@@ -306,8 +306,27 @@ textarea.form-input {
     .printable-area { padding: 0 !important; }
     .main-layout, #dashboard-view { display: block; height: auto !important; }
     main { overflow: visible !important; height: auto !important; }
-    header, .dashboard-header { display: none; }
-    .content-card { box-shadow: none; border: 1px solid var(--gails-grey-mid); margin-top: 1.5rem; page-break-inside: avoid; }
+
+    /* Keep the view.html header, but hide the dashboard one */
+    .dashboard-header { display: none; }
+    header { display: block; text-align: center; }
+    header a { display: none; } /* Hides the logo */
+    header div { margin-top: 0 !important; } /* Removes excess space */
+
+    /* Card styling */
+    .content-card { box-shadow: none; border: 1px solid var(--gails-grey-mid); page-break-inside: avoid; }
+    #quarter-overview { margin-top: 2rem; } /* Add space below header */
+
+    /* Page break for subsequent sections */
+    #monthly-sections {
+        page-break-before: always;
+    }
+
+    /* We need to reset the top margin for the first card inside monthly-sections */
+    #monthly-sections .content-card:first-child {
+        margin-top: 0;
+    }
+
     .summary-content { font-size: 10pt; }
     h1, h2, h3, h4, h5 { page-break-after: avoid; }
 }
