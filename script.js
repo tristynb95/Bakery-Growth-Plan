@@ -43,8 +43,6 @@ function runApp(app) {
         sidebarName: document.getElementById('sidebar-name'),
         sidebarBakery: document.getElementById('sidebar-bakery'),
         sidebarInitials: document.getElementById('sidebar-initials'),
-        sidebarPfpContainer: document.getElementById('sidebar-pfp-container'),
-        sidebarPfp: document.getElementById('sidebar-pfp'),
         contentArea: document.getElementById('content-area'),
         mainNav: document.getElementById('main-nav'),
         printBtn: document.getElementById('print-btn'),
@@ -84,7 +82,6 @@ function runApp(app) {
     const appState = {
         planData: {},
         currentUser: null,
-        userProfile: {},
         currentPlanId: null,
         currentView: 'vision',
         saveTimeout: null,
@@ -351,18 +348,6 @@ function runApp(app) {
             DOMElements.resetView.classList.add('hidden');
             DOMElements.initialLoadingView.classList.remove('hidden');
             appState.currentUser = user;
-
-            // Fetch user profile
-            const userRef = db.collection('users').doc(user.uid);
-            const doc = await userRef.get();
-            if (doc.exists) {
-                appState.userProfile = doc.data();
-            } else {
-                appState.userProfile = { name: '', bakery: '', photoURL: '' };
-            }
-            updateUI();
-
-
             setupActivityListeners();
             resetSessionTimeout();
             const lastPlanId = localStorage.getItem('lastPlanId');
@@ -376,7 +361,6 @@ function runApp(app) {
             DOMElements.initialLoadingView.classList.add('hidden');
         } else {
             appState.currentUser = null;
-            appState.userProfile = {};
             appState.planData = {};
             appState.currentPlanId = null;
             clearActivityListeners();
@@ -692,26 +676,16 @@ function runApp(app) {
     }
 
     function updateSidebarInfo() {
-        const { name, bakery, photoURL } = appState.userProfile;
-        
-        DOMElements.sidebarName.textContent = name || 'Your Name';
-        DOMElements.sidebarBakery.textContent = bakery || "Your Bakery";
-
-        if (photoURL) {
-            DOMElements.sidebarPfp.src = photoURL;
-            DOMElements.sidebarPfp.classList.remove('hidden');
-            DOMElements.sidebarInitials.classList.add('hidden');
+        const managerName = appState.planData.managerName || '';
+        DOMElements.sidebarName.textContent = managerName || 'Your Name';
+        DOMElements.sidebarBakery.textContent = appState.planData.bakeryLocation || "Your Bakery";
+        if (managerName) {
+            const names = managerName.trim().split(' ');
+            const firstInitial = names[0] ? names[0][0] : '';
+            const lastInitial = names.length > 1 ? names[names.length - 1][0] : '';
+            DOMElements.sidebarInitials.textContent = (firstInitial + lastInitial).toUpperCase();
         } else {
-            DOMElements.sidebarPfp.classList.add('hidden');
-            DOMElements.sidebarInitials.classList.remove('hidden');
-            if (name) {
-                const names = name.trim().split(' ');
-                const firstInitial = names[0] ? names[0][0] : '';
-                const lastInitial = names.length > 1 ? names[names.length - 1][0] : '';
-                DOMElements.sidebarInitials.textContent = (firstInitial + lastInitial).toUpperCase();
-            } else {
-                DOMElements.sidebarInitials.textContent = '--';
-            }
+            DOMElements.sidebarInitials.textContent = '--';
         }
     }
 
@@ -1566,8 +1540,7 @@ function runApp(app) {
                         planName: newPlanName,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                         lastEdited: firebase.firestore.FieldValue.serverTimestamp(),
-                        managerName: appState.userProfile.name || '',
-                        bakeryLocation: appState.userProfile.bakery || ''
+                        managerName: ''
                     });
                     await handleSelectPlan(newPlan.id);
                 } catch (error) {
@@ -1825,3 +1798,5 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
+
