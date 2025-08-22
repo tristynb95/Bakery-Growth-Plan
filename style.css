@@ -938,3 +938,10 @@ tr:hover .btn-remove-row {
 .weekly-tab.active .week-complete-icon {
     color: var(--gails-red);
 }
+
+/* 36. Button For Profile Page
+-------------------------------------------------- */
+/* Additional styles for profile page */
+#pfp-upload-btn {
+    cursor: pointer;
+}
