@@ -21,6 +21,7 @@ async function initializeFirebase() {
 function runApp(app) {
     const auth = firebase.auth();
     const db = firebase.firestore();
+    const storage = firebase.storage(); // Added for profile picture storage
 
     // --- GLOBAL STATE & DOM REFERENCES ---
     const DOMElements = {
@@ -679,13 +680,20 @@ function runApp(app) {
         const managerName = appState.planData.managerName || '';
         DOMElements.sidebarName.textContent = managerName || 'Your Name';
         DOMElements.sidebarBakery.textContent = appState.planData.bakeryLocation || "Your Bakery";
-        if (managerName) {
+        const pfpContainer = DOMElements.sidebarInitials;
+
+        // Check for a profile picture URL in the user's data
+        if (appState.planData.photoURL && appState.planData.photoURL !== 'placeholder.png') {
+            pfpContainer.innerHTML = `<img src="${appState.planData.photoURL}" alt="Profile" class="w-full h-full object-cover rounded-full">`;
+            pfpContainer.style.backgroundColor = 'transparent'; // Remove bg color if image is present
+        } else {
+            // Fallback to initials if no photoURL
             const names = managerName.trim().split(' ');
             const firstInitial = names[0] ? names[0][0] : '';
             const lastInitial = names.length > 1 ? names[names.length - 1][0] : '';
-            DOMElements.sidebarInitials.textContent = (firstInitial + lastInitial).toUpperCase();
-        } else {
-            DOMElements.sidebarInitials.textContent = '--';
+            pfpContainer.textContent = (firstInitial + lastInitial).toUpperCase();
+            pfpContainer.innerHTML = ''; // Clear any potential img tag
+            pfpContainer.style.backgroundColor = 'var(--gails-red-light)';
         }
     }
 
@@ -1798,5 +1806,3 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
