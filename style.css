@@ -938,25 +938,3 @@ tr:hover .btn-remove-row {
 .weekly-tab.active .week-complete-icon {
     color: var(--gails-red);
 }
-
-/* Add these styles to the end of your style.css file */
-
-/* 36. Profile Page Specific Styles
--------------------------------------------------- */
-#pfp-preview {
-    transition: filter 0.3s ease;
-}
-
-.group:hover #pfp-preview {
-    filter: brightness(0.8);
-}
-
-#pfp-upload-btn {
-    transition: opacity 0.3s ease;
-}
-
-/* A placeholder image style */
-img[src="placeholder.png"] {
-    background-color: var(--gails-grey-light);
-}
-
