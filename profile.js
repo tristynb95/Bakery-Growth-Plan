@@ -31,21 +31,21 @@ function runProfileScript(app) {
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             // User is signed in.
-            DOMElements.profileEmail.textContent = user.email;
+            DOMElements.profileEmail.value = user.email;
 
             // Fetch user's name from Firestore
             const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists) {
-                DOMElements.profileName.textContent = userDoc.data().name || 'No name set';
+            if (userDoc.exists && userDoc.data().name) {
+                DOMElements.profileName.value = userDoc.data().name;
             } else {
                 // Look for the name in any of the user's plans
                 const plansRef = db.collection('users').doc(user.uid).collection('plans');
-                const snapshot = await plansRef.limit(1).get();
+                const snapshot = await plansRef.orderBy('lastEdited', 'desc').limit(1).get();
                 if (!snapshot.empty) {
                     const planData = snapshot.docs[0].data();
-                    DOMElements.profileName.textContent = planData.managerName || 'No name set';
+                    DOMElements.profileName.value = planData.managerName || 'No name set';
                 } else {
-                    DOMElements.profileName.textContent = 'No name set';
+                    DOMElements.profileName.value = 'No name set';
                 }
             }
         } else {
