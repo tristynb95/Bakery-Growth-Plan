@@ -938,3 +938,14 @@ tr:hover .btn-remove-row {
 .weekly-tab.active .week-complete-icon {
     color: var(--gails-red);
 }
+
+/* 36. Profile Page Styles
+-------------------------------------------------- */
+.profile-container {
+    padding: 2rem;
+}
+
+.profile-container .form-input {
+    background-color: var(--gails-grey-light);
+    cursor: not-allowed;
+}

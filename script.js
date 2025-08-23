@@ -38,6 +38,7 @@ function runApp(app) {
         loginBtn: document.getElementById('login-btn'),
         logoutBtn: document.getElementById('logout-btn'),
         dashboardLogoutBtn: document.getElementById('dashboard-logout-btn'),
+        dashboardProfileBtn: document.getElementById('dashboard-profile-btn'),
         backToDashboardBtn: document.getElementById('back-to-dashboard-btn'),
         authError: document.getElementById('auth-error'),
         sidebarName: document.getElementById('sidebar-name'),
@@ -1687,6 +1688,9 @@ function runApp(app) {
 
     DOMElements.logoutBtn.addEventListener('click', () => handleLogout(false));
     DOMElements.dashboardLogoutBtn.addEventListener('click', () => handleLogout(false));
+    DOMElements.dashboardProfileBtn.addEventListener('click', () => {
+        window.location.href = '/profile.html';
+    });
     DOMElements.backToDashboardBtn.addEventListener('click', handleBackToDashboard);
     DOMElements.dashboardContent.addEventListener('click', (e) => {
         const createBtn = e.target.closest('#create-new-plan-btn');
