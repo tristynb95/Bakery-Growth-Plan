@@ -949,3 +949,25 @@ tr:hover .btn-remove-row {
     background-color: var(--gails-grey-light);
     cursor: not-allowed;
 }
+
+.btn-remove-photo {
+    background-color: rgba(17, 24, 39, 0.6);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--gails-white);
+    border-radius: 9999px;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.btn-remove-photo:hover {
+    background-color: var(--gails-red);
+    color: var(--gails-white);
+    transform: scale(1.1);
+}
