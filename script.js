@@ -207,7 +207,7 @@ function runApp(app) {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
                             <div class="flex flex-col">
                                 <label for="m${monthNum}s2_levers" class="font-semibold text-lg block mb-2 text-gray-800">My Key Actions:</label>
-                                <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing flex-grow key-levers-input" contenteditable="true" data-placeholder="1. Daily: Review the production report from yesterday to adjust today's baking.&#10;2. Weekly: Lead a 'Coffee calibration' session in the management meeting.&#10;3. Ongoing: Coach one team member daily on a specific SHINE principle." data-maxlength="600"></div>
+                                <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing flex-grow key-levers-input" contenteditable="true" data-placeholder="1. Daily: Review the production report from yesterday to adjust today's baking.&#10;<br>2. Lead a 'Coffee calibration' session in the management meeting <br>3. Ongoing: Coach one team member daily on a specific SHINE principle." data-maxlength="600"></div>
                             </div>
                             <div class="space-y-4">
                                 <div>
@@ -1802,5 +1802,6 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
