@@ -828,6 +828,7 @@ td.actions-cell {
 .btn-remove-row {
     background: none;
     border: none;
+    /* Changed bin symbol to X symbol */
     color: var(--gails-grey-mid);
     cursor: pointer;
     border-radius: 50%;
@@ -841,13 +842,18 @@ td.actions-cell {
     transition: all 0.2s ease;
 }
 
+/* Change icon from trash to X */
+.btn-remove-row .bi-trash-fill::before {
+    content: "\f62a"; /* Bootstrap Icons: x-lg */
+}
+
 tr:hover .btn-remove-row {
     opacity: 1; /* Show on row hover */
 }
 
 .btn-remove-row:hover {
     background-color: var(--gails-red-light);
-    color: var(--gails-red);
+    color: var(--gails-red); /* X turns red on hover */
 }
 
 .event-item:hover .btn-remove-event {
