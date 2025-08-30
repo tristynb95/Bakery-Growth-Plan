@@ -1673,7 +1673,7 @@ eventTypes.forEach(type => {
     let element;
     if (type === 'birthday') {
         element = document.createElement('i');
-        element.className = 'bi bi-cake2-fill';
+        element.className = 'bi bi-cake2';
     } else {
         element = document.createElement('div');
         element.className = `event-dot option-dot ${type}`;
@@ -2306,6 +2306,7 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
