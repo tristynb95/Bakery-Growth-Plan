@@ -1636,10 +1636,7 @@ function runApp(app) {
             const dayContent = document.createElement('textarea');
             dayContent.classList.add('calendar-day-content');
             dayContent.value = appState.calendar.data[dateKey] || '';
-            dayContent.addEventListener('blur', (e) => {
-                e.target.scrollTop = 0;
-            });
-
+            
             dayCell.appendChild(dayContent);
             DOMElements.calendarGrid.appendChild(dayCell);
         }
@@ -1949,6 +1946,14 @@ function runApp(app) {
         const dayCell = e.target.closest('.calendar-day');
         if (dayCell && dayCell.dataset.dateKey) {
             openDayDetailModal(dayCell.dataset.dateKey);
+        }
+    });
+
+    DOMElements.calendarGrid.addEventListener('input', (e) => {
+        const dayCell = e.target.closest('.calendar-day');
+        if (dayCell && dayCell.dataset.dateKey) {
+            appState.calendar.data[dayCell.dataset.dateKey] = e.target.value;
+            saveCalendarData();
         }
     });
     DOMElements.dayDetailCloseBtn.addEventListener('click', () => {
