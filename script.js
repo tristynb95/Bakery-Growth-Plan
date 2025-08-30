@@ -85,6 +85,11 @@ function runApp(app) {
         calendarPrevMonthBtn: document.getElementById('calendar-prev-month-btn'),
         calendarNextMonthBtn: document.getElementById('calendar-next-month-btn'),
         calendarCloseBtn: document.getElementById('calendar-close-btn'),
+        dayDetailModal: document.getElementById('day-detail-modal'),
+        dayDetailTitle: document.getElementById('day-detail-title'),
+        dayDetailTextarea: document.getElementById('day-detail-textarea'),
+        dayDetailSaveBtn: document.getElementById('day-detail-save-btn'),
+        dayDetailCloseBtn: document.getElementById('day-detail-close-btn'),
     };
 
     const appState = {
@@ -1595,7 +1600,7 @@ function runApp(app) {
         DOMElements.calendarMonthYear.textContent = date.toLocaleString('en-GB', { month: 'long', year: 'numeric' });
 
         const firstDayOfMonth = new Date(year, month, 1);
-        const firstDayOfWeek = firstDayOfMonth.getDay(); // 0=Sun, 1=Mon...
+        const firstDayOfWeek = firstDayOfMonth.getDay(); 
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
         ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
@@ -1614,6 +1619,8 @@ function runApp(app) {
         for (let i = 1; i <= daysInMonth; i++) {
             const dayCell = document.createElement('div');
             dayCell.classList.add('calendar-day');
+            const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            dayCell.dataset.dateKey = dateKey;
 
             if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
                 dayCell.classList.add('current-day');
@@ -1626,11 +1633,9 @@ function runApp(app) {
             
             const dayContent = document.createElement('textarea');
             dayContent.classList.add('calendar-day-content');
-            const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
             dayContent.value = appState.calendar.data[dateKey] || '';
-            dayContent.addEventListener('input', (e) => {
-                appState.calendar.data[dateKey] = e.target.value;
-                saveCalendarData();
+            dayContent.addEventListener('blur', (e) => {
+                e.target.scrollTop = 0;
             });
 
             dayCell.appendChild(dayContent);
@@ -1666,6 +1671,36 @@ function runApp(app) {
             });
         }, 1000); // Debounce saving by 1 second
     }
+
+    function openDayDetailModal(dateKey) {
+        const [year, month, day] = dateKey.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        const formattedDate = date.toLocaleDateString('en-GB', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        DOMElements.dayDetailTitle.textContent = formattedDate;
+        DOMElements.dayDetailTextarea.value = appState.calendar.data[dateKey] || '';
+        DOMElements.dayDetailModal.classList.remove('hidden');
+        DOMElements.dayDetailTextarea.focus();
+        DOMElements.dayDetailSaveBtn.onclick = () => {
+            const newContent = DOMElements.dayDetailTextarea.value;
+            appState.calendar.data[dateKey] = newContent;
+            saveCalendarData();
+            
+            // Update the main calendar view
+            const dayTextarea = DOMElements.calendarGrid.querySelector(`[data-date-key="${dateKey}"] .calendar-day-content`);
+            if (dayTextarea) {
+                dayTextarea.value = newContent;
+            }
+
+            DOMElements.dayDetailModal.classList.add('hidden');
+        };
+    }
+
     // --- EVENT LISTENERS ---
     const handleLoginAttempt = () => {
         DOMElements.authError.style.display = 'none';
@@ -1907,6 +1942,15 @@ function runApp(app) {
     DOMElements.calendarNextMonthBtn.addEventListener('click', () => {
         appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() + 1);
         renderCalendar();
+    });
+    DOMElements.calendarGrid.addEventListener('dblclick', (e) => {
+        const dayCell = e.target.closest('.calendar-day');
+        if (dayCell && dayCell.dataset.dateKey) {
+            openDayDetailModal(dayCell.dataset.dateKey);
+        }
+    });
+    DOMElements.dayDetailCloseBtn.addEventListener('click', () => {
+        DOMElements.dayDetailModal.classList.add('hidden');
     });
 }
 
