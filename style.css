@@ -1,5 +1,5 @@
 /* Gail's Bakery 30-60-90 Plan Stylesheet */
-/* v10.5 - Redesigned Calendar Modal */
+/* v10.6 - Responsive Calendar Modal */
 
 /* 1. Root Variables & Base Styles
 -------------------------------------------------- */
@@ -314,20 +314,20 @@ td.actions-cell { text-align: center; vertical-align: middle; width: 50px; }
 .sortable-header[data-sort-dir="desc"] .sort-icon { opacity: 1; color: var(--gails-red); }
 .sortable-header[data-sort-dir="desc"] .sort-icon::before { content: '\F229'; }
 
-/* 12. Calendar Styles (Redesigned)
+/* 12. Calendar Styles (Redesigned & Responsive)
 -------------------------------------------------- */
 .calendar-fab { position: fixed; bottom: 2rem; right: 2rem; width: 3.5rem; height: 3.5rem; border-radius: 50%; font-size: 1.5rem; z-index: 998; box-shadow: var(--shadow-lg); }
 .calendar-fab .bi { margin: 0; }
-.calendar-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1010; padding: 2rem; }
+.calendar-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1010; padding: 1rem; }
 .calendar-modal-content { background-color: var(--gails-white); border-radius: 1.5rem; width: 100%; max-width: 1200px; height: 90vh; max-height: 800px; display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; }
 .calendar-main-grid { display: grid; grid-template-columns: 2fr 1fr; height: 100%; width: 100%; }
 .calendar-grid-container { display: flex; flex-direction: column; padding: 1.5rem; border-right: 1px solid var(--gails-grey-mid); }
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-shrink: 0; }
 .calendar-nav-container { display: flex; gap: 0.5rem; }
 #calendar-month-year { font-family: 'Poppins', sans-serif; font-size: 1.5rem; }
-.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); flex-grow: 1; gap: 0.5rem; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); flex-grow: 1; gap: 4px; }
 .calendar-day-header { text-align: center; font-weight: 600; color: var(--gails-text-secondary); font-size: 0.875rem; }
-.calendar-day { border-radius: 0.75rem; padding: 0.5rem; cursor: pointer; transition: background-color 0.2s ease; border: 2px solid transparent; }
+.calendar-day { border-radius: 0.75rem; padding: 0.5rem; cursor: pointer; transition: background-color 0.2s ease; border: 2px solid transparent; display: flex; flex-direction: column; }
 .calendar-day:hover { background-color: var(--gails-grey-light); }
 .calendar-day.selected { background-color: var(--gails-red-light); border-color: var(--gails-red); }
 .calendar-day-number { font-weight: 600; text-align: right; margin-bottom: 0.25rem; }
@@ -359,3 +359,19 @@ td.actions-cell { text-align: center; vertical-align: middle; width: 50px; }
 .event-type-btn[data-type="personal"], .event-type-badge.personal { background-color: #8B5CF6; }
 .day-detail-footer { padding: 1.5rem; border-top: 1px solid var(--gails-grey-mid); background-color: var(--gails-white); flex-shrink: 0; }
 .event-item:hover .btn-remove-event { opacity: 1; }
+
+/* Calendar Responsive Styles */
+@media (max-width: 1024px) {
+    .calendar-modal-content {
+        height: 95vh;
+        max-height: none;
+    }
+    .calendar-main-grid {
+        grid-template-columns: 1fr; /* Stack the columns */
+        overflow-y: auto; /* Allow the whole container to scroll */
+    }
+    .calendar-grid-container {
+        border-right: none;
+        border-bottom: 1px solid var(--gails-grey-mid); /* Add a separator */
+    }
+}
