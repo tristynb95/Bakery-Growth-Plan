@@ -78,6 +78,13 @@ function runApp(app) {
         termsAgreeCheckbox: document.getElementById('terms-agree'),
         createAccountBtn: document.getElementById('create-account-btn'),
         registerError: document.getElementById('register-error'),
+        calendarFab: document.getElementById('calendar-fab'),
+        calendarModal: document.getElementById('calendar-modal'),
+        calendarGrid: document.getElementById('calendar-grid'),
+        calendarMonthYear: document.getElementById('calendar-month-year'),
+        calendarPrevMonthBtn: document.getElementById('calendar-prev-month-btn'),
+        calendarNextMonthBtn: document.getElementById('calendar-next-month-btn'),
+        calendarCloseBtn: document.getElementById('calendar-close-btn'),
     };
 
     const appState = {
@@ -88,6 +95,10 @@ function runApp(app) {
         saveTimeout: null,
         sessionTimeout: null,
         planUnsubscribe: null,
+        calendar: {
+            currentDate: new Date(),
+            data: {},
+        }
     };
     
     let undoStack = [];
@@ -482,6 +493,7 @@ function runApp(app) {
         DOMElements.dashboardView.classList.add('hidden');
         DOMElements.appView.classList.remove('hidden');
         switchView('vision');
+        DOMElements.calendarFab.classList.remove('hidden');
     }
 
     function handleBackToDashboard() {
@@ -495,6 +507,7 @@ function runApp(app) {
         appState.currentPlanId = null;
         DOMElements.appView.classList.add('hidden');
         DOMElements.dashboardView.classList.remove('hidden');
+        DOMElements.calendarFab.classList.add('hidden');
         renderDashboard();
     }
 
@@ -1571,7 +1584,69 @@ function runApp(app) {
                 break;
         }
     }
+    // --- CALENDAR LOGIC ---
+    function renderCalendar() {
+        DOMElements.calendarGrid.innerHTML = '';
+        const date = appState.calendar.currentDate;
+        const month = date.getMonth();
+        const year = date.getFullYear();
 
+        DOMElements.calendarMonthYear.textContent = date.toLocaleString('en-GB', { month: 'long', year: 'numeric' });
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        // Add weekday headers
+        ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.classList.add('calendar-day-header', 'text-center', 'font-bold');
+            dayHeader.textContent = day;
+            DOMElements.calendarGrid.appendChild(dayHeader);
+        });
+        
+        for (let i = 0; i < firstDay; i++) {
+            const emptyCell = document.createElement('div');
+            DOMElements.calendarGrid.appendChild(emptyCell);
+        }
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dayCell = document.createElement('div');
+            dayCell.classList.add('calendar-day');
+            
+            const dayHeader = document.createElement('div');
+            dayHeader.classList.add('calendar-day-header');
+            dayHeader.textContent = i;
+            dayCell.appendChild(dayHeader);
+            
+            const dayContent = document.createElement('textarea');
+            dayContent.classList.add('calendar-day-content');
+            const dateKey = `${year}-${month}-${i}`;
+            dayContent.value = appState.calendar.data[dateKey] || '';
+            dayContent.addEventListener('input', (e) => {
+                appState.calendar.data[dateKey] = e.target.value;
+                saveCalendarData();
+            });
+
+            dayCell.appendChild(dayContent);
+            DOMElements.calendarGrid.appendChild(dayCell);
+        }
+    }
+
+    async function loadCalendarData() {
+        if (!appState.currentUser || !appState.currentPlanId) return;
+        const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
+        const doc = await calendarRef.get();
+        if (doc.exists) {
+            appState.calendar.data = doc.data();
+        }
+        renderCalendar();
+    }
+
+    function saveCalendarData() {
+        if (!appState.currentUser || !appState.currentPlanId) return;
+        const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
+        calendarRef.set(appState.calendar.data, { merge: true });
+    }
     // --- EVENT LISTENERS ---
     const handleLoginAttempt = () => {
         DOMElements.authError.style.display = 'none';
@@ -1799,12 +1874,23 @@ function runApp(app) {
         localStorage.setItem('gails_cookie_consent', 'false');
         cookieBanner.classList.add('hidden');
     });
+    DOMElements.calendarFab.addEventListener('click', () => {
+        DOMElements.calendarModal.classList.remove('hidden');
+        loadCalendarData();
+    });
+    DOMElements.calendarCloseBtn.addEventListener('click', () => {
+        DOMElements.calendarModal.classList.add('hidden');
+    });
+    DOMElements.calendarPrevMonthBtn.addEventListener('click', () => {
+        appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() - 1);
+        renderCalendar();
+    });
+    DOMElements.calendarNextMonthBtn.addEventListener('click', () => {
+        appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() + 1);
+        renderCalendar();
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
