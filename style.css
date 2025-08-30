@@ -1376,27 +1376,30 @@ tr:hover .btn-remove-row {
     border-top: 1px solid var(--gails-grey-light);
 }
 
-/* 39. Final Compact Event Form & Custom Dropdown
+/* 39. Final Polished Event Form
 -------------------------------------------------- */
 
-/* Compact modifier for the whole form */
+/* Main form container */
 .add-event-form-redesigned.is-compact {
-    gap: 0.85rem; /* Reduced gap between sections */
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem; /* Increased gap for better spacing */
 }
 
 .add-event-form-redesigned.is-compact .form-section-label {
-    font-size: 0.75rem; /* Smaller label font */
+    font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
     color: var(--gails-text-secondary);
-    margin-bottom: 0.4rem; /* Reduced space below label */
+    margin-bottom: 0.5rem;
 }
 
+/* Slightly larger, more legible text in inputs */
 .add-event-form-redesigned.is-compact .form-input,
 .add-event-form-redesigned.is-compact .dropdown-selected {
-    font-size: 0.9rem; /* Smaller input text */
-    padding-top: 0.6rem;
-    padding-bottom: 0.6rem;
+    font-size: 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
 }
 
 /* This makes the "Notes" section take up all remaining vertical space */
@@ -1407,20 +1410,21 @@ tr:hover .btn-remove-row {
 }
 .form-section-fill textarea {
     flex-grow: 1;
-    min-height: 70px; /* Set a minimum height */
+    min-height: 120px; /* Increased minimum height */
 }
 
-/* Final tweaks to the buttons */
+/* Bolder, more prominent action buttons */
 .is-compact .form-actions {
-    padding-top: 0.6rem;
+    padding-top: 1rem;
     margin-top: 0;
+    border-top: 1px solid var(--gails-grey-light);
 }
 .is-compact .btn {
-    padding: 0.5rem 1.15rem; /* Smaller buttons */
-    font-size: 0.9rem;
+    padding: 0.75rem 1.5rem; /* Larger buttons */
+    font-size: 1rem;
 }
 
-/* Custom Dropdown Styling (with compact adjustments) */
+/* Custom Dropdown Styling (with updated sizing) */
 .custom-dropdown {
     position: relative;
 }
@@ -1472,7 +1476,7 @@ tr:hover .btn-remove-row {
     align-items: center;
     padding: 0.75rem 1rem;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 .dropdown-option:hover {
     background-color: var(--gails-grey-light);
@@ -1494,8 +1498,6 @@ tr:hover .btn-remove-row {
 .option-dot.operations, .selected-dot.operations { background-color: #F59E0B; }
 .option-dot.finance, .selected-dot.finance { background-color: #10B981; }
 .option-dot.personal, .selected-dot.personal { background-color: #8B5CF6; }
-
-/* In style.css, add this at the end */
 
 /* 40. Event Panel Header Actions
 -------------------------------------------------- */
