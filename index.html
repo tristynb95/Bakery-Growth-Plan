@@ -276,9 +276,12 @@
                 </div>
     
                 <div id="day-detail-view" class="day-detail-container">
-                    <div class="day-detail-header">
+                    <div id="day-detail-header" class="day-detail-header">
                         <h3 id="day-detail-title" class="font-bold text-lg">Select a day</h3>
-                        <button id="calendar-close-btn" class="btn btn-secondary"><i class="bi bi-x-lg"></i></button>
+                        <div class="day-detail-actions">
+                            <button id="add-event-btn" class="btn btn-secondary"><i class="bi bi-plus-lg"></i> Add Event</button>
+                            <button id="calendar-close-btn" class="btn btn-secondary"><i class="bi bi-x-lg"></i></button>
+                        </div>
                     </div>
                     <div id="day-detail-content" class="day-detail-content">
                         <div id="day-event-list" class="day-event-list">
