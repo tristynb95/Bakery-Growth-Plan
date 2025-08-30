@@ -1106,6 +1106,12 @@ tr:hover .btn-remove-row {
     margin-top: auto;
 }
 
+/* Add this new rule below .event-dots-container */
+.event-dots-container .bi-cake2-fill {
+    font-size: 9px;
+    color: #D97706;
+}
+
 .event-dot {
     width: 8px;
     height: 8px;
@@ -1535,6 +1541,32 @@ tr:hover .btn-remove-row {
     background-color: var(--gails-grey-mid); /* Default color */
 }
 
+/* --- ADD THESE NEW RULES FOR CATEGORY ICONS --- */
+.selected-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px; /* Matches dot size */
+    height: 12px; /* Matches dot size */
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+
+.option-icon {
+    width: 14px; /* Slightly larger for better visual weight */
+    height: 14px;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+    text-align: center;
+    font-size: 14px; /* Ensure icon fills the space */
+    line-height: 1; /* Align icon vertically */
+}
+
+/* Hide the dot when a birthday is selected */
+.selected-icon-container.has-icon .selected-dot {
+    display: none;
+}
+
 /* --- People & Development (Greens) --- */
 .option-dot.one-to-one, .selected-dot.one-to-one { background-color: #10B981; }
 .option-dot.cross-training, .selected-dot.cross-training { background-color: #34D399; }
@@ -1554,7 +1586,7 @@ tr:hover .btn-remove-row {
 .option-dot.rise-with-gails, .selected-dot.rise-with-gails { background-color: var(--gails-red); }
 
 /* --- Celebrations & Milestones (Yellows/Oranges) --- */
-.option-dot.birthday, .selected-dot.birthday { background-color: #FBBF24; }
+.option-icon.birthday { color: #D97706; }
 .option-dot.coffee-cake, .selected-dot.coffee-cake { background-color: #F59E0B; }
 .option-dot.probation-end, .selected-dot.probation-end { background-color: #FCD34D; }
 .option-dot.quarterly-awards, .selected-dot.quarterly-awards { background-color: #fbbf24; }
