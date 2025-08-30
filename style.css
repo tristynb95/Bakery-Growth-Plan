@@ -1206,25 +1206,3 @@ tr:hover .btn-remove-row {
 .event-item:hover .btn-remove-event {
     opacity: 1;
 }
-
-#add-event-form {
-    padding: 0.5rem;
-}
-
-#add-event-form label:not(.flex) {
-    display: block;
-}
-
-#add-event-form .form-input {
-    font-size: 1rem;
-}
-
-#add-event-form input[type="time"].form-input {
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-}
-
-#add-event-form .event-type-btn {
-    padding: 0.6rem;
-    font-size: 0.875rem;
-}
