@@ -1670,10 +1670,15 @@ function runApp(app) {
             if (Array.isArray(dayEvents)) {
                 const eventTypes = new Set(dayEvents.map(e => e.type));
 eventTypes.forEach(type => {
-    const dot = document.createElement('div');
-    // MODIFIED: This now leverages the new CSS rules for all categories
-    dot.className = `event-dot option-dot ${type}`; 
-    dotsContainer.appendChild(dot);
+    let element;
+    if (type === 'birthday') {
+        element = document.createElement('i');
+        element.className = 'bi bi-cake2-fill';
+    } else {
+        element = document.createElement('div');
+        element.className = `event-dot option-dot ${type}`;
+    }
+    dotsContainer.appendChild(element);
 });
             }
             
@@ -2301,6 +2306,7 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
