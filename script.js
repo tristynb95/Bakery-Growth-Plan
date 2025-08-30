@@ -1783,7 +1783,20 @@ function runApp(app) {
     
         const eventTypeSelector = document.getElementById('event-type-selector');
         eventTypeSelector.querySelector('.selected')?.classList.remove('selected');
-        eventTypeSelector.querySelector(`[data-type="${event.type}"]`)?.classList.add('selected');
+
+        // ADD THESE LINES
+const optionToSelect = categoryDropdown.querySelector(`.dropdown-option[data-type="${event.type}"]`);
+if (optionToSelect) {
+    const type = optionToSelect.dataset.type;
+    const selectedDot = categoryDropdown.querySelector('.selected-dot');
+    const selectedText = categoryDropdown.querySelector('.selected-text');
+    const hiddenInput = document.getElementById('event-type-input');
+
+    selectedDot.className = `selected-dot ${type}`;
+    selectedText.textContent = optionToSelect.textContent.trim();
+    selectedText.classList.remove('is-placeholder');
+    hiddenInput.value = type;
+}
     }
 
     function setupCalendarEventListeners() {
@@ -1917,8 +1930,8 @@ function runApp(app) {
 
         if (saveEventBtn) saveEventBtn.addEventListener('click', async () => {
             const title = document.getElementById('event-title-input').value.trim();
-            const typeButton = eventTypeSelector ? eventTypeSelector.querySelector('.selected') : null;
-            if (!title || !typeButton) {
+            const eventType = document.getElementById('event-type-input').value;
+            if (!title || !eventType) {
                 alert('Please provide a title and select an event type.');
                 return;
             }
@@ -1962,7 +1975,7 @@ if (categoryDropdown) {
                 allDay: isAllDay,
                 timeFrom: isAllDay ? '' : document.getElementById('event-time-from-input').value,
                 timeTo: isAllDay ? '' : document.getElementById('event-time-to-input').value,
-                type: typeButton.dataset.type,
+                type: eventType,
                 description: document.getElementById('event-description-input').value.trim(),
             };
 
@@ -2225,6 +2238,7 @@ if (categoryDropdown) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
