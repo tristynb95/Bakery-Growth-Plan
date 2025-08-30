@@ -1764,6 +1764,8 @@ function runApp(app) {
     
         document.getElementById('day-event-list').classList.add('hidden');
         document.getElementById('add-event-btn').classList.add('hidden');
+        document.getElementById('edit-event-actions').classList.remove('hidden');
+        document.getElementById('edit-event-actions').classList.add('flex');
         document.getElementById('add-event-form').classList.remove('hidden');
     
         document.getElementById('add-event-form-title').textContent = 'Edit Event';
@@ -1926,30 +1928,71 @@ if (optionToSelect) {
         });
 
         if (addEventBtn) addEventBtn.addEventListener('click', () => {
-            appState.calendar.editingEventIndex = null;
-            if (dayEventList) dayEventList.classList.add('hidden');
-            addEventBtn.classList.add('hidden');
-            const form = document.getElementById('add-event-form');
-            if(form) form.classList.remove('hidden');
-            
-            const titleInput = document.getElementById('event-title-input');
-            const allDayToggle = document.getElementById('event-all-day-toggle');
-            const timeContainer = document.getElementById('event-time-inputs-container');
-            if(titleInput) titleInput.value = '';
-            if(allDayToggle) allDayToggle.checked = false;
-            if(timeContainer) timeContainer.classList.remove('is-disabled');
-            const fromInput = document.getElementById('event-time-from-input');
-            const toInput = document.getElementById('event-time-to-input');
-            const descInput = document.getElementById('event-description-input');
-            if(fromInput) fromInput.value = '';
-            if(toInput) toInput.value = '';
-            if(descInput) descInput.value = '';
-            if(eventTypeSelector) eventTypeSelector.querySelector('.selected')?.classList.remove('selected');
-            const formTitle = document.getElementById('add-event-form-title');
-            const saveBtn = document.getElementById('save-event-btn');
-            if(formTitle) formTitle.textContent = 'Add New Event';
-            if(saveBtn) saveBtn.textContent = 'Save Event';
-        });
+    appState.calendar.editingEventIndex = null;
+    if (dayEventList) dayEventList.classList.add('hidden');
+
+    // Hide the "Add Event" button and show the "Cancel/Save" buttons
+    addEventBtn.classList.add('hidden');
+    document.getElementById('edit-event-actions').classList.remove('hidden');
+    document.getElementById('edit-event-actions').classList.add('flex');
+
+    const form = document.getElementById('add-event-form');
+    if(form) form.classList.remove('hidden');
+
+    const titleInput = document.getElementById('event-title-input');
+    const allDayToggle = document.getElementById('event-all-day-toggle');
+    const timeContainer = document.getElementById('event-time-inputs-container');
+    if(titleInput) titleInput.value = '';
+    if(allDayToggle) allDayToggle.checked = false;
+    if(timeContainer) timeContainer.classList.remove('hidden');
+
+    const fromInput = document.getElementById('event-time-from-input');
+    const toInput = document.getElementById('event-time-to-input');
+    const descInput = document.getElementById('event-description-input');
+    if(fromInput) fromInput.value = '';
+    if(toInput) toInput.value = '';
+    if(descInput) descInput.value = '';
+
+    // Reset the custom dropdown
+    const categoryDropdown = document.getElementById('category-dropdown');
+    if(categoryDropdown) {
+        const selectedDot = categoryDropdown.querySelector('.selected-dot');
+        const selectedText = categoryDropdown.querySelector('.selected-text');
+        const hiddenInput = document.getElementById('event-type-input');
+        selectedDot.className = 'selected-dot';
+        selectedText.textContent = 'Select a category...';
+        selectedText.classList.add('is-placeholder');
+        hiddenInput.value = '';
+    }
+
+    const formTitle = document.getElementById('add-event-form-title');
+    const saveBtn = document.getElementById('save-event-btn');
+    if(formTitle) formTitle.textContent = 'Add New Event';
+    if(saveBtn) saveBtn.textContent = 'Save Event';
+});
+Find the cancelEventBtn.addEventListener('click', ...) function (around line 1188). Replace the entire function with this new version:
+
+JavaScript
+
+// REPLACE the existing cancelEventBtn listener with this
+
+if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => {
+    appState.calendar.editingEventIndex = null;
+    const form = document.getElementById('add-event-form');
+    if (form) form.classList.add('hidden');
+
+    // Show the "Add Event" button and hide the "Cancel/Save" buttons
+    if (addEventBtn) addEventBtn.classList.remove('hidden');
+    const editActions = document.getElementById('edit-event-actions');
+    editActions.classList.add('hidden');
+    editActions.classList.remove('flex');
+
+    if (dayEventList) dayEventList.classList.remove('hidden');
+    const formTitle = document.getElementById('add-event-form-title');
+    const saveBtn = document.getElementById('save-event-btn');
+    if(formTitle) formTitle.textContent = 'Add New Event';
+    if(saveBtn) saveBtn.textContent = 'Save Event';
+});
 
         if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => {
             appState.calendar.editingEventIndex = null;
@@ -2241,6 +2284,7 @@ if (optionToSelect) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
