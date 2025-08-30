@@ -1218,7 +1218,7 @@ tr:hover .btn-remove-row {
 .add-event-form-redesigned {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem; /* Consistent spacing between sections */
+    gap: 1rem; /* Consistent spacing between sections */
     height: 100%; /* Ensure it fills the parent */
     padding: 1rem;
 }
