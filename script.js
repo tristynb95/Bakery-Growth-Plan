@@ -1759,45 +1759,50 @@ function runApp(app) {
     }
 
     function showEditEventForm(index) {
-        appState.calendar.editingEventIndex = index;
-        const event = appState.calendar.data[selectedDateKey][index];
+    appState.calendar.editingEventIndex = index;
+    const event = appState.calendar.data[selectedDateKey][index];
+
+    // Hide event list and show the form
+    document.getElementById('day-event-list').classList.add('hidden');
+    document.getElementById('add-event-form').classList.remove('hidden');
+
+    // --- Button Visibility Logic ---
+    document.getElementById('add-event-btn').classList.add('hidden');
+    const editActions = document.getElementById('edit-event-actions');
+    editActions.classList.remove('hidden');
+    editActions.classList.add('flex');
+    // ----------------------------
+
+    // Update form titles
+    document.getElementById('add-event-form-title').textContent = 'Edit Event';
+    document.getElementById('save-event-btn').textContent = 'Update Event';
+
+    // Populate form fields
+    const allDayCheckbox = document.getElementById('event-all-day-toggle');
+    const timeInputsContainer = document.getElementById('event-time-inputs-container');
     
-        document.getElementById('day-event-list').classList.add('hidden');
-        document.getElementById('add-event-btn').classList.add('hidden');
-        document.getElementById('edit-event-actions').classList.remove('hidden');
-        document.getElementById('edit-event-actions').classList.add('flex');
-        document.getElementById('add-event-form').classList.remove('hidden');
-    
-        document.getElementById('add-event-form-title').textContent = 'Edit Event';
-        document.getElementById('save-event-btn').textContent = 'Update Event';
-    
-        const allDayCheckbox = document.getElementById('event-all-day-toggle');
-        const timeInputsContainer = document.getElementById('event-time-inputs-container');
-        
-        allDayCheckbox.addEventListener('change', () => {
+    allDayCheckbox.checked = event.allDay || false;
     timeInputsContainer.classList.toggle('hidden', allDayCheckbox.checked);
-});
 
-        document.getElementById('event-title-input').value = event.title;
-        document.getElementById('event-time-from-input').value = event.timeFrom || '';
-        document.getElementById('event-time-to-input').value = event.timeTo || '';
-        document.getElementById('event-description-input').value = event.description || '';
-    
-        const eventTypeSelector = document.getElementById('event-type-selector');
-        eventTypeSelector.querySelector('.selected')?.classList.remove('selected');
+    document.getElementById('event-title-input').value = event.title;
+    document.getElementById('event-time-from-input').value = event.timeFrom || '';
+    document.getElementById('event-time-to-input').value = event.timeTo || '';
+    document.getElementById('event-description-input').value = event.description || '';
 
-        // ADD THESE LINES
-const optionToSelect = categoryDropdown.querySelector(`.dropdown-option[data-type="${event.type}"]`);
-if (optionToSelect) {
-    const type = optionToSelect.dataset.type;
-    const selectedDot = categoryDropdown.querySelector('.selected-dot');
-    const selectedText = categoryDropdown.querySelector('.selected-text');
-    const hiddenInput = document.getElementById('event-type-input');
-
-    selectedDot.className = `selected-dot ${type}`;
-    selectedText.textContent = optionToSelect.textContent.trim();
-    selectedText.classList.remove('is-placeholder');
-    hiddenInput.value = type;
+    // Set the custom dropdown value
+    const categoryDropdown = document.getElementById('category-dropdown');
+    const optionToSelect = categoryDropdown.querySelector(`.dropdown-option[data-type="${event.type}"]`);
+    if (optionToSelect) {
+        const type = optionToSelect.dataset.type;
+        const selectedDot = categoryDropdown.querySelector('.selected-dot');
+        const selectedText = categoryDropdown.querySelector('.selected-text');
+        const hiddenInput = document.getElementById('event-type-input');
+        
+        selectedDot.className = `selected-dot ${type}`;
+        selectedText.textContent = optionToSelect.textContent.trim();
+        selectedText.classList.remove('is-placeholder');
+        hiddenInput.value = type;
+    }
 }
     }
 
@@ -2284,6 +2289,7 @@ if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
