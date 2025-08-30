@@ -1759,115 +1759,103 @@ function runApp(app) {
     }
 
     function showEditEventForm(index) {
-    appState.calendar.editingEventIndex = index;
-    const event = appState.calendar.data[selectedDateKey][index];
-
-    // Hide event list and show the form
-    document.getElementById('day-event-list').classList.add('hidden');
-    document.getElementById('add-event-form').classList.remove('hidden');
-
-    // --- Button Visibility Logic ---
-    document.getElementById('add-event-btn').classList.add('hidden');
-    const editActions = document.getElementById('edit-event-actions');
-    editActions.classList.remove('hidden');
-    editActions.classList.add('flex');
-    // ----------------------------
-
-    // Update form titles
-    document.getElementById('add-event-form-title').textContent = 'Edit Event';
-    document.getElementById('save-event-btn').textContent = 'Update Event';
-
-    // Populate form fields
-    const allDayCheckbox = document.getElementById('event-all-day-toggle');
-    const timeInputsContainer = document.getElementById('event-time-inputs-container');
+        appState.calendar.editingEventIndex = index;
+        const event = appState.calendar.data[selectedDateKey][index];
     
-    allDayCheckbox.checked = event.allDay || false;
-    timeInputsContainer.classList.toggle('hidden', allDayCheckbox.checked);
+        document.getElementById('day-event-list').classList.add('hidden');
+        document.getElementById('add-event-form').classList.remove('hidden');
 
-    document.getElementById('event-title-input').value = event.title;
-    document.getElementById('event-time-from-input').value = event.timeFrom || '';
-    document.getElementById('event-time-to-input').value = event.timeTo || '';
-    document.getElementById('event-description-input').value = event.description || '';
-
-    // Set the custom dropdown value
-    const categoryDropdown = document.getElementById('category-dropdown');
-    const optionToSelect = categoryDropdown.querySelector(`.dropdown-option[data-type="${event.type}"]`);
-    if (optionToSelect) {
-        const type = optionToSelect.dataset.type;
-        const selectedDot = categoryDropdown.querySelector('.selected-dot');
-        const selectedText = categoryDropdown.querySelector('.selected-text');
-        const hiddenInput = document.getElementById('event-type-input');
+        document.getElementById('add-event-btn').classList.add('hidden');
+        const editActions = document.getElementById('edit-event-actions');
+        editActions.classList.remove('hidden');
+        editActions.classList.add('flex');
+    
+        document.getElementById('add-event-form-title').textContent = 'Edit Event';
+        document.getElementById('save-event-btn').textContent = 'Update Event';
+    
+        const allDayCheckbox = document.getElementById('event-all-day-toggle');
+        const timeInputsContainer = document.getElementById('event-time-inputs-container');
         
-        selectedDot.className = `selected-dot ${type}`;
-        selectedText.textContent = optionToSelect.textContent.trim();
-        selectedText.classList.remove('is-placeholder');
-        hiddenInput.value = type;
-    }
-}
+        allDayCheckbox.checked = event.allDay || false;
+        timeInputsContainer.classList.toggle('hidden', allDayCheckbox.checked);
+
+        document.getElementById('event-title-input').value = event.title;
+        document.getElementById('event-time-from-input').value = event.timeFrom || '';
+        document.getElementById('event-time-to-input').value = event.timeTo || '';
+        document.getElementById('event-description-input').value = event.description || '';
+    
+        const categoryDropdown = document.getElementById('category-dropdown');
+        const optionToSelect = categoryDropdown.querySelector(`.dropdown-option[data-type="${event.type}"]`);
+        if (optionToSelect) {
+            const type = optionToSelect.dataset.type;
+            const selectedDot = categoryDropdown.querySelector('.selected-dot');
+            const selectedText = categoryDropdown.querySelector('.selected-text');
+            const hiddenInput = document.getElementById('event-type-input');
+            
+            selectedDot.className = `selected-dot ${type}`;
+            selectedText.textContent = optionToSelect.textContent.trim();
+            selectedText.classList.remove('is-placeholder');
+            hiddenInput.value = type;
+        }
     }
 
     function setupCalendarEventListeners() {
-    const calendarFab = document.getElementById('calendar-fab');
-    const calendarModal = document.getElementById('calendar-modal');
-    const calendarCloseBtn = document.getElementById('calendar-close-btn');
-    const calendarPrevMonthBtn = document.getElementById('calendar-prev-month-btn');
-    const calendarNextMonthBtn = document.getElementById('calendar-next-month-btn');
-    const calendarTodayBtn = document.getElementById('calendar-today-btn');
-    const calendarGrid = document.getElementById('calendar-grid');
-    const addEventBtn = document.getElementById('add-event-btn');
-    const cancelEventBtn = document.getElementById('cancel-event-btn');
-    const saveEventBtn = document.getElementById('save-event-btn');
-    const eventTypeSelector = document.getElementById('event-type-selector');
-    const allDayCheckbox = document.getElementById('event-all-day-toggle');
-    const timeInputsContainer = document.getElementById('event-time-inputs-container');
-    const dayEventList = document.getElementById('day-event-list');
+        const calendarFab = document.getElementById('calendar-fab');
+        const calendarModal = document.getElementById('calendar-modal');
+        const calendarCloseBtn = document.getElementById('calendar-close-btn');
+        const calendarPrevMonthBtn = document.getElementById('calendar-prev-month-btn');
+        const calendarNextMonthBtn = document.getElementById('calendar-next-month-btn');
+        const calendarTodayBtn = document.getElementById('calendar-today-btn');
+        const calendarGrid = document.getElementById('calendar-grid');
+        const addEventBtn = document.getElementById('add-event-btn');
+        const cancelEventBtn = document.getElementById('cancel-event-btn');
+        const saveEventBtn = document.getElementById('save-event-btn');
+        const allDayCheckbox = document.getElementById('event-all-day-toggle');
+        const timeInputsContainer = document.getElementById('event-time-inputs-container');
+        const dayEventList = document.getElementById('day-event-list');
+        const categoryDropdown = document.getElementById('category-dropdown');
 
-    // Make sure this guard clause is at the top
-    if (!calendarFab || !calendarModal || !allDayCheckbox) {
-        console.warn("Calendar UI elements not found. Skipping event listener setup.");
-        return;
-    }
-
-    // Your new code from the prompt fits perfectly here
-    const categoryDropdown = document.getElementById('category-dropdown');
-    if (categoryDropdown) {
-    const selectedDisplay = categoryDropdown.querySelector('.dropdown-selected');
-    const optionsContainer = categoryDropdown.querySelector('.dropdown-options');
-    const hiddenInput = document.getElementById('event-type-input');
-
-    selectedDisplay.addEventListener('click', () => {
-        categoryDropdown.classList.toggle('open');
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!categoryDropdown.contains(e.target)) {
-            categoryDropdown.classList.remove('open');
+        if (!calendarFab || !calendarModal || !allDayCheckbox) {
+            console.warn("Calendar UI elements not found. Skipping event listener setup.");
+            return;
         }
-    });
-
-    optionsContainer.addEventListener('click', (e) => {
-        const option = e.target.closest('.dropdown-option');
-        if (option) {
-            const type = option.dataset.type;
-            const selectedDot = selectedDisplay.querySelector('.selected-dot');
-            const selectedText = selectedDisplay.querySelector('.selected-text');
-
-            selectedDot.className = `selected-dot ${type}`;
-            selectedText.textContent = option.textContent.trim();
-            selectedText.classList.remove('is-placeholder');
-            hiddenInput.value = type;
-            categoryDropdown.classList.remove('open');
-        }
-    });
-}
-
-
 
         allDayCheckbox.addEventListener('change', () => {
             if (timeInputsContainer) {
-                timeInputsContainer.classList.toggle('is-disabled', allDayCheckbox.checked);
+                timeInputsContainer.classList.toggle('hidden', allDayCheckbox.checked);
             }
         });
+
+        if (categoryDropdown) {
+            const selectedDisplay = categoryDropdown.querySelector('.dropdown-selected');
+            const optionsContainer = categoryDropdown.querySelector('.dropdown-options');
+            const hiddenInput = document.getElementById('event-type-input');
+
+            selectedDisplay.addEventListener('click', () => {
+                categoryDropdown.classList.toggle('open');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!categoryDropdown.contains(e.target)) {
+                    categoryDropdown.classList.remove('open');
+                }
+            });
+
+            optionsContainer.addEventListener('click', (e) => {
+                const option = e.target.closest('.dropdown-option');
+                if (option) {
+                    const type = option.dataset.type;
+                    const selectedDot = selectedDisplay.querySelector('.selected-dot');
+                    const selectedText = selectedDisplay.querySelector('.selected-text');
+
+                    selectedDot.className = `selected-dot ${type}`;
+                    selectedText.textContent = option.textContent.trim();
+                    selectedText.classList.remove('is-placeholder');
+                    hiddenInput.value = type;
+                    categoryDropdown.classList.remove('open');
+                }
+            });
+        }
 
         calendarFab.addEventListener('click', () => {
             appState.calendar.currentDate = new Date();
@@ -1933,77 +1921,56 @@ function runApp(app) {
         });
 
         if (addEventBtn) addEventBtn.addEventListener('click', () => {
-    appState.calendar.editingEventIndex = null;
-    if (dayEventList) dayEventList.classList.add('hidden');
+            appState.calendar.editingEventIndex = null;
+            if (dayEventList) dayEventList.classList.add('hidden');
+            
+            addEventBtn.classList.add('hidden');
+            document.getElementById('edit-event-actions').classList.remove('hidden');
+            document.getElementById('edit-event-actions').classList.add('flex');
 
-    // Hide the "Add Event" button and show the "Cancel/Save" buttons
-    addEventBtn.classList.add('hidden');
-    document.getElementById('edit-event-actions').classList.remove('hidden');
-    document.getElementById('edit-event-actions').classList.add('flex');
+            const form = document.getElementById('add-event-form');
+            if(form) form.classList.remove('hidden');
+            
+            const titleInput = document.getElementById('event-title-input');
+            const allDayToggle = document.getElementById('event-all-day-toggle');
+            const timeContainer = document.getElementById('event-time-inputs-container');
+            if(titleInput) titleInput.value = '';
+            if(allDayToggle) allDayToggle.checked = false;
+            if(timeContainer) timeContainer.classList.remove('hidden');
 
-    const form = document.getElementById('add-event-form');
-    if(form) form.classList.remove('hidden');
-
-    const titleInput = document.getElementById('event-title-input');
-    const allDayToggle = document.getElementById('event-all-day-toggle');
-    const timeContainer = document.getElementById('event-time-inputs-container');
-    if(titleInput) titleInput.value = '';
-    if(allDayToggle) allDayToggle.checked = false;
-    if(timeContainer) timeContainer.classList.remove('hidden');
-
-    const fromInput = document.getElementById('event-time-from-input');
-    const toInput = document.getElementById('event-time-to-input');
-    const descInput = document.getElementById('event-description-input');
-    if(fromInput) fromInput.value = '';
-    if(toInput) toInput.value = '';
-    if(descInput) descInput.value = '';
-
-    // Reset the custom dropdown
-    const categoryDropdown = document.getElementById('category-dropdown');
-    if(categoryDropdown) {
-        const selectedDot = categoryDropdown.querySelector('.selected-dot');
-        const selectedText = categoryDropdown.querySelector('.selected-text');
-        const hiddenInput = document.getElementById('event-type-input');
-        selectedDot.className = 'selected-dot';
-        selectedText.textContent = 'Select a category...';
-        selectedText.classList.add('is-placeholder');
-        hiddenInput.value = '';
-    }
-
-    const formTitle = document.getElementById('add-event-form-title');
-    const saveBtn = document.getElementById('save-event-btn');
-    if(formTitle) formTitle.textContent = 'Add New Event';
-    if(saveBtn) saveBtn.textContent = 'Save Event';
-});
-Find the cancelEventBtn.addEventListener('click', ...) function (around line 1188). Replace the entire function with this new version:
-
-JavaScript
-
-// REPLACE the existing cancelEventBtn listener with this
-
-if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => {
-    appState.calendar.editingEventIndex = null;
-    const form = document.getElementById('add-event-form');
-    if (form) form.classList.add('hidden');
-
-    // Show the "Add Event" button and hide the "Cancel/Save" buttons
-    if (addEventBtn) addEventBtn.classList.remove('hidden');
-    const editActions = document.getElementById('edit-event-actions');
-    editActions.classList.add('hidden');
-    editActions.classList.remove('flex');
-
-    if (dayEventList) dayEventList.classList.remove('hidden');
-    const formTitle = document.getElementById('add-event-form-title');
-    const saveBtn = document.getElementById('save-event-btn');
-    if(formTitle) formTitle.textContent = 'Add New Event';
-    if(saveBtn) saveBtn.textContent = 'Save Event';
-});
+            const fromInput = document.getElementById('event-time-from-input');
+            const toInput = document.getElementById('event-time-to-input');
+            const descInput = document.getElementById('event-description-input');
+            if(fromInput) fromInput.value = '';
+            if(toInput) toInput.value = '';
+            if(descInput) descInput.value = '';
+            
+            if(categoryDropdown) {
+                const selectedDot = categoryDropdown.querySelector('.selected-dot');
+                const selectedText = categoryDropdown.querySelector('.selected-text');
+                const hiddenInput = document.getElementById('event-type-input');
+                selectedDot.className = 'selected-dot';
+                selectedText.textContent = 'Select a category...';
+                selectedText.classList.add('is-placeholder');
+                hiddenInput.value = '';
+            }
+            
+            const formTitle = document.getElementById('add-event-form-title');
+            const saveBtn = document.getElementById('save-event-btn');
+            if(formTitle) formTitle.textContent = 'Add New Event';
+            if(saveBtn) saveBtn.textContent = 'Save Event';
+        });
 
         if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => {
             appState.calendar.editingEventIndex = null;
             const form = document.getElementById('add-event-form');
             if (form) form.classList.add('hidden');
+            
             if (addEventBtn) addEventBtn.classList.remove('hidden');
+            const editActions = document.getElementById('edit-event-actions');
+            editActions.classList.add('hidden');
+            editActions.classList.remove('flex');
+
             if (dayEventList) dayEventList.classList.remove('hidden');
             const formTitle = document.getElementById('add-event-form-title');
             const saveBtn = document.getElementById('save-event-btn');
@@ -2018,7 +1985,6 @@ if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => {
                 alert('Please provide a title and select an event type.');
                 return;
             }
-
 
             const isAllDay = allDayCheckbox.checked;
             const eventData = {
@@ -2289,11 +2255,3 @@ if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
-
-
-
-
