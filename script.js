@@ -1588,39 +1588,45 @@ function runApp(app) {
     function renderCalendar() {
         DOMElements.calendarGrid.innerHTML = '';
         const date = appState.calendar.currentDate;
+        const today = new Date();
         const month = date.getMonth();
         const year = date.getFullYear();
 
         DOMElements.calendarMonthYear.textContent = date.toLocaleString('en-GB', { month: 'long', year: 'numeric' });
 
-        const firstDay = new Date(year, month, 1).getDay();
+        const firstDayOfMonth = new Date(year, month, 1);
+        const firstDayOfWeek = firstDayOfMonth.getDay(); // 0=Sun, 1=Mon...
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        // Add weekday headers
         ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
             const dayHeader = document.createElement('div');
-            dayHeader.classList.add('calendar-day-header', 'text-center', 'font-bold');
+            dayHeader.classList.add('calendar-day-header');
             dayHeader.textContent = day;
             DOMElements.calendarGrid.appendChild(dayHeader);
         });
         
-        for (let i = 0; i < firstDay; i++) {
+        for (let i = 0; i < firstDayOfWeek; i++) {
             const emptyCell = document.createElement('div');
+            emptyCell.style.backgroundColor = 'var(--gails-grey-light)';
             DOMElements.calendarGrid.appendChild(emptyCell);
         }
 
         for (let i = 1; i <= daysInMonth; i++) {
             const dayCell = document.createElement('div');
             dayCell.classList.add('calendar-day');
+
+            if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                dayCell.classList.add('current-day');
+            }
             
-            const dayHeader = document.createElement('div');
-            dayHeader.classList.add('calendar-day-header');
-            dayHeader.textContent = i;
-            dayCell.appendChild(dayHeader);
+            const dayNumber = document.createElement('div');
+            dayNumber.classList.add('calendar-day-number');
+            dayNumber.textContent = i;
+            dayCell.appendChild(dayNumber);
             
             const dayContent = document.createElement('textarea');
             dayContent.classList.add('calendar-day-content');
-            const dateKey = `${year}-${month}-${i}`;
+            const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
             dayContent.value = appState.calendar.data[dateKey] || '';
             dayContent.addEventListener('input', (e) => {
                 appState.calendar.data[dateKey] = e.target.value;
@@ -1635,17 +1641,30 @@ function runApp(app) {
     async function loadCalendarData() {
         if (!appState.currentUser || !appState.currentPlanId) return;
         const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
-        const doc = await calendarRef.get();
-        if (doc.exists) {
-            appState.calendar.data = doc.data();
+        try {
+            const doc = await calendarRef.get();
+            if (doc.exists) {
+                appState.calendar.data = doc.data();
+            } else {
+                appState.calendar.data = {};
+            }
+        } catch (error) {
+            console.error("Error loading calendar data:", error);
+            appState.calendar.data = {};
         }
         renderCalendar();
     }
-
+    
+    let calendarSaveTimeout;
     function saveCalendarData() {
-        if (!appState.currentUser || !appState.currentPlanId) return;
-        const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
-        calendarRef.set(appState.calendar.data, { merge: true });
+        clearTimeout(calendarSaveTimeout);
+        calendarSaveTimeout = setTimeout(() => {
+            if (!appState.currentUser || !appState.currentPlanId) return;
+            const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
+            calendarRef.set(appState.calendar.data, { merge: true }).catch(error => {
+                console.error("Failed to save calendar data:", error);
+            });
+        }, 1000); // Debounce saving by 1 second
     }
     // --- EVENT LISTENERS ---
     const handleLoginAttempt = () => {
