@@ -283,17 +283,17 @@
                     <div id="day-detail-content" class="day-detail-content">
                         <div id="day-event-list" class="day-event-list">
                             </div>
-                        <div id="add-event-form" class="add-event-form hidden">
-                            <h4 id="add-event-form-title" class="font-bold mb-2">Add New Event</h4>
-                            <input type="text" id="event-title-input" class="form-input mb-2" placeholder="Event Title">
+                        <div id="add-event-form" class="add-event-form hidden space-y-4">
+                            <h4 id="add-event-form-title" class="font-bold text-lg">Add New Event</h4>
+                            <input type="text" id="event-title-input" class="form-input" placeholder="Event Title">
                             
-                            <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center justify-between">
                                 <label for="event-all-day-checkbox" class="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-700">
                                     <input type="checkbox" id="event-all-day-checkbox" class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
                                     <span>All Day</span>
                                 </label>
                             </div>
-                            <div id="event-time-inputs-container" class="grid grid-cols-2 gap-4 mb-2">
+                            <div id="event-time-inputs-container" class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label for="event-time-from-input" class="text-xs font-medium text-gray-500">From</label>
                                     <input type="time" id="event-time-from-input" class="form-input text-sm p-2 mt-1">
@@ -304,14 +304,14 @@
                                 </div>
                             </div>
 
-                            <div id="event-type-selector" class="flex gap-2 mb-2">
+                            <div id="event-type-selector" class="flex flex-wrap gap-2">
                                 <button class="event-type-btn" data-type="team">Team</button>
                                 <button class="event-type-btn" data-type="operations">Operations</button>
                                 <button class="event-type-btn" data-type="finance">Finance</button>
                                 <button class="event-type-btn" data-type="personal">Personal</button>
                             </div>
-                            <textarea id="event-description-input" class="form-input mb-2" placeholder="Description..."></textarea>
-                            <div class="flex justify-end gap-2">
+                            <textarea id="event-description-input" class="form-input" placeholder="Description..."></textarea>
+                            <div class="flex justify-end gap-2 pt-2">
                                 <button id="cancel-event-btn" class="btn btn-secondary">Cancel</button>
                                 <button id="save-event-btn" class="btn btn-primary">Save Event</button>
                             </div>
