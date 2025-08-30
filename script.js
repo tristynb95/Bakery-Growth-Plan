@@ -1694,7 +1694,6 @@ function runApp(app) {
     function renderDayDetails(dateKey) {
         selectedDateKey = dateKey;
 
-        // Update selected day in calendar view
         document.querySelectorAll('.calendar-day.selected').forEach(d => d.classList.remove('selected'));
         const selectedDayCell = document.querySelector(`.calendar-day[data-date-key="${dateKey}"]`);
         if (selectedDayCell) selectedDayCell.classList.add('selected');
@@ -1711,13 +1710,12 @@ function runApp(app) {
         const dayEvents = appState.calendar.data[dateKey] || [];
 
         if (dayEvents.length > 0) {
-            dayEvents.sort((a,b) => (a.time || '').localeCompare(b.time || '')); // Sort events by time
+            dayEvents.sort((a,b) => (a.time || '').localeCompare(b.time || ''));
             dayEvents.forEach((event, index) => {
                 const eventItem = document.createElement('div');
                 eventItem.classList.add('event-item');
                 
                 const timeHTML = event.time ? `<p class="event-item-time">${event.time}</p>` : '';
-                
                 const descriptionHTML = event.description ? `<p class="event-item-description">${event.description.replace(/\n/g, '<br>')}</p>` : '';
 
                 eventItem.innerHTML = `
@@ -1757,7 +1755,7 @@ function runApp(app) {
         const saveEventBtn = document.getElementById('save-event-btn');
         const eventTypeSelector = document.getElementById('event-type-selector');
         
-        if(!calendarFab) return; // Guard against running on pages without calendar
+        if(!calendarFab) return;
 
         calendarFab.addEventListener('click', () => {
             appState.calendar.currentDate = new Date();
@@ -2096,7 +2094,6 @@ function runApp(app) {
         cookieBanner.classList.add('hidden');
     });
     
-    // Setup listeners for the new calendar
     setupCalendarEventListeners();
 }
 
