@@ -1954,6 +1954,16 @@ function runApp(app) {
     DOMElements.dayDetailCloseBtn.addEventListener('click', () => {
         DOMElements.dayDetailModal.classList.add('hidden');
     });
+    DOMElements.calendarModal.addEventListener('click', (e) => {
+        if (e.target === DOMElements.calendarModal && DOMElements.dayDetailModal.classList.contains('hidden')) {
+            DOMElements.calendarModal.classList.add('hidden');
+        }
+    });
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !DOMElements.calendarModal.classList.contains('hidden') && DOMElements.dayDetailModal.classList.contains('hidden')) {
+            DOMElements.calendarModal.classList.add('hidden');
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
