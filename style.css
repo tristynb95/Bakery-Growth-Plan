@@ -297,7 +297,7 @@ textarea.form-input {
 .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1.25rem 1.75rem; background-color: var(--gails-bg); border-bottom-left-radius: 1.25rem; border-bottom-right-radius: 1.25rem; }
 
 /* REVISED CLOSE BUTTON STYLES */
-#modal-close-btn, #calendar-close-btn {
+#modal-close-btn {
     background-color: #ffffff !important;
     border: 1px solid #e0e0e0 !important;
     border-radius: 0.5rem !important;
@@ -312,14 +312,14 @@ textarea.form-input {
     box-shadow: none !important;
 }
 
-#modal-close-btn:hover, #calendar-close-btn:hover {
+#modal-close-btn:hover {
     background-color: #f5f5f5 !important;
     border-color: #cccccc !important;
     transform: none !important;
     box-shadow: none !important;
 }
 
-#modal-close-btn i, #calendar-close-btn i {
+#modal-close-btn i {
     font-size: 1.25rem !important;
     color: #6b7280 !important;
     line-height: 1 !important;
@@ -531,8 +531,10 @@ textarea.form-input {
 #modal-box[data-type="aiActionPlan"],
 #modal-box[data-type="aiActionPlan_view"],
 #modal-box[data-type="aiActionPlan_generate"] {
-    max-width: 95vw;
-    width: 1100px; /* Set a fixed large width, but max-width will constrain it */
+    width: 100%;
+    max-width: 1200px;
+    height: 90vh;
+    max-height: 800px;
 }
 
 /* 24. AI Action Plan Table Styles
