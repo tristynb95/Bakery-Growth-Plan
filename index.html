@@ -237,7 +237,7 @@
         <div id="modal-box" class="modal-box">
             <div class="modal-header">
                 <h3 id="modal-title" class="text-lg font-bold">Modal Title</h3>
-                <button id="modal-close-btn" class="btn btn-secondary !p-2.5 !rounded-full"><i class="bi bi-x-lg text-lg"></i></button>
+                <button id="modal-close-btn" class="modal-close-btn">&times;</button>
             </div>
             <div id="modal-content" class="modal-content">
             </div>
@@ -286,7 +286,24 @@
                         <div id="add-event-form" class="add-event-form hidden">
                             <h4 id="add-event-form-title" class="font-bold mb-2">Add New Event</h4>
                             <input type="text" id="event-title-input" class="form-input mb-2" placeholder="Event Title">
-                            <input type="time" id="event-time-input" class="form-input mb-2">
+                            
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="event-all-day-checkbox" class="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-700">
+                                    <input type="checkbox" id="event-all-day-checkbox" class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                                    <span>All Day</span>
+                                </label>
+                            </div>
+                            <div id="event-time-inputs-container" class="grid grid-cols-2 gap-4 mb-2">
+                                <div>
+                                    <label for="event-time-from-input" class="text-xs font-medium text-gray-500">From</label>
+                                    <input type="time" id="event-time-from-input" class="form-input text-sm p-2 mt-1">
+                                </div>
+                                <div>
+                                    <label for="event-time-to-input" class="text-xs font-medium text-gray-500">To</label>
+                                    <input type="time" id="event-time-to-input" class="form-input text-sm p-2 mt-1">
+                                </div>
+                            </div>
+
                             <div id="event-type-selector" class="flex gap-2 mb-2">
                                 <button class="event-type-btn" data-type="team">Team</button>
                                 <button class="event-type-btn" data-type="operations">Operations</button>
@@ -316,4 +333,3 @@
 
 </body>
 </html>
-
