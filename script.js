@@ -1769,11 +1769,12 @@ function runApp(app) {
         document.getElementById('add-event-form-title').textContent = 'Edit Event';
         document.getElementById('save-event-btn').textContent = 'Update Event';
     
-        const allDayCheckbox = document.getElementById('event-all-day-checkbox');
+        const allDayCheckbox = document.getElementById('event-all-day-toggle');
         const timeInputsContainer = document.getElementById('event-time-inputs-container');
         
-        allDayCheckbox.checked = event.allDay || false;
-        timeInputsContainer.classList.toggle('hidden', allDayCheckbox.checked);
+        allDayCheckbox.addEventListener('change', () => {
+    timeInputsContainer.classList.toggle('is-disabled', allDayCheckbox.checked);
+});
 
         document.getElementById('event-title-input').value = event.title;
         document.getElementById('event-time-from-input').value = event.timeFrom || '';
@@ -2180,3 +2181,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
