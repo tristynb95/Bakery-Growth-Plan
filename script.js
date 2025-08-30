@@ -90,11 +90,11 @@ function runApp(app) {
         planUnsubscribe: null,
         calendarUnsubscribe: null,
         calendar: {
-        currentDate: new Date(),
-        data: {},
-        editingEventIndex: null // Add this property
-    }
-};
+            currentDate: new Date(),
+            data: {},
+            editingEventIndex: null
+        }
+    };
     
     let undoStack = [];
     let redoStack = [];
@@ -1173,22 +1173,22 @@ function runApp(app) {
             const tab = e.target.closest('.ai-tab-btn');
             const sortHeader = e.target.closest('.sortable-header');
             if (addBtn) {
-    const tableBody = addBtn.closest('table').querySelector('tbody');
-    if (tableBody) {
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-x-lg"></i></button></td>
-        `;
-        tableBody.appendChild(newRow);
-        saveState();
-    }
-}
+                const tableBody = addBtn.closest('table').querySelector('tbody');
+                if (tableBody) {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td contenteditable="true"></td>
+                        <td contenteditable="true"></td>
+                        <td contenteditable="true"></td>
+                        <td contenteditable="true"></td>
+                        <td contenteditable="true"></td>
+                        <td contenteditable="true"></td>
+                        <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-trash3"></i></button></td>
+                    `;
+                    tableBody.appendChild(newRow);
+                    saveState();
+                }
+            }
             if (removeBtn) {
                 removeBtn.closest('tr').remove();
                 saveState();
@@ -1613,7 +1613,8 @@ function runApp(app) {
                 break;
         }
     }
-    // --- CALENDAR LOGIC (REDESIGNED) ---
+
+    // --- CALENDAR LOGIC (REDESIGNED & ENHANCED) ---
     let selectedDateKey = null;
 
     function renderCalendar() {
@@ -1750,7 +1751,7 @@ function runApp(app) {
                 eventList.appendChild(eventItem);
             });
         } else {
-            eventList.innerHTML = '<p class="text-gray-500">No events scheduled for this day.</p>';
+            eventList.innerHTML = '<p class="text-gray-500 text-center py-4">No events scheduled for this day.</p>';
         }
         
         document.getElementById('add-event-btn').classList.remove('hidden');
@@ -1783,7 +1784,6 @@ function runApp(app) {
         eventTypeSelector.querySelector('.selected')?.classList.remove('selected');
         eventTypeSelector.querySelector(`[data-type="${event.type}"]`)?.classList.add('selected');
     }
-
 
     function setupCalendarEventListeners() {
         const calendarFab = document.getElementById('calendar-fab');
@@ -1847,6 +1847,7 @@ function runApp(app) {
             const eventItem = e.target.closest('.event-item');
 
             if (removeBtn) {
+                e.stopPropagation(); // Prevent the edit event from firing
                 if (!confirm('Are you sure you want to delete this event?')) return;
                 const indexToRemove = parseInt(removeBtn.dataset.index, 10);
                 const dayEvents = appState.calendar.data[selectedDateKey] || [];
