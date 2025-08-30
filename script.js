@@ -1798,13 +1798,20 @@ function runApp(app) {
         const cancelEventBtn = document.getElementById('cancel-event-btn');
         const saveEventBtn = document.getElementById('save-event-btn');
         const eventTypeSelector = document.getElementById('event-type-selector');
-        const allDayCheckbox = document.getElementById('event-all-day-checkbox');
+        const allDayCheckbox = document.getElementById('event-all-day-toggle');
         const timeInputsContainer = document.getElementById('event-time-inputs-container');
+        const dayEventList = document.getElementById('day-event-list');
 
-        if(!calendarFab) return;
+        // Master guard clause: if the main calendar components don't exist, do nothing.
+        if (!calendarFab || !calendarModal || !allDayCheckbox) {
+            console.warn("Calendar UI elements not found. Skipping event listener setup.");
+            return;
+        }
 
         allDayCheckbox.addEventListener('change', () => {
-            timeInputsContainer.classList.toggle('hidden', allDayCheckbox.checked);
+            if (timeInputsContainer) {
+                timeInputsContainer.classList.toggle('is-disabled', allDayCheckbox.checked);
+            }
         });
 
         calendarFab.addEventListener('click', () => {
@@ -1816,19 +1823,19 @@ function runApp(app) {
             calendarModal.classList.remove('hidden');
         });
 
-        calendarCloseBtn.addEventListener('click', () => calendarModal.classList.add('hidden'));
+        if (calendarCloseBtn) calendarCloseBtn.addEventListener('click', () => calendarModal.classList.add('hidden'));
         
-        calendarPrevMonthBtn.addEventListener('click', () => {
+        if (calendarPrevMonthBtn) calendarPrevMonthBtn.addEventListener('click', () => {
             appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() - 1);
             renderCalendar();
         });
 
-        calendarNextMonthBtn.addEventListener('click', () => {
+        if (calendarNextMonthBtn) calendarNextMonthBtn.addEventListener('click', () => {
             appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() + 1);
             renderCalendar();
         });
 
-        calendarTodayBtn.addEventListener('click', () => {
+        if (calendarTodayBtn) calendarTodayBtn.addEventListener('click', () => {
             const today = new Date();
             appState.calendar.currentDate = today;
             const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -1836,26 +1843,26 @@ function runApp(app) {
             renderDayDetails(dateKey);
         });
 
-        calendarGrid.addEventListener('click', (e) => {
+        if (calendarGrid) calendarGrid.addEventListener('click', (e) => {
             const dayCell = e.target.closest('.calendar-day');
             if (dayCell && dayCell.dataset.dateKey) {
                 renderDayDetails(dayCell.dataset.dateKey);
             }
         });
         
-        document.getElementById('day-event-list').addEventListener('click', async (e) => {
+        if (dayEventList) dayEventList.addEventListener('click', async (e) => {
             const removeBtn = e.target.closest('.btn-remove-event');
             const eventItem = e.target.closest('.event-item');
 
             if (removeBtn) {
-                e.stopPropagation(); // Prevent the edit event from firing
+                e.stopPropagation();
                 if (!confirm('Are you sure you want to delete this event?')) return;
                 const indexToRemove = parseInt(removeBtn.dataset.index, 10);
                 const dayEvents = appState.calendar.data[selectedDateKey] || [];
                 dayEvents.splice(indexToRemove, 1);
                 const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
                 const dataToUpdate = {};
-                dataToUpdate[selectedDateKey] = dayEvents;
+                dataToUpdate[selectedDateKey] = dayEvents.length > 0 ? dayEvents : firebase.firestore.FieldValue.delete();
                 try {
                     await calendarRef.set(dataToUpdate, { merge: true });
                     renderCalendar();
@@ -1870,49 +1877,60 @@ function runApp(app) {
             }
         });
 
-        addEventBtn.addEventListener('click', () => {
+        if (addEventBtn) addEventBtn.addEventListener('click', () => {
             appState.calendar.editingEventIndex = null;
-            document.getElementById('day-event-list').classList.add('hidden');
+            if (dayEventList) dayEventList.classList.add('hidden');
             addEventBtn.classList.add('hidden');
             const form = document.getElementById('add-event-form');
-            form.classList.remove('hidden');
+            if(form) form.classList.remove('hidden');
             
-            document.getElementById('event-title-input').value = '';
-            document.getElementById('event-all-day-checkbox').checked = false;
-            document.getElementById('event-time-inputs-container').classList.remove('hidden');
-            document.getElementById('event-time-from-input').value = '';
-            document.getElementById('event-time-to-input').value = '';
-            document.getElementById('event-description-input').value = '';
-            document.getElementById('event-type-selector').querySelector('.selected')?.classList.remove('selected');
-            document.getElementById('add-event-form-title').textContent = 'Add New Event';
-            document.getElementById('save-event-btn').textContent = 'Save Event';
+            const titleInput = document.getElementById('event-title-input');
+            const allDayToggle = document.getElementById('event-all-day-toggle');
+            const timeContainer = document.getElementById('event-time-inputs-container');
+            if(titleInput) titleInput.value = '';
+            if(allDayToggle) allDayToggle.checked = false;
+            if(timeContainer) timeContainer.classList.remove('is-disabled');
+            const fromInput = document.getElementById('event-time-from-input');
+            const toInput = document.getElementById('event-time-to-input');
+            const descInput = document.getElementById('event-description-input');
+            if(fromInput) fromInput.value = '';
+            if(toInput) toInput.value = '';
+            if(descInput) descInput.value = '';
+            if(eventTypeSelector) eventTypeSelector.querySelector('.selected')?.classList.remove('selected');
+            const formTitle = document.getElementById('add-event-form-title');
+            const saveBtn = document.getElementById('save-event-btn');
+            if(formTitle) formTitle.textContent = 'Add New Event';
+            if(saveBtn) saveBtn.textContent = 'Save Event';
         });
 
-        cancelEventBtn.addEventListener('click', () => {
+        if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => {
             appState.calendar.editingEventIndex = null;
-            document.getElementById('add-event-form').classList.add('hidden');
-            document.getElementById('add-event-btn').classList.remove('hidden');
-            document.getElementById('day-event-list').classList.remove('hidden');
-            document.getElementById('add-event-form-title').textContent = 'Add New Event';
-            document.getElementById('save-event-btn').textContent = 'Save Event';
+            const form = document.getElementById('add-event-form');
+            if (form) form.classList.add('hidden');
+            if (addEventBtn) addEventBtn.classList.remove('hidden');
+            if (dayEventList) dayEventList.classList.remove('hidden');
+            const formTitle = document.getElementById('add-event-form-title');
+            const saveBtn = document.getElementById('save-event-btn');
+            if(formTitle) formTitle.textContent = 'Add New Event';
+            if(saveBtn) saveBtn.textContent = 'Save Event';
         });
 
-        eventTypeSelector.addEventListener('click', (e) => {
+        if (eventTypeSelector) eventTypeSelector.addEventListener('click', (e) => {
             if (e.target.classList.contains('event-type-btn')) {
                 eventTypeSelector.querySelector('.selected')?.classList.remove('selected');
                 e.target.classList.add('selected');
             }
         });
 
-        saveEventBtn.addEventListener('click', async () => {
+        if (saveEventBtn) saveEventBtn.addEventListener('click', async () => {
             const title = document.getElementById('event-title-input').value.trim();
-            const typeButton = eventTypeSelector.querySelector('.selected');
+            const typeButton = eventTypeSelector ? eventTypeSelector.querySelector('.selected') : null;
             if (!title || !typeButton) {
                 alert('Please provide a title and select an event type.');
                 return;
             }
 
-            const isAllDay = document.getElementById('event-all-day-checkbox').checked;
+            const isAllDay = allDayCheckbox.checked;
             const eventData = {
                 title: title,
                 allDay: isAllDay,
@@ -2181,4 +2199,5 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
