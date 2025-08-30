@@ -1008,9 +1008,11 @@ tr:hover .btn-remove-row {
     background-color: var(--gails-white);
     border-radius: 1.5rem;
     width: 100%;
-    max-width: 1200px; /* Increased max-width for the two-pane layout */
+    /* --- MODIFIED LINES START --- */
+    max-width: min(1600px, 90vw); 
     height: 90vh;
-    max-height: 800px;
+    max-height: 900px;
+    /* --- MODIFIED LINES END --- */
     display: flex;
     flex-direction: column;
     box-shadow: var(--shadow-lg);
@@ -1377,7 +1379,7 @@ tr:hover .btn-remove-row {
 
 .event-details-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.2fr 0.8fr; /* <-- Change this line */
     gap: 1.25rem;
     align-items: start;
 }
