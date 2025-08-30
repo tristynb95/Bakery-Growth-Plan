@@ -1530,4 +1530,8 @@ tr:hover .btn-remove-row {
     resize: none; /* <-- This removes the scrollbar and resize handle */
 }
 
-
+/* 42. Hide Default Time Input Icon
+-------------------------------------------------- */
+input[type="time"]::-webkit-calendar-picker-indicator {
+    display: none;
+}
