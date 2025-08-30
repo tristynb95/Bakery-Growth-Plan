@@ -1773,7 +1773,7 @@ function runApp(app) {
         const timeInputsContainer = document.getElementById('event-time-inputs-container');
         
         allDayCheckbox.addEventListener('change', () => {
-    timeInputsContainer.classList.toggle('is-disabled', allDayCheckbox.checked);
+    timeInputsContainer.classList.toggle('hidden', allDayCheckbox.checked);
 });
 
         document.getElementById('event-title-input').value = event.title;
@@ -2199,5 +2199,6 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
