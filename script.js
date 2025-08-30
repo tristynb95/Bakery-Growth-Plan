@@ -442,6 +442,7 @@ function runApp(app) {
         DOMElements.dashboardView.classList.add('hidden');
         DOMElements.appView.classList.remove('hidden');
         switchView(viewId);
+        DOMElements.calendarFab.classList.remove('hidden');
     }
 
     async function renderDashboard() {
