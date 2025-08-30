@@ -1780,8 +1780,15 @@ function runApp(app) {
             renderCalendar();
         });
         calendarTodayBtn.addEventListener('click', () => {
-            appState.calendar.currentDate = new Date();
+            const today = new Date();
+            appState.calendar.currentDate = today;
+            const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
             renderCalendar();
+            renderDayDetails(dateKey);
+        });
+
+        calendarGrid.addEventListener('click', (e) => {
+            const dayCell = e.target.closest('.calendar-day');
         });
 
         calendarGrid.addEventListener('click', (e) => {
@@ -2107,6 +2114,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
