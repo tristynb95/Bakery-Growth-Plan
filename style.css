@@ -1055,6 +1055,8 @@ tr:hover .btn-remove-row {
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
+    /* MODIFIED: This new property ensures all rows have an equal, consistent height */
+    grid-auto-rows: 1fr;
     flex-grow: 1;
     gap: 0.5rem;
 }
