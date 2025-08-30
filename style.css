@@ -1112,6 +1112,6 @@ tr:hover .btn-remove-row {
     color: var(--gails-text-primary);
     pointer-events: none; /* Make it non-interactive directly */
 }
-#day-detail-modal .modal-overlay {
+#day-detail-modal {
     z-index: 1020; /* Ensure it's on top of the calendar modal */
 }
