@@ -67,7 +67,7 @@ exports.handler = async function(event, context) {
                   <td contenteditable="true">Ongoing</td>
                   <td contenteditable="true">Waste reports, Production planning tool</td>
                   <td contenteditable="true">To Do</td>
-                  <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-trash3"></i></button></td>
+                  <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-x-lg"></i></button></td>
                 </tr>
               </tbody>
               <tfoot>
