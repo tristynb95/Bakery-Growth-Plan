@@ -1375,32 +1375,97 @@ tr:hover .btn-remove-row {
     border-top: 1px solid var(--gails-grey-light);
 }
 
-/* Add to the bottom of Section 38 in style.css */
+/* 39. Compact Event Form & Custom Dropdown
+-------------------------------------------------- */
 
-.event-details-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr; /* <-- Change this line */
-    gap: 1.25rem;
-    align-items: start;
+/* Compact modifier for the whole form */
+.add-event-form-redesigned.is-compact {
+    gap: 1rem; /* Reduce gap between sections */
 }
-
-/* Make the time control group stack vertically in its new, narrower column */
-.event-details-grid .time-control-group {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
+.add-event-form-redesigned.is-compact .form-section-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--gails-text-secondary);
+    margin-bottom: 0.5rem;
 }
-
-.event-details-grid .all-day-toggle-wrap,
-.event-details-grid .time-inputs-wrap {
-    justify-content: space-between;
+.add-event-form-redesigned.is-compact .form-input {
+    font-size: 0.9rem;
 }
 
-/* Reduce the width of time inputs and labels to fit */
-.event-details-grid .time-input .form-input {
-    width: 100%;
-    min-width: 80px;
+/* Custom Dropdown Styling */
+.custom-dropdown {
+    position: relative;
 }
-.event-details-grid .time-input label {
-    font-size: 0.875rem;
+.dropdown-selected {
+    display: flex;
+    align-items: center;
+    background-color: var(--gails-white);
+    border: 1px solid var(--gails-grey-mid);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
 }
+.dropdown-selected:focus, .custom-dropdown.open .dropdown-selected {
+    border-color: var(--gails-red);
+    box-shadow: var(--shadow-focus);
+}
+.selected-text.is-placeholder {
+    color: #9CA3AF;
+}
+.dropdown-caret {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+}
+.custom-dropdown.open .dropdown-caret {
+    transform: rotate(180deg);
+}
+
+/* Dropdown Options Panel */
+.dropdown-options {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background-color: var(--gails-white);
+    border: 1px solid var(--gails-grey-mid);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-md);
+    z-index: 1020;
+    opacity: 0;
+    transform: translateY(-10px);
+    visibility: hidden;
+    transition: all 0.2s ease;
+}
+.custom-dropdown.open .dropdown-options {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+.dropdown-option {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+}
+.dropdown-option:hover {
+    background-color: var(--gails-grey-light);
+}
+.dropdown-option:not(:last-child) {
+    border-bottom: 1px solid var(--gails-grey-light);
+}
+
+/* Color Dots */
+.selected-dot, .option-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+    background-color: var(--gails-grey-mid); /* Default color */
+}
+.option-dot.team, .selected-dot.team { background-color: #3B82F6; }
+.option-dot.operations, .selected-dot.operations { background-color: #F59E0B; }
+.option-dot.finance, .selected-dot.finance { background-color: #10B981; }
+.option-dot.personal, .selected-dot.personal { background-color: #8B5CF6; }
