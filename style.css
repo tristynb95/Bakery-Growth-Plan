@@ -1074,6 +1074,9 @@ tr:hover .btn-remove-row {
     cursor: pointer;
     transition: background-color 0.2s ease;
     border: 2px solid transparent;
+    /* MODIFIED: Use flexbox to allow vertical alignment */
+    display: flex;
+    flex-direction: column;
 }
 
 .calendar-day:hover {
@@ -1099,7 +1102,8 @@ tr:hover .btn-remove-row {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    margin-top: 0.25rem;
+    /* MODIFIED: This pushes the dots to the bottom of the cell */
+    margin-top: auto;
 }
 
 .event-dot {
