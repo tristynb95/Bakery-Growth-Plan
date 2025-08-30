@@ -584,6 +584,11 @@ function runApp(app) {
                         renderCalendar();
                     }
                 }
+            } else { // If the document doesn't exist, reset local data
+                appState.calendar.data = {};
+                 if (!DOMElements.calendarModal.classList.contains('hidden')) {
+                    renderCalendar();
+                }
             }
         }, (error) => {
             console.error("Error listening to calendar changes:", error);
@@ -1626,7 +1631,8 @@ function runApp(app) {
                 break;
         }
     }
-    // --- CALENDAR LOGIC ---
+    // --- CALENDAR LOGIC (REDESIGNED) ---
+
     function renderCalendar() {
         DOMElements.calendarGrid.innerHTML = '';
         const date = appState.calendar.currentDate;
@@ -1675,6 +1681,10 @@ function runApp(app) {
             dayContent.addEventListener('blur', (e) => {
                 e.target.scrollTop = 0;
             });
+             dayContent.addEventListener('input', (e) => {
+                const currentData = e.target.value;
+                updateCalendarEntry(dateKey, currentData);
+            });
 
             dayCell.appendChild(dayContent);
             DOMElements.calendarGrid.appendChild(dayCell);
@@ -1698,23 +1708,38 @@ function runApp(app) {
     }
     
     let calendarSaveTimeout;
-    function saveCalendarData(forceImmediate = false) {
+    function updateCalendarEntry(dateKey, content) {
         clearTimeout(calendarSaveTimeout);
-        const save = () => {
+        appState.calendar.data[dateKey] = content;
+        
+        calendarSaveTimeout = setTimeout(() => {
             if (!appState.currentUser || !appState.currentPlanId) return;
+            
             const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
-            calendarRef.set(appState.calendar.data, { merge: true }).catch(error => {
+            const dataToSave = {};
+            dataToSave[dateKey] = content;
+
+            calendarRef.set(dataToSave, { merge: true }).catch(error => {
                 console.error("Failed to save calendar data:", error);
             });
-        };
-
-        if (forceImmediate) {
-            save();
-        } else {
-            calendarSaveTimeout = setTimeout(save, 1000); 
-        }
+        }, 500); // Debounce saves by 500ms
     }
 
+    async function saveCalendarEntryImmediate(dateKey, content) {
+        clearTimeout(calendarSaveTimeout);
+        appState.calendar.data[dateKey] = content;
+        if (!appState.currentUser || !appState.currentPlanId) return;
+        
+        const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
+        const dataToSave = {};
+        dataToSave[dateKey] = content;
+
+        try {
+            await calendarRef.set(dataToSave, { merge: true });
+        } catch (error) {
+            console.error("Failed to immediately save calendar data:", error);
+        }
+    }
 
     function openDayDetailModal(dateKey) {
         const [year, month, day] = dateKey.split('-').map(Number);
@@ -1731,19 +1756,24 @@ function runApp(app) {
         DOMElements.dayDetailModal.classList.remove('hidden');
         DOMElements.dayDetailTextarea.focus();
         
-        DOMElements.dayDetailSaveBtn.onclick = () => {
+        DOMElements.dayDetailSaveBtn.onclick = async () => {
             const newContent = DOMElements.dayDetailTextarea.value;
-            appState.calendar.data[dateKey] = newContent;
-            saveCalendarData(true);
-            
+            DOMElements.dayDetailSaveBtn.disabled = true;
+            DOMElements.dayDetailSaveBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Saving...';
+
+            await saveCalendarEntryImmediate(dateKey, newContent);
+
             const dayTextarea = DOMElements.calendarGrid.querySelector(`[data-date-key="${dateKey}"] .calendar-day-content`);
             if (dayTextarea) {
                 dayTextarea.value = newContent;
             }
 
+            DOMElements.dayDetailSaveBtn.disabled = false;
+            DOMElements.dayDetailSaveBtn.innerHTML = 'Save & Close';
             DOMElements.dayDetailModal.classList.add('hidden');
         };
     }
+
 
     // --- EVENT LISTENERS ---
     const handleLoginAttempt = () => {
@@ -1991,14 +2021,6 @@ function runApp(app) {
         const dayCell = e.target.closest('.calendar-day');
         if (dayCell && dayCell.dataset.dateKey) {
             openDayDetailModal(dayCell.dataset.dateKey);
-        }
-    });
-
-    DOMElements.calendarGrid.addEventListener('input', (e) => {
-        const dayCell = e.target.closest('.calendar-day');
-        if (dayCell && dayCell.dataset.dateKey) {
-            appState.calendar.data[dayCell.dataset.dateKey] = e.target.value;
-            saveCalendarData();
         }
     });
     DOMElements.dayDetailCloseBtn.addEventListener('click', () => {
