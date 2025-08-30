@@ -1760,42 +1760,54 @@ eventTypes.forEach(type => {
         document.getElementById('add-event-form').classList.add('hidden');
     }
 
-    function showEditEventForm(index) {
-        appState.calendar.editingEventIndex = index;
-        const event = appState.calendar.data[selectedDateKey][index];
-    
-        document.getElementById('day-event-list').classList.add('hidden');
-        document.getElementById('add-event-form').classList.remove('hidden');
-    
-        document.getElementById('add-event-form-title').textContent = 'Edit Event';
-        document.getElementById('save-event-btn').textContent = 'Update Event';
-    
-        const allDayCheckbox = document.getElementById('event-all-day-toggle');
-        const timeInputsContainer = document.getElementById('event-time-inputs-container');
-        
-        allDayCheckbox.checked = event.allDay || false;
-        timeInputsContainer.classList.toggle('hidden', allDayCheckbox.checked);
+    // MODIFIED: This entire function is updated to correctly load an event's category into the new searchable dropdown.
+function showEditEventForm(index) {
+    appState.calendar.editingEventIndex = index;
+    const event = appState.calendar.data[selectedDateKey][index];
 
-        document.getElementById('event-title-input').value = event.title;
-        document.getElementById('event-time-from-input').value = event.timeFrom || '';
-        document.getElementById('event-time-to-input').value = event.timeTo || '';
-        document.getElementById('event-description-input').value = event.description || '';
-    
-        const categoryDropdown = document.getElementById('category-dropdown');
-        const optionToSelect = categoryDropdown.querySelector(`.dropdown-option[data-type="${event.type}"]`);
+    // Show the form
+    document.getElementById('day-event-list').classList.add('hidden');
+    document.getElementById('add-event-form').classList.remove('hidden');
+
+    // Set form titles
+    document.getElementById('add-event-form-title').textContent = 'Edit Event';
+    document.getElementById('save-event-btn').textContent = 'Update Event';
+
+    // Populate standard event fields
+    document.getElementById('event-title-input').value = event.title;
+    const allDayCheckbox = document.getElementById('event-all-day-toggle');
+    allDayCheckbox.checked = event.allDay || false;
+    document.getElementById('event-time-inputs-container').classList.toggle('hidden', allDayCheckbox.checked);
+    document.getElementById('event-time-from-input').value = event.timeFrom || '';
+    document.getElementById('event-time-to-input').value = event.timeTo || '';
+    document.getElementById('event-description-input').value = event.description || '';
+
+    // --- NEW LOGIC: Correctly populates the searchable category dropdown ---
+    const searchInput = document.getElementById('category-search-input');
+    const hiddenInput = document.getElementById('event-type-input');
+    const selectedDot = document.getElementById('category-selected-dot');
+    const optionsContainer = document.querySelector('#category-dropdown .dropdown-options');
+
+    if (event.type) {
+        const optionToSelect = optionsContainer.querySelector(`.dropdown-option[data-type="${event.type}"]`);
         if (optionToSelect) {
-            const type = optionToSelect.dataset.type;
-            const selectedDot = categoryDropdown.querySelector('.selected-dot');
-            const selectedText = categoryDropdown.querySelector('.selected-text');
-            const hiddenInput = document.getElementById('event-type-input');
-            
-            selectedDot.className = `selected-dot ${type}`;
-            selectedText.textContent = optionToSelect.textContent.trim();
-            selectedText.classList.remove('is-placeholder');
-            hiddenInput.value = type;
+            // If a valid category is found, populate the input, hidden field, and dot
+            searchInput.value = optionToSelect.textContent.trim();
+            hiddenInput.value = event.type;
+            selectedDot.className = `selected-dot ${event.type}`;
+        } else {
+            // If event.type is old/invalid, clear the fields
+            searchInput.value = '';
+            hiddenInput.value = '';
+            selectedDot.className = 'selected-dot';
         }
+    } else {
+        // Clear the fields if the event has no category
+        searchInput.value = '';
+        hiddenInput.value = '';
+        selectedDot.className = 'selected-dot';
     }
-
+}
     // MODIFIED: This entire function has been updated to support the searchable category dropdown.
 function setupCalendarEventListeners() {
     const calendarFab = document.getElementById('calendar-fab');
@@ -2291,6 +2303,7 @@ function setupCalendarEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
