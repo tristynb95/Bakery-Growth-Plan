@@ -1800,26 +1800,61 @@ if (optionToSelect) {
     }
 
     function setupCalendarEventListeners() {
-        const calendarFab = document.getElementById('calendar-fab');
-        const calendarModal = document.getElementById('calendar-modal');
-        const calendarCloseBtn = document.getElementById('calendar-close-btn');
-        const calendarPrevMonthBtn = document.getElementById('calendar-prev-month-btn');
-        const calendarNextMonthBtn = document.getElementById('calendar-next-month-btn');
-        const calendarTodayBtn = document.getElementById('calendar-today-btn');
-        const calendarGrid = document.getElementById('calendar-grid');
-        const addEventBtn = document.getElementById('add-event-btn');
-        const cancelEventBtn = document.getElementById('cancel-event-btn');
-        const saveEventBtn = document.getElementById('save-event-btn');
-        const eventTypeSelector = document.getElementById('event-type-selector');
-        const allDayCheckbox = document.getElementById('event-all-day-toggle');
-        const timeInputsContainer = document.getElementById('event-time-inputs-container');
-        const dayEventList = document.getElementById('day-event-list');
+    const calendarFab = document.getElementById('calendar-fab');
+    const calendarModal = document.getElementById('calendar-modal');
+    const calendarCloseBtn = document.getElementById('calendar-close-btn');
+    const calendarPrevMonthBtn = document.getElementById('calendar-prev-month-btn');
+    const calendarNextMonthBtn = document.getElementById('calendar-next-month-btn');
+    const calendarTodayBtn = document.getElementById('calendar-today-btn');
+    const calendarGrid = document.getElementById('calendar-grid');
+    const addEventBtn = document.getElementById('add-event-btn');
+    const cancelEventBtn = document.getElementById('cancel-event-btn');
+    const saveEventBtn = document.getElementById('save-event-btn');
+    const eventTypeSelector = document.getElementById('event-type-selector');
+    const allDayCheckbox = document.getElementById('event-all-day-toggle');
+    const timeInputsContainer = document.getElementById('event-time-inputs-container');
+    const dayEventList = document.getElementById('day-event-list');
 
-        // Master guard clause: if the main calendar components don't exist, do nothing.
-        if (!calendarFab || !calendarModal || !allDayCheckbox) {
-            console.warn("Calendar UI elements not found. Skipping event listener setup.");
-            return;
+    // Make sure this guard clause is at the top
+    if (!calendarFab || !calendarModal || !allDayCheckbox) {
+        console.warn("Calendar UI elements not found. Skipping event listener setup.");
+        return;
+    }
+
+    // Your new code from the prompt fits perfectly here
+    const categoryDropdown = document.getElementById('category-dropdown');
+    if (categoryDropdown) {
+    const selectedDisplay = categoryDropdown.querySelector('.dropdown-selected');
+    const optionsContainer = categoryDropdown.querySelector('.dropdown-options');
+    const hiddenInput = document.getElementById('event-type-input');
+
+    selectedDisplay.addEventListener('click', () => {
+        categoryDropdown.classList.toggle('open');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!categoryDropdown.contains(e.target)) {
+            categoryDropdown.classList.remove('open');
         }
+    });
+
+    optionsContainer.addEventListener('click', (e) => {
+        const option = e.target.closest('.dropdown-option');
+        if (option) {
+            const type = option.dataset.type;
+            const selectedDot = selectedDisplay.querySelector('.selected-dot');
+            const selectedText = selectedDisplay.querySelector('.selected-text');
+
+            selectedDot.className = `selected-dot ${type}`;
+            selectedText.textContent = option.textContent.trim();
+            selectedText.classList.remove('is-placeholder');
+            hiddenInput.value = type;
+            categoryDropdown.classList.remove('open');
+        }
+    });
+}
+
+
 
         allDayCheckbox.addEventListener('change', () => {
             if (timeInputsContainer) {
@@ -1936,38 +1971,6 @@ if (optionToSelect) {
                 return;
             }
 
-            // ADD THIS NEW BLOCK for the custom dropdown
-const categoryDropdown = document.getElementById('category-dropdown');
-if (categoryDropdown) {
-    const selectedDisplay = categoryDropdown.querySelector('.dropdown-selected');
-    const optionsContainer = categoryDropdown.querySelector('.dropdown-options');
-    const hiddenInput = document.getElementById('event-type-input');
-
-    selectedDisplay.addEventListener('click', () => {
-        categoryDropdown.classList.toggle('open');
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!categoryDropdown.contains(e.target)) {
-            categoryDropdown.classList.remove('open');
-        }
-    });
-
-    optionsContainer.addEventListener('click', (e) => {
-        const option = e.target.closest('.dropdown-option');
-        if (option) {
-            const type = option.dataset.type;
-            const selectedDot = selectedDisplay.querySelector('.selected-dot');
-            const selectedText = selectedDisplay.querySelector('.selected-text');
-
-            selectedDot.className = `selected-dot ${type}`;
-            selectedText.textContent = option.textContent.trim();
-            selectedText.classList.remove('is-placeholder');
-            hiddenInput.value = type;
-            categoryDropdown.classList.remove('open');
-        }
-    });
-}
 
             const isAllDay = allDayCheckbox.checked;
             const eventData = {
@@ -2238,6 +2241,7 @@ if (categoryDropdown) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
