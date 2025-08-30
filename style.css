@@ -1220,16 +1220,16 @@ tr:hover .btn-remove-row {
     flex-direction: column;
     gap: 1.25rem; /* Consistent spacing between sections */
     height: 100%; /* Ensure it fills the parent */
-    padding: 1.5rem;
+    padding: 1rem;
 }
 
 /* Form title */
 .add-event-form-title {
     font-family: 'Poppins', sans-serif;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: var(--gails-text-primary);
-    margin-bottom: 0.5rem; /* Extra space after title */
+    margin-bottom: 0.25rem; /* Extra space after title */
 }
 
 /* Input with icon styling */
