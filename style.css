@@ -1114,6 +1114,7 @@ tr:hover .btn-remove-row {
     display: flex;
     flex-direction: column;
     background-color: var(--gails-bg);
+    overflow: hidden; /* <-- Add this line */
 }
 
 .day-detail-header {
