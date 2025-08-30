@@ -283,54 +283,59 @@
                     <div id="day-detail-content" class="day-detail-content">
                         <div id="day-event-list" class="day-event-list">
                         </div>
-                        <div id="add-event-form" class="add-event-form-redesigned hidden">
-                            <h4 id="add-event-form-title" class="add-event-form-title">Add New Event</h4>
-                        
-                            <div class="form-field-group">
-                                <i class="bi bi-chat-left-text form-field-icon"></i>
-                                <input type="text" id="event-title-input" class="form-input" placeholder="Event Title">
-                            </div>
-                        
-                            <div class="time-control-group">
-                                <div class="all-day-toggle-wrap">
-                                    <label for="event-all-day-toggle" class="all-day-label">All Day</label>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" id="event-all-day-toggle">
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-                                <div id="event-time-inputs-container" class="time-inputs-wrap">
-                                    <div class="time-input">
-                                        <label for="event-time-from-input">From</label>
-                                        <input type="time" id="event-time-from-input" class="form-input">
-                                    </div>
-                                    <div class="time-input">
-                                        <label for="event-time-to-input">To</label>
-                                        <input type="time" id="event-time-to-input" class="form-input">
-                                    </div>
-                                </div>
-                            </div>
-                        
-                            <div class="form-section">
-                                <label class="form-section-label">Category</label>
-                                <div id="event-type-selector" class="event-type-grid">
-                                    <button class="event-type-btn" data-type="team">Team</button>
-                                    <button class="event-type-btn" data-type="operations">Operations</button>
-                                    <button class="event-type-btn" data-type="finance">Finance</button>
-                                    <button class="event-type-btn" data-type="personal">Personal</button>
-                                </div>
-                            </div>
-                            
-                            <div class="form-section">
-                                <label for="event-description-input" class="form-section-label">Notes</label>
-                                <textarea id="event-description-input" class="form-input" placeholder="Add a description..."></textarea>
-                            </div>
-                        
-                            <div class="form-actions">
-                                <button id="cancel-event-btn" class="btn btn-secondary">Cancel</button>
-                                <button id="save-event-btn" class="btn btn-primary">Save Event</button>
-                            </div>
-                        </div>
+                       <div id="add-event-form" class="add-event-form-redesigned hidden">
+    <h4 id="add-event-form-title" class="add-event-form-title">Add New Event</h4>
+
+    <div class="form-field-group">
+        <i class="bi bi-chat-left-text form-field-icon"></i>
+        <input type="text" id="event-title-input" class="form-input" placeholder="Event Title">
+    </div>
+
+    <div class="event-details-grid">
+        <div class="form-section">
+            <label class="form-section-label">Time & Date</label>
+            <div class="time-control-group">
+                <div class="all-day-toggle-wrap">
+                    <label for="event-all-day-toggle" class="all-day-label">All Day</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="event-all-day-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div id="event-time-inputs-container" class="time-inputs-wrap">
+                    <div class="time-input">
+                        <label for="event-time-from-input">From</label>
+                        <input type="time" id="event-time-from-input" class="form-input">
+                    </div>
+                    <div class="time-input">
+                        <label for="event-time-to-input">To</label>
+                        <input type="time" id="event-time-to-input" class="form-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <label class="form-section-label">Category</label>
+            <div id="event-type-selector" class="event-type-grid">
+                <button class="event-type-btn" data-type="team">Team</button>
+                <button class="event-type-btn" data-type="operations">Operations</button>
+                <button class="event-type-btn" data-type="finance">Finance</button>
+                <button class="event-type-btn" data-type="personal">Personal</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="form-section">
+        <label for="event-description-input" class="form-section-label">Notes</label>
+        <textarea id="event-description-input" class="form-input" placeholder="Add a description..."></textarea>
+    </div>
+
+    <div class="form-actions">
+        <button id="cancel-event-btn" class="btn btn-secondary">Cancel</button>
+        <button id="save-event-btn" class="btn btn-primary">Save Event</button>
+    </div>
+</div>
                         </div>
                     <div id="day-detail-footer" class="day-detail-footer">
                         <button id="add-event-btn" class="btn btn-primary w-full"><i class="bi bi-plus-lg"></i> Add Event</button>
@@ -348,3 +353,4 @@
 
 </body>
 </html>
+
