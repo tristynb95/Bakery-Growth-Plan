@@ -1077,6 +1077,19 @@ tr:hover .btn-remove-row {
     flex-direction: column;
     transition: background-color 0.2s ease;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.calendar-day::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2rem;
+    background: linear-gradient(to bottom, transparent, var(--gails-white));
+    pointer-events: none;
 }
 
 .calendar-day:hover {
@@ -1101,7 +1114,7 @@ tr:hover .btn-remove-row {
 }
 
 .calendar-day-content {
-    flex-grow: 1; /* Key fix for textbox containment */
+    flex-grow: 1;
     width: 100%;
     border: none;
     outline: none;
@@ -1110,7 +1123,12 @@ tr:hover .btn-remove-row {
     font-size: 0.875rem;
     line-height: 1.5;
     color: var(--gails-text-primary);
-    pointer-events: none; /* Make it non-interactive directly */
+    pointer-events: none;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+.calendar-day-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 #day-detail-modal {
     z-index: 1020; /* Ensure it's on top of the calendar modal */
