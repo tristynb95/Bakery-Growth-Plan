@@ -1728,7 +1728,7 @@ function runApp(app) {
                         </div>
                         <div class="flex items-center gap-2">
                              <span class="event-type-badge ${event.type}">${event.type}</span>
-                             <button class="btn-remove-row btn-remove-event" data-index="${index}" title="Delete event"><i class="bi bi-trash"></i></button>
+                             <button class="btn-remove-row btn-remove-event" data-index="${index}" title="Delete event"><i class="bi bi-x-lg"></i></button>
                         </div>
                     </div>
                     ${descriptionHTML}
@@ -2103,3 +2103,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
