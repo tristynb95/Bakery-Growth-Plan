@@ -1754,7 +1754,7 @@ function runApp(app) {
             eventList.innerHTML = '<p class="text-gray-500 text-center py-4">No events scheduled for this day.</p>';
         }
         
-        document.getElementById('add-event-btn').classList.remove('hidden');
+        
         document.getElementById('add-event-form').classList.add('hidden');
     }
 
@@ -1764,11 +1764,6 @@ function runApp(app) {
     
         document.getElementById('day-event-list').classList.add('hidden');
         document.getElementById('add-event-form').classList.remove('hidden');
-
-        document.getElementById('add-event-btn').classList.add('hidden');
-        const editActions = document.getElementById('edit-event-actions');
-        editActions.classList.remove('hidden');
-        editActions.classList.add('flex');
     
         document.getElementById('add-event-form-title').textContent = 'Edit Event';
         document.getElementById('save-event-btn').textContent = 'Update Event';
@@ -1923,10 +1918,6 @@ function runApp(app) {
         if (addEventBtn) addEventBtn.addEventListener('click', () => {
             appState.calendar.editingEventIndex = null;
             if (dayEventList) dayEventList.classList.add('hidden');
-            
-            addEventBtn.classList.add('hidden');
-            document.getElementById('edit-event-actions').classList.remove('hidden');
-            document.getElementById('edit-event-actions').classList.add('flex');
 
             const form = document.getElementById('add-event-form');
             if(form) form.classList.remove('hidden');
@@ -1965,11 +1956,6 @@ function runApp(app) {
             appState.calendar.editingEventIndex = null;
             const form = document.getElementById('add-event-form');
             if (form) form.classList.add('hidden');
-            
-            if (addEventBtn) addEventBtn.classList.remove('hidden');
-            const editActions = document.getElementById('edit-event-actions');
-            editActions.classList.add('hidden');
-            editActions.classList.remove('flex');
 
             if (dayEventList) dayEventList.classList.remove('hidden');
             const formTitle = document.getElementById('add-event-form-title');
@@ -2255,3 +2241,4 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
