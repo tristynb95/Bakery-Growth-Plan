@@ -1372,3 +1372,33 @@ tr:hover .btn-remove-row {
     padding-top: 0.5rem;
     border-top: 1px solid var(--gails-grey-light);
 }
+
+/* Add to the bottom of Section 38 in style.css */
+
+.event-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+/* Make the time control group stack vertically in its new, narrower column */
+.event-details-grid .time-control-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+}
+
+.event-details-grid .all-day-toggle-wrap,
+.event-details-grid .time-inputs-wrap {
+    justify-content: space-between;
+}
+
+/* Reduce the width of time inputs and labels to fit */
+.event-details-grid .time-input .form-input {
+    width: 100%;
+    min-width: 80px;
+}
+.event-details-grid .time-input label {
+    font-size: 0.875rem;
+}
