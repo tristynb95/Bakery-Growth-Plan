@@ -100,6 +100,7 @@ function runApp(app) {
         saveTimeout: null,
         sessionTimeout: null,
         planUnsubscribe: null,
+        calendarUnsubscribe: null, // ADDED
         calendar: {
             currentDate: new Date(),
             data: {},
@@ -354,6 +355,10 @@ function runApp(app) {
             appState.planUnsubscribe();
             appState.planUnsubscribe = null;
         }
+        if (appState.calendarUnsubscribe) { // ADDED
+            appState.calendarUnsubscribe();
+            appState.calendarUnsubscribe = null;
+        }
 
         if (user) {
             const lastActivity = localStorage.getItem('lastActivity');
@@ -396,6 +401,10 @@ function runApp(app) {
         if (appState.planUnsubscribe) {
             appState.planUnsubscribe();
             appState.planUnsubscribe = null;
+        }
+        if (appState.calendarUnsubscribe) { // ADDED
+            appState.calendarUnsubscribe();
+            appState.calendarUnsubscribe = null;
         }
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
@@ -507,6 +516,10 @@ function runApp(app) {
             appState.planUnsubscribe();
             appState.planUnsubscribe = null;
         }
+        if (appState.calendarUnsubscribe) { // ADDED
+            appState.calendarUnsubscribe();
+            appState.calendarUnsubscribe = null;
+        }
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         appState.planData = {};
@@ -522,13 +535,19 @@ function runApp(app) {
         if (appState.planUnsubscribe) {
             appState.planUnsubscribe();
         }
+        if (appState.calendarUnsubscribe) { // ADDED
+            appState.calendarUnsubscribe();
+        }
+
         if (!appState.currentUser || !appState.currentPlanId) {
             appState.planData = {};
+            appState.calendar.data = {}; // also clear calendar data
             return;
         }
-        const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
+        const planDocRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
+        const calendarDocRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId); // ADDED calendar doc ref
         try {
-            const doc = await docRef.get();
+            const doc = await planDocRef.get();
             if (doc.exists) {
                 appState.planData = doc.data();
             } else {
@@ -541,11 +560,9 @@ function runApp(app) {
             handleBackToDashboard();
         }
 
-        // --- NEW ---
-        // Eager load calendar data at the same time as the plan data
         await loadCalendarData();
 
-        appState.planUnsubscribe = docRef.onSnapshot((doc) => {
+        appState.planUnsubscribe = planDocRef.onSnapshot((doc) => {
             if (doc.exists) {
                 const remoteData = doc.data();
                 if (JSON.stringify(remoteData) !== JSON.stringify(appState.planData)) {
@@ -556,6 +573,21 @@ function runApp(app) {
             }
         }, (error) => {
             console.error("Error listening to plan changes:", error);
+        });
+
+        // ADDED calendar listener
+        appState.calendarUnsubscribe = calendarDocRef.onSnapshot((doc) => {
+            if (doc.exists) {
+                const remoteCalendarData = doc.data();
+                if (JSON.stringify(remoteCalendarData) !== JSON.stringify(appState.calendar.data)) {
+                    appState.calendar.data = remoteCalendarData;
+                    if (!DOMElements.calendarModal.classList.contains('hidden')) {
+                        renderCalendar();
+                    }
+                }
+            }
+        }, (error) => {
+            console.error("Error listening to calendar changes:", error);
         });
     }
 
@@ -1664,20 +1696,26 @@ function runApp(app) {
             console.error("Error loading calendar data:", error);
             appState.calendar.data = {};
         }
-        // renderCalendar(); // No need to render here, it will be rendered when the user clicks the FAB
     }
     
     let calendarSaveTimeout;
-    function saveCalendarData() {
+    function saveCalendarData(forceImmediate = false) { // MODIFIED
         clearTimeout(calendarSaveTimeout);
-        calendarSaveTimeout = setTimeout(() => {
+        const save = () => {
             if (!appState.currentUser || !appState.currentPlanId) return;
             const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
             calendarRef.set(appState.calendar.data, { merge: true }).catch(error => {
                 console.error("Failed to save calendar data:", error);
             });
-        }, 1000); // Debounce saving by 1 second
+        };
+
+        if (forceImmediate) {
+            save();
+        } else {
+            calendarSaveTimeout = setTimeout(save, 1000); 
+        }
     }
+
 
     function openDayDetailModal(dateKey) {
         const [year, month, day] = dateKey.split('-').map(Number);
@@ -1696,9 +1734,8 @@ function runApp(app) {
         DOMElements.dayDetailSaveBtn.onclick = () => {
             const newContent = DOMElements.dayDetailTextarea.value;
             appState.calendar.data[dateKey] = newContent;
-            saveCalendarData();
+            saveCalendarData(true); // MODIFIED
             
-            // Update the main calendar view
             const dayTextarea = DOMElements.calendarGrid.querySelector(`[data-date-key="${dateKey}"] .calendar-day-content`);
             if (dayTextarea) {
                 dayTextarea.value = newContent;
