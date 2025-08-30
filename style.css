@@ -1520,4 +1520,12 @@ tr:hover .btn-remove-row {
     font-size: 0.875rem;
 }
 
+/* 41. Compact Notes Text Area
+-------------------------------------------------- */
+#event-description-input.form-input {
+    min-height: 0;
+    flex-grow: 0;
+    resize: vertical;
+}
+
 
