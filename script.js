@@ -1669,11 +1669,12 @@ function runApp(app) {
             const dayEvents = appState.calendar.data[dateKey];
             if (Array.isArray(dayEvents)) {
                 const eventTypes = new Set(dayEvents.map(e => e.type));
-                eventTypes.forEach(type => {
-                    const dot = document.createElement('div');
-                    dot.classList.add('event-dot', `event-dot-${type}`);
-                    dotsContainer.appendChild(dot);
-                });
+eventTypes.forEach(type => {
+    const dot = document.createElement('div');
+    // MODIFIED: This now leverages the new CSS rules for all categories
+    dot.className = `event-dot option-dot ${type}`; 
+    dotsContainer.appendChild(dot);
+});
             }
             
             dayCell.appendChild(dotsContainer);
@@ -2290,6 +2291,7 @@ function setupCalendarEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
