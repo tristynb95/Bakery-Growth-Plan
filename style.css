@@ -1256,7 +1256,7 @@ tr:hover .btn-remove-row {
     background-color: transparent; /* <-- Change this line */
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
-    height: 52px;
+    height: 50px;
 }
 
 .all-day-toggle-wrap {
