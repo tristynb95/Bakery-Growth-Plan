@@ -576,17 +576,10 @@ function runApp(app) {
         });
 
         appState.calendarUnsubscribe = calendarDocRef.onSnapshot((doc) => {
-            if (doc.exists) {
-                const remoteCalendarData = doc.data();
-                if (JSON.stringify(remoteCalendarData) !== JSON.stringify(appState.calendar.data)) {
-                    appState.calendar.data = remoteCalendarData;
-                    if (!DOMElements.calendarModal.classList.contains('hidden')) {
-                        renderCalendar();
-                    }
-                }
-            } else { // If the document doesn't exist, reset local data
-                appState.calendar.data = {};
-                 if (!DOMElements.calendarModal.classList.contains('hidden')) {
+            const remoteCalendarData = doc.exists ? doc.data() : {};
+            if (JSON.stringify(remoteCalendarData) !== JSON.stringify(appState.calendar.data)) {
+                appState.calendar.data = remoteCalendarData;
+                if (!DOMElements.calendarModal.classList.contains('hidden')) {
                     renderCalendar();
                 }
             }
@@ -1678,13 +1671,7 @@ function runApp(app) {
             const dayContent = document.createElement('textarea');
             dayContent.classList.add('calendar-day-content');
             dayContent.value = appState.calendar.data[dateKey] || '';
-            dayContent.addEventListener('blur', (e) => {
-                e.target.scrollTop = 0;
-            });
-             dayContent.addEventListener('input', (e) => {
-                const currentData = e.target.value;
-                updateCalendarEntry(dateKey, currentData);
-            });
+            dayContent.readOnly = true; 
 
             dayCell.appendChild(dayContent);
             DOMElements.calendarGrid.appendChild(dayCell);
@@ -1707,40 +1694,6 @@ function runApp(app) {
         }
     }
     
-    let calendarSaveTimeout;
-    function updateCalendarEntry(dateKey, content) {
-        clearTimeout(calendarSaveTimeout);
-        appState.calendar.data[dateKey] = content;
-        
-        calendarSaveTimeout = setTimeout(() => {
-            if (!appState.currentUser || !appState.currentPlanId) return;
-            
-            const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
-            const dataToSave = {};
-            dataToSave[dateKey] = content;
-
-            calendarRef.set(dataToSave, { merge: true }).catch(error => {
-                console.error("Failed to save calendar data:", error);
-            });
-        }, 500); // Debounce saves by 500ms
-    }
-
-    async function saveCalendarEntryImmediate(dateKey, content) {
-        clearTimeout(calendarSaveTimeout);
-        appState.calendar.data[dateKey] = content;
-        if (!appState.currentUser || !appState.currentPlanId) return;
-        
-        const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
-        const dataToSave = {};
-        dataToSave[dateKey] = content;
-
-        try {
-            await calendarRef.set(dataToSave, { merge: true });
-        } catch (error) {
-            console.error("Failed to immediately save calendar data:", error);
-        }
-    }
-
     function openDayDetailModal(dateKey) {
         const [year, month, day] = dateKey.split('-').map(Number);
         const date = new Date(year, month - 1, day);
@@ -1758,19 +1711,40 @@ function runApp(app) {
         
         DOMElements.dayDetailSaveBtn.onclick = async () => {
             const newContent = DOMElements.dayDetailTextarea.value;
+            const originalButtonText = 'Save & Close';
+            
             DOMElements.dayDetailSaveBtn.disabled = true;
             DOMElements.dayDetailSaveBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Saving...';
 
-            await saveCalendarEntryImmediate(dateKey, newContent);
+            if (!appState.currentUser || !appState.currentPlanId) return;
+            
+            const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
+            const dataToUpdate = {};
+            dataToUpdate[dateKey] = newContent;
 
-            const dayTextarea = DOMElements.calendarGrid.querySelector(`[data-date-key="${dateKey}"] .calendar-day-content`);
-            if (dayTextarea) {
-                dayTextarea.value = newContent;
+            try {
+                await calendarRef.set(dataToUpdate, { merge: true });
+                
+                appState.calendar.data[dateKey] = newContent;
+                
+                const dayTextarea = DOMElements.calendarGrid.querySelector(`[data-date-key="${dateKey}"] .calendar-day-content`);
+                if (dayTextarea) {
+                    dayTextarea.value = newContent;
+                }
+
+                DOMElements.dayDetailSaveBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Saved!';
+                setTimeout(() => {
+                    DOMElements.dayDetailSaveBtn.disabled = false;
+                    DOMElements.dayDetailSaveBtn.innerHTML = originalButtonText;
+                    DOMElements.dayDetailModal.classList.add('hidden');
+                }, 1000);
+
+            } catch (error) {
+                console.error("Error saving calendar data:", error);
+                alert("Could not save your changes. Please try again.");
+                DOMElements.dayDetailSaveBtn.disabled = false;
+                DOMElements.dayDetailSaveBtn.innerHTML = originalButtonText;
             }
-
-            DOMElements.dayDetailSaveBtn.disabled = false;
-            DOMElements.dayDetailSaveBtn.innerHTML = 'Save & Close';
-            DOMElements.dayDetailModal.classList.add('hidden');
         };
     }
 
