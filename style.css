@@ -1000,7 +1000,7 @@ tr:hover .btn-remove-row {
     align-items: center;
     justify-content: center;
     z-index: 1010;
-    padding: 2rem;
+    padding: 1rem;
 }
 
 .calendar-modal-content {
@@ -1008,7 +1008,8 @@ tr:hover .btn-remove-row {
     border-radius: 1rem;
     width: 100%;
     height: 100%;
-    max-width: 1400px; /* Limit max width on large screens */
+    max-width: 95vw; /* Make it wider */
+    max-height: 95vh; /* Make it taller */
     display: flex;
     flex-direction: column;
     box-shadow: var(--shadow-lg);
@@ -1052,8 +1053,8 @@ tr:hover .btn-remove-row {
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: auto 1fr 1fr 1fr 1fr 1fr 1fr; /* Header row + up to 6 weeks */
-    gap: 1px; /* Creates thin grid lines */
+    grid-template-rows: auto repeat(6, 1fr); /* Fixes squashed bottom row */
+    gap: 1px;
     flex-grow: 1;
     background-color: var(--gails-grey-mid);
     border-top: 1px solid var(--gails-grey-mid);
@@ -1075,6 +1076,7 @@ tr:hover .btn-remove-row {
     display: flex;
     flex-direction: column;
     transition: background-color 0.2s ease;
+    cursor: pointer;
 }
 
 .calendar-day:hover {
@@ -1099,16 +1101,17 @@ tr:hover .btn-remove-row {
 }
 
 .calendar-day-content {
-    flex-grow: 1; /* This is the key fix */
+    flex-grow: 1; /* Key fix for textbox containment */
     width: 100%;
     border: none;
     outline: none;
-    resize: none; /* Disables the resize handle */
+    resize: none;
     background-color: transparent;
     font-size: 0.875rem;
     line-height: 1.5;
     color: var(--gails-text-primary);
+    pointer-events: none; /* Make it non-interactive directly */
 }
-.calendar-day-content:focus {
-    box-shadow: none; /* Remove focus shadow inside calendar */
+#day-detail-modal .modal-overlay {
+    z-index: 1020; /* Ensure it's on top of the calendar modal */
 }
