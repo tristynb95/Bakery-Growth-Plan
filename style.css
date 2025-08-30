@@ -1021,7 +1021,7 @@ tr:hover .btn-remove-row {
 
 .calendar-main-grid {
     display: grid;
-    grid-template-columns: 2fr 1.5fr; /* <-- Change this line */
+    grid-template-columns: 2fr 1fr; /* <-- Change this line */
     width: 100%;
     flex-grow: 1;
     min-height: 0;
