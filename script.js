@@ -1760,20 +1760,15 @@ eventTypes.forEach(type => {
         document.getElementById('add-event-form').classList.add('hidden');
     }
 
-    // MODIFIED: This entire function is updated to correctly load an event's category into the new searchable dropdown.
+    // MODIFIED: Now correctly handles loading an event with an icon
 function showEditEventForm(index) {
     appState.calendar.editingEventIndex = index;
     const event = appState.calendar.data[selectedDateKey][index];
 
-    // Show the form
     document.getElementById('day-event-list').classList.add('hidden');
     document.getElementById('add-event-form').classList.remove('hidden');
-
-    // Set form titles
     document.getElementById('add-event-form-title').textContent = 'Edit Event';
     document.getElementById('save-event-btn').textContent = 'Update Event';
-
-    // Populate standard event fields
     document.getElementById('event-title-input').value = event.title;
     const allDayCheckbox = document.getElementById('event-all-day-toggle');
     allDayCheckbox.checked = event.allDay || false;
@@ -1782,30 +1777,32 @@ function showEditEventForm(index) {
     document.getElementById('event-time-to-input').value = event.timeTo || '';
     document.getElementById('event-description-input').value = event.description || '';
 
-    // --- NEW LOGIC: Correctly populates the searchable category dropdown ---
     const searchInput = document.getElementById('category-search-input');
     const hiddenInput = document.getElementById('event-type-input');
-    const selectedDot = document.getElementById('category-selected-dot');
+    const iconContainer = document.getElementById('category-selected-icon-container');
     const optionsContainer = document.querySelector('#category-dropdown .dropdown-options');
+
+    // Clear previous state
+    iconContainer.innerHTML = '<span id="category-selected-dot" class="selected-dot"></span>';
+    iconContainer.className = 'selected-icon-container';
 
     if (event.type) {
         const optionToSelect = optionsContainer.querySelector(`.dropdown-option[data-type="${event.type}"]`);
         if (optionToSelect) {
-            // If a valid category is found, populate the input, hidden field, and dot
+            const iconElement = optionToSelect.querySelector('.option-icon, .option-dot');
+            iconContainer.innerHTML = iconElement.outerHTML;
+            iconContainer.classList.add(event.type);
+            iconContainer.classList.toggle('has-icon', iconElement.classList.contains('option-icon'));
+
             searchInput.value = optionToSelect.textContent.trim();
             hiddenInput.value = event.type;
-            selectedDot.className = `selected-dot ${event.type}`;
         } else {
-            // If event.type is old/invalid, clear the fields
             searchInput.value = '';
             hiddenInput.value = '';
-            selectedDot.className = 'selected-dot';
         }
     } else {
-        // Clear the fields if the event has no category
         searchInput.value = '';
         hiddenInput.value = '';
-        selectedDot.className = 'selected-dot';
     }
 }
     // MODIFIED: This entire function has been updated to support the searchable category dropdown.
@@ -1991,40 +1988,33 @@ const selectOption = (option) => {
         }
     });
 
-    if (addEventBtn) addEventBtn.addEventListener('click', () => {
-		appState.calendar.editingEventIndex = null;
-		if (dayEventList) dayEventList.classList.add('hidden');
-		const form = document.getElementById('add-event-form');
-		if (form) form.classList.remove('hidden');
+    // MODIFIED: The reset logic now clears the icon container
+if (addEventBtn) addEventBtn.addEventListener('click', () => {
+    appState.calendar.editingEventIndex = null;
+    if (dayEventList) dayEventList.classList.add('hidden');
+    const form = document.getElementById('add-event-form');
+    if (form) form.classList.remove('hidden');
 
-		const titleInput = document.getElementById('event-title-input');
-		if (titleInput) titleInput.value = '';
-		const allDayToggle = document.getElementById('event-all-day-toggle');
-		if (allDayToggle) allDayToggle.checked = false;
-		const timeContainer = document.getElementById('event-time-inputs-container');
-		if (timeContainer) timeContainer.classList.remove('hidden');
-		const fromInput = document.getElementById('event-time-from-input');
-		if (fromInput) fromInput.value = '';
-		const toInput = document.getElementById('event-time-to-input');
-		if (toInput) toInput.value = '';
-		const descInput = document.getElementById('event-description-input');
-		if (descInput) descInput.value = '';
+    // Reset standard fields
+    document.getElementById('event-title-input').value = '';
+    document.getElementById('event-all-day-toggle').checked = false;
+    document.getElementById('event-time-inputs-container').classList.remove('hidden');
+    document.getElementById('event-time-from-input').value = '';
+    document.getElementById('event-time-to-input').value = '';
+    document.getElementById('event-description-input').value = '';
 
-		// Reset searchable dropdown
-		if (categoryDropdown) {
-			const selectedDot = document.getElementById('category-selected-dot');
-			const searchInput = document.getElementById('category-search-input');
-			const hiddenInput = document.getElementById('event-type-input');
-			selectedDot.className = 'selected-dot';
-			searchInput.value = '';
-			hiddenInput.value = '';
-		}
+    // Reset searchable dropdown and icon
+    if (categoryDropdown) {
+        const iconContainer = document.getElementById('category-selected-icon-container');
+        iconContainer.innerHTML = '<span id="category-selected-dot" class="selected-dot"></span>';
+        iconContainer.className = 'selected-icon-container';
+        document.getElementById('category-search-input').value = '';
+        document.getElementById('event-type-input').value = '';
+    }
 
-		const formTitle = document.getElementById('add-event-form-title');
-		if (formTitle) formTitle.textContent = 'Add New Event';
-		const saveBtn = document.getElementById('save-event-btn');
-		if (saveBtn) saveBtn.textContent = 'Save Event';
-	});
+    document.getElementById('add-event-form-title').textContent = 'Add New Event';
+    document.getElementById('save-event-btn').textContent = 'Save Event';
+});
 
     if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => {
         appState.calendar.editingEventIndex = null;
@@ -2311,6 +2301,7 @@ const selectOption = (option) => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
