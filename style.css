@@ -1021,10 +1021,10 @@ tr:hover .btn-remove-row {
 
 .calendar-main-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr; /* 2/3 for calendar, 1/3 for details */
+    grid-template-columns: 1fr 1.5fr; /* <-- Change this line */
     width: 100%;
-    flex-grow: 1; /* Let the grid fill the available vertical space */
-    min-height: 0; /* Critical fix to prevent overflow in flex containers */
+    flex-grow: 1;
+    min-height: 0;
 }
 
 .calendar-grid-container {
