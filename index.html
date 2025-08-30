@@ -291,48 +291,49 @@
         <input type="text" id="event-title-input" class="form-input" placeholder="Event Title">
     </div>
 
-    <div class="form-section">
-        <label class="form-section-label">Time & Date</label>
-        <div class="time-control-group">
-            <div class="all-day-toggle-wrap">
-                <label for="event-all-day-toggle" class="all-day-label">All Day</label>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="event-all-day-toggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div id="event-time-inputs-container" class="time-inputs-wrap">
-                <div class="time-input">
-                    <label for="event-time-from-input">From</label>
-                    <input type="time" id="event-time-from-input" class="form-input">
+    <div class="event-details-grid">
+        <div class="form-section">
+            <label class="form-section-label">Time & Date</label>
+            <div class="time-control-group">
+                <div class="all-day-toggle-wrap">
+                    <label for="event-all-day-toggle" class="all-day-label">All Day</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="event-all-day-toggle">
+                        <span class="slider"></span>
+                    </label>
                 </div>
-                <div class="time-input">
-                    <label for="event-time-to-input">To</label>
-                    <input type="time" id="event-time-to-input" class="form-input">
+                <div id="event-time-inputs-container" class="time-inputs-wrap">
+                    <div class="time-input">
+                        <label for="event-time-from-input">From</label>
+                        <input type="time" id="event-time-from-input" class="form-input">
+                    </div>
+                    <div class="time-input">
+                        <label for="event-time-to-input">To</label>
+                        <input type="time" id="event-time-to-input" class="form-input">
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="form-section">
-        <label class="form-section-label">Category</label>
-        <div id="category-dropdown" class="custom-dropdown">
-            <div class="dropdown-selected" tabindex="0">
-                <span class="selected-dot"></span>
-                <span class="selected-text is-placeholder">Select a category...</span>
-                <i class="bi bi-chevron-down dropdown-caret"></i>
+        <div class="form-section">
+            <label class="form-section-label">Category</label>
+            <div id="category-dropdown" class="custom-dropdown">
+                <div class="dropdown-selected" tabindex="0">
+                    <span class="selected-dot"></span>
+                    <span class="selected-text is-placeholder">Select category...</span>
+                    <i class="bi bi-chevron-down dropdown-caret"></i>
+                </div>
+                <div class="dropdown-options">
+                    <div class="dropdown-option" data-type="team"><span class="option-dot team"></span> Team</div>
+                    <div class="dropdown-option" data-type="operations"><span class="option-dot operations"></span> Operations</div>
+                    <div class="dropdown-option" data-type="finance"><span class="option-dot finance"></span> Finance</div>
+                    <div class="dropdown-option" data-type="personal"><span class="option-dot personal"></span> Personal</div>
+                </div>
+                <input type="hidden" id="event-type-input">
             </div>
-            <div class="dropdown-options">
-                <div class="dropdown-option" data-type="team"><span class="option-dot team"></span> Team</div>
-                <div class="dropdown-option" data-type="operations"><span class="option-dot operations"></span> Operations</div>
-                <div class="dropdown-option" data-type="finance"><span class="option-dot finance"></span> Finance</div>
-                <div class="dropdown-option" data-type="personal"><span class="option-dot personal"></span> Personal</div>
-            </div>
-            <input type="hidden" id="event-type-input">
         </div>
     </div>
     
-    <div class="form-section">
+    <div class="form-section form-section-fill">
         <label for="event-description-input" class="form-section-label">Notes</label>
         <textarea id="event-description-input" class="form-input" placeholder="Add a description..."></textarea>
     </div>
@@ -359,5 +360,6 @@
 
 </body>
 </html>
+
 
 
