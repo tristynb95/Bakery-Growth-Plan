@@ -1038,7 +1038,7 @@ tr:hover .btn-remove-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 3rem;
+    margin-bottom: 2.5rem;
     flex-shrink: 0;
 }
 
