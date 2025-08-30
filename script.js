@@ -1639,6 +1639,10 @@ function runApp(app) {
             dayContent.addEventListener('blur', (e) => {
                 e.target.scrollTop = 0;
             });
+            dayContent.addEventListener('input', (e) => {
+                appState.calendar.data[dateKey] = e.target.value;
+                saveCalendarData();
+            });
 
             dayCell.appendChild(dayContent);
             DOMElements.calendarGrid.appendChild(dayCell);
