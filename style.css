@@ -1229,7 +1229,7 @@ tr:hover .btn-remove-row {
     font-size: 1.15rem;
     font-weight: 700;
     color: var(--gails-text-primary);
-    margin-bottom: 0.25rem; /* Extra space after title */
+    margin-bottom: 0rem; /* Extra space after title */
 }
 
 /* Input with icon styling */
@@ -1340,7 +1340,7 @@ tr:hover .btn-remove-row {
 .time-input .form-input {
     padding: 0.25rem 0.5rem; /* <-- Change this line */
     font-size: 0.8rem;      /* <-- Change this line */
-    width: 80px;
+    width: 90px;
 }
 
 /* General form sections */
