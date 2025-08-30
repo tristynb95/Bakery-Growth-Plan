@@ -1,976 +1,3 @@
-/* Gail's Bakery 30-60-90 Plan Stylesheet */
-/* v10.4 - Uniform Dashboard Card Sizing */
-
-/* 1. Root Variables & Base Styles
--------------------------------------------------- */
-:root {
-    --gails-red: #D10A11;
-    --gails-red-dark: #A4080D;
-    --gails-red-light: #FFF1F2;
-    --gails-gold: #FFC72C; /* New accent colour */
-    --gails-green: #059669;
-    --gails-white: #FFFFFF;
-    --gails-bg: #FDFDFC; /* Softer, warmer background */
-    --gails-grey-light: #F3F4F6;
-    --gails-grey-mid: #D1D5DB;
-    --gails-text-primary: #1F2937;
-    --gails-text-secondary: #6B7280;
-    --status-on-track-bg: #D1FAE5; --status-on-track-text: #065F46; --status-on-track-border: #6EE7B7;
-    --status-issues-bg: #FEF3C7; --status-issues-text: #92400E; --status-issues-border: #FBBF24;
-    --status-off-track-bg: #FEE2E2; --status-off-track-text: #991B1B; --status-off-track-border: #FCA5A5;
-    --review-blue-bg: #EFF6FF; --review-blue-text: #1E40AF; --review-blue-border: #93C5FD;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-focus: 0 0 0 3px rgba(209, 10, 17, 0.4); /* Enhanced focus shadow */
-}
-
-body {
-    font-family: 'DM Sans', sans-serif;
-    background-color: var(--gails-bg);
-    color: var(--gails-text-primary);
-    font-size: 16px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-.font-poppins {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-}
-.hidden { display: none !important; }
-.gails-red-text { color: var(--gails-red); }
-h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
-
-
-/* 2. Auth View & Loading States
--------------------------------------------------- */
-.auth-container { display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh; padding: 1rem; }
-.auth-box { width: 100%; max-width: 400px; background: var(--gails-white); padding: 2.5rem; border-radius: 1rem; box-shadow: var(--shadow-lg); border: 1px solid #E5E7EB; display: flex; flex-direction: column; gap: 1rem; }
-.auth-logo { height: 40px; width: auto; margin-bottom: 1rem; align-self: center; }
-.auth-title { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 700; text-align: center; color: var(--gails-text-primary); }
-.auth-error { background-color: var(--gails-red-light); color: var(--gails-red); border: 1px solid #FEE2E2; padding: 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; display: none; }
-.auth-buttons { display: flex; gap: 1rem; margin-top: 1rem; }
-.auth-buttons > .btn { flex: 1; }
-
-.loading-wrapper { display: flex; flex-direction: column; align-items: center; gap: 2rem; }
-.loading-wrapper .auth-logo { margin-bottom: 0; }
-.loading-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(253, 253, 252, 0.85); /* Updated to match new BG */
-    backdrop-filter: blur(5px); z-index: 1000;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-}
-.loading-spinner {
-    width: 50px; height: 50px;
-    border: 5px solid var(--gails-grey-mid);
-    border-top-color: var(--gails-red);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Enhanced Creation Loader */
-.creation-loader-step {
-    display: flex;
-    align-items: center;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--gails-text-secondary);
-    opacity: 0;
-    transform: translateY(10px);
-    animation: fadeInUp 0.5s ease forwards;
-}
-@keyframes fadeInUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-.creation-loader-step .icon {
-    width: 24px;
-    height: 24px;
-    margin-right: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.creation-loader-step .spinner {
-    width: 20px;
-    height: 20px;
-    border: 3px solid var(--gails-grey-mid);
-    border-top-color: var(--gails-red);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-.creation-loader-step .checkmark {
-    font-size: 1.5rem;
-    color: var(--gails-green);
-    transform: scale(0);
-    animation: popIn 0.3s ease forwards;
-}
-@keyframes popIn {
-    to {
-        transform: scale(1);
-    }
-}
-
-
-/* 3. Dashboard view
--------------------------------------------------- */
-.dashboard-header { background-color: var(--gails-white); padding: 1.25rem 2.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; }
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2rem; /* Increased gap */
-    margin-top: 2.5rem;
-}
-.plan-card {
-    background-color: var(--gails-white);
-    border: 1px solid #E5E7EB;
-    border-radius: 1.25rem; /* Slightly more rounded */
-    padding: 2rem; /* Increased padding */
-    box-shadow: var(--shadow-md);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    min-height: 250px; /* This is the fix */
-}
-.plan-card:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--gails-red);
-}
-.plan-card-actions { position: absolute; top: 1rem; right: 1rem; display: flex; gap: 0.5rem; opacity: 0; transition: opacity 0.3s ease; }
-.plan-card:hover .plan-card-actions { opacity: 1; }
-.plan-action-btn { background-color: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px); border: 1px solid var(--gails-grey-mid); color: var(--gails-text-secondary); border-radius: 9999px; width: 2.25rem; height: 2.25rem; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
-.plan-action-btn:hover { color: var(--gails-text-primary); border-color: #4B5563; background-color: var(--gails-white); }
-.plan-card-main { cursor: pointer; flex-grow: 1; display: flex; flex-direction: column;}
-.plan-card.new-plan-card {
-    border-style: dashed; border-width: 2px; color: var(--gails-text-secondary);
-    align-items: center; justify-content: center; cursor: pointer;
-}
-.plan-card.new-plan-card:hover {
-    color: var(--gails-red); background-color: var(--gails-red-light); border-color: var(--gails-red);
-}
-.plan-card.new-plan-card .bi-plus-circle-dotted { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-.plan-card.new-plan-card:hover .bi-plus-circle-dotted { transform: scale(1.15) rotate(90deg); }
-
-/* Dashboard Progress Circle */
-.progress-circle {
-    width: 44px; height: 44px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    background: conic-gradient(var(--gails-red) calc(var(--progress, 0) * 3.6deg), var(--gails-grey-light) 0deg);
-    transition: background 0.6s ease-out;
-}
-.progress-circle-inner {
-    width: 36px; height: 36px; border-radius: 50%; background: var(--gails-white);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.75rem; font-weight: 700; color: var(--gails-red);
-}
-
-/* 4. Main App Layout & Sidebar
--------------------------------------------------- */
-.main-layout { display: grid; grid-template-columns: 280px 1fr; height: 100vh; grid-template-areas: "sidebar main"; }
-#sidebar { grid-area: sidebar; }
-main { grid-area: main; }
-.sidebar-nav a {
-    display: flex; align-items: center; padding: 0.85rem 1rem; border-radius: 0.75rem;
-    font-weight: 600; /* Bolder font */
-    color: var(--gails-text-secondary);
-    transition: all 0.25s ease; border-left: 4px solid transparent;
-    transform: perspective(1px) translateZ(0); /* Promotes to its own layer */
-}
-.sidebar-nav a:hover {
-    background-color: var(--gails-grey-light);
-    color: var(--gails-text-primary);
-    transform: translateX(4px);
-}
-.sidebar-nav a.active {
-    background-color: var(--gails-red-light); color: var(--gails-red);
-    border-left-color: var(--gails-red);
-}
-.sidebar-nav .nav-icon { margin-right: 0.85rem; font-size: 1.35rem; }
-.nav-icon-completed { display: none; margin-right: 0.85rem; font-size: 1.35rem; color: var(--gails-green); }
-.sidebar-nav a.completed .nav-icon { display: none; }
-.sidebar-nav a.completed .nav-icon-completed { display: inline-block; }
-.sidebar-nav a.completed { color: var(--gails-green); }
-.sidebar-nav a.completed:not(.active) { background-color: #F0FDF4; }
-
-/* 5. Core Components
--------------------------------------------------- */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: 0.75rem; /* More rounded */ font-weight: 600; transition: all 0.2s ease-in-out; padding: 0.75rem 1.5rem; /* More padding */ border: 1px solid transparent; cursor: pointer; white-space: nowrap; }
-.btn-primary { background-color: var(--gails-red); color: var(--gails-white); box-shadow: var(--shadow-sm); }
-.btn-primary:hover { background-color: var(--gails-red-dark); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.btn-secondary { background-color: var(--gails-white); color: var(--gails-text-primary); border-color: var(--gails-grey-mid); }
-.btn-secondary:hover { border-color: #4B5563; background-color: var(--gails-grey-light); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
-.btn:active { transform: scale(0.98) translateY(0); box-shadow: none; }
-/* style.css */
-
-.form-input {
-    width: 100%;
-    padding: 1rem 1.15rem; /* Increased vertical and horizontal padding */
-    border-radius: 0.5rem;
-    border: 1px solid var(--gails-grey-mid);
-    background-color: var(--gails-white);
-    transition: all 0.2s;
-    font-size: 1.05rem; /* Slightly larger font */
-}
-
-/* Add this new rule for better textarea sizing */
-textarea.form-input {
-    min-height: 120px; /* Sets a larger default height */
-    line-height: 1.6;  /* Improves readability of multi-line text */
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: var(--gails-red);
-    box-shadow: var(--shadow-focus);
-}
-.content-card { background-color: var(--gails-white); border-radius: 1.25rem; box-shadow: var(--shadow-sm); border: 1px solid #E5E7EB; padding: 2rem; /* Increased padding */ }
-
-/* Character Counter Styles */
-.textarea-wrapper { position: relative; }
-.char-counter {
-    position: absolute; bottom: 8px; right: 12px;
-    font-size: 0.8rem; font-weight: 500; color: var(--gails-text-secondary);
-    background-color: rgba(253, 253, 252, 0.8); /* Updated to new BG color */
-    backdrop-filter: blur(2px); padding: 2px 8px; border-radius: 6px;
-    opacity: 0; transition: opacity 0.2s ease-in-out; pointer-events: none;
-}
-.char-counter.visible {
-    opacity: 1;
-}
-
-/* 6. Interactive Elements & Enhancements
--------------------------------------------------- */
-/* Enhanced Stepper */
-.stepper-item {
-    padding: 0.5rem;
-    border-radius: 0.75rem;
-    transition: background-color 0.2s ease, transform 0.2s ease;
-}
-.stepper-item:hover {
-    background-color: var(--gails-grey-light);
-    transform: translateX(4px);
-}
-.stepper-item .step-circle { position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background-color: var(--gails-grey-mid); color: var(--gails-white); }
-.stepper-item.active .step-circle { background-color: var(--gails-red); transform: scale(1.1); }
-.stepper-item.completed .step-circle { background-color: var(--gails-green); }
-
-.stepper-item .step-line { background-color: var(--gails-grey-mid); transition: background-color 0.3s; }
-.stepper-item.completed .step-line { background-color: var(--gails-green); }
-.stepper-item .step-label { transition: color 0.3s, font-weight 0.3s; }
-.stepper-item.active .step-label { color: var(--gails-red); font-weight: 600; }
-.stepper-item:hover:not(.active) .step-label {
-    color: var(--gails-text-primary);
-}
-
-.progress-bar-container { width: 100%; height: 10px; background-color: var(--gails-grey-light); border-radius: 5px; overflow: hidden; }
-.progress-bar-fill { width: 0%; height: 100%; background-color: var(--gails-red); border-radius: 5px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-
-.status-button { padding: 0.375rem 0.85rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; line-height: 1; border: 1px solid var(--gails-grey-mid); background-color: var(--gails-white); color: #374151; cursor: pointer; transition: all 0.2s ease-in-out; }
-.status-button:hover { background-color: var(--gails-grey-light); transform: translateY(-1px); }
-.status-button[data-status="on-track"].selected { background-color: var(--status-on-track-bg); color: var(--status-on-track-text); border-color: var(--status-on-track-border); }
-.status-button[data-status="issues"].selected { background-color: var(--status-issues-bg); color: var(--status-issues-text); border-color: var(--status-issues-border); }
-.status-button[data-status="off-track"].selected { background-color: var(--status-off-track-bg); color: var(--status-off-track-text); border-color: var(--status-off-track-border); }
-
-/* Enhanced Save Indicator */
-#save-indicator {
-    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    transform: translateY(10px);
-}
-#save-indicator.visible {
-    opacity: 1 !important;
-    transform: translateY(0);
-}
-
-/* 7. Custom Modal Styles
--------------------------------------------------- */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(5px); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.modal-box { background-color: var(--gails-white); border-radius: 1.25rem; box-shadow: var(--shadow-lg); width: 100%; max-width: 500px; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.75rem; border-bottom: 1px solid #E5E7EB; }
-.modal-content { padding: 1.75rem; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1.25rem 1.75rem; background-color: var(--gails-bg); border-bottom-left-radius: 1.25rem; border-bottom-right-radius: 1.25rem; }
-.modal-close-btn { background: none; border: none; font-size: 1.75rem; line-height: 1; cursor: pointer; color: var(--gails-text-secondary); }
-.modal-close-btn:hover { color: var(--gails-text-primary); }
-
-/* 8. Print-Specific Styles
--------------------------------------------------- */
-@media print {
-    body { background-color: var(--gails-white); }
-    .no-print { display: none !important; }
-    .printable-area { padding: 0 !important; }
-    .main-layout, #dashboard-view { display: block; height: auto !important; }
-    main { overflow: visible !important; height: auto !important; }
-
-    /* Keep the view.html header, but hide the dashboard one */
-    .dashboard-header { display: none; }
-    header { display: block; text-align: center; }
-    header a { display: none; } /* Hides the logo */
-    header div { margin-top: 0 !important; } /* Removes excess space */
-
-    /* Card styling */
-    .content-card { box-shadow: none; border: 1px solid var(--gails-grey-mid); page-break-inside: avoid; }
-    #quarter-overview { margin-top: 2rem; } /* Add space below header */
-
-    /* Page break for subsequent sections */
-    #monthly-sections {
-        page-break-before: always;
-    }
-
-    /* We need to reset the top margin for the first card inside monthly-sections */
-    #monthly-sections .content-card:first-child {
-        margin-top: 0;
-    }
-
-    .summary-content { font-size: 10pt; }
-    h1, h2, h3, h4, h5 { page-break-after: avoid; }
-}
-
-/* 9. Auth Enhancements */
-.forgot-password-link { display: block; font-size: 0.875rem; text-align: right; color: var(--gails-text-secondary); text-decoration: none; margin-top: -0.25rem; margin-bottom: 1rem; transition: color 0.2s ease-in-out; }
-.forgot-password-link:hover { color: var(--gails-red); text-decoration: underline; }
-.auth-success { background-color: #F0FDF4; color: #065F46; border: 1px solid #A7F3D0; padding: 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; margin-bottom: 1rem; }
-
-/* 10. Input Validation Enhancements */
-.form-input.input-error { border-color: var(--gails-red); box-shadow: var(--shadow-focus); }
-.shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; transform: translate3d(0, 0, 0); backface-visibility: hidden; perspective: 1000px; }
-@keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
-
-/* 11. Modal Enhancements */
-.modal-error-container { min-height: 24px; margin-top: 0.5rem; display: flex; align-items: center; }
-
-/* 12. Mobile Responsive Styles */
-@media (max-width: 1024px) {
-    .main-layout { display: block; }
-    #sidebar {
-        position: fixed; top: 0; left: 0; bottom: 0;
-        transform: translateX(-100%);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 1001; width: 280px; box-shadow: var(--shadow-lg);
-    }
-    .sidebar-open #sidebar { transform: translateX(0); }
-    .sidebar-overlay {
-        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background-color: rgba(17, 24, 39, 0.6); z-index: 1000;
-        opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none;
-    }
-    .sidebar-open .sidebar-overlay { opacity: 1; pointer-events: auto; }
-    main { width: 100%; height: 100%; }
-    .main-header .mobile-menu-btn { display: inline-flex; }
-    .printable-area { padding: 1.5rem !important; }
-    .main-header h1 { font-size: 1.75rem; }
-    .main-header #header-subtitle { font-size: 1rem; }
-    .dashboard-grid { grid-template-columns: 1fr; }
-    .content-card .grid-cols-3, .content-card .grid-cols-2 { grid-template-columns: 1fr; }
-    .stepper-item { align-items: flex-start; }
-}
-
-/* 13. Cookie Consent Banner */
-.cookie-consent-banner { position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--gails-white); padding: 1.25rem; box-shadow: var(--shadow-lg); z-index: 1002; border-top: 1px solid #E5E7EB; }
-.cookie-consent-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-.cookie-consent-link { text-decoration: underline; color: var(--gails-red); }
-.cookie-consent-buttons { display: flex; gap: 0.75rem; }
-
-/* 14. Dashboard Layout Fix */
-#dashboard-view { display: flex; flex-direction: column; min-height: 100vh; }
-#dashboard-content { flex-grow: 1; }
-
-/* 15. Subtle Button Style */
-.btn-subtle {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    background-color: transparent; border: 1px solid transparent;
-    padding: 0.5rem 1rem; color: var(--gails-text-secondary);
-    font-weight: 500; cursor: pointer; border-radius: 0.5rem;
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-}
-.btn-subtle:hover { background-color: var(--gails-grey-light); color: var(--gails-text-primary); }
-
-/* 16. Pillar Button Styles (Add to end of file)
--------------------------------------------------- */
-.pillar-button {
-    background-color: var(--gails-white);
-    color: var(--gails-text-secondary);
-    border: 1px solid var(--gails-grey-mid);
-    justify-content: center;
-    text-align: center;
-    font-size: 0.9rem;
-    padding: 0.75rem 1rem;
-    font-weight: 600;
-    transition: all 0.2s ease-in-out;
-}
-
-.pillar-button:hover {
-    border-color: var(--gails-text-primary);
-    color: var(--gails-text-primary);
-    background-color: var(--gails-grey-light);
-}
-
-.pillar-button.selected {
-    background-color: var(--gails-red);
-    color: var(--gails-white);
-    border-color: var(--gails-red);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.pillar-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background-color: var(--gails-red-light);
-    color: var(--gails-red);
-}
-
-/* 17. Icon & SVG Adjustments
--------------------------------------------------- */
-.pillar-icon-svg {
-    vertical-align: -0.125em; /* Aligns custom SVG with text baseline like Bootstrap Icons */
-}
-
-/* 18. Rich Text Editing Styles
--------------------------------------------------- */
-[contenteditable="true"].form-input {
-    min-height: 120px; /* Sets a larger default height */
-    line-height: 1.6;  /* Improves readability of multi-line text */
-    position: relative; /* Add this line */
-}
-
-/* Replicates placeholder text for contenteditable divs using a JS-managed class */
-[contenteditable="true"].form-input.is-placeholder-showing::before {
-    content: attr(data-placeholder);
-    color: #9CA3AF; /* Standard placeholder text colour */
-    pointer-events: none; /* Allows clicking through the placeholder */
-
-    /* New positioning rules */
-    position: absolute;
-    top: 1rem;        /* Match parent's top padding */
-    left: 1.15rem;    /* Match parent's left padding */
-    right: 1.15rem;   /* Allow text to wrap correctly */
-}
-
-/* 19. Custom Height for Weekly Check-in Text Boxes
--------------------------------------------------- */
-.weekly-check-in-container [contenteditable="true"].form-input {
-    min-height: 60px;
-}
-/* 20. Stepper Completion Checkmark Icon
--------------------------------------------------- */
-.stepper-item.completed .step-circle .bi-check-lg {
-    font-size: 1.2rem;
-    line-height: 1;
-}
-
-/* 21. Stepper Progress Text (Subtle Version)
--------------------------------------------------- */
-.step-progress {
-    font-size: 0.85em; /* Slightly smaller than the title */
-    font-weight: 500;  /* Lighter than the title */
-    color: var(--gails-text-secondary);
-    margin-left: 0.5rem; /* Space between title and counter */
-}
-
-/* 22. AI Action Plan Modal Styles
--------------------------------------------------- */
-#ai-printable-area ul {
-    list-style-type: none;
-    padding-left: 0;
-}
-#ai-printable-area .task-category {
-    padding-left: 1rem;
-    border-left: 3px solid var(--gails-grey-light);
-}
-
-/* 23. Modal Content Scrolling Fix
--------------------------------------------------- */
-.modal-box {
-    max-height: 85vh; /* Limit the modal's height to 85% of the screen height */
-    display: flex;
-    flex-direction: column;
-}
-
-.modal-content {
-    overflow-y: auto; /* Make the content area scrollable if it overflows */
-}
-
-/* Give the AI modal a bit more width to better display the plan */
-#modal-box[data-type="aiActionPlan"],
-#modal-box[data-type="aiActionPlan_view"],
-#modal-box[data-type="aiActionPlan_generate"] {
-    max-width: 95vw;
-    width: 1100px; /* Set a fixed large width, but max-width will constrain it */
-}
-
-/* 24. AI Action Plan Table Styles
--------------------------------------------------- */
-#ai-printable-area table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-}
-#ai-printable-area th, #ai-printable-area td {
-    border: 1px solid var(--gails-grey-mid);
-    padding: 0.75rem;
-    text-align: left;
-    font-size: 0.9rem;
-}
-#ai-printable-area th {
-    background-color: var(--gails-grey-light);
-    font-weight: 600;
-}
-#ai-printable-area h2 {
-    margin-top: 2rem;
-    border-bottom: 2px solid var(--gails-red-light);
-    padding-bottom: 0.5rem;
-}
-
-/* 25. Redesigned Summary Page Styles
--------------------------------------------------- */
-.summary-grid {
-    display: grid;
-    grid-template-columns: 1fr; /* Default to single column on mobile */
-}
-
-/* Two-column layout for wider screens */
-@media (min-width: 768px) {
-    .summary-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-.summary-section:not(:first-child) {
-    margin-top: 2rem;
-}
-
-.summary-heading {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--gails-red);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.75rem;
-}
-
-/* 26. Summary Page Status Badges
--------------------------------------------------- */
-.summary-status-badge {
-    padding: 0.25rem 0.625rem; /* 4px 10px */
-    border-radius: 9999px;
-    font-size: 0.625rem; /* 10px */
-    font-weight: 700;
-    line-height: 1;
-    text-transform: uppercase;
-    border: 1px solid transparent;
-}
-
-.summary-status-badge.status-on-track {
-    background-color: var(--status-on-track-bg);
-    color: var(--status-on-track-text);
-    border-color: var(--status-on-track-border);
-}
-.summary-status-badge.status-issues {
-    background-color: var(--status-issues-bg);
-    color: var(--status-issues-text);
-    border-color: var(--status-issues-border);
-}
-.summary-status-badge.status-off-track {
-    background-color: var(--status-off-track-bg);
-    color: var(--status-off-track-text);
-    border-color: var(--status-off-track-border);
-}
-
-/* Add some spacing for the new two-line weekly win layout */
-.summary-section ul {
-    list-style: none;
-    padding: 0;
-}
-.summary-section ul li:not(:first-child) {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--gails-grey-light);
-}
-
-/* 27. Editable AI Action Plan Styles
--------------------------------------------------- */
-.editable-action-plan {
-    border: 1px solid var(--gails-grey-mid);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    min-height: 200px;
-    outline: none;
-    transition: all 0.2s;
-}
-
-.editable-action-plan:focus {
-    border-color: var(--gails-red);
-    box-shadow: var(--shadow-focus);
-}
-
-/* ===== NEW RULE TO WIDEN TABLE CONTAINER ===== */
-#modal-box[data-type="aiActionPlan_view"] .editable-action-plan {
-    padding: 0;
-    border: none;
-}
-
-
-/* Ensure the new buttons in the modal footer look good */
-.modal-footer {
-    flex-wrap: wrap; /* Allow buttons to wrap on small screens */
-}
-
-/* 28. Redesigned Monthly Dashboard Styles
--------------------------------------------------- */
-
-/* Weekly Check-in Tab Styles */
-.weekly-tab {
-    padding: 0.75rem 0.25rem; /* 12px 4px */
-    font-size: 1rem; /* 16px */
-    font-weight: 600;
-    color: var(--gails-text-secondary);
-    border-bottom: 3px solid transparent;
-    transition: all 0.2s ease-in-out;
-    text-decoration: none;
-}
-
-.weekly-tab:hover {
-    color: var(--gails-text-primary);
-    border-bottom-color: var(--gails-grey-mid);
-}
-
-.weekly-tab.active {
-    color: var(--gails-red);
-    border-bottom-color: var(--gails-red);
-}
-
-/* Custom Height for Weekly Check-in Text Boxes */
-.weekly-check-in-input {
-    min-height: 80px;
-}
-
-/* 29. Taller Key Levers Text Box
--------------------------------------------------- */
-.key-levers-input {
-    min-height: 360px; /* Adjust this value as needed */
-}
-
-/* 30. Sidebar Navigation Progress Counter
--------------------------------------------------- */
-.nav-progress {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--gails-text-secondary);
-    margin-left: 0.5rem;
-    display: none; /* Hidden by default, JS will show it */
-}
-
-.sidebar-nav a.active .nav-progress {
-    color: var(--gails-red);
-}
-
-/* 30. Sidebar Donut Progress Indicator (Revised)
--------------------------------------------------- */
-/* Restore original nav icons that were hidden */
-.sidebar-nav a .nav-icon {
-    display: inline-block;
-}
-
-/* This container pushes the donut to the far right */
-.nav-progress-donut-container {
-    width: 20px;
-    height: 20px;
-    margin-left: auto;
-}
-
-.progress-donut {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-    overflow: visible;
-}
-
-.progress-donut__track {
-    stroke: var(--gails-grey-light);
-}
-
-.progress-donut__progress {
-    stroke: var(--gails-red);
-    transition: stroke-dashoffset 0.5s cubic-bezier(0.65, 0, 0.35, 1);
-}
-
-/* Hide the donut when the section is 100% complete */
-.sidebar-nav a.completed .nav-progress-donut-container {
-    display: none;
-}
-
-/* 31. AI Action Plan Tabs
--------------------------------------------------- */
-.ai-action-plan-container {
-    padding: 0;
-}
-
-.ai-tabs-nav {
-    display: flex;
-    border-bottom: 2px solid var(--gails-grey-light);
-    margin-bottom: 1.5rem;
-    padding: 0 1rem; /* Add some horizontal padding to the tabs */
-}
-
-.ai-tabs-nav .btn {
-    border-radius: 0.5rem 0.5rem 0 0;
-    border-bottom-width: 0;
-    margin-bottom: -2px;
-    background-color: transparent;
-    border-color: transparent;
-}
-
-.ai-tabs-nav .btn.active {
-    background-color: var(--gails-white);
-    border-color: var(--gails-grey-mid);
-    color: var(--gails-red);
-}
-
-
-.ai-tabs-content > div {
-    display: none;
-}
-
-.ai-tabs-content > div.active {
-    display: block;
-    animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Override existing styles for the editable container to remove padding/border */
-.editable-action-plan {
-    padding: 0;
-    border: none;
-    border-radius: 0;
-    min-height: auto;
-}
-
-.editable-action-plan:focus {
-    border-color: transparent;
-    box-shadow: none;
-}
-
-/* 32. Dynamic Table Action Buttons
--------------------------------------------------- */
-.btn-add-row {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--gails-text-secondary);
-    background-color: transparent;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-add-row:hover {
-    background-color: var(--gails-grey-light);
-    color: var(--gails-text-primary);
-}
-
-.btn-add-row .bi {
-    font-size: 1.2rem;
-}
-
-td.actions-cell {
-    text-align: center;
-    vertical-align: middle;
-    width: 50px; /* Give it a fixed width */
-}
-
-.btn-remove-row {
-    background: none;
-    border: none;
-    color: var(--gails-grey-mid);
-    cursor: pointer;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    opacity: 0; /* Hidden by default */
-    transition: all 0.2s ease;
-}
-
-tr:hover .btn-remove-row {
-    opacity: 1; /* Show on row hover */
-}
-
-.btn-remove-row:hover {
-    background-color: var(--gails-red-light);
-    color: var(--gails-red);
-}
-
-/* style.css */
-
-/* style.css */
-
-@media print {
-    /* ... other print styles ... */
-
-    /* Hides the 'Actions' column header and cells specifically for printing */
-    th.actions-cell,
-    td.actions-cell {
-        display: none !important;
-    }
-
-    /* ... other print styles ... */
-}
-
-/* 33. Undo/Redo Buttons
--------------------------------------------------- */
-.undo-redo-container {
-    display: flex;
-    gap: 0.5rem;
-    margin-right: auto; /* Pushes this group to the left */
-}
-
-.btn-icon {
-    padding: 0.75rem; /* Make it square */
-    font-size: 1.1rem;
-    line-height: 1;
-}
-
-.btn-icon .bi {
-    margin: 0; /* Remove default gap */
-}
-
-.btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-/* Adjust modal footer for new button layout */
-.modal-footer {
-    justify-content: space-between;
-    flex-wrap: nowrap;
-}
-
-/* 34. Sortable Table Headers
--------------------------------------------------- */
-.sortable-header {
-    cursor: pointer;
-    user-select: none;
-}
-
-.header-flex-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-}
-
-.sortable-header:hover {
-    background-color: var(--gails-red-light) !important;
-}
-
-.sortable-header .sort-icon {
-    display: inline-block;
-    width: 1em;
-    height: 1em;
-    margin-left: 0.5rem;
-    opacity: 0.3;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-/* Default state icon */
-.sortable-header .sort-icon::before {
-    content: '\F229'; /* Bootstrap Icons "caret-down-fill" */
-    font-family: "bootstrap-icons";
-}
-
-/* Ascending sort state */
-.sortable-header[data-sort-dir="asc"] .sort-icon {
-    opacity: 1;
-    color: var(--gails-red);
-}
-.sortable-header[data-sort-dir="asc"] .sort-icon::before {
-    content: '\F236'; /* "caret-up-fill" */
-}
-
-/* Descending sort state */
-.sortable-header[data-sort-dir="desc"] .sort-icon {
-    opacity: 1;
-    color: var(--gails-red);
-}
-.sortable-header[data-sort-dir="desc"] .sort-icon::before {
-    content: '\F229'; /* "caret-down-fill" */
-}
-
-/* Center buttons for confirmation dialogs */
-.modal-footer.is-confirming {
-    justify-content: center;
-}
-
-/* 35. Weekly Tab Completion Tick
--------------------------------------------------- */
-.week-complete-icon {
-    font-size: 0.9em; /* Make the icon slightly smaller */
-    line-height: 1;
-    transform: translateY(-1px); /* Nudge up for better alignment */
-    transition: color 0.2s ease-in-out;
-    color: var(--gails-green); /* Set the default color to green */
-}
-
-/* When a tab is active AND complete, make the tick red to match */
-.weekly-tab.active .week-complete-icon {
-    color: var(--gails-red);
-}
-
-/* 36. Profile Page Styles
--------------------------------------------------- */
-.profile-container {
-    padding: 2rem;
-}
-
-.profile-container .form-input {
-    background-color: var(--gails-grey-light);
-    cursor: not-allowed;
-}
-
-.btn-remove-photo {
-    background-color: rgba(17, 24, 39, 0.6);
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--gails-white);
-    border-radius: 9999px;
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: all 0.2s ease;
-}
-
-.btn-remove-photo:hover {
-    background-color: var(--gails-red);
-    color: var(--gails-white);
-    transform: scale(1.1);
-}
 /* 37. Calendar Styles (Redesigned)
 -------------------------------------------------- */
 .calendar-fab {
@@ -1004,155 +31,195 @@ tr:hover .btn-remove-row {
 }
 
 .calendar-modal-content {
-    background-color: var(--gails-bg);
+    background-color: var(--gails-white);
     border-radius: 1.5rem;
     width: 100%;
-    height: 100%;
-    max-width: 95vw;
-    max-height: 95vh;
+    max-width: 1200px; /* Increased max-width for the two-pane layout */
+    height: 90vh;
+    max-height: 800px;
     display: flex;
     flex-direction: column;
     box-shadow: var(--shadow-lg);
     overflow: hidden;
+}
+
+.calendar-main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* 2/3 for calendar, 1/3 for details */
+    height: 100%;
+    width: 100%;
+}
+
+.calendar-grid-container {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    border-right: 1px solid var(--gails-grey-mid);
 }
 
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--gails-grey-mid);
-    background-color: var(--gails-white);
-    border-radius: 1.5rem 1.5rem 0 0;
+    margin-bottom: 1.5rem;
     flex-shrink: 0;
-    gap: 1rem;
 }
 
 .calendar-nav-container {
     display: flex;
     gap: 0.5rem;
-    align-items: center;
 }
 
 #calendar-month-year {
     font-family: 'Poppins', sans-serif;
     font-size: 1.5rem;
-    color: var(--gails-text-primary);
-    margin: 0;
-    text-align: center;
-    flex-grow: 1;
-}
-
-.calendar-header .btn {
-    padding: 0.5rem;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-}
-
-.calendar-header .btn .bi {
-    font-size: 1.125rem;
-}
-
-#calendar-today-btn {
-    padding: 0.5rem 1rem;
-    width: auto;
-    height: 2.5rem;
-    border-radius: 0.75rem;
-    font-weight: 600;
 }
 
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: auto repeat(6, 1fr);
-    gap: 1px;
     flex-grow: 1;
-    background-color: var(--gails-grey-mid);
-    border-top: 1px solid var(--gails-grey-mid);
-    padding: 1px;
-}
-
-.calendar-day-header, .calendar-day {
-    background-color: var(--gails-white);
-    padding: 0.5rem;
+    gap: 0.5rem;
 }
 
 .calendar-day-header {
     text-align: center;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--gails-text-secondary);
     font-size: 0.875rem;
-    padding-bottom: 0.75rem;
 }
 
 .calendar-day {
-    display: flex;
-    flex-direction: column;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    border-radius: 0.75rem;
+    padding: 0.5rem;
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    border-radius: 0.5rem;
+    transition: background-color 0.2s ease;
+    border: 2px solid transparent;
 }
 
 .calendar-day:hover {
+    background-color: var(--gails-grey-light);
+}
+
+.calendar-day.selected {
     background-color: var(--gails-red-light);
-    transform: scale(1.02);
-    z-index: 10;
-    box-shadow: var(--shadow-lg);
+    border-color: var(--gails-red);
 }
 
 .calendar-day-number {
     font-weight: 600;
-    font-size: 0.875rem;
-    margin-bottom: 0.5rem;
-    transition: all 0.2s ease;
     text-align: right;
-    padding: 0.25rem;
+    margin-bottom: 0.25rem;
 }
 
 .calendar-day.current-day .calendar-day-number {
-    background-color: var(--gails-red);
-    color: var(--gails-white);
-    border-radius: 50%;
-    width: 1.75rem;
-    height: 1.75rem;
+    color: var(--gails-red);
+}
+
+.event-dots-container {
     display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 0.25rem;
+}
+
+.event-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.event-dot-team { background-color: #3B82F6; }
+.event-dot-operations { background-color: #F59E0B; }
+.event-dot-finance { background-color: #10B981; }
+.event-dot-personal { background-color: #8B5CF6; }
+
+/* Day Detail Styles */
+.day-detail-container {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--gails-bg);
+}
+
+.day-detail-header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    float: right;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--gails-grey-mid);
+    flex-shrink: 0;
 }
 
-.calendar-day.other-month {
-    background-color: var(--gails-grey-light);
-    color: var(--gails-grey-mid);
-}
-
-.calendar-day.other-month:hover {
-    background-color: var(--gails-grey-mid);
-}
-
-.calendar-day-content {
+.day-detail-content {
     flex-grow: 1;
-    width: 100%;
-    border: none;
-    outline: none;
-    resize: none;
-    background-color: transparent;
-    font-size: 0.8rem;
-    line-height: 1.4;
-    color: var(--gails-text-primary);
-    pointer-events: none;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    padding: 0.25rem;
+    overflow-y: auto;
+    padding: 1.5rem;
 }
 
-.calendar-day-content::-webkit-scrollbar {
-    display: none;
+.day-event-list .event-item {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--gails-grey-light);
+}
+.day-event-list .event-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
 }
 
-#day-detail-modal {
-    z-index: 1020;
+.event-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.event-item-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.event-item-time {
+    font-size: 0.875rem;
+    color: var(--gails-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.event-item-description {
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+}
+
+.event-type-badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    flex-shrink: 0;
+}
+.event-type-btn {
+    flex-grow: 1;
+    border: 1px solid var(--gails-grey-mid);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+.event-type-btn.selected {
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Color coding for buttons and badges */
+.event-type-btn[data-type="team"], .event-type-badge.team { background-color: #3B82F6; }
+.event-type-btn[data-type="operations"], .event-type-badge.operations { background-color: #F59E0B; }
+.event-type-btn[data-type="finance"], .event-type-badge.finance { background-color: #10B981; }
+.event-type-btn[data-type="personal"], .event-type-badge.personal { background-color: #8B5CF6; }
+
+
+.day-detail-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--gails-grey-mid);
+    background-color: var(--gails-white);
+    flex-shrink: 0;
 }
