@@ -1695,7 +1695,6 @@ function runApp(app) {
     function renderDayDetails(dateKey) {
         selectedDateKey = dateKey;
 
-        // Update selected day in calendar view
         document.querySelectorAll('.calendar-day.selected').forEach(d => d.classList.remove('selected'));
         const selectedDayCell = document.querySelector(`.calendar-day[data-date-key="${dateKey}"]`);
         if (selectedDayCell) selectedDayCell.classList.add('selected');
@@ -1704,23 +1703,34 @@ function runApp(app) {
         const date = new Date(year, month - 1, day);
         const formattedDate = date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
         
-        const dayDetailTitle = document.getElementById('day-detail-title');
-    dayDetailTitle.textContent = formattedDate;
+        document.getElementById('day-detail-title').textContent = formattedDate;
 
-    const eventList = document.getElementById('day-event-list');
-    eventList.classList.remove('hidden'); // Ensures the list is visible by default
-    eventList.innerHTML = '';
-    const dayEvents = appState.calendar.data[dateKey] || [];
-
+        const eventList = document.getElementById('day-event-list');
+        eventList.classList.remove('hidden');
+        eventList.innerHTML = '';
+        const dayEvents = appState.calendar.data[dateKey] || [];
 
         if (dayEvents.length > 0) {
-        dayEvents.sort((a,b) => (a.time || '').localeCompare(b.time || '')); // Sort events by time
-        dayEvents.forEach((event, index) => {
-            const eventItem = document.createElement('div');
-            eventItem.classList.add('event-item');
-            eventItem.dataset.index = index; // Add this line
-
-            const timeHTML = event.time ? `<p class="event-item-time">${event.time}</p>` : '';
+            dayEvents.sort((a,b) => {
+                if (a.allDay && !b.allDay) return -1;
+                if (!a.allDay && b.allDay) return 1;
+                return (a.timeFrom || '').localeCompare(b.timeFrom || '');
+            });
+            dayEvents.forEach((event, index) => {
+                const eventItem = document.createElement('div');
+                eventItem.classList.add('event-item');
+                eventItem.dataset.index = index;
+                
+                let timeHTML = '';
+                if (event.allDay) {
+                    timeHTML = `<p class="event-item-time font-semibold">All Day</p>`;
+                } else if (event.timeFrom) {
+                    let timeString = event.timeFrom;
+                    if (event.timeTo) {
+                        timeString += ` - ${event.timeTo}`;
+                    }
+                    timeHTML = `<p class="event-item-time">${timeString}</p>`;
+                }
                 
                 const descriptionHTML = event.description ? `<p class="event-item-description">${event.description.replace(/\n/g, '<br>')}</p>` : '';
 
@@ -1748,175 +1758,191 @@ function runApp(app) {
     }
 
     function showEditEventForm(index) {
-    appState.calendar.editingEventIndex = index;
-    const event = appState.calendar.data[selectedDateKey][index];
+        appState.calendar.editingEventIndex = index;
+        const event = appState.calendar.data[selectedDateKey][index];
+    
+        document.getElementById('day-event-list').classList.add('hidden');
+        document.getElementById('add-event-btn').classList.add('hidden');
+        document.getElementById('add-event-form').classList.remove('hidden');
+    
+        document.getElementById('add-event-form-title').textContent = 'Edit Event';
+        document.getElementById('save-event-btn').textContent = 'Update Event';
+    
+        const allDayCheckbox = document.getElementById('event-all-day-checkbox');
+        const timeInputsContainer = document.getElementById('event-time-inputs-container');
+        
+        allDayCheckbox.checked = event.allDay || false;
+        timeInputsContainer.classList.toggle('hidden', allDayCheckbox.checked);
 
-    // Hide list, show form
-    document.getElementById('day-event-list').classList.add('hidden');
-    document.getElementById('add-event-btn').classList.add('hidden');
-    document.getElementById('add-event-form').classList.remove('hidden');
-
-    // Update form title and button text
-    document.getElementById('add-event-form-title').textContent = 'Edit Event';
-    document.getElementById('save-event-btn').textContent = 'Update Event';
-
-    // Populate form fields
-    document.getElementById('event-title-input').value = event.title;
-    document.getElementById('event-time-input').value = event.time || '';
-    document.getElementById('event-description-input').value = event.description || '';
-
-    const eventTypeSelector = document.getElementById('event-type-selector');
-    eventTypeSelector.querySelector('.selected')?.classList.remove('selected');
-    eventTypeSelector.querySelector(`[data-type="${event.type}"]`)?.classList.add('selected');
-}
+        document.getElementById('event-title-input').value = event.title;
+        document.getElementById('event-time-from-input').value = event.timeFrom || '';
+        document.getElementById('event-time-to-input').value = event.timeTo || '';
+        document.getElementById('event-description-input').value = event.description || '';
+    
+        const eventTypeSelector = document.getElementById('event-type-selector');
+        eventTypeSelector.querySelector('.selected')?.classList.remove('selected');
+        eventTypeSelector.querySelector(`[data-type="${event.type}"]`)?.classList.add('selected');
+    }
 
 
     function setupCalendarEventListeners() {
-    const calendarFab = document.getElementById('calendar-fab');
-    const calendarModal = document.getElementById('calendar-modal');
-    const calendarCloseBtn = document.getElementById('calendar-close-btn');
-    const calendarPrevMonthBtn = document.getElementById('calendar-prev-month-btn');
-    const calendarNextMonthBtn = document.getElementById('calendar-next-month-btn');
-    const calendarTodayBtn = document.getElementById('calendar-today-btn');
-    const calendarGrid = document.getElementById('calendar-grid');
-    const addEventBtn = document.getElementById('add-event-btn');
-    const cancelEventBtn = document.getElementById('cancel-event-btn');
-    const saveEventBtn = document.getElementById('save-event-btn');
-    const eventTypeSelector = document.getElementById('event-type-selector');
-    
-    if(!calendarFab) return;
+        const calendarFab = document.getElementById('calendar-fab');
+        const calendarModal = document.getElementById('calendar-modal');
+        const calendarCloseBtn = document.getElementById('calendar-close-btn');
+        const calendarPrevMonthBtn = document.getElementById('calendar-prev-month-btn');
+        const calendarNextMonthBtn = document.getElementById('calendar-next-month-btn');
+        const calendarTodayBtn = document.getElementById('calendar-today-btn');
+        const calendarGrid = document.getElementById('calendar-grid');
+        const addEventBtn = document.getElementById('add-event-btn');
+        const cancelEventBtn = document.getElementById('cancel-event-btn');
+        const saveEventBtn = document.getElementById('save-event-btn');
+        const eventTypeSelector = document.getElementById('event-type-selector');
+        const allDayCheckbox = document.getElementById('event-all-day-checkbox');
+        const timeInputsContainer = document.getElementById('event-time-inputs-container');
 
-    calendarFab.addEventListener('click', () => {
-        appState.calendar.currentDate = new Date();
-        const today = new Date();
-        selectedDateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-        renderCalendar();
-        renderDayDetails(selectedDateKey);
-        calendarModal.classList.remove('hidden');
-    });
+        if(!calendarFab) return;
 
-    calendarCloseBtn.addEventListener('click', () => calendarModal.classList.add('hidden'));
-    
-    calendarPrevMonthBtn.addEventListener('click', () => {
-        appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() - 1);
-        renderCalendar();
-    });
+        allDayCheckbox.addEventListener('change', () => {
+            timeInputsContainer.classList.toggle('hidden', allDayCheckbox.checked);
+        });
 
-    calendarNextMonthBtn.addEventListener('click', () => {
-        appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() + 1);
-        renderCalendar();
-    });
+        calendarFab.addEventListener('click', () => {
+            appState.calendar.currentDate = new Date();
+            const today = new Date();
+            selectedDateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            renderCalendar();
+            renderDayDetails(selectedDateKey);
+            calendarModal.classList.remove('hidden');
+        });
 
-    calendarTodayBtn.addEventListener('click', () => {
-        const today = new Date();
-        appState.calendar.currentDate = today;
-        const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-        renderCalendar();
-        renderDayDetails(dateKey);
-    });
+        calendarCloseBtn.addEventListener('click', () => calendarModal.classList.add('hidden'));
+        
+        calendarPrevMonthBtn.addEventListener('click', () => {
+            appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() - 1);
+            renderCalendar();
+        });
 
-    calendarGrid.addEventListener('click', (e) => {
-        const dayCell = e.target.closest('.calendar-day');
-        if (dayCell && dayCell.dataset.dateKey) {
-            renderDayDetails(dayCell.dataset.dateKey);
-        }
-    });
-    
-    document.getElementById('day-event-list').addEventListener('click', async (e) => {
-        const removeBtn = e.target.closest('.btn-remove-event');
-        const eventItem = e.target.closest('.event-item');
+        calendarNextMonthBtn.addEventListener('click', () => {
+            appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() + 1);
+            renderCalendar();
+        });
 
-        if (removeBtn) {
-            if (!confirm('Are you sure you want to delete this event?')) return;
-            const indexToRemove = parseInt(removeBtn.dataset.index, 10);
+        calendarTodayBtn.addEventListener('click', () => {
+            const today = new Date();
+            appState.calendar.currentDate = today;
+            const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            renderCalendar();
+            renderDayDetails(dateKey);
+        });
+
+        calendarGrid.addEventListener('click', (e) => {
+            const dayCell = e.target.closest('.calendar-day');
+            if (dayCell && dayCell.dataset.dateKey) {
+                renderDayDetails(dayCell.dataset.dateKey);
+            }
+        });
+        
+        document.getElementById('day-event-list').addEventListener('click', async (e) => {
+            const removeBtn = e.target.closest('.btn-remove-event');
+            const eventItem = e.target.closest('.event-item');
+
+            if (removeBtn) {
+                if (!confirm('Are you sure you want to delete this event?')) return;
+                const indexToRemove = parseInt(removeBtn.dataset.index, 10);
+                const dayEvents = appState.calendar.data[selectedDateKey] || [];
+                dayEvents.splice(indexToRemove, 1);
+                const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
+                const dataToUpdate = {};
+                dataToUpdate[selectedDateKey] = dayEvents;
+                try {
+                    await calendarRef.set(dataToUpdate, { merge: true });
+                    renderCalendar();
+                    renderDayDetails(selectedDateKey);
+                } catch (error) {
+                    console.error("Error removing event:", error);
+                    alert("Could not remove the event. Please try again.");
+                }
+            } else if (eventItem) {
+                const index = parseInt(eventItem.dataset.index, 10);
+                showEditEventForm(index);
+            }
+        });
+
+        addEventBtn.addEventListener('click', () => {
+            appState.calendar.editingEventIndex = null;
+            document.getElementById('day-event-list').classList.add('hidden');
+            addEventBtn.classList.add('hidden');
+            const form = document.getElementById('add-event-form');
+            form.classList.remove('hidden');
+            
+            document.getElementById('event-title-input').value = '';
+            document.getElementById('event-all-day-checkbox').checked = false;
+            document.getElementById('event-time-inputs-container').classList.remove('hidden');
+            document.getElementById('event-time-from-input').value = '';
+            document.getElementById('event-time-to-input').value = '';
+            document.getElementById('event-description-input').value = '';
+            document.getElementById('event-type-selector').querySelector('.selected')?.classList.remove('selected');
+            document.getElementById('add-event-form-title').textContent = 'Add New Event';
+            document.getElementById('save-event-btn').textContent = 'Save Event';
+        });
+
+        cancelEventBtn.addEventListener('click', () => {
+            appState.calendar.editingEventIndex = null;
+            document.getElementById('add-event-form').classList.add('hidden');
+            document.getElementById('add-event-btn').classList.remove('hidden');
+            document.getElementById('day-event-list').classList.remove('hidden');
+            document.getElementById('add-event-form-title').textContent = 'Add New Event';
+            document.getElementById('save-event-btn').textContent = 'Save Event';
+        });
+
+        eventTypeSelector.addEventListener('click', (e) => {
+            if (e.target.classList.contains('event-type-btn')) {
+                eventTypeSelector.querySelector('.selected')?.classList.remove('selected');
+                e.target.classList.add('selected');
+            }
+        });
+
+        saveEventBtn.addEventListener('click', async () => {
+            const title = document.getElementById('event-title-input').value.trim();
+            const typeButton = eventTypeSelector.querySelector('.selected');
+            if (!title || !typeButton) {
+                alert('Please provide a title and select an event type.');
+                return;
+            }
+
+            const isAllDay = document.getElementById('event-all-day-checkbox').checked;
+            const eventData = {
+                title: title,
+                allDay: isAllDay,
+                timeFrom: isAllDay ? '' : document.getElementById('event-time-from-input').value,
+                timeTo: isAllDay ? '' : document.getElementById('event-time-to-input').value,
+                type: typeButton.dataset.type,
+                description: document.getElementById('event-description-input').value.trim(),
+            };
+
             const dayEvents = appState.calendar.data[selectedDateKey] || [];
-            dayEvents.splice(indexToRemove, 1);
+            
+            if (appState.calendar.editingEventIndex !== null) {
+                dayEvents[appState.calendar.editingEventIndex] = eventData;
+            } else {
+                dayEvents.push(eventData);
+            }
+
             const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
             const dataToUpdate = {};
             dataToUpdate[selectedDateKey] = dayEvents;
+
             try {
                 await calendarRef.set(dataToUpdate, { merge: true });
+                appState.calendar.editingEventIndex = null;
                 renderCalendar();
                 renderDayDetails(selectedDateKey);
             } catch (error) {
-                console.error("Error removing event:", error);
-                alert("Could not remove the event. Please try again.");
+                console.error("Error saving event:", error);
+                alert("Could not save the event. Please try again.");
             }
-        } else if (eventItem) {
-            const index = parseInt(eventItem.dataset.index, 10);
-            showEditEventForm(index);
-        }
-    });
-
-    addEventBtn.addEventListener('click', () => {
-        appState.calendar.editingEventIndex = null;
-        document.getElementById('day-event-list').classList.add('hidden');
-        addEventBtn.classList.add('hidden');
-        const form = document.getElementById('add-event-form');
-        form.classList.remove('hidden');
-        
-        document.getElementById('event-title-input').value = '';
-        document.getElementById('event-time-input').value = '';
-        document.getElementById('event-description-input').value = '';
-        document.getElementById('event-type-selector').querySelector('.selected')?.classList.remove('selected');
-        document.getElementById('add-event-form-title').textContent = 'Add New Event';
-        document.getElementById('save-event-btn').textContent = 'Save Event';
-    });
-
-    cancelEventBtn.addEventListener('click', () => {
-        appState.calendar.editingEventIndex = null;
-        document.getElementById('add-event-form').classList.add('hidden');
-        document.getElementById('add-event-btn').classList.remove('hidden');
-        document.getElementById('day-event-list').classList.remove('hidden');
-        document.getElementById('add-event-form-title').textContent = 'Add New Event';
-        document.getElementById('save-event-btn').textContent = 'Save Event';
-    });
-
-    eventTypeSelector.addEventListener('click', (e) => {
-        if (e.target.classList.contains('event-type-btn')) {
-            eventTypeSelector.querySelector('.selected')?.classList.remove('selected');
-            e.target.classList.add('selected');
-        }
-    });
-
-    saveEventBtn.addEventListener('click', async () => {
-        const title = document.getElementById('event-title-input').value.trim();
-        const typeButton = eventTypeSelector.querySelector('.selected');
-        if (!title || !typeButton) {
-            alert('Please provide a title and select an event type.');
-            return;
-        }
-
-        const eventData = {
-            title: title,
-            time: document.getElementById('event-time-input').value,
-            type: typeButton.dataset.type,
-            description: document.getElementById('event-description-input').value.trim(),
-        };
-
-        const dayEvents = appState.calendar.data[selectedDateKey] || [];
-        
-        if (appState.calendar.editingEventIndex !== null) {
-            dayEvents[appState.calendar.editingEventIndex] = eventData;
-        } else {
-            dayEvents.push(eventData);
-        }
-
-        const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
-        const dataToUpdate = {};
-        dataToUpdate[selectedDateKey] = dayEvents;
-
-        try {
-            await calendarRef.set(dataToUpdate, { merge: true });
-            appState.calendar.editingEventIndex = null;
-            renderCalendar();
-            renderDayDetails(selectedDateKey);
-        } catch (error) {
-            console.error("Error saving event:", error);
-            alert("Could not save the event. Please try again.");
-        }
-    });
-}
+        });
+    }
 
     // --- EVENT LISTENERS ---
     const handleLoginAttempt = () => {
