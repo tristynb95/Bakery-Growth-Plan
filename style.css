@@ -1220,7 +1220,7 @@ tr:hover .btn-remove-row {
     flex-direction: column;
     gap: 1rem; /* Consistent spacing between sections */
     height: 100%; /* Ensure it fills the parent */
-    padding: 1rem;
+    padding: 0.25rem 1rem 1rem 1rem;
 }
 
 /* Form title */
