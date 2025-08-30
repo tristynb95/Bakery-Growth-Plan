@@ -1172,22 +1172,22 @@ function runApp(app) {
             const tab = e.target.closest('.ai-tab-btn');
             const sortHeader = e.target.closest('.sortable-header');
             if (addBtn) {
-                const tableBody = addBtn.closest('table').querySelector('tbody');
-                if (tableBody) {
-                    const newRow = document.createElement('tr');
-                    newRow.innerHTML = `
-                        <td contenteditable="true"></td>
-                        <td contenteditable="true"></td>
-                        <td contenteditable="true"></td>
-                        <td contenteditable="true"></td>
-                        <td contenteditable="true"></td>
-                        <td contenteditable="true"></td>
-                        <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-trash3"></i></button></td>
-                    `;
-                    tableBody.appendChild(newRow);
-                    saveState();
-                }
-            }
+    const tableBody = addBtn.closest('table').querySelector('tbody');
+    if (tableBody) {
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-x-lg"></i></button></td>
+        `;
+        tableBody.appendChild(newRow);
+        saveState();
+    }
+}
             if (removeBtn) {
                 removeBtn.closest('tr').remove();
                 saveState();
@@ -2107,5 +2107,6 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
