@@ -1494,3 +1494,25 @@ tr:hover .btn-remove-row {
 .option-dot.operations, .selected-dot.operations { background-color: #F59E0B; }
 .option-dot.finance, .selected-dot.finance { background-color: #10B981; }
 .option-dot.personal, .selected-dot.personal { background-color: #8B5CF6; }
+
+/* In style.css, add this at the end */
+
+/* 40. Event Panel Header Actions
+-------------------------------------------------- */
+.day-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.day-detail-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Style the new add event button to be more subtle */
+#day-detail-header #add-event-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
