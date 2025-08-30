@@ -284,34 +284,51 @@
                         <div id="day-event-list" class="day-event-list">
                             </div>
                         <div id="add-event-form" class="add-event-form hidden">
-                            <h4 id="add-event-form-title" class="font-bold mb-2">Add New Event</h4>
-                            <input type="text" id="event-title-input" class="form-input mb-2" placeholder="Event Title">
+                            <h4 id="add-event-form-title" class="font-bold text-lg mb-4">Add New Event</h4>
                             
-                            <div class="flex items-center justify-between mb-2">
-                                <label for="event-all-day-checkbox" class="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-700">
-                                    <input type="checkbox" id="event-all-day-checkbox" class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
-                                    <span>All Day</span>
-                                </label>
-                            </div>
-                            <div id="event-time-inputs-container" class="grid grid-cols-2 gap-4 mb-2">
+                            <div class="space-y-4">
                                 <div>
-                                    <label for="event-time-from-input" class="text-xs font-medium text-gray-500">From</label>
-                                    <input type="time" id="event-time-from-input" class="form-input text-sm p-2 mt-1">
+                                    <label for="event-title-input" class="text-sm font-medium text-gray-700">Event Title</label>
+                                    <input type="text" id="event-title-input" class="form-input mt-1" placeholder="e.g., Train the Trainer session">
                                 </div>
+
+                                <div id="event-time-inputs-container">
+                                    <div class="grid grid-cols-2 gap-4 items-end">
+                                        <div>
+                                            <label for="event-time-from-input" class="text-sm font-medium text-gray-700">From</label>
+                                            <input type="time" id="event-time-from-input" class="form-input mt-1">
+                                        </div>
+                                        <div>
+                                            <label for="event-time-to-input" class="text-sm font-medium text-gray-700">To</label>
+                                            <input type="time" id="event-time-to-input" class="form-input mt-1">
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div>
-                                    <label for="event-time-to-input" class="text-xs font-medium text-gray-500">To</label>
-                                    <input type="time" id="event-time-to-input" class="form-input text-sm p-2 mt-1">
+                                    <label for="event-all-day-checkbox" class="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-700">
+                                        <input type="checkbox" id="event-all-day-checkbox" class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                                        <span>All Day Event</span>
+                                    </label>
+                                </div>
+                                
+                                <div>
+                                     <label class="text-sm font-medium text-gray-700">Category</label>
+                                     <div id="event-type-selector" class="flex gap-2 mt-1">
+                                        <button class="event-type-btn" data-type="team">Team</button>
+                                        <button class="event-type-btn" data-type="operations">Operations</button>
+                                        <button class="event-type-btn" data-type="finance">Finance</button>
+                                        <button class="event-type-btn" data-type="personal">Personal</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="event-description-input" class="text-sm font-medium text-gray-700">Description</label>
+                                    <textarea id="event-description-input" class="form-input mt-1" placeholder="Add details..."></textarea>
                                 </div>
                             </div>
 
-                            <div id="event-type-selector" class="flex gap-2 mb-2">
-                                <button class="event-type-btn" data-type="team">Team</button>
-                                <button class="event-type-btn" data-type="operations">Operations</button>
-                                <button class="event-type-btn" data-type="finance">Finance</button>
-                                <button class="event-type-btn" data-type="personal">Personal</button>
-                            </div>
-                            <textarea id="event-description-input" class="form-input mb-2" placeholder="Description..."></textarea>
-                            <div class="flex justify-end gap-2">
+                            <div class="flex justify-end gap-2 mt-6">
                                 <button id="cancel-event-btn" class="btn btn-secondary">Cancel</button>
                                 <button id="save-event-btn" class="btn btn-primary">Save Event</button>
                             </div>
