@@ -1435,6 +1435,7 @@ tr:hover .btn-remove-row {
     background-color: var(--gails-white);
     border: 1px solid var(--gails-grey-mid);
     border-radius: 0.5rem;
+    padding: 0.6rem 0.75rem;
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -1491,7 +1492,7 @@ tr:hover .btn-remove-row {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    margin-right: 0.75rem;
+    margin-right: 0.5rem;
     flex-shrink: 0;
     background-color: var(--gails-grey-mid); /* Default color */
 }
@@ -1525,7 +1526,8 @@ tr:hover .btn-remove-row {
 #event-description-input.form-input {
     min-height: 0;
     flex-grow: 0;
-    resize: vertical;
+    height: 46px; /* <-- Add this line to set a fixed height */
+    resize: none; /* <-- Change this to prevent resizing */
 }
 
 
