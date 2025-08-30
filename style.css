@@ -34,10 +34,10 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-.font-poppins { 
-    font-family: 'Poppins', sans-serif; 
-    font-weight: 700; 
-    letter-spacing: -0.02em; 
+.font-poppins {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
 }
 .hidden { display: none !important; }
 .gails-red-text { color: var(--gails-red); }
@@ -120,11 +120,11 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 /* 3. Dashboard view
 -------------------------------------------------- */
 .dashboard-header { background-color: var(--gails-white); padding: 1.25rem 2.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; }
-.dashboard-grid { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 2rem; /* Increased gap */
-    margin-top: 2.5rem; 
+    margin-top: 2.5rem;
 }
 .plan-card {
     background-color: var(--gails-white);
@@ -138,8 +138,8 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
     position: relative;
     min-height: 250px; /* This is the fix */
 }
-.plan-card:hover { 
-    transform: translateY(-6px); 
+.plan-card:hover {
+    transform: translateY(-6px);
     box-shadow: var(--shadow-lg);
     border-color: var(--gails-red);
 }
@@ -148,11 +148,11 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 .plan-action-btn { background-color: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px); border: 1px solid var(--gails-grey-mid); color: var(--gails-text-secondary); border-radius: 9999px; width: 2.25rem; height: 2.25rem; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
 .plan-action-btn:hover { color: var(--gails-text-primary); border-color: #4B5563; background-color: var(--gails-white); }
 .plan-card-main { cursor: pointer; flex-grow: 1; display: flex; flex-direction: column;}
-.plan-card.new-plan-card { 
-    border-style: dashed; border-width: 2px; color: var(--gails-text-secondary); 
-    align-items: center; justify-content: center; cursor: pointer; 
+.plan-card.new-plan-card {
+    border-style: dashed; border-width: 2px; color: var(--gails-text-secondary);
+    align-items: center; justify-content: center; cursor: pointer;
 }
-.plan-card.new-plan-card:hover { 
+.plan-card.new-plan-card:hover {
     color: var(--gails-red); background-color: var(--gails-red-light); border-color: var(--gails-red);
 }
 .plan-card.new-plan-card .bi-plus-circle-dotted { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -176,21 +176,21 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 .main-layout { display: grid; grid-template-columns: 280px 1fr; height: 100vh; grid-template-areas: "sidebar main"; }
 #sidebar { grid-area: sidebar; }
 main { grid-area: main; }
-.sidebar-nav a { 
-    display: flex; align-items: center; padding: 0.85rem 1rem; border-radius: 0.75rem; 
+.sidebar-nav a {
+    display: flex; align-items: center; padding: 0.85rem 1rem; border-radius: 0.75rem;
     font-weight: 600; /* Bolder font */
-    color: var(--gails-text-secondary); 
-    transition: all 0.25s ease; border-left: 4px solid transparent; 
+    color: var(--gails-text-secondary);
+    transition: all 0.25s ease; border-left: 4px solid transparent;
     transform: perspective(1px) translateZ(0); /* Promotes to its own layer */
 }
-.sidebar-nav a:hover { 
-    background-color: var(--gails-grey-light); 
-    color: var(--gails-text-primary); 
+.sidebar-nav a:hover {
+    background-color: var(--gails-grey-light);
+    color: var(--gails-text-primary);
     transform: translateX(4px);
 }
-.sidebar-nav a.active { 
-    background-color: var(--gails-red-light); color: var(--gails-red); 
-    border-left-color: var(--gails-red); 
+.sidebar-nav a.active {
+    background-color: var(--gails-red-light); color: var(--gails-red);
+    border-left-color: var(--gails-red);
 }
 .sidebar-nav .nav-icon { margin-right: 0.85rem; font-size: 1.35rem; }
 .nav-icon-completed { display: none; margin-right: 0.85rem; font-size: 1.35rem; color: var(--gails-green); }
@@ -209,13 +209,13 @@ main { grid-area: main; }
 .btn:active { transform: scale(0.98) translateY(0); box-shadow: none; }
 /* style.css */
 
-.form-input { 
-    width: 100%; 
+.form-input {
+    width: 100%;
     padding: 1rem 1.15rem; /* Increased vertical and horizontal padding */
-    border-radius: 0.5rem; 
-    border: 1px solid var(--gails-grey-mid); 
-    background-color: var(--gails-white); 
-    transition: all 0.2s; 
+    border-radius: 0.5rem;
+    border: 1px solid var(--gails-grey-mid);
+    background-color: var(--gails-white);
+    transition: all 0.2s;
     font-size: 1.05rem; /* Slightly larger font */
 }
 
@@ -225,10 +225,10 @@ textarea.form-input {
     line-height: 1.6;  /* Improves readability of multi-line text */
 }
 
-.form-input:focus { 
-    outline: none; 
-    border-color: var(--gails-red); 
-    box-shadow: var(--shadow-focus); 
+.form-input:focus {
+    outline: none;
+    border-color: var(--gails-red);
+    box-shadow: var(--shadow-focus);
 }
 .content-card { background-color: var(--gails-white); border-radius: 1.25rem; box-shadow: var(--shadow-sm); border: 1px solid #E5E7EB; padding: 2rem; /* Increased padding */ }
 
@@ -828,7 +828,7 @@ tr:hover .btn-remove-row {
     /* ... other print styles ... */
 
     /* Hides the 'Actions' column header and cells specifically for printing */
-    th.actions-cell, 
+    th.actions-cell,
     td.actions-cell {
         display: none !important;
     }
@@ -1018,42 +1018,53 @@ tr:hover .btn-remove-row {
 
 .calendar-header {
     display: flex;
-    justify-content: center;
+    justify-content: space-between; /* Adjusted for better layout */
     align-items: center;
-    padding: 1.5rem 2rem;
+    padding: 1.25rem 1.5rem; /* Adjusted padding */
     border-bottom: 1px solid var(--gails-grey-mid);
     position: relative;
     background-color: var(--gails-white);
     flex-shrink: 0;
+    gap: 1rem; /* Add gap between elements */
 }
 
 #calendar-month-year {
     font-family: 'Poppins', sans-serif;
     font-size: 1.5rem;
     color: var(--gails-text-primary);
-    margin: 0 1.5rem;
+    margin: 0; /* Remove large margin */
+    text-align: center;
+    flex-grow: 1; /* Allow title to take space */
 }
 
 .calendar-header .btn {
-    padding: 0.5rem; /* Smaller padding for icon buttons */
-    width: 2.25rem; /* 36px */
-    height: 2.25rem; /* 36px */
+    padding: 0.5rem;
+    width: 2.5rem; /* 40px */
+    height: 2.5rem; /* 40px */
     border-radius: 50%;
 }
+
 .calendar-header .btn .bi {
-    font-size: 1rem;
+    font-size: 1.125rem; /* 18px */
 }
+
+#calendar-today-btn {
+    padding: 0.5rem 1rem; /* More padding for text */
+    width: auto;
+    height: 2.5rem; /* 40px */
+    border-radius: 0.75rem; /* Match other buttons */
+    font-weight: 600;
+    order: -1; /* Move to the left */
+}
+
 #calendar-close-btn {
-    position: absolute;
-    top: 50%;
-    right: 1.5rem;
-    transform: translateY(-50%);
+    /* No longer needs absolute positioning */
 }
 
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: auto repeat(6, 1fr); /* Fixes squashed bottom row */
+    grid-template-rows: auto repeat(6, 1fr);
     gap: 1px;
     flex-grow: 1;
     background-color: var(--gails-grey-mid);
@@ -1062,23 +1073,25 @@ tr:hover .btn-remove-row {
 
 .calendar-day-header, .calendar-day {
     background-color: var(--gails-white);
-    padding: 0.5rem;
+    padding: 0.75rem; /* Increased padding */
 }
 
 .calendar-day-header {
     text-align: center;
-    font-weight: 600;
+    font-weight: 700; /* Bolder */
     color: var(--gails-text-secondary);
     font-size: 0.875rem;
+    padding: 0.5rem; /* Less vertical padding for headers */
 }
 
 .calendar-day {
     display: flex;
     flex-direction: column;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    border: 1px solid transparent; /* Add transparent border */
 }
 
 .calendar-day::after {
@@ -1087,34 +1100,56 @@ tr:hover .btn-remove-row {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 2rem;
-    background: linear-gradient(to bottom, transparent, var(--gails-white));
+    height: 2.5rem; /* Taller gradient */
+    background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.8));
     pointer-events: none;
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.3s ease;
+}
+
+.calendar-day:hover::after {
+    opacity: 1; /* Show gradient on hover */
 }
 
 .calendar-day:hover {
-    background-color: var(--gails-grey-light);
+    background-color: var(--gails-red-light);
+    border-color: var(--gails-red); /* Show border on hover */
 }
 
 .calendar-day-number {
     font-weight: 600;
     font-size: 0.875rem;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem; /* More space */
+    transition: all 0.2s ease;
 }
 
 .calendar-day.current-day .calendar-day-number {
     background-color: var(--gails-red);
     color: var(--gails-white);
     border-radius: 50%;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 2rem; /* Larger circle */
+    height: 2rem; /* Larger circle */
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 0 0 4px var(--gails-red-light);
+}
+.calendar-day.current-day {
+    border-color: var(--gails-red);
+}
+
+
+.calendar-day.other-month {
+    color: var(--gails-grey-mid);
+    background-color: var(--gails-grey-light);
+}
+.calendar-day.other-month:hover {
+    background-color: var(--gails-grey-mid);
+    border-color: var(--gails-grey-mid);
 }
 
 .calendar-day-content {
-    flex-grow: 1; /* Key fix for textbox containment */
+    flex-grow: 1;
     width: 100%;
     border: none;
     outline: none;
@@ -1123,12 +1158,15 @@ tr:hover .btn-remove-row {
     font-size: 0.875rem;
     line-height: 1.5;
     color: var(--gails-text-primary);
-    pointer-events: none; /* Make it non-interactive directly */
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    pointer-events: none;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 .calendar-day-content::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
+  display: none;
+}
+#day-detail-modal {
+    z-index: 1020;
 }
 #day-detail-modal {
     z-index: 1020; /* Ensure it's on top of the calendar modal */
