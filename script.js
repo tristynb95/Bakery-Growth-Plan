@@ -1604,14 +1604,15 @@ function runApp(app) {
         const firstDayOfWeek = firstDayOfMonth.getDay(); 
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+        ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach(day => {
             const dayHeader = document.createElement('div');
             dayHeader.classList.add('calendar-day-header');
             dayHeader.textContent = day;
             DOMElements.calendarGrid.appendChild(dayHeader);
         });
         
-        for (let i = 0; i < firstDayOfWeek; i++) {
+        const emptyCells = (firstDayOfWeek === 0) ? 6 : firstDayOfWeek - 1;
+        for (let i = 0; i < emptyCells; i++) {
             const emptyCell = document.createElement('div');
             emptyCell.style.backgroundColor = 'var(--gails-grey-light)';
             DOMElements.calendarGrid.appendChild(emptyCell);
