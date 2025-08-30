@@ -1704,11 +1704,13 @@ function runApp(app) {
         const formattedDate = date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
         
         const dayDetailTitle = document.getElementById('day-detail-title');
-        dayDetailTitle.textContent = formattedDate;
+    dayDetailTitle.textContent = formattedDate;
 
-        const eventList = document.getElementById('day-event-list');
-        eventList.innerHTML = '';
-        const dayEvents = appState.calendar.data[dateKey] || [];
+    const eventList = document.getElementById('day-event-list');
+    eventList.classList.remove('hidden'); // Ensures the list is visible by default
+    eventList.innerHTML = '';
+    const dayEvents = appState.calendar.data[dateKey] || [];
+
 
         if (dayEvents.length > 0) {
             dayEvents.sort((a,b) => (a.time || '').localeCompare(b.time || '')); // Sort events by time
@@ -1815,18 +1817,20 @@ function runApp(app) {
         });
 
         addEventBtn.addEventListener('click', () => {
-            addEventBtn.classList.add('hidden');
-            document.getElementById('add-event-form').classList.remove('hidden');
-            document.getElementById('event-title-input').value = '';
-            document.getElementById('event-time-input').value = '';
-            document.getElementById('event-description-input').value = '';
-            eventTypeSelector.querySelector('.selected')?.classList.remove('selected');
-        });
+        document.getElementById('day-event-list').classList.add('hidden'); // Hide the event list
+        addEventBtn.classList.add('hidden');
+        document.getElementById('add-event-form').classList.remove('hidden');
+        document.getElementById('event-title-input').value = '';
+        document.getElementById('event-time-input').value = '';
+        document.getElementById('event-description-input').value = '';
+        eventTypeSelector.querySelector('.selected')?.classList.remove('selected');
+    });
 
-        cancelEventBtn.addEventListener('click', () => {
-            addEventBtn.classList.remove('hidden');
-            document.getElementById('add-event-form').classList.add('hidden');
-        });
+    cancelEventBtn.addEventListener('click', () => {
+        document.getElementById('day-event-list').classList.remove('hidden'); // Show the event list again
+        addEventBtn.classList.remove('hidden');
+        document.getElementById('add-event-form').classList.add('hidden');
+    });
 
         eventTypeSelector.addEventListener('click', (e) => {
             if (e.target.classList.contains('event-type-btn')) {
@@ -2103,4 +2107,5 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
