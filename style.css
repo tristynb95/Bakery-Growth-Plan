@@ -1535,3 +1535,11 @@ tr:hover .btn-remove-row {
 input[type="time"]::-webkit-calendar-picker-indicator {
     display: none;
 }
+
+/* Add this new rule to the bottom of style.css */
+
+/* 43. Center Time Input Placeholder Text
+-------------------------------------------------- */
+input[type="time"] {
+    text-align: center;
+}
