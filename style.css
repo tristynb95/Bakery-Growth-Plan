@@ -1475,9 +1475,12 @@ tr:hover .btn-remove-row {
     background-color: var(--gails-white);
     border: 1px solid var(--gails-grey-mid);
     border-radius: 0.5rem;
-    padding: 1rem 0.75rem;
+    /* MODIFIED: Standardised padding to align the icon */
+    padding: 1rem;
     cursor: pointer;
     transition: all 0.2s;
+    /* MODIFIED: Adjusted gap for better visual balance */
+    gap: 0.75rem;
 }
 .dropdown-selected:focus, .custom-dropdown.open .dropdown-selected {
     border-color: var(--gails-red);
