@@ -1526,8 +1526,8 @@ tr:hover .btn-remove-row {
 #event-description-input.form-input {
     min-height: 0;
     flex-grow: 0;
-    height: 46px; /* <-- Add this line to set a fixed height */
-    resize: none; /* <-- Change this to prevent resizing */
+    height: 46px;
+    resize: none; /* <-- This removes the scrollbar and resize handle */
 }
 
 
