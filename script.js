@@ -1705,6 +1705,7 @@ function runApp(app) {
         const formattedDate = date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
         
         document.getElementById('day-detail-title').textContent = formattedDate;
+        document.getElementById('add-event-form').classList.add('hidden');
 
         const eventList = document.getElementById('day-event-list');
         eventList.classList.remove('hidden');
@@ -1916,53 +1917,57 @@ function runApp(app) {
         });
 
         if (addEventBtn) addEventBtn.addEventListener('click', () => {
-            appState.calendar.editingEventIndex = null;
-            if (dayEventList) dayEventList.classList.add('hidden');
+    appState.calendar.editingEventIndex = null;
 
-            const form = document.getElementById('add-event-form');
-            if(form) form.classList.remove('hidden');
-            
-            const titleInput = document.getElementById('event-title-input');
-            const allDayToggle = document.getElementById('event-all-day-toggle');
-            const timeContainer = document.getElementById('event-time-inputs-container');
-            if(titleInput) titleInput.value = '';
-            if(allDayToggle) allDayToggle.checked = false;
-            if(timeContainer) timeContainer.classList.remove('hidden');
+    // Hide the event list and show the blank form
+    if (dayEventList) dayEventList.classList.add('hidden');
+    const form = document.getElementById('add-event-form');
+    if (form) form.classList.remove('hidden');
 
-            const fromInput = document.getElementById('event-time-from-input');
-            const toInput = document.getElementById('event-time-to-input');
-            const descInput = document.getElementById('event-description-input');
-            if(fromInput) fromInput.value = '';
-            if(toInput) toInput.value = '';
-            if(descInput) descInput.value = '';
-            
-            if(categoryDropdown) {
-                const selectedDot = categoryDropdown.querySelector('.selected-dot');
-                const selectedText = categoryDropdown.querySelector('.selected-text');
-                const hiddenInput = document.getElementById('event-type-input');
-                selectedDot.className = 'selected-dot';
-                selectedText.textContent = 'Select a category...';
-                selectedText.classList.add('is-placeholder');
-                hiddenInput.value = '';
-            }
-            
-            const formTitle = document.getElementById('add-event-form-title');
-            const saveBtn = document.getElementById('save-event-btn');
-            if(formTitle) formTitle.textContent = 'Add New Event';
-            if(saveBtn) saveBtn.textContent = 'Save Event';
-        });
+    // Reset all form fields to blank
+    const titleInput = document.getElementById('event-title-input');
+    if (titleInput) titleInput.value = '';
+
+    const allDayToggle = document.getElementById('event-all-day-toggle');
+    if (allDayToggle) allDayToggle.checked = false;
+
+    const timeContainer = document.getElementById('event-time-inputs-container');
+    if (timeContainer) timeContainer.classList.remove('hidden');
+
+    const fromInput = document.getElementById('event-time-from-input');
+    if (fromInput) fromInput.value = '';
+
+    const toInput = document.getElementById('event-time-to-input');
+    if (toInput) toInput.value = '';
+
+    const descInput = document.getElementById('event-description-input');
+    if (descInput) descInput.value = '';
+
+    const categoryDropdown = document.getElementById('category-dropdown');
+    if (categoryDropdown) {
+        const selectedDot = categoryDropdown.querySelector('.selected-dot');
+        const selectedText = categoryDropdown.querySelector('.selected-text');
+        const hiddenInput = document.getElementById('event-type-input');
+        selectedDot.className = 'selected-dot';
+        selectedText.textContent = 'Select a category...';
+        selectedText.classList.add('is-placeholder');
+        hiddenInput.value = '';
+    }
+
+    const formTitle = document.getElementById('add-event-form-title');
+    if (formTitle) formTitle.textContent = 'Add New Event';
+
+    const saveBtn = document.getElementById('save-event-btn');
+    if (saveBtn) saveBtn.textContent = 'Save Event';
+});
 
         if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => {
-            appState.calendar.editingEventIndex = null;
-            const form = document.getElementById('add-event-form');
-            if (form) form.classList.add('hidden');
+    appState.calendar.editingEventIndex = null;
+    const form = document.getElementById('add-event-form');
+    if (form) form.classList.add('hidden');
 
-            if (dayEventList) dayEventList.classList.remove('hidden');
-            const formTitle = document.getElementById('add-event-form-title');
-            const saveBtn = document.getElementById('save-event-btn');
-            if(formTitle) formTitle.textContent = 'Add New Event';
-            if(saveBtn) saveBtn.textContent = 'Save Event';
-        });
+    if (dayEventList) dayEventList.classList.remove('hidden');
+});
 
         if (saveEventBtn) saveEventBtn.addEventListener('click', async () => {
             const title = document.getElementById('event-title-input').value.trim();
@@ -2241,4 +2246,5 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
