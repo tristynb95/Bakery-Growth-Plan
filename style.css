@@ -1489,20 +1489,47 @@ tr:hover .btn-remove-row {
     border-bottom: 1px solid var(--gails-grey-light);
 }
 
+/* --- MODIFIED: Replaced with new, expanded category color palette --- */
+
 /* Color Dots */
 .selected-dot, .option-dot {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    margin-right: 0.5rem;
+    margin-right: 0.75rem; /* Increased spacing slightly */
     flex-shrink: 0;
     background-color: var(--gails-grey-mid); /* Default color */
 }
-.option-dot.team, .selected-dot.team { background-color: #3B82F6; }
-.option-dot.operations, .selected-dot.operations { background-color: #F59E0B; }
-.option-dot.finance, .selected-dot.finance { background-color: #10B981; }
-.option-dot.personal, .selected-dot.personal { background-color: #8B5CF6; }
 
+/* --- People & Development (Greens) --- */
+.option-dot.one-to-one, .selected-dot.one-to-one { background-color: #10B981; }
+.option-dot.cross-training, .selected-dot.cross-training { background-color: #34D399; }
+.option-dot.on-boarding, .selected-dot.on-boarding { background-color: #6EE7B7; }
+.option-dot.recruitment, .selected-dot.recruitment { background-color: #059669; }
+.option-dot.training, .selected-dot.training { background-color: #047857; }
+
+/* --- Business & Operations (Blues) --- */
+.option-dot.bm-self-audit, .selected-dot.bm-self-audit { background-color: #3B82F6; }
+.option-dot.cascade, .selected-dot.cascade { background-color: #60A5FA; }
+.option-dot.meeting, .selected-dot.meeting { background-color: #2563EB; }
+
+/* --- Launches & Deadlines (Reds) --- */
+.option-dot.new-product-launch, .selected-dot.new-product-launch { background-color: #EF4444; }
+.option-dot.promo-launch, .selected-dot.promo-launch { background-color: #F87171; }
+.option-dot.rise-deadline, .selected-dot.rise-deadline { background-color: #DC2626; }
+.option-dot.rise-with-gails, .selected-dot.rise-with-gails { background-color: var(--gails-red); }
+
+/* --- Celebrations & Milestones (Yellows/Oranges) --- */
+.option-dot.birthday, .selected-dot.birthday { background-color: #FBBF24; }
+.option-dot.coffee-cake, .selected-dot.coffee-cake { background-color: #F59E0B; }
+.option-dot.probation-end, .selected-dot.probation-end { background-color: #FCD34D; }
+.option-dot.quarterly-awards, .selected-dot.quarterly-awards { background-color: #fbbf24; }
+.option-dot.work-anniversary, .selected-dot.work-anniversary { background-color: #FCD34D; }
+
+/* --- Other (Neutrals & Purples) --- */
+.option-dot.personal, .selected-dot.personal { background-color: #8B5CF6; }
+.option-dot.reminder, .selected-dot.reminder { background-color: #9CA3AF; }
+.option-dot.requested-off, .selected-dot.requested-off { background-color: #6B7280; }
 /* --- ADD THESE NEW RULES FOR SEARCHABLE DROPDOWN --- */
 
 /* This ensures the dot, input, and caret icon are aligned nicely */
