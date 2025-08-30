@@ -295,36 +295,8 @@ textarea.form-input {
 .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.75rem; border-bottom: 1px solid #E5E7EB; }
 .modal-content { padding: 1.75rem; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1.25rem 1.75rem; background-color: var(--gails-bg); border-bottom-left-radius: 1.25rem; border-bottom-right-radius: 1.25rem; }
-
-/* REVISED CLOSE BUTTON STYLES */
-#modal-close-btn {
-    background-color: #ffffff !important;
-    border: 1px solid #e0e0e0 !important;
-    border-radius: 0.5rem !important;
-    padding: 0.5rem 0.75rem !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease-in-out !important;
-    /* Override btn-secondary transforms for consistency */
-    transform: none !important;
-    box-shadow: none !important;
-}
-
-#modal-close-btn:hover {
-    background-color: #f5f5f5 !important;
-    border-color: #cccccc !important;
-    transform: none !important;
-    box-shadow: none !important;
-}
-
-#modal-close-btn i {
-    font-size: 1.25rem !important;
-    color: #6b7280 !important;
-    line-height: 1 !important;
-}
-
+.modal-close-btn { background: none; border: none; font-size: 1.75rem; line-height: 1; cursor: pointer; color: var(--gails-text-secondary); }
+.modal-close-btn:hover { color: var(--gails-text-primary); }
 
 /* 8. Print-Specific Styles
 -------------------------------------------------- */
@@ -531,10 +503,8 @@ textarea.form-input {
 #modal-box[data-type="aiActionPlan"],
 #modal-box[data-type="aiActionPlan_view"],
 #modal-box[data-type="aiActionPlan_generate"] {
-    width: 100%;
-    max-width: 1200px;
-    height: 90vh;
-    max-height: 800px;
+    max-width: 95vw;
+    width: 1100px; /* Set a fixed large width, but max-width will constrain it */
 }
 
 /* 24. AI Action Plan Table Styles
@@ -836,14 +806,9 @@ td.actions-cell {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem; /* Slightly larger for better visibility */
-    opacity: 0;
+    font-size: 1rem;
+    opacity: 0; /* Hidden by default */
     transition: all 0.2s ease;
-}
-
-/* Change icon from trash to X */
-.btn-remove-row .bi-trash-fill::before {
-    content: "\f62a"; /* Bootstrap Icons: x-lg */
 }
 
 tr:hover .btn-remove-row {
@@ -852,11 +817,7 @@ tr:hover .btn-remove-row {
 
 .btn-remove-row:hover {
     background-color: var(--gails-red-light);
-    color: var(--gails-red); /* X turns red on hover */
-}
-
-.event-item:hover .btn-remove-event {
-    opacity: 1;
+    color: var(--gails-red);
 }
 
 /* style.css */
@@ -1171,9 +1132,18 @@ tr:hover .btn-remove-row {
 
 .day-event-list .event-item {
     margin-bottom: 1rem;
-    padding-bottom: 1rem;
+    padding: 1rem;
     border-bottom: 1px solid var(--gails-grey-light);
+    border-radius: 0.75rem;
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    cursor: pointer;
 }
+
+.day-event-list .event-item:hover {
+    background-color: var(--gails-grey-light);
+    transform: translateX(4px);
+}
+
 .day-event-list .event-item:last-child {
     border-bottom: none;
     margin-bottom: 0;
