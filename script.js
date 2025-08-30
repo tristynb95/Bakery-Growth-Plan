@@ -2153,9 +2153,3 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
-
-
