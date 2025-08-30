@@ -1014,6 +1014,7 @@ tr:hover .btn-remove-row {
     flex-direction: column;
     box-shadow: var(--shadow-lg);
     overflow: hidden; /* Prevent inner content from breaking out */
+    padding: 1rem; /* Add padding to the modal content */
 }
 
 .calendar-header {
@@ -1028,6 +1029,12 @@ tr:hover .btn-remove-row {
     gap: 1rem; /* Add gap between elements */
 }
 
+.calendar-nav-container {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
 #calendar-month-year {
     font-family: 'Poppins', sans-serif;
     font-size: 1.5rem;
@@ -1035,6 +1042,9 @@ tr:hover .btn-remove-row {
     margin: 0; /* Remove large margin */
     text-align: center;
     flex-grow: 1; /* Allow title to take space */
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .calendar-header .btn {
@@ -1054,7 +1064,6 @@ tr:hover .btn-remove-row {
     height: 2.5rem; /* 40px */
     border-radius: 0.75rem; /* Match other buttons */
     font-weight: 600;
-    order: -1; /* Move to the left */
 }
 
 #calendar-close-btn {
