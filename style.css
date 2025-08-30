@@ -1478,8 +1478,8 @@ tr:hover .btn-remove-row {
     background-color: var(--gails-white);
     border: 1px solid var(--gails-grey-mid);
     border-radius: 0.5rem;
-    /* MODIFIED: This line increases the left/right padding for better alignment */
-    padding: 1rem 1.15rem;
+    /* MODIFIED: Removed left padding, which was moving the text */
+    padding: 1rem 1.15rem 1rem 0;
     cursor: pointer;
     transition: all 0.2s;
     gap: 0.75rem;
@@ -1551,10 +1551,11 @@ tr:hover .btn-remove-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 12px; /* Matches dot size */
-    height: 12px; /* Matches dot size */
-    margin-right: 0.75rem;
+    width: 14px;
+    height: 14px;
     flex-shrink: 0;
+    /* MODIFIED: This is the specific line that moves the icon over */
+    margin-left: 1.5rem;
 }
 
 .option-icon {
