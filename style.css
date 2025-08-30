@@ -1197,3 +1197,8 @@ tr:hover .btn-remove-row {
     background-color: var(--gails-white);
     flex-shrink: 0;
 }
+
+/* Add delete button */
+.event-item:hover .btn-remove-event {
+    opacity: 1;
+}
