@@ -1875,13 +1875,21 @@ function setupCalendarEventListeners() {
             }
         };
 
-        const selectOption = (option) => {
-            const type = option.dataset.type;
-            selectedDot.className = `selected-dot ${type}`;
-            searchInput.value = option.textContent.trim();
-            hiddenInput.value = type;
-            categoryDropdown.classList.remove('open');
-        };
+        // MODIFIED: This function now handles both icons and dots
+const selectOption = (option) => {
+    const type = option.dataset.type;
+    const iconContainer = document.getElementById('category-selected-icon-container');
+    const iconElement = option.querySelector('.option-icon, .option-dot');
+
+    // Copy the icon/dot element into the selected display
+    iconContainer.innerHTML = iconElement.outerHTML;
+    iconContainer.className = `selected-icon-container ${type}`; // Pass class for styling
+    iconContainer.classList.toggle('has-icon', iconElement.classList.contains('option-icon'));
+
+    searchInput.value = option.textContent.trim();
+    hiddenInput.value = type;
+    categoryDropdown.classList.remove('open');
+};
 
         searchInput.addEventListener('focus', () => {
             categoryDropdown.classList.add('open');
@@ -2303,6 +2311,7 @@ function setupCalendarEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
