@@ -1256,7 +1256,7 @@ tr:hover .btn-remove-row {
     background-color: var(--gails-grey-light);
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
-    height: 76px;
+    height: 52px;
 }
 
 .all-day-toggle-wrap {
@@ -1338,8 +1338,8 @@ tr:hover .btn-remove-row {
     color: var(--gails-text-secondary);
 }
 .time-input .form-input {
-    padding: 0.35rem 0.5rem; /* <-- Change this line */
-    font-size: 0.9rem;
+    padding: 0.25rem 0.5rem; /* <-- Change this line */
+    font-size: 0.8rem;      /* <-- Change this line */
     width: 95px;
 }
 
