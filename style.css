@@ -1489,7 +1489,6 @@ tr:hover .btn-remove-row {
     min-height: 80px;
 }
 
-.is-compact .all-day-toggle-wrap,
 .is-compact .time-inputs-wrap {
     justify-content: space-between;
     transition: all 0.2s ease-in-out;
