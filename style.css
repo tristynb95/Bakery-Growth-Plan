@@ -1107,9 +1107,12 @@ tr:hover .btn-remove-row {
 }
 
 /* Add this new rule below .event-dots-container */
-.event-dots-container .bi-cake2-fill {
-    font-size: 9px;
+.event-dots-container .bi-cake2 {
+    /* MODIFIED: Corrected selector and increased size */
+    font-size: 16px;
     color: #D97706;
+    /* MODIFIED: Adjusts vertical alignment */
+    margin-bottom: 4px;
 }
 
 .event-dot {
