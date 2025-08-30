@@ -84,6 +84,7 @@ function runApp(app) {
         calendarMonthYear: document.getElementById('calendar-month-year'),
         calendarPrevMonthBtn: document.getElementById('calendar-prev-month-btn'),
         calendarNextMonthBtn: document.getElementById('calendar-next-month-btn'),
+        calendarTodayBtn: document.getElementById('calendar-today-btn'),
         calendarCloseBtn: document.getElementById('calendar-close-btn'),
         dayDetailModal: document.getElementById('day-detail-modal'),
         dayDetailTitle: document.getElementById('day-detail-title'),
@@ -1977,6 +1978,7 @@ function runApp(app) {
         cookieBanner.classList.add('hidden');
     });
     DOMElements.calendarFab.addEventListener('click', () => {
+        appState.calendar.currentDate = new Date();
         DOMElements.calendarModal.classList.remove('hidden');
         renderCalendar();
     });
@@ -1989,6 +1991,10 @@ function runApp(app) {
     });
     DOMElements.calendarNextMonthBtn.addEventListener('click', () => {
         appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() + 1);
+        renderCalendar();
+    });
+    DOMElements.calendarTodayBtn.addEventListener('click', () => {
+        appState.calendar.currentDate = new Date();
         renderCalendar();
     });
     DOMElements.calendarGrid.addEventListener('dblclick', (e) => {
