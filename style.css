@@ -1131,19 +1131,16 @@ tr:hover .btn-remove-row {
 }
 
 .day-event-list .event-item {
-    margin-bottom: 1rem;
     padding: 1rem;
     border-bottom: 1px solid var(--gails-grey-light);
     border-radius: 0.75rem;
     transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
     cursor: pointer;
 }
-
 .day-event-list .event-item:hover {
     background-color: var(--gails-grey-light);
     transform: translateX(4px);
 }
-
 .day-event-list .event-item:last-child {
     border-bottom: none;
     margin-bottom: 0;
@@ -1205,4 +1202,7 @@ tr:hover .btn-remove-row {
     border-top: 1px solid var(--gails-grey-mid);
     background-color: var(--gails-white);
     flex-shrink: 0;
+}
+.event-item:hover .btn-remove-event {
+    opacity: 1;
 }
