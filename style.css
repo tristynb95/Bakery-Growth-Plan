@@ -1503,6 +1503,40 @@ tr:hover .btn-remove-row {
 .option-dot.finance, .selected-dot.finance { background-color: #10B981; }
 .option-dot.personal, .selected-dot.personal { background-color: #8B5CF6; }
 
+/* --- ADD THESE NEW RULES FOR SEARCHABLE DROPDOWN --- */
+
+/* This ensures the dot, input, and caret icon are aligned nicely */
+.dropdown-selected {
+    gap: 0.5rem; /* Adds a little space between elements */
+}
+
+/* Styles for the new searchable input field */
+.dropdown-search-input {
+    border: none;
+    outline: none;
+    background-color: transparent;
+    width: 100%;
+    font-size: 1rem;
+    padding: 0;
+    color: var(--gails-text-primary);
+}
+
+.dropdown-search-input::placeholder {
+    color: #9CA3AF;
+}
+
+/* Style for the 'no results' message */
+.dropdown-option.no-results {
+    color: var(--gails-text-secondary);
+    cursor: default;
+    font-style: italic;
+    justify-content: center;
+}
+
+.dropdown-option.no-results:hover {
+    background-color: transparent;
+}
+
 /* 40. Event Panel Header Actions
 -------------------------------------------------- */
 .day-detail-header {
