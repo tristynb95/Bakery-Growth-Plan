@@ -540,6 +540,11 @@ function runApp(app) {
             console.error("Error fetching initial plan data:", error);
             handleBackToDashboard();
         }
+
+        // --- NEW ---
+        // Eager load calendar data at the same time as the plan data
+        await loadCalendarData();
+
         appState.planUnsubscribe = docRef.onSnapshot((doc) => {
             if (doc.exists) {
                 const remoteData = doc.data();
@@ -1636,7 +1641,10 @@ function runApp(app) {
             const dayContent = document.createElement('textarea');
             dayContent.classList.add('calendar-day-content');
             dayContent.value = appState.calendar.data[dateKey] || '';
-            
+            dayContent.addEventListener('blur', (e) => {
+                e.target.scrollTop = 0;
+            });
+
             dayCell.appendChild(dayContent);
             DOMElements.calendarGrid.appendChild(dayCell);
         }
@@ -1656,7 +1664,7 @@ function runApp(app) {
             console.error("Error loading calendar data:", error);
             appState.calendar.data = {};
         }
-        renderCalendar();
+        // renderCalendar(); // No need to render here, it will be rendered when the user clicks the FAB
     }
     
     let calendarSaveTimeout;
@@ -1929,7 +1937,7 @@ function runApp(app) {
     });
     DOMElements.calendarFab.addEventListener('click', () => {
         DOMElements.calendarModal.classList.remove('hidden');
-        loadCalendarData();
+        renderCalendar();
     });
     DOMElements.calendarCloseBtn.addEventListener('click', () => {
         DOMElements.calendarModal.classList.add('hidden');
