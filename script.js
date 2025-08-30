@@ -1915,13 +1915,6 @@ function runApp(app) {
             if(saveBtn) saveBtn.textContent = 'Save Event';
         });
 
-        if (eventTypeSelector) eventTypeSelector.addEventListener('click', (e) => {
-            if (e.target.classList.contains('event-type-btn')) {
-                eventTypeSelector.querySelector('.selected')?.classList.remove('selected');
-                e.target.classList.add('selected');
-            }
-        });
-
         if (saveEventBtn) saveEventBtn.addEventListener('click', async () => {
             const title = document.getElementById('event-title-input').value.trim();
             const typeButton = eventTypeSelector ? eventTypeSelector.querySelector('.selected') : null;
@@ -1929,6 +1922,39 @@ function runApp(app) {
                 alert('Please provide a title and select an event type.');
                 return;
             }
+
+            // ADD THIS NEW BLOCK for the custom dropdown
+const categoryDropdown = document.getElementById('category-dropdown');
+if (categoryDropdown) {
+    const selectedDisplay = categoryDropdown.querySelector('.dropdown-selected');
+    const optionsContainer = categoryDropdown.querySelector('.dropdown-options');
+    const hiddenInput = document.getElementById('event-type-input');
+
+    selectedDisplay.addEventListener('click', () => {
+        categoryDropdown.classList.toggle('open');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!categoryDropdown.contains(e.target)) {
+            categoryDropdown.classList.remove('open');
+        }
+    });
+
+    optionsContainer.addEventListener('click', (e) => {
+        const option = e.target.closest('.dropdown-option');
+        if (option) {
+            const type = option.dataset.type;
+            const selectedDot = selectedDisplay.querySelector('.selected-dot');
+            const selectedText = selectedDisplay.querySelector('.selected-text');
+
+            selectedDot.className = `selected-dot ${type}`;
+            selectedText.textContent = option.textContent.trim();
+            selectedText.classList.remove('is-placeholder');
+            hiddenInput.value = type;
+            categoryDropdown.classList.remove('open');
+        }
+    });
+}
 
             const isAllDay = allDayCheckbox.checked;
             const eventData = {
@@ -2199,6 +2225,7 @@ function runApp(app) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
