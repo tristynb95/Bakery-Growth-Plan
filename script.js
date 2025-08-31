@@ -1760,6 +1760,8 @@ function runApp(app) {
     }
 
     function renderDayDetails(dateKey) {
+        document.getElementById('add-event-btn').classList.remove('hidden');
+        document.getElementById('day-detail-title').classList.remove('hidden');
         selectedDateKey = dateKey;
 
         document.querySelectorAll('.calendar-day.selected').forEach(d => d.classList.remove('selected'));
@@ -2363,6 +2365,7 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
