@@ -398,6 +398,7 @@ function runApp(app) {
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         localStorage.removeItem('lastActivity');
+        document.getElementById('calendar-fab').classList.add('hidden');
         if (isTimeout) {
             openModal('timeout');
         }
