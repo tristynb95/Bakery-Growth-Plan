@@ -1825,17 +1825,17 @@ input[type="time"] {
     position: absolute;
     bottom: 0;
     right: 0;
-    width: 3rem; /* 48px */
-    height: 3rem; /* 48px */
+    width: 3.5rem; /* Slightly larger for better tap target */
+    height: 3.5rem; /* Slightly larger for better tap target */
     border-radius: 50%;
     background-color: var(--gails-white);
-    color: var(--gails-text-primary);
-    border: 1px solid var(--gails-grey-mid);
-    box-shadow: var(--shadow-md);
+    color: var(--gails-text-secondary); /* Default icon color */
+    border: 1px solid var(--gails-grey-light); /* Added border */
+    box-shadow: var(--shadow-md); /* Added shadow */
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
+    font-size: 1.5rem; /* Slightly larger icon */
     cursor: pointer;
     z-index: 999;
     opacity: 0;
@@ -1850,7 +1850,7 @@ input[type="time"] {
     transform: scale(1.1); /* Keep original transform for hover, just scale */
 }
 
-/* Tooltip styles */
+/* Tooltip styles (no change here, but keeping for context) */
 .radial-menu-item::after {
     content: attr(data-tooltip);
     position: absolute;
@@ -1867,6 +1867,7 @@ input[type="time"] {
     opacity: 0;
     transition: opacity 0.2s ease, transform 0.2s ease;
     pointer-events: none;
+    z-index: 1001; /* Ensure tooltip is above other items */
 }
 
 .radial-menu-item:hover::after {
@@ -1881,24 +1882,24 @@ input[type="time"] {
     transform: scale(1);
 }
 
-/* Position items in an arc. Delays create the staggered animation */
+/* Position items in a wider arc with increased distances */
 .radial-menu-container.open #radial-action-calendar {
-    transform: translateY(-125%);
+    transform: translateY(-160%); /* Moved further up */
     transition-delay: 0.1s;
 }
 .radial-menu-container.open #radial-action-note {
-    transform: translateX(-88%) translateY(-88%);
+    transform: translateX(-115%) translateY(-115%); /* Moved further out diagonally */
     transition-delay: 0.05s;
 }
 .radial-menu-container.open #radial-action-spotlight {
-    transform: translateX(-125%);
+    transform: translateX(-160%); /* Moved further to the left */
     transition-delay: 0s;
 }
 
-/* Hover transform for open items */
-.radial-menu-container.open #radial-action-calendar:hover { transform: translateY(-125%) scale(1.1); }
-.radial-menu-container.open #radial-action-note:hover { transform: translateX(-88%) translateY(-88%) scale(1.1); }
-.radial-menu-container.open #radial-action-spotlight:hover { transform: translateX(-125%) scale(1.1); }
+/* Hover transform for open items (adjusting to new base positions) */
+.radial-menu-container.open #radial-action-calendar:hover { transform: translateY(-160%) scale(1.1); }
+.radial-menu-container.open #radial-action-note:hover { transform: translateX(-115%) translateY(-115%) scale(1.1); }
+.radial-menu-container.open #radial-action-spotlight:hover { transform: translateX(-160%) scale(1.1); }
 
 /* Overlay for focusing on the menu */
 .radial-menu-overlay {
