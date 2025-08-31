@@ -1708,7 +1708,13 @@ input[type="time"] {
 .event-dots-container .bi-cake2 {
     font-size: 16px;
     color: #D97706; /* A rich orange/gold */
-    line-height: 0; /* Improves vertical alignment in a flex container */
+
+    /* New lines for perfect alignment */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px; /* Match font-size for a predictable box */
+    height: 16px;
 }
 
 
