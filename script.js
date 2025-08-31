@@ -1667,19 +1667,37 @@ function runApp(app) {
             dotsContainer.classList.add('event-dots-container');
             
             const dayEvents = appState.calendar.data[dateKey];
-            if (Array.isArray(dayEvents)) {
-                const eventTypes = new Set(dayEvents.map(e => e.type));
-eventTypes.forEach(type => {
-    let element;
-    if (type === 'birthday') {
-        element = document.createElement('i');
-        element.className = 'bi bi-cake2';
-    } else {
-        element = document.createElement('div');
-        element.className = `event-dot option-dot ${type}`;
-    }
-    dotsContainer.appendChild(element);
-});
+            if (Array.isArray(dayEvents) && dayEvents.length > 0) {
+                // Sort events to ensure consistency. All-day events first, then by time.
+                dayEvents.sort((a, b) => {
+                    if (a.allDay && !b.allDay) return -1;
+                    if (!a.allDay && b.allDay) return 1;
+                    return (a.timeFrom || '').localeCompare(b.timeFrom || '');
+                });
+
+                // Determine the number of dots to show
+                const dotsToShow = dayEvents.slice(0, 3);
+
+                // Render the dots
+                dotsToShow.forEach(event => {
+                    let element;
+                    if (event.type === 'birthday') {
+                        element = document.createElement('i');
+                        element.className = 'bi bi-cake2';
+                    } else {
+                        element = document.createElement('div');
+                        element.className = `event-dot option-dot ${event.type}`;
+                    }
+                    dotsContainer.appendChild(element);
+                });
+
+                // If there are more than 3 events, show the overflow indicator
+                if (dayEvents.length > 3) {
+                    const overflowEl = document.createElement('div');
+                    overflowEl.className = 'event-overflow';
+                    overflowEl.textContent = `+${dayEvents.length - 3}`;
+                    dotsContainer.appendChild(overflowEl);
+                }
             }
             
             dayCell.appendChild(dotsContainer);

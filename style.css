@@ -1104,6 +1104,7 @@ tr:hover .btn-remove-row {
     gap: 4px;
     /* MODIFIED: This pushes the dots to the bottom of the cell */
     margin-top: auto;
+    align-items: center; /* Add this */
 }
 
 /* Add this new rule below .event-dots-container */
@@ -1677,4 +1678,14 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 -------------------------------------------------- */
 input[type="time"] {
     text-align: center;
+}
+
+.event-overflow {
+    font-size: 0.75rem; /* 12px */
+    font-weight: 600;
+    color: var(--gails-text-secondary);
+    background-color: var(--gails-grey-light);
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1; /* Ensures consistent height */
 }
