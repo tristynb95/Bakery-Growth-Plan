@@ -1635,7 +1635,7 @@ function runApp(app) {
                 selectedDateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
                 renderCalendar();
                 renderDayDetails(selectedDateKey);
-                document.getElementById('calendar-modal').classList.remove('hidden');
+                document.getElementById('calendar-modal').classList.add('is-visible');
                 DOMElements.radialMenuContainer.classList.remove('open'); // Close menu after action
             });
         }
@@ -1989,7 +1989,7 @@ const selectOption = (option) => {
         });
     }
 
-    if (calendarCloseBtn) calendarCloseBtn.addEventListener('click', () => calendarModal.classList.add('hidden'));
+    if (calendarCloseBtn) calendarCloseBtn.addEventListener('click', () => calendarModal.classList.remove('is-visible'));
     
     if (calendarPrevMonthBtn) calendarPrevMonthBtn.addEventListener('click', () => {
     appState.calendar.currentDate.setDate(1); // Set day to 1st to prevent rollover
@@ -2358,5 +2358,6 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
