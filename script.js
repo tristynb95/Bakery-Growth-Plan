@@ -1643,8 +1643,7 @@ function runApp(app) {
         const quickNoteButton = document.getElementById('radial-action-note');
         if (quickNoteButton) {
             quickNoteButton.addEventListener('click', () => {
-                alert("Quick Note feature coming soon! Opening calendar...");
-                document.getElementById('radial-action-calendar').click();
+                alert("Quick Note feature coming soon!");
                 DOMElements.radialMenuContainer.classList.remove('open');
             });
         }
@@ -2359,3 +2358,4 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
