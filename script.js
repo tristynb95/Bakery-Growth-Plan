@@ -1704,14 +1704,28 @@ function runApp(app) {
                         eventsContainer.appendChild(element);
                     });
                 } else {
-                    // Show the new stack indicator
+                    // Show the new horizontal stack of dots
                     const overflowStack = document.createElement('div');
                     overflowStack.className = 'event-overflow-stack';
-                    overflowStack.innerHTML = `
-                        <div class="stack-bar"></div>
-                        <div class="stack-bar"></div>
-                        <div class="stack-bar"></div>
-                    `;
+                    
+                    // Take the first 3 event types for the stack dots' colors, if available
+                    // Otherwise, default to a muted color (handled by CSS)
+                    const eventTypesForStack = dayEvents.slice(0, 3).map(e => e.type);
+
+                    eventTypesForStack.forEach(type => {
+                        const stackDot = document.createElement('div');
+                        stackDot.className = `stack-dot ${type}`; // Add event type for potential styling
+                        overflowStack.appendChild(stackDot);
+                    });
+                    
+                    // If less than 3 event types, add generic stack dots to fill
+                    while (eventTypesForStack.length < 3) {
+                        const stackDot = document.createElement('div');
+                        stackDot.className = 'stack-dot';
+                        overflowStack.appendChild(stackDot);
+                        eventTypesForStack.push(null); // Just to keep count
+                    }
+
                     eventsContainer.appendChild(overflowStack);
                 }
             }
@@ -2341,6 +2355,7 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
