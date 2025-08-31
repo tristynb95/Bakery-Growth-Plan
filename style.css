@@ -1098,12 +1098,18 @@ tr:hover .btn-remove-row {
     color: var(--gails-red);
 }
 
+/* This ensures the dots container is always at the bottom */
 .event-dots-container {
+    position: relative; /* Needed for the mask to work */
     display: flex;
-    flex-wrap: wrap;
     gap: 4px;
-    /* MODIFIED: This pushes the dots to the bottom of the cell */
-    margin-top: auto;
+    margin-top: auto; /* Pushes to the bottom */
+    align-items: center;
+    overflow: hidden; /* Hides the part of the dots that go past the edge */
+    
+    /* The Fade-Out Effect */
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
 }
 
 /* Add this new rule below .event-dots-container */
@@ -1707,20 +1713,6 @@ input[type="time"] {
 .event-dot {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
-}
-
-
-/* --- Overflow Stack (for days with > 3 events) --- */
-.event-overflow-stack {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-}
-.event-overflow-stack .stack-dot {
-    width: 6px;
-    height: 6px;
     border-radius: 50%;
 }
 
