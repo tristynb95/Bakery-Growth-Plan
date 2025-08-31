@@ -1023,6 +1023,19 @@ tr:hover .btn-remove-row {
     flex-direction: column;
     box-shadow: var(--shadow-lg);
     overflow: hidden;
+    position: relative;
+}
+
+#calendar-modal #calendar-close-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 10;
+    padding: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: none;
 }
 
 .calendar-main-grid {
