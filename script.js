@@ -78,6 +78,9 @@ function runApp(app) {
         termsAgreeCheckbox: document.getElementById('terms-agree'),
         createAccountBtn: document.getElementById('create-account-btn'),
         registerError: document.getElementById('register-error'),
+        radialMenuContainer: document.getElementById('radial-menu-container'),
+        radialMenuFab: document.getElementById('radial-menu-fab'),
+        radialMenuOverlay: document.getElementById('radial-menu-overlay'),
     };
 
     const appState = {
@@ -498,7 +501,7 @@ function runApp(app) {
         DOMElements.dashboardView.classList.add('hidden');
         DOMElements.appView.classList.remove('hidden');
         switchView('vision');
-        document.getElementById('calendar-fab').classList.remove('hidden');
+        document.getElementById('radial-menu-container').classList.remove('hidden');
     }
 
     function handleBackToDashboard() {
@@ -516,7 +519,7 @@ function runApp(app) {
         appState.currentPlanId = null;
         DOMElements.appView.classList.add('hidden');
         DOMElements.dashboardView.classList.remove('hidden');
-        document.getElementById('calendar-fab').classList.add('hidden');
+        document.getElementById('radial-menu-container').classList.add('hidden');
         renderDashboard();
     }
 
@@ -1615,6 +1618,46 @@ function runApp(app) {
         }
     }
 
+    if (DOMElements.radialMenuFab) {
+        DOMElements.radialMenuFab.addEventListener('click', () => {
+            DOMElements.radialMenuContainer.classList.toggle('open');
+        });
+
+        DOMElements.radialMenuOverlay.addEventListener('click', () => {
+            DOMElements.radialMenuContainer.classList.remove('open');
+        });
+
+        const calendarButton = document.getElementById('radial-action-calendar');
+        if (calendarButton) {
+            calendarButton.addEventListener('click', () => {
+                appState.calendar.currentDate = new Date();
+                const today = new Date();
+                selectedDateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                renderCalendar();
+                renderDayDetails(selectedDateKey);
+                document.getElementById('calendar-modal').classList.remove('hidden');
+                DOMElements.radialMenuContainer.classList.remove('open'); // Close menu after action
+            });
+        }
+
+        const quickNoteButton = document.getElementById('radial-action-note');
+        if (quickNoteButton) {
+            quickNoteButton.addEventListener('click', () => {
+                alert("Quick Note feature coming soon! Opening calendar...");
+                document.getElementById('radial-action-calendar').click();
+                DOMElements.radialMenuContainer.classList.remove('open');
+            });
+        }
+        
+        const spotlightButton = document.getElementById('radial-action-spotlight');
+        if (spotlightButton) {
+            spotlightButton.addEventListener('click', () => {
+                alert("Team Spotlight feature coming soon!");
+                DOMElements.radialMenuContainer.classList.remove('open');
+            });
+        }
+    }
+
     // --- CALENDAR LOGIC (REDESIGNED & ENHANCED) ---
     let selectedDateKey = null;
 
@@ -1947,15 +1990,6 @@ const selectOption = (option) => {
             }
         });
     }
-
-    calendarFab.addEventListener('click', () => {
-        appState.calendar.currentDate = new Date();
-        const today = new Date();
-        selectedDateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-        renderCalendar();
-        renderDayDetails(selectedDateKey);
-        calendarModal.classList.remove('hidden');
-    });
 
     if (calendarCloseBtn) calendarCloseBtn.addEventListener('click', () => calendarModal.classList.add('hidden'));
     
@@ -2326,6 +2360,7 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
