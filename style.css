@@ -1787,3 +1787,31 @@ input[type="time"] {
 .stack-dot.personal { background-color: #8B5CF6; }
 .stack-dot.reminder { background-color: #9CA3AF; }
 .stack-dot.requested-off { background-color: #6B7280; }
+
+/* 46. Calendar Dot & Icon Color Fixes
+-------------------------------------------------- */
+
+/* FIX 1: Adds the missing yellow color for 'probation-end', 
+         'quarterly-awards', and 'work-anniversary' dots.
+*/
+.option-dot.probation-end, 
+.selected-dot.probation-end, 
+.stack-dot.probation-end,
+.option-dot.quarterly-awards, 
+.selected-dot.quarterly-awards, 
+.stack-dot.quarterly-awards,
+.option-dot.work-anniversary, 
+.selected-dot.work-anniversary, 
+.stack-dot.work-anniversary {
+    background-color: #FCD34D; /* A bright, celebratory yellow */
+}
+
+
+/* FIX 2: Specifically targets the birthday cake icon on the calendar grid 
+         and gives it the correct orange/gold color.
+*/
+.event-dots-container .bi-cake2 {
+    font-size: 16px;
+    color: #D97706; /* A rich orange/gold */
+    margin-bottom: 2px; /* Small adjustment for vertical alignment */
+}
