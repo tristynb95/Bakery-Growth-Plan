@@ -1648,7 +1648,6 @@ function runApp(app) {
         for (let i = 1; i <= daysInMonth; i++) {
             const dayCell = document.createElement('div');
             dayCell.classList.add('calendar-day');
-            // This is required for the birthday indicator's positioning
             dayCell.style.position = 'relative'; 
             
             const currentDayDate = new Date(year, month, i);
@@ -1676,9 +1675,9 @@ function runApp(app) {
                 else if (allDayEvents.length >= 4) dayCell.classList.add('day-density-2');
                 else if (allDayEvents.length >= 1) dayCell.classList.add('day-density-1');
 
-                // --- NEW SEPARATED RENDERING LOGIC ---
+                // --- NEW UNLIMITED DOT RENDERING LOGIC ---
 
-                // 1. Check for and render the birthday indicator
+                // 1. Render birthday indicator separately
                 const hasBirthday = allDayEvents.some(e => e.type === 'birthday');
                 if (hasBirthday) {
                     const indicator = document.createElement('div');
@@ -1687,32 +1686,19 @@ function runApp(app) {
                     dayCell.appendChild(indicator);
                 }
 
-                // 2. Render dots for all other events
+                // 2. Render dots for ALL other events
                 const otherEvents = allDayEvents.filter(e => e.type !== 'birthday');
-                const eventsContainer = document.createElement('div');
-                eventsContainer.classList.add('event-dots-container');
-
                 if (otherEvents.length > 0) {
-                    if (otherEvents.length <= 3) {
-                        // Show up to 3 dots for other events
-                        otherEvents.forEach(event => {
-                            const element = document.createElement('div');
-                            element.className = `event-dot ${event.type}`;
-                            eventsContainer.appendChild(element);
-                        });
-                    } else {
-                        // Show the horizontal overflow stack if there are > 3 other events
-                        const overflowStack = document.createElement('div');
-                        overflowStack.className = 'event-overflow-stack';
-                        otherEvents.slice(0, 3).forEach(event => {
-                            const stackDot = document.createElement('div');
-                            stackDot.className = `stack-dot ${event.type}`;
-                            overflowStack.appendChild(stackDot);
-                        });
-                        eventsContainer.appendChild(overflowStack);
-                    }
+                    const eventsContainer = document.createElement('div');
+                    eventsContainer.classList.add('event-dots-container');
+                    
+                    otherEvents.forEach(event => {
+                        const dot = document.createElement('div');
+                        dot.className = `event-dot ${event.type}`;
+                        eventsContainer.appendChild(dot);
+                    });
+                    dayCell.appendChild(eventsContainer);
                 }
-                dayCell.appendChild(eventsContainer);
                 // --- END of New Logic ---
             }
             calendarGrid.appendChild(dayCell);
@@ -2338,6 +2324,7 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
