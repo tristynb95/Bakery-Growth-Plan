@@ -391,6 +391,7 @@ function runApp(app) {
     });
 
     const handleLogout = (isTimeout = false, isRevival = false) => {
+        console.log('Logging out...');
         if (appState.planUnsubscribe) {
             appState.planUnsubscribe();
             appState.planUnsubscribe = null;
@@ -402,7 +403,10 @@ function runApp(app) {
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         localStorage.removeItem('lastActivity');
-        document.getElementById('calendar-fab').classList.add('hidden');
+        const radialMenu = document.getElementById('radial-menu-container');
+        if (radialMenu) {
+            radialMenu.classList.add('hidden');
+        }
         if (isTimeout) {
             openModal('timeout');
         }
@@ -412,7 +416,13 @@ function runApp(app) {
         }
         DOMElements.emailInput.value = '';
         DOMElements.passwordInput.value = '';
-        auth.signOut();
+        try {
+            auth.signOut();
+        } catch (error) {
+            console.error('Error signing out:', error);
+            // Even if sign out fails, reload the page to force a state check
+            window.location.reload();
+        }
     };
 
     // --- DASHBOARD LOGIC ---
@@ -2386,12 +2396,3 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
-
-
-
-
-
