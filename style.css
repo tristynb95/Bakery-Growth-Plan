@@ -974,6 +974,7 @@ tr:hover .btn-remove-row {
 
 /* 37. Calendar Styles (Redesigned)
 -------------------------------------------------- */
+
 .calendar-fab {
     position: fixed;
     bottom: 2rem;
@@ -1002,6 +1003,14 @@ tr:hover .btn-remove-row {
     justify-content: center;
     z-index: 1010;
     padding: 2rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.calendar-modal.is-visible {
+    opacity: 1;
+    visibility: visible;
 }
 
 .calendar-modal-content {
