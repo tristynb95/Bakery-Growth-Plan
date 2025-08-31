@@ -1664,44 +1664,60 @@ function runApp(app) {
             dayNumber.textContent = i;
             dayCell.appendChild(dayNumber);
 
-            const dotsContainer = document.createElement('div');
-            dotsContainer.classList.add('event-dots-container');
+            const eventsContainer = document.createElement('div');
+            eventsContainer.classList.add('event-dots-container');
             
-            const dayEvents = appState.calendar.data[dateKey];
+            const dayEvents = appState.calendar.data[dateKey] || [];
+            
+            // --- NEW: Day Density & Event Stack Logic ---
             if (Array.isArray(dayEvents) && dayEvents.length > 0) {
-                // Sort events to ensure consistency. All-day events first, then by time.
+                // 1. Set Day Density for Heat Map
+                if (dayEvents.length >= 8) {
+                    dayCell.classList.add('day-density-4');
+                } else if (dayEvents.length >= 6) {
+                    dayCell.classList.add('day-density-3');
+                } else if (dayEvents.length >= 4) {
+                    dayCell.classList.add('day-density-2');
+                } else if (dayEvents.length >= 1) {
+                    dayCell.classList.add('day-density-1');
+                }
+
+                // 2. Sort events for consistent dot display
                 dayEvents.sort((a, b) => {
                     if (a.allDay && !b.allDay) return -1;
                     if (!a.allDay && b.allDay) return 1;
                     return (a.timeFrom || '').localeCompare(b.timeFrom || '');
                 });
 
-                // Determine the number of dots to show
-                const dotsToShow = dayEvents.slice(0, 3);
-
-                // Render the dots
-                dotsToShow.forEach(event => {
-                    let element;
-                    if (event.type === 'birthday') {
-                        element = document.createElement('i');
-                        element.className = 'bi bi-cake2';
-                    } else {
-                        element = document.createElement('div');
-                        element.className = `event-dot option-dot ${event.type}`;
-                    }
-                    dotsContainer.appendChild(element);
-                });
-
-                // If there are more than 3 events, show the overflow indicator
-                if (dayEvents.length > 3) {
-                    const overflowEl = document.createElement('div');
-                    overflowEl.className = 'event-overflow';
-                    overflowEl.textContent = `+${dayEvents.length - 3}`;
-                    dotsContainer.appendChild(overflowEl);
+                // 3. Render Dots or Overflow Stack
+                if (dayEvents.length <= 3) {
+                    // Show up to 3 dots
+                    dayEvents.forEach(event => {
+                        let element;
+                        if (event.type === 'birthday') {
+                            element = document.createElement('i');
+                            element.className = 'bi bi-cake2';
+                        } else {
+                            element = document.createElement('div');
+                            element.className = `event-dot option-dot ${event.type}`;
+                        }
+                        eventsContainer.appendChild(element);
+                    });
+                } else {
+                    // Show the new stack indicator
+                    const overflowStack = document.createElement('div');
+                    overflowStack.className = 'event-overflow-stack';
+                    overflowStack.innerHTML = `
+                        <div class="stack-bar"></div>
+                        <div class="stack-bar"></div>
+                        <div class="stack-bar"></div>
+                    `;
+                    eventsContainer.appendChild(overflowStack);
                 }
             }
+            // --- END of New Logic ---
             
-            dayCell.appendChild(dotsContainer);
+            dayCell.appendChild(eventsContainer);
             calendarGrid.appendChild(dayCell);
         }
     }
@@ -2325,6 +2341,7 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
