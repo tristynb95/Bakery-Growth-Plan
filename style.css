@@ -1003,9 +1003,6 @@ tr:hover .btn-remove-row {
     justify-content: center;
     z-index: 1010;
     padding: 2rem;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease-in-out;
 }
 
 .calendar-modal.is-visible {
@@ -1917,8 +1914,8 @@ input[type="time"] {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(17, 24, 39, 0.7); /* Updated */
-    backdrop-filter: blur(5px); /* Updated */
+    background: rgba(253, 253, 252, 0.6);
+    backdrop-filter: blur(4px);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease-in-out;
