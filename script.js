@@ -1733,6 +1733,18 @@ function runApp(app) {
         }
     }
 
+    async function loadCalendarData() {
+        if (!appState.currentUser || !appState.currentPlanId) return;
+        const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
+        try {
+            const doc = await calendarRef.get();
+            appState.calendar.data = doc.exists ? doc.data() : {};
+        } catch (error) {
+            console.error("Error loading calendar data:", error);
+            appState.calendar.data = {};
+        }
+    }
+
     function renderDayDetails(dateKey) {
         selectedDateKey = dateKey;
 
@@ -2340,8 +2352,6 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
 
 
 
