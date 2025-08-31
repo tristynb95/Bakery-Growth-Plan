@@ -444,7 +444,7 @@ function runApp(app) {
         DOMElements.dashboardView.classList.add('hidden');
         DOMElements.appView.classList.remove('hidden');
         switchView(viewId);
-        document.getElementById('calendar-fab').classList.remove('hidden');
+        document.getElementById('radial-menu-container').classList.remove('hidden');
     }
 
     async function renderDashboard() {
@@ -2360,6 +2360,7 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
