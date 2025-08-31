@@ -1703,20 +1703,6 @@ input[type="time"] {
 .calendar-day.day-density-4 { --day-density: 0.25; }
 
 
-/* --- Event Indicator Container & Alignment --- */
-.event-dots-container .bi-cake2 {
-    font-size: 16px;
-    color: #D97706; /* A rich orange/gold */
-
-    /* New lines for perfect alignment */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px; /* Match font-size for a predictable box */
-    height: 16px;
-}
-
-
 /* --- Individual Event Dots (for days with <= 3 events) --- */
 .event-dot {
     width: 8px;
@@ -1774,4 +1760,25 @@ input[type="time"] {
 -------------------------------------------------- */
 .event-dots-container > * {
     vertical-align: middle;
+}
+
+/* 46. Birthday Indicator & Refined Dot Alignment
+-------------------------------------------------- */
+
+/* This positions the new birthday indicator in the top-left corner */
+.calendar-day .birthday-indicator {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    font-size: 16px;
+    color: #D97706; /* Orange/gold color */
+}
+
+/* This ensures the dots container is always at the bottom */
+.event-dots-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: auto; /* Pushes to the bottom */
+    align-items: center; /* Vertically aligns dots with each other */
 }
