@@ -2054,7 +2054,6 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
     const form = document.getElementById('add-event-form');
     if (form) form.classList.remove('hidden');
     addEventBtn.classList.add('hidden');
-    document.getElementById('day-detail-title').classList.add('hidden');
     // Reset standard fields
     document.getElementById('event-title-input').value = '';
     document.getElementById('event-all-day-toggle').checked = false;
