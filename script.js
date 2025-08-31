@@ -1873,7 +1873,6 @@ function showEditEventForm(index) {
 }
     // MODIFIED: This entire function has been updated to support the searchable category dropdown.
 function setupCalendarEventListeners() {
-    const calendarFab = document.getElementById('calendar-fab');
     const calendarModal = document.getElementById('calendar-modal');
     const calendarCloseBtn = document.getElementById('calendar-close-btn');
     const calendarPrevMonthBtn = document.getElementById('calendar-prev-month-btn');
@@ -1891,7 +1890,7 @@ function setupCalendarEventListeners() {
     const categoryDropdown = document.getElementById('category-dropdown');
     const searchInput = document.getElementById('category-search-input');
 
-    if (!calendarFab || !calendarModal || !allDayCheckbox || !categoryDropdown) {
+    if (!calendarModal || !allDayCheckbox || !categoryDropdown) {
         console.warn("Calendar UI elements not found. Skipping event listener setup.");
         return;
     }
@@ -2360,18 +2359,3 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
