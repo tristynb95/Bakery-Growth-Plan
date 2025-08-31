@@ -92,6 +92,7 @@ function runApp(app) {
         sessionTimeout: null,
         planUnsubscribe: null,
         calendarUnsubscribe: null,
+        aiPlanGenerationController: null,
         calendar: {
             currentDate: new Date(),
             data: {},
@@ -1236,14 +1237,22 @@ function runApp(app) {
             saveState();
             setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
         } else {
+            if (appState.aiPlanGenerationController) {
+                appState.aiPlanGenerationController.abort();
+            }
             openModal('aiActionPlan_generate');
             try {
+                appState.aiPlanGenerationController = new AbortController();
+                const signal = appState.aiPlanGenerationController.signal;
+
                 const planSummary = summarizePlanForAI(appState.planData);
                 const response = await fetch('/.netlify/functions/generate-plan', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ planSummary })
+                    body: JSON.stringify({ planSummary }),
+                    signal: signal
                 });
+
                 if (!response.ok) {
                     let errorResult;
                     try {
@@ -1263,17 +1272,29 @@ function runApp(app) {
                 await saveData(true);
                 handleAIActionPlan();
             } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log('AI plan generation was cancelled by the user.');
+                    return;
+                }
                 console.error("Error generating AI plan:", error);
                 const modalContent = document.getElementById('modal-content');
                 modalContent.innerHTML = `<p class="text-red-600 font-semibold">An error occurred.</p><p class="text-gray-600 mt-2 text-sm">${error.message}</p>`;
                 DOMElements.modalActionBtn.style.display = 'none';
                 DOMElements.modalCancelBtn.textContent = 'Close';
+            } finally {
+                appState.aiPlanGenerationController = null;
             }
         }
     }
 
     function requestCloseModal() {
-        const isAiModal = DOMElements.modalBox.dataset.type === 'aiActionPlan_view';
+        const modalType = DOMElements.modalBox.dataset.type;
+
+        if (modalType === 'aiActionPlan_generate' && appState.aiPlanGenerationController) {
+            appState.aiPlanGenerationController.abort();
+        }
+
+        const isAiModal = modalType === 'aiActionPlan_view';
         const hasUnsavedChanges = undoStack.length > 1;
         if (isAiModal && hasUnsavedChanges) {
             openModal('confirmClose');
@@ -1410,7 +1431,8 @@ function runApp(app) {
                 DOMElements.modalTitle.textContent = "Generating AI Action Plan";
                 DOMElements.modalContent.innerHTML = `<div class="flex flex-col items-center justify-center p-8"><div class="loading-spinner"></div><p class="mt-4 text-gray-600">Please wait, the AI is creating your plan...</p></div>`;
                 DOMElements.modalActionBtn.style.display = 'none';
-                DOMElements.modalCancelBtn.style.display = 'none';
+                DOMElements.modalCancelBtn.style.display = 'inline-flex';
+                DOMElements.modalCancelBtn.textContent = 'Cancel';
                 break;
             case 'aiActionPlan_view': {
                 DOMElements.modalTitle.textContent = "Edit Your Action Plan";
