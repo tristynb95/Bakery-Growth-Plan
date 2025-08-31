@@ -1960,14 +1960,16 @@ const selectOption = (option) => {
     if (calendarCloseBtn) calendarCloseBtn.addEventListener('click', () => calendarModal.classList.add('hidden'));
     
     if (calendarPrevMonthBtn) calendarPrevMonthBtn.addEventListener('click', () => {
-        appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() - 1);
-        renderCalendar();
-    });
+    appState.calendar.currentDate.setDate(1); // Set day to 1st to prevent rollover
+    appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() - 1);
+    renderCalendar();
+});
 
-    if (calendarNextMonthBtn) calendarNextMonthBtn.addEventListener('click', () => {
-        appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() + 1);
-        renderCalendar();
-    });
+if (calendarNextMonthBtn) calendarNextMonthBtn.addEventListener('click', () => {
+    appState.calendar.currentDate.setDate(1); // Set day to 1st to prevent rollover
+    appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() + 1);
+    renderCalendar();
+});
 
     if (calendarTodayBtn) calendarTodayBtn.addEventListener('click', () => {
         const today = new Date();
@@ -2324,6 +2326,7 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
