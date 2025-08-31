@@ -36,7 +36,7 @@ function runApp(app) {
         emailInput: document.getElementById('email'),
         passwordInput: document.getElementById('password'),
         loginBtn: document.getElementById('login-btn'),
-        logoutBtn: document.getElementById('logout-btn'),
+        sidebarLogoutBtn: document.getElementById('sidebar-logout-btn'), // Corrected reference
         dashboardLogoutBtn: document.getElementById('dashboard-logout-btn'),
         dashboardProfileBtn: document.getElementById('dashboard-profile-btn'),
         backToDashboardBtn: document.getElementById('back-to-dashboard-btn'),
@@ -2267,7 +2267,7 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
         DOMElements.appView.classList.remove('sidebar-open');
     });
 
-    DOMElements.logoutBtn.addEventListener('click', () => handleLogout(false));
+    DOMElements.sidebarLogoutBtn.addEventListener('click', () => handleLogout(false));
     DOMElements.dashboardLogoutBtn.addEventListener('click', () => handleLogout(false));
     DOMElements.dashboardProfileBtn.addEventListener('click', () => {
         window.location.href = '/profile.html';
@@ -2386,6 +2386,7 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
