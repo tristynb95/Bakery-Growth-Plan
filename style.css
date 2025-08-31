@@ -1104,7 +1104,6 @@ tr:hover .btn-remove-row {
     gap: 4px;
     /* MODIFIED: This pushes the dots to the bottom of the cell */
     margin-top: auto;
-    align-items: center; /* Add this */
 }
 
 /* Add this new rule below .event-dots-container */
@@ -1770,3 +1769,9 @@ input[type="time"] {
 .event-dot.personal, .stack-dot.personal { background-color: #8B5CF6; }
 .event-dot.reminder, .stack-dot.reminder { background-color: #9CA3AF; }
 .event-dot.requested-off, .stack-dot.requested-off { background-color: #6B7280; }
+
+/* 45. Definitive Icon & Dot Vertical Alignment
+-------------------------------------------------- */
+.event-dots-container > * {
+    vertical-align: middle;
+}
