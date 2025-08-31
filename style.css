@@ -1689,3 +1689,45 @@ input[type="time"] {
     border-radius: 4px;
     line-height: 1; /* Ensures consistent height */
 }
+
+/* 44. Day Density & Event Stack Styles
+-------------------------------------------------- */
+
+/* Base style for the calendar day to accept the density variable */
+.calendar-day {
+    --day-density: 0; /* Default density */
+    background-color: rgba(251, 191, 36, var(--day-density)); /* Using amber/gold for a warm glow */
+}
+
+/* Heat map styles based on the --day-density variable */
+.calendar-day.day-density-1 { --day-density: 0.05; }
+.calendar-day.day-density-2 { --day-density: 0.1; }
+.calendar-day.day-density-3 { --day-density: 0.18; }
+.calendar-day.day-density-4 { --day-density: 0.25; }
+
+/* The new event stack indicator */
+.event-overflow-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    width: 16px;
+    height: 16px;
+    margin-top: 4px;
+}
+
+.event-overflow-stack .stack-bar {
+    width: 100%;
+    height: 3px;
+    border-radius: 2px;
+    background-color: var(--gails-text-secondary);
+    opacity: 0.6;
+}
+
+/* Make the stack more prominent on hover/selected */
+.calendar-day:hover .event-overflow-stack .stack-bar,
+.calendar-day.selected .event-overflow-stack .stack-bar {
+    background-color: var(--gails-red);
+    opacity: 1;
+}
