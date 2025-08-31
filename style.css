@@ -1893,19 +1893,19 @@ input[type="time"] {
     transform: translateY(-160%); /* Moved further up */
     transition-delay: 0.1s;
 }
-.radial-menu-container.open #radial-action-note {
+.radial-menu-container.open #radial-action-plan { /* Updated from #radial-action-note */
     transform: translateX(-115%) translateY(-115%); /* Moved further out diagonally */
     transition-delay: 0.05s;
 }
-.radial-menu-container.open #radial-action-spotlight {
+.radial-menu-container.open #radial-action-gemini { /* Updated from #radial-action-spotlight */
     transform: translateX(-160%); /* Moved further to the left */
     transition-delay: 0s;
 }
 
 /* Hover transform for open items (adjusting to new base positions) */
 .radial-menu-container.open #radial-action-calendar:hover { transform: translateY(-160%) scale(1.1); }
-.radial-menu-container.open #radial-action-note:hover { transform: translateX(-115%) translateY(-115%) scale(1.1); }
-.radial-menu-container.open #radial-action-spotlight:hover { transform: translateX(-160%) scale(1.1); }
+.radial-menu-container.open #radial-action-plan:hover { transform: translateX(-115%) translateY(-115%) scale(1.1); } /* Updated */
+.radial-menu-container.open #radial-action-gemini:hover { transform: translateX(-160%) scale(1.1); } /* Updated */
 
 /* Overlay for focusing on the menu */
 .radial-menu-overlay {
