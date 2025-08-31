@@ -1643,7 +1643,7 @@ function runApp(app) {
         const actionPlanButton = document.getElementById('radial-action-plan');
         if (actionPlanButton) {
             actionPlanButton.addEventListener('click', () => {
-                alert("Action Plan feature coming soon!");
+                handleAIActionPlan();
                 DOMElements.radialMenuContainer.classList.remove('open');
             });
         }
@@ -2358,6 +2358,7 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
