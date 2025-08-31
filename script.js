@@ -1640,18 +1640,18 @@ function runApp(app) {
             });
         }
 
-        const quickNoteButton = document.getElementById('radial-action-note');
-        if (quickNoteButton) {
-            quickNoteButton.addEventListener('click', () => {
-                alert("Quick Note feature coming soon!");
+        const actionPlanButton = document.getElementById('radial-action-plan');
+        if (actionPlanButton) {
+            actionPlanButton.addEventListener('click', () => {
+                alert("Action Plan feature coming soon!");
                 DOMElements.radialMenuContainer.classList.remove('open');
             });
         }
         
-        const spotlightButton = document.getElementById('radial-action-spotlight');
-        if (spotlightButton) {
-            spotlightButton.addEventListener('click', () => {
-                alert("Team Spotlight feature coming soon!");
+        const geminiButton = document.getElementById('radial-action-gemini');
+        if (geminiButton) {
+            geminiButton.addEventListener('click', () => {
+                alert("Gemini AI feature coming soon!");
                 DOMElements.radialMenuContainer.classList.remove('open');
             });
         }
@@ -2358,6 +2358,7 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
