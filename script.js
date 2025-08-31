@@ -2080,6 +2080,8 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
         if (form) form.classList.add('hidden');
 
         if (dayEventList) dayEventList.classList.remove('hidden');
+        document.getElementById('add-event-btn').classList.remove('hidden');
+        document.getElementById('day-detail-title').classList.remove('hidden');
     });
 
     if (saveEventBtn) saveEventBtn.addEventListener('click', async () => {
@@ -2117,6 +2119,8 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
             appState.calendar.editingEventIndex = null;
             renderCalendar();
             renderDayDetails(selectedDateKey);
+            document.getElementById('add-event-btn').classList.remove('hidden');
+            document.getElementById('day-detail-title').classList.remove('hidden');
         } catch (error) {
             console.error("Error saving event:", error);
             alert("Could not save the event. Please try again.");
@@ -2359,6 +2363,7 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
