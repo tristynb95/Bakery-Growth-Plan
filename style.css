@@ -1774,3 +1774,148 @@ input[type="time"] {
     margin-top: auto; /* Pushes to the bottom */
     align-items: center; /* Vertically aligns dots with each other */
 }
+
+/* 47. Radial Menu FAB Styles
+-------------------------------------------------- */
+.radial-menu-container {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 998;
+}
+
+/* The main floating action button */
+.radial-menu-fab {
+    width: 3.5rem; /* 56px */
+    height: 3.5rem; /* 56px */
+    border-radius: 50%;
+    font-size: 1.75rem; /* 28px */
+    position: relative;
+    z-index: 1000;
+    box-shadow: var(--shadow-lg);
+    /* Remove default button padding to center icons correctly */
+    padding: 0; 
+}
+.radial-menu-fab .bi { margin: 0; }
+
+/* Icon handling for open/close animation */
+.radial-menu-fab .open-icon,
+.radial-menu-fab .close-icon {
+    position: absolute;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+.radial-menu-fab .close-icon {
+    transform: rotate(-45deg) scale(0.5);
+    opacity: 0;
+}
+
+.radial-menu-container.open .radial-menu-fab .open-icon {
+    transform: rotate(45deg) scale(0.5);
+    opacity: 0;
+}
+
+.radial-menu-container.open .radial-menu-fab .close-icon {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+}
+
+/* The individual menu items */
+.radial-menu-item {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 3rem; /* 48px */
+    height: 3rem; /* 48px */
+    border-radius: 50%;
+    background-color: var(--gails-white);
+    color: var(--gails-text-primary);
+    border: 1px solid var(--gails-grey-mid);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    cursor: pointer;
+    z-index: 999;
+    opacity: 0;
+    transform: translate(0, 0) scale(0.5);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.radial-menu-item:hover {
+    background-color: var(--gails-red);
+    color: var(--gails-white);
+    border-color: var(--gails-red);
+    transform: scale(1.1); /* Keep original transform for hover, just scale */
+}
+
+/* Tooltip styles */
+.radial-menu-item::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: 120%; /* Position to the left */
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--gails-text-primary);
+    color: var(--gails-white);
+    padding: 0.3rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+}
+
+.radial-menu-item:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(-5px); /* Slide out effect */
+}
+
+
+/* When the menu is open, position the items */
+.radial-menu-container.open .radial-menu-item {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Position items in an arc. Delays create the staggered animation */
+.radial-menu-container.open #radial-action-calendar {
+    transform: translateY(-125%);
+    transition-delay: 0.1s;
+}
+.radial-menu-container.open #radial-action-note {
+    transform: translateX(-88%) translateY(-88%);
+    transition-delay: 0.05s;
+}
+.radial-menu-container.open #radial-action-spotlight {
+    transform: translateX(-125%);
+    transition-delay: 0s;
+}
+
+/* Hover transform for open items */
+.radial-menu-container.open #radial-action-calendar:hover { transform: translateY(-125%) scale(1.1); }
+.radial-menu-container.open #radial-action-note:hover { transform: translateX(-88%) translateY(-88%) scale(1.1); }
+.radial-menu-container.open #radial-action-spotlight:hover { transform: translateX(-125%) scale(1.1); }
+
+/* Overlay for focusing on the menu */
+.radial-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(253, 253, 252, 0.6);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 997;
+}
+
+.radial-menu-container.open .radial-menu-overlay {
+    opacity: 1;
+    pointer-events: auto;
+}
