@@ -539,13 +539,10 @@ export function closeModal() {
 
 // --- Main Initializer ---
 
-export function initializeUI(database, state, apiFunction, saveDataFunction, planSelectFunction) {
+export function initializeUI(database, state) {
     // Connect to other parts of the app
     db = database;
     appState = state;
-    generateAiActionPlan = apiFunction;
-    saveData = saveDataFunction;
-    handleSelectPlan = planSelectFunction;
 
     // --- Modal Event Listeners ---
     DOMElements.modalCloseBtn.addEventListener('click', closeModal);
