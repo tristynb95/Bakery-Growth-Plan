@@ -1,5 +1,7 @@
 // js/plan-view.js
 
+import { handleShare, handleAIActionPlan } from './ui.js';
+
 // Dependencies passed from main.js
 let db, appState, openModal, initializeCharCounters;
 
@@ -91,7 +93,12 @@ const templates = {
                     <p class="text-gray-600 mb-6">Return here each week to log your progress, celebrate wins, and spotlight your team.</p>
                     <div class="mb-6 border-b border-gray-200">
                         <nav id="weekly-tabs" class="flex -mb-px space-x-6" aria-label="Tabs">
-                            ${[1, 2, 3, 4].map(w => `<a href="#" class="weekly-tab ${w === 1 ? 'active' : ''}" data-week="${w}">Week ${w}</a>`).join('')}
+                            ${[1, 2, 3, 4].map(w => `
+                                <a href="#" class="weekly-tab ${w === 1 ? 'active' : ''} flex items-center" data-week="${w}">
+                                    <span>Week ${w}</span>
+                                    <i class="bi bi-check-circle-fill week-complete-icon ml-2 hidden"></i>
+                                </a>
+                            `).join('')}
                         </nav>
                     </div>
                     <div id="weekly-tab-content">
@@ -130,6 +137,88 @@ const templates = {
             </div>
         `,
 };
+
+// --- Progress Calculation & Data Helpers ---
+
+function isContentEmpty(htmlContent) {
+    if (!htmlContent) return true;
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+    return tempDiv.innerText.trim() === '';
+}
+
+function getVisionProgress(planData) {
+    const data = planData || appState.planData;
+    const requiredFields = templates.vision.requiredFields;
+    const total = requiredFields.length;
+    const completed = requiredFields.filter(field => !isContentEmpty(data[field])).length;
+    return { completed, total };
+}
+
+function isWeekComplete(monthNum, weekNum, planData) {
+    const data = planData || appState.planData;
+    const status = data[`m${monthNum}s5_w${weekNum}_status`];
+    const win = data[`m${monthNum}s5_w${weekNum}_win`];
+    const spotlight = data[`m${monthNum}s5_w${weekNum}_spotlight`];
+    const shine = data[`m${monthNum}s5_w${weekNum}_shine`];
+    return !!status && !isContentEmpty(win) && !isContentEmpty(spotlight) && !isContentEmpty(shine);
+}
+
+function getMonthProgress(monthNum, planData) {
+    const data = planData || appState.planData;
+    const requiredFields = [
+        `m${monthNum}s1_battle`, `m${monthNum}s1_pillar`, `m${monthNum}s2_levers`,
+        `m${monthNum}s2_powerup_q`, `m${monthNum}s2_powerup_a`, `m${monthNum}s3_people`,
+        `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
+        `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
+    ];
+    for (let w = 1; w <= 4; w++) {
+        requiredFields.push(`m${monthNum}s5_w${w}_status`, `m${monthNum}s5_w${w}_win`, `m${monthNum}s5_w${w}_spotlight`, `m${monthNum}s5_w${w}_shine`);
+    }
+    if (monthNum == 3) {
+        requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
+    }
+    const total = requiredFields.length;
+    const completed = requiredFields.filter(field => !isContentEmpty(data[field])).length;
+    return { completed, total };
+}
+
+function calculatePlanCompletion(planData) {
+    let totalFields = 0;
+    let completedFields = 0;
+    const visionProgress = getVisionProgress(planData);
+    totalFields += visionProgress.total;
+    completedFields += visionProgress.completed;
+    for (let m = 1; m <= 3; m++) {
+        const monthProgress = getMonthProgress(m, planData);
+        totalFields += monthProgress.total;
+        completedFields += monthProgress.completed;
+    }
+    return totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
+}
+
+function summarizePlanForAI(planData) {
+    const e = (text) => {
+        if (!text) return '';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = text;
+        return tempDiv.innerText.trim();
+    };
+    let summary = `QUARTERLY NARRATIVE: ${e(planData.quarterlyTheme)}\n\n`;
+    for (let m = 1; m <= 3; m++) {
+        summary += `--- MONTH ${m} ---\n`;
+        summary += `GOAL: ${e(planData[`month${m}Goal`])}\n`;
+        summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
+        summary += `KEY ACTIONS: ${e(planData[`m${m}s2_levers`])}\n`;
+        summary += `DEVELOPING OUR BREADHEADS: ${e(planData[`m${m}s3_people`])}\n`;
+        summary += `PROTECT THE CORE (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
+        summary += `PROTECT THE CORE (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
+        summary += `PROTECT THE CORE (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
+        summary += `PROTECT THE CORE (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
+    }
+    return summary;
+}
+
 
 // --- Data Handling & Saving ---
 
@@ -246,7 +335,122 @@ function populateViewWithData() {
             }
         });
     }
+    // Make sure placeholders are correct after populating data
+    document.querySelectorAll('#app-view [contenteditable="true"]').forEach(el => {
+        if (el.innerText.trim() === '') {
+            el.classList.add('is-placeholder-showing');
+        } else {
+            el.classList.remove('is-placeholder-showing');
+        }
+    });
 }
+
+function updateViewWithRemoteData(remoteData) {
+    if (appState.currentView === 'summary') {
+        renderSummary(); // Re-render summary view on data change
+        return;
+    }
+    if (DOMElements.appView.classList.contains('hidden')) {
+        return;
+    }
+    if (appState.currentView.startsWith('month-')) {
+        const monthNum = parseInt(appState.currentView.split('-')[1], 10);
+        updateWeeklyTabCompletion(monthNum, remoteData);
+    }
+    document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
+        // Only update if the element is not currently focused by the user
+        if (document.activeElement !== el) {
+            if (el.id && remoteData[el.id] !== undefined) {
+                if (el.isContentEditable) {
+                    if (el.innerHTML !== remoteData[el.id]) {
+                        el.innerHTML = remoteData[el.id];
+                    }
+                } else {
+                    if (el.value !== remoteData[el.id]) {
+                        el.value = remoteData[el.id];
+                    }
+                }
+            }
+        }
+        if (el.isContentEditable) {
+             if (el.innerText.trim() === '') {
+                el.classList.add('is-placeholder-showing');
+            } else {
+                el.classList.remove('is-placeholder-showing');
+            }
+        }
+    });
+    // This logic handles multi-select buttons like pillars
+    document.querySelectorAll('.pillar-buttons').forEach(group => {
+        const stepKey = group.dataset.stepKey;
+        const dataKey = `${stepKey}_pillar`;
+        const pillars = remoteData[dataKey]; // This will be an array or undefined
+        group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+        if (Array.isArray(pillars)) {
+            pillars.forEach(pillar => {
+                const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
+                if (buttonToSelect) buttonToSelect.classList.add('selected');
+            });
+        }
+    });
+    // This logic handles single-select buttons like weekly status
+    if (appState.currentView.startsWith('month-')) {
+        const monthNum = appState.currentView.split('-')[1];
+        document.querySelectorAll('.status-buttons').forEach(group => {
+            const week = group.dataset.week;
+            const key = `m${monthNum}s5_w${week}_status`;
+            const status = remoteData[key];
+            group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+            if (status) {
+                const buttonToSelect = group.querySelector(`[data-status="${status}"]`);
+                if (buttonToSelect) buttonToSelect.classList.add('selected');
+            }
+        });
+    }
+}
+
+
+function updateWeeklyTabCompletion(monthNum, planData) {
+    for (let w = 1; w <= 4; w++) {
+        const isComplete = isWeekComplete(monthNum, w, planData);
+        const tab = document.querySelector(`.weekly-tab[data-week="${w}"]`);
+        if (tab) {
+            const tickIcon = tab.querySelector('.week-complete-icon');
+            if (tickIcon) {
+                tickIcon.classList.toggle('hidden', !isComplete);
+            }
+        }
+    }
+}
+
+function updateSidebarNavStatus() {
+    const updateNavItem = (navId, progress) => {
+        const navLink = document.querySelector(navId);
+        if (!navLink) return;
+        const isComplete = progress.total > 0 && progress.completed === progress.total;
+        navLink.classList.toggle('completed', isComplete);
+        const progressCircle = navLink.querySelector('.progress-donut__progress');
+        if (progressCircle) {
+            const radius = progressCircle.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+            const progressFraction = progress.total > 0 ? progress.completed / progress.total : 0;
+            const offset = circumference - (progressFraction * circumference);
+            progressCircle.style.strokeDashoffset = offset;
+        }
+    };
+    updateNavItem('#nav-vision', getVisionProgress());
+    for (let m = 1; m <= 3; m++) {
+        updateNavItem(`#nav-month-${m}`, getMonthProgress(m));
+    }
+}
+
+function updateOverallProgress() {
+    const percentage = calculatePlanCompletion(appState.planData);
+    DOMElements.progressPercentage.textContent = `${percentage}%`;
+    DOMElements.progressBarFill.style.width = `${percentage}%`;
+}
+
 
 function updateSidebarInfo() {
     const managerName = appState.planData.managerName || '';
@@ -264,7 +468,76 @@ function updateSidebarInfo() {
 
 function updateUI() {
     updateSidebarInfo();
-    // updateOverallProgress(); // This logic can be moved here if needed
+    updateOverallProgress();
+    updateSidebarNavStatus();
+}
+
+function renderSummary() {
+    const formData = appState.planData;
+    const e = (html) => {
+        if (!html) return '...';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        if (tempDiv.innerText.trim() === '') { return '...'; }
+        return html.replace(/<p><\/p>/g, '').replace(/<br>/g, ' ');
+    };
+    const renderMonthSummary = (monthNum) => {
+        let weeklyCheckinHTML = '<ul>';
+        let hasLoggedWeeks = false;
+        for (let w = 1; w <= 4; w++) {
+            const status = formData[`m${monthNum}s5_w${w}_status`];
+            const win = formData[`m${monthNum}s5_w${w}_win`];
+            const spotlight = formData[`m${monthNum}s5_w${w}_spotlight`];
+            const shine = formData[`m${monthNum}s5_w${w}_shine`];
+
+            if (status) {
+                hasLoggedWeeks = true;
+                const statusText = status.replace('-', ' ').toUpperCase();
+                const statusBadgeHTML = `<span class="summary-status-badge status-${status}">${statusText}</span>`;
+                let checkinContent = '';
+                if (!isContentEmpty(win)) checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Win/Learning:</strong> ${e(win)}</p>`;
+                if (!isContentEmpty(spotlight)) checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Breadhead Spotlight:</strong> ${e(spotlight)}</p>`;
+                if (!isContentEmpty(shine)) checkinContent += `<p class="text-sm text-gray-600"><strong>SHINE Focus:</strong> ${e(shine)}</p>`;
+                if (checkinContent === '') checkinContent = '<p class="text-sm text-gray-500 italic">No details logged.</p>';
+
+                weeklyCheckinHTML += `<li class="mb-3 pb-3 border-b last:border-b-0"><div class="flex justify-between items-center mb-2"><strong class="font-semibold text-gray-700">Week ${w}</strong>${statusBadgeHTML}</div>${checkinContent}</li>`;
+            }
+        }
+        if (!hasLoggedWeeks) weeklyCheckinHTML = '<p class="text-sm text-gray-500">No weekly check-ins logged.</p>';
+        else weeklyCheckinHTML += '</ul>';
+
+        const pillars = formData[`m${monthNum}s1_pillar`];
+        const pillarIcons = { 'people': 'bi-people-fill', 'product': 'bi-cup-hot-fill', 'customer': 'bi-heart-fill', 'place': 'bi-shop' };
+        let pillarBadgesHTML = '';
+        if (Array.isArray(pillars) && pillars.length > 0) {
+            pillarBadgesHTML = pillars.map(p => `<span class="pillar-badge"><i class="bi ${pillarIcons[p]}"></i> ${p.charAt(0).toUpperCase() + p.slice(1)}</span>`).join('');
+        }
+        let pillarHTML = pillarBadgesHTML ? `<div class="flex items-center gap-2 mb-4 flex-wrap"><span class="font-semibold text-sm text-gray-500">Pillar Focus:</span>${pillarBadgesHTML}</div>` : '';
+
+        return `<div class="content-card p-0 overflow-hidden mt-8">
+            <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">${monthNum * 30} Day Plan</h2>
+            <div class="summary-grid">
+                <div class="p-6">
+                    ${pillarHTML}
+                    <div class="summary-section"><h3 class="summary-heading">Must-Win Battle</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div></div>
+                    <div class="summary-section"><h3 class="summary-heading">Key Actions</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div>
+                    <div class="summary-section"><h3 class="summary-heading">Developing Our Breadheads</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div></div>
+                </div>
+                <div class="p-6 bg-gray-50/70 border-l">
+                    <div class="summary-section"><h3 class="summary-heading">Upholding Pillars</h3><ul class="space-y-3 mt-2"><li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-heart-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_customer`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-shop w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_place`])}</span></li></ul></div>
+                    <div class="summary-section"><h3 class="summary-heading">Weekly Momentum</h3>${weeklyCheckinHTML}</div>
+                    <div class="summary-section"><h3 class="summary-heading">End of Month Review</h3><ul class="space-y-3 mt-2"><li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong>Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong>Challenge:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong>Next:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li></ul></div>
+                </div>
+            </div>
+        </div>`;
+    };
+    DOMElements.contentArea.innerHTML = `<div class="space-y-8 summary-content">
+        <div class="content-card p-6"><h2 class="text-2xl font-bold font-poppins mb-4">Quarter Overview</h2><div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4"><div><h4 class="font-semibold text-sm text-gray-500">Manager</h4><p class="text-gray-800 font-medium">${formData.managerName || '...'}</p></div><div><h4 class="font-semibold text-sm text-gray-500">Bakery</h4><p class="text-gray-800 font-medium">${formData.bakeryLocation || '...'}</p></div><div><h4 class="font-semibold text-sm text-gray-500">Quarter</h4><p class="text-gray-800 font-medium">${formData.quarter || '...'}</p></div></div><div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Vision</h4><div class="text-gray-800 prose prose-sm">${e(formData.quarterlyTheme)}</div></div><div><h3 class="text-lg font-bold border-b pb-2 mb-3">Key Monthly Objectives</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm"><div><strong class="font-semibold text-gray-600 block">Month 1:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month1Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 2:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month2Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 3:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month3Goal)}</div></div></div></div></div>
+        ${renderMonthSummary(1)}
+        ${renderMonthSummary(2)}
+        ${renderMonthSummary(3)}
+        <div class="content-card p-6 mt-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);"><h2 class="text-2xl font-bold mb-4" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2><div class="space-y-4"><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Biggest Achievements</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_achievements)}</div></div><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_challenges)}</div></div><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Narrative</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_narrative)}</div></div><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Focus For Next Quarter</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_next_quarter)}</div></div></div></div>
+    </div>`;
 }
 
 function switchView(viewId) {
@@ -284,15 +557,15 @@ function switchView(viewId) {
 
     if (viewId === 'summary') {
         DOMElements.desktopHeaderButtons.classList.remove('hidden');
-        DOMElements.printBtn.classList.remove('hidden');
-        DOMElements.shareBtn.classList.remove('hidden');
-        DOMElements.aiActionBtn.classList.remove('hidden');
-        // renderSummary(); // This function would need to be moved here as well
+        renderSummary();
     } else {
         DOMElements.desktopHeaderButtons.classList.add('hidden');
         const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
         DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
         populateViewWithData();
+        if (monthNum) {
+            updateWeeklyTabCompletion(monthNum, appState.planData);
+        }
     }
 
     document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
@@ -316,20 +589,30 @@ export function showPlanView(planId) {
     appState.planUnsubscribe = planDocRef.onSnapshot((doc) => {
         if (doc.exists) {
             const remoteData = doc.data();
+            // A more robust check to prevent unnecessary re-renders
             if (JSON.stringify(remoteData) !== JSON.stringify(appState.planData)) {
                 appState.planData = remoteData;
-                updateUI();
-                if(appState.currentView !== 'summary') {
-                    populateViewWithData();
-                }
+                updateViewWithRemoteData(remoteData); // Use the more robust function
+                updateUI(); // This updates sidebar, progress bars etc.
             }
         } else {
-            console.error("Plan document not found!");
+            console.error("Plan document not found! Returning to dashboard.");
             document.dispatchEvent(new CustomEvent('back-to-dashboard'));
         }
+    }, (error) => {
+        console.error("Error listening to plan changes:", error);
+        document.dispatchEvent(new CustomEvent('back-to-dashboard'));
     });
 
-    switchView('vision');
+    // We need to fetch the data once before setting the view
+    planDocRef.get().then(doc => {
+        if (doc.exists) {
+            appState.planData = doc.data();
+            updateUI();
+            const lastViewId = localStorage.getItem('lastViewId');
+            switchView(lastViewId || 'vision');
+        }
+    });
 }
 
 export function initializePlanView(database, state, modalFunc, charCounterFunc) {
@@ -350,6 +633,29 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc) 
     DOMElements.contentArea.addEventListener('input', (e) => {
         if (e.target.matches('input, [contenteditable="true"]')) {
             saveData();
+        }
+        if (e.target.isContentEditable) {
+            if (e.target.innerText.trim() === '') {
+                e.target.classList.add('is-placeholder-showing');
+            } else {
+                e.target.classList.remove('is-placeholder-showing');
+            }
+        }
+    });
+
+    DOMElements.contentArea.addEventListener('keydown', (e) => {
+        const editor = e.target.closest('[contenteditable="true"]');
+        if (!editor) return;
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+            e.preventDefault();
+            document.execCommand('bold', false, null);
+        }
+        const maxLength = parseInt(editor.dataset.maxlength, 10);
+        if (maxLength) {
+            const isControlKey = e.key.length > 1 || e.ctrlKey || e.metaKey;
+            if (editor.innerText.length >= maxLength && !isControlKey) {
+                e.preventDefault();
+            }
         }
     });
 
@@ -385,5 +691,12 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc) 
 
     DOMElements.sidebarLogoutBtn.addEventListener('click', () => {
         document.dispatchEvent(new CustomEvent('logout-request'));
+    });
+
+    DOMElements.printBtn.addEventListener('click', () => window.print());
+    DOMElements.shareBtn.addEventListener('click', () => handleShare(db, appState));
+    DOMElements.aiActionBtn.addEventListener('click', () => {
+        const planSummary = summarizePlanForAI(appState.planData);
+        handleAIActionPlan(appState, saveData, planSummary);
     });
 }
