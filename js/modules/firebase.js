@@ -4,7 +4,13 @@
 // This module simply grabs that global object and exports it for use in other modules.
 
 const { firebase } = window;
-const app = firebase.app();
+let app;
+try {
+  app = firebase.app();
+} catch (e) {
+  // This will be handled by the initializeFirebase function
+}
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 
@@ -14,17 +20,18 @@ const db = firebase.firestore();
  * @throws {Error} If the configuration cannot be fetched or initialization fails.
  */
 export async function initializeFirebase() {
+  if (firebase.apps.length) {
+    return; // Already initialized
+  }
+
   try {
     const response = await fetch('/.netlify/functions/config');
     if (!response.ok) {
       throw new Error('Could not fetch Firebase configuration.');
     }
     const firebaseConfig = await response.json();
-    // The app is already initialized by the script tags, but we need to configure it.
-    // We check if it's already configured to avoid errors on hot-reloads.
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
+    firebase.initializeApp(firebaseConfig);
+    app = firebase.app();
   } catch (error) {
     console.error("Fatal Error: Failed to initialize Firebase.", error);
     document.body.innerHTML = '<div style="text-align: center; padding: 40px; font-family: sans-serif;"><h1>Application Error</h1><p>Could not load application configuration. Please try again later or contact support.</p></div>';
