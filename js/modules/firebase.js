@@ -1,43 +1,33 @@
-// This module handles the connection to the Firebase service.
+// js/app.js
 
-// The Firebase scripts are now loaded in the HTML file, creating a global 'firebase' object.
-// This module simply grabs that global object and exports it for use in other modules.
-
-const { firebase } = window;
-let app;
-try {
-  app = firebase.app();
-} catch (e) {
-  // This will be handled by the initializeFirebase function
-}
-
-const auth = firebase.auth();
-const db = firebase.firestore();
+// Step 1: Import ONLY the initializer function first.
+import { initializeFirebase } from './modules/firebase.js';
 
 /**
- * Initializes the Firebase application.
- * Fetches configuration from a serverless function and initializes the app.
- * @throws {Error} If the configuration cannot be fetched or initialization fails.
+ * Main function to start the application.
  */
-export async function initializeFirebase() {
-  if (firebase.apps.length) {
-    return; // Already initialized
-  }
-
+async function startApp() {
   try {
-    const response = await fetch('/.netlify/functions/config');
-    if (!response.ok) {
-      throw new Error('Could not fetch Firebase configuration.');
-    }
-    const firebaseConfig = await response.json();
-    firebase.initializeApp(firebaseConfig);
-    app = firebase.app();
+    // Step 2: Initialize Firebase and WAIT for it to complete.
+    await initializeFirebase();
+
+    // Step 3: NOW that Firebase is ready, dynamically import the rest of the app logic.
+    // This ensures that when auth.js and other modules are loaded, they have a working Firebase connection.
+    const { initializeAuthListener, setupAuthEventListeners } = await import('./modules/auth.js');
+    const { setupCalendarEventListeners } = await import('./modules/calendar.js');
+
+    // Step 4: Run the setup functions.
+    initializeAuthListener();
+    setupAuthEventListeners();
+    setupCalendarEventListeners(); // We can set up the main calendar listeners now.
+    
+    // The rest of your app's logic will now be handled by the auth listener, as it was before.
+    console.log("Application startup sequence complete.");
+
   } catch (error) {
-    console.error("Fatal Error: Failed to initialize Firebase.", error);
-    document.body.innerHTML = '<div style="text-align: center; padding: 40px; font-family: sans-serif;"><h1>Application Error</h1><p>Could not load application configuration. Please try again later or contact support.</p></div>';
-    throw error;
+    console.error("Application failed to start:", error);
   }
 }
 
-// Export the initialized services for use in other modules
-export { app, auth, db, firebase };
+// Start the application immediately.
+startApp();
