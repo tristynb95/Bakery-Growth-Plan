@@ -1,9 +1,9 @@
 // js/calendar.js
 
-let db, currentUser, currentPlanId, appState, selectedDateKey;
+let db, appState, selectedDateKey;
 
 // Helper function to parse UK-style dates that might be entered in the AI plan
-function parseUkDate(str) {
+export function parseUkDate(str) {
     if (!str || str.trim() === '') return null;
     const dateRegex = /^\s*(\d{1,2})[\s\/-](\d{1,2}|[a-zA-Z]{3})[\s\/-](\d{2}|\d{4})\s*$/;
     const match = str.trim().match(dateRegex);
@@ -555,10 +555,8 @@ function setupCalendarEventListeners() {
 
 
 // This is the main function we'll export. It kicks everything off.
-export function initializeCalendar(database, user, planId, state) {
+export function initializeCalendar(database, state) {
     db = database;
-    currentUser = user;
-    currentPlanId = planId;
     appState = state; // We get the app's state from main.js
 
     // Set up the radial menu button to open the calendar
