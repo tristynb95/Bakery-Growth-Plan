@@ -1431,7 +1431,7 @@ function runApp(app) {
             case 'timeout':
                 DOMElements.modalTitle.textContent = "Session Ended";
                 DOMElements.modalContent.innerHTML = `<p>Your work has been saved automatically. For your security, please sign in to continue.</p>`;
-                DOMElements.modalActionBtn.textContent = "Continue";
+                DOMElements.modalActionBtn.textContent = "Close";
                 DOMElements.modalCancelBtn.style.display = 'none';
                 DOMElements.modalActionBtn.onclick = closeModal;
                 break;
@@ -2482,3 +2482,4 @@ function setupCalendarEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
