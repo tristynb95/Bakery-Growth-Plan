@@ -1,1 +1,144 @@
+// js/auth.js
 
+// This function will be in charge of setting up all the buttons and inputs for the login/register screens.
+export function initializeAuth(auth) {
+    // --- DOM Elements for Authentication ---
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const loginBtn = document.getElementById('login-btn');
+    const authError = document.getElementById('auth-error');
+    const forgotPasswordBtn = document.getElementById('forgot-password-btn');
+    const resetView = document.getElementById('reset-view');
+    const loginView = document.getElementById('login-view');
+    const registerView = document.getElementById('register-view');
+    const showRegisterViewBtn = document.getElementById('show-register-view-btn');
+    const backToLoginFromRegisterBtn = document.getElementById('back-to-login-from-register-btn');
+    const registerEmail = document.getElementById('register-email');
+    const registerPassword = document.getElementById('register-password');
+    const termsAgreeCheckbox = document.getElementById('terms-agree');
+    const createAccountBtn = document.getElementById('create-account-btn');
+    const registerError = document.getElementById('register-error');
+    const resetEmail = document.getElementById('reset-email');
+    const sendResetBtn = document.getElementById('send-reset-btn');
+    const resetMessageContainer = document.getElementById('reset-message-container');
+    const backToLoginBtn = document.getElementById('back-to-login-btn');
+
+    // --- Login Logic ---
+    const handleLoginAttempt = () => {
+        authError.style.display = 'none';
+        auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value)
+            .catch(error => {
+                let friendlyMessage = 'An unexpected error occurred. Please try again.';
+                switch (error.code) {
+                    case 'auth/invalid-login-credentials':
+                    case 'auth/invalid-credential':
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                        friendlyMessage = 'Incorrect email or password. Please check your details and try again.';
+                        break;
+                    case 'auth/invalid-email':
+                        friendlyMessage = 'The email address is not valid. Please enter a valid email.';
+                        break;
+                }
+                authError.textContent = friendlyMessage;
+                authError.style.display = 'block';
+            });
+    };
+
+    const loginOnEnter = (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            handleLoginAttempt();
+        }
+    };
+
+    loginBtn.addEventListener('click', handleLoginAttempt);
+    emailInput.addEventListener('keyup', loginOnEnter);
+    passwordInput.addEventListener('keyup', loginOnEnter);
+
+    // --- Registration Logic ---
+    createAccountBtn.addEventListener('click', () => {
+        const email = registerEmail.value;
+        const password = registerPassword.value;
+        registerError.style.display = 'none';
+        if (!termsAgreeCheckbox.checked) {
+            registerError.textContent = 'You must agree to the Terms and Conditions and Privacy Policy.';
+            registerError.style.display = 'block';
+            return;
+        }
+        auth.createUserWithEmailAndPassword(email, password)
+            .catch(error => {
+                let friendlyMessage = 'An unexpected error occurred. Please try again.';
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        friendlyMessage = 'An account with this email address already exists. Please try logging in.';
+                        break;
+                    case 'auth/weak-password':
+                        friendlyMessage = 'The password is too weak. Please choose a stronger password.';
+                        break;
+                    case 'auth/invalid-email':
+                        friendlyMessage = 'The email address is not valid. Please enter a valid email.';
+                        break;
+                }
+                registerError.textContent = friendlyMessage;
+                registerError.style.display = 'block';
+            });
+    });
+
+    // --- View Switching Logic ---
+    showRegisterViewBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginView.classList.add('hidden');
+        resetView.classList.add('hidden');
+        registerView.classList.remove('hidden');
+        authError.style.display = 'none';
+    });
+
+    backToLoginFromRegisterBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        registerView.classList.add('hidden');
+        loginView.classList.remove('hidden');
+    });
+
+    forgotPasswordBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginView.classList.add('hidden');
+        registerView.classList.add('hidden');
+        resetView.classList.remove('hidden');
+        authError.style.display = 'none';
+        resetMessageContainer.innerHTML = '';
+    });
+
+    backToLoginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        resetView.classList.add('hidden');
+        loginView.classList.remove('hidden');
+    });
+
+    // --- Password Reset Logic ---
+    sendResetBtn.addEventListener('click', () => {
+        const email = resetEmail.value;
+        resetMessageContainer.innerHTML = '';
+        if (!email) {
+            resetMessageContainer.innerHTML = `<p class="auth-error" style="display:block; margin-bottom: 1rem;">Please enter your email address.</p>`;
+            return;
+        }
+        sendResetBtn.disabled = true;
+        sendResetBtn.textContent = 'Sending...';
+        auth.sendPasswordResetEmail(email)
+            .then(() => {
+                resetMessageContainer.innerHTML = `<p class="auth-success">If an account exists for this email, a password reset link has been sent. Please check your inbox.</p>`;
+            })
+            .catch((error) => {
+                // We show the same success message to prevent people from guessing emails
+                resetMessageContainer.innerHTML = `<p class="auth-success">If an account exists for this email, a password reset link has been sent. Please check your inbox.</p>`;
+                console.error("Password Reset Error:", error.message);
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    sendResetBtn.disabled = false;
+                    sendResetBtn.textContent = 'Send Reset Link';
+                }, 3000);
+            });
+    });
+}
