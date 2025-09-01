@@ -202,17 +202,30 @@ export function summarizePlanForAI(planData) {
         tempDiv.innerHTML = text;
         return tempDiv.innerText.trim();
     };
-    let summary = `QUARTERLY NARRATIVE: ${e(planData.quarterlyTheme)}\n\n`;
+
+    let summary = `MANAGER: ${e(planData.managerName)}\n`;
+    summary += `BAKERY: ${e(planData.bakeryLocation)}\n`;
+    summary += `QUARTER: ${e(planData.quarter)}\n`;
+    summary += `QUARTERLY VISION: ${e(planData.quarterlyTheme)}\n\n`;
+
     for (let m = 1; m <= 3; m++) {
         summary += `--- MONTH ${m} ---\n`;
         summary += `GOAL: ${e(planData[`month${m}Goal`])}\n`;
+        
+        const pillars = planData[`m${m}s1_pillar`];
+        if (Array.isArray(pillars) && pillars.length > 0) {
+            summary += `PILLAR FOCUS: ${pillars.join(', ')}\n`;
+        }
+
         summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
         summary += `KEY ACTIONS: ${e(planData[`m${m}s2_levers`])}\n`;
+        summary += `TEAM POWER-UP QUESTION: ${e(planData[`m${m}s2_powerup_q`])}\n`;
+        summary += `TEAM'S WINNING IDEA: ${e(planData[`m${m}s2_powerup_a`])}\n`;
         summary += `DEVELOPING OUR BREADHEADS: ${e(planData[`m${m}s3_people`])}\n`;
-        summary += `PROTECT THE CORE (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
-        summary += `PROTECT THE CORE (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
-        summary += `PROTECT THE CORE (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
-        summary += `PROTECT THE CORE (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
+        summary += `UPHOLDING PILLARS (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
+        summary += `UPHOLDING PILLARS (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
+        summary += `UPHOLDING PILLARS (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
+        summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
     }
     return summary;
 }
@@ -619,7 +632,6 @@ export function showPlanView(planId) {
     });
 }
 
-// MODIFIED: Simplified the function signature
 export function initializePlanView(database, state, modalFunc, charCounterFunc, aiActionPlanFunc, shareFunc) {
     db = database;
     appState = state;
