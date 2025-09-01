@@ -353,8 +353,8 @@ export async function handleAIActionPlan(appState, saveDataFn, planSummary) {
             appState.aiPlanGenerationController = new AbortController();
             const cleanedHTML = await generateAiActionPlan(planSummary, appState.aiPlanGenerationController.signal);
             appState.planData.aiActionPlan = cleanedHTML;
-            await saveData(true); // Force save the new AI plan
-            handleAIActionPlan(appState, saveData, planSummary); // Recurse to show the plan
+            await activeSaveDataFunction(true, { aiActionPlan: cleanedHTML }); // Force save the new AI plan
+            handleAIActionPlan(appState, saveDataFn, planSummary); // Recurse to show the plan
         } catch (error) {
             if (error.name === 'AbortError') {
                 console.log('AI plan generation cancelled.');
