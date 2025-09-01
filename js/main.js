@@ -49,7 +49,6 @@ function runApp(app) {
     initializeUI(db, appState);
     initializeCalendar(db, appState);
     initializeDashboard(db, appState, openModal, handleSelectPlan);
-    // MODIFIED: Simplified the function call
     initializePlanView(db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare);
 
 
@@ -83,6 +82,9 @@ function runApp(app) {
         if (e.detail && e.detail.isTimeout) {
             openModal('timeout');
         }
+        // This is the fix: clear the last viewed plan from local storage on logout
+        localStorage.removeItem('lastPlanId');
+        localStorage.removeItem('lastViewId');
         auth.signOut();
     });
 
