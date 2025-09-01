@@ -1860,51 +1860,6 @@ function runApp(app) {
     }
 
     // MODIFIED: Now correctly handles loading an event with an icon
-function showEditEventForm(index) {
-    appState.calendar.editingEventIndex = index;
-    const event = appState.calendar.data[selectedDateKey][index];
-
-    document.getElementById('day-event-list').classList.add('hidden');
-    document.getElementById('add-event-form').classList.remove('hidden');
-    document.getElementById('add-event-form-title').textContent = 'Edit Event';
-    document.getElementById('save-event-btn').textContent = 'Update Event';
-    document.getElementById('event-title-input').value = event.title;
-    const allDayCheckbox = document.getElementById('event-all-day-toggle');
-    allDayCheckbox.checked = event.allDay || false;
-    document.getElementById('event-time-inputs-container').classList.toggle('hidden', allDayCheckbox.checked);
-    document.getElementById('event-time-from-input').value = event.timeFrom || '';
-    document.getElementById('event-time-to-input').value = event.timeTo || '';
-    document.getElementById('event-description-input').value = event.description || '';
-
-    const searchInput = document.getElementById('category-search-input');
-    const hiddenInput = document.getElementById('event-type-input');
-    const iconContainer = document.getElementById('category-selected-icon-container');
-    const optionsContainer = document.querySelector('#category-dropdown .dropdown-options');
-
-    // Clear previous state
-    iconContainer.innerHTML = '<span id="category-selected-dot" class="selected-dot"></span>';
-    iconContainer.className = 'selected-icon-container';
-
-    if (event.type) {
-        const optionToSelect = optionsContainer.querySelector(`.dropdown-option[data-type="${event.type}"]`);
-        if (optionToSelect) {
-            const iconElement = optionToSelect.querySelector('.option-icon, .option-dot');
-            iconContainer.innerHTML = iconElement.outerHTML;
-            iconContainer.classList.add(event.type);
-            iconContainer.classList.toggle('has-icon', iconElement.classList.contains('option-icon'));
-
-            searchInput.value = optionToSelect.textContent.trim();
-            hiddenInput.value = event.type;
-        } else {
-            searchInput.value = '';
-            hiddenInput.value = '';
-        }
-    } else {
-        searchInput.value = '';
-        hiddenInput.value = '';
-    }
-}
-    // MODIFIED: This entire function has been updated to support the searchable category dropdown.
 function setupCalendarEventListeners() {
     const calendarModal = document.getElementById('calendar-modal');
     const calendarCloseBtn = document.getElementById('calendar-close-btn');
@@ -1919,7 +1874,6 @@ function setupCalendarEventListeners() {
     const timeInputsContainer = document.getElementById('event-time-inputs-container');
     const dayEventList = document.getElementById('day-event-list');
 
-    // --- NEW: Searchable Dropdown Elements ---
     const categoryDropdown = document.getElementById('category-dropdown');
     const searchInput = document.getElementById('category-search-input');
 
@@ -1934,14 +1888,23 @@ function setupCalendarEventListeners() {
         }
     });
 
-    // --- NEW: Searchable Dropdown Logic ---
     if (categoryDropdown && searchInput) {
         const selectedDisplay = categoryDropdown.querySelector('.dropdown-selected');
         const optionsContainer = categoryDropdown.querySelector('.dropdown-options');
         const hiddenInput = document.getElementById('event-type-input');
-        const selectedDot = document.getElementById('category-selected-dot');
 
         const filterOptions = () => {
+            // ====================================================================
+            // START: MODIFIED LOGIC
+            // ====================================================================
+            // Clear any existing highlights whenever the input changes (filter is run)
+            const highlighted = optionsContainer.querySelector('.is-highlighted');
+            if (highlighted) {
+                highlighted.classList.remove('is-highlighted');
+            }
+            // ====================================================================
+            // END: MODIFIED LOGIC
+            // ====================================================================
             const searchTerm = searchInput.value.toLowerCase();
             const options = optionsContainer.querySelectorAll('.dropdown-option:not(.no-results)');
             let visibleCount = 0;
@@ -1970,15 +1933,13 @@ function setupCalendarEventListeners() {
             }
         };
 
-        // MODIFIED: This function now handles both icons and dots
         const selectOption = (option) => {
             const type = option.dataset.type;
             const iconContainer = document.getElementById('category-selected-icon-container');
             const iconElement = option.querySelector('.option-icon, .option-dot');
 
-            // Copy the icon/dot element into the selected display
             iconContainer.innerHTML = iconElement.outerHTML;
-            iconContainer.className = `selected-icon-container ${type}`; // Pass class for styling
+            iconContainer.className = `selected-icon-container ${type}`;
             iconContainer.classList.toggle('has-icon', iconElement.classList.contains('option-icon'));
 
             searchInput.value = option.textContent.trim();
@@ -1989,17 +1950,13 @@ function setupCalendarEventListeners() {
         searchInput.addEventListener('focus', () => {
             categoryDropdown.classList.add('open');
             searchInput.select();
-            filterOptions(); // Show all options when focused
+            filterOptions();
         });
 
         searchInput.addEventListener('input', filterOptions);
 
-        // ====================================================================
-        // START: NEW KEYBOARD NAVIGATION LOGIC
-        // ====================================================================
         searchInput.addEventListener('keydown', (e) => {
             if (!categoryDropdown.classList.contains('open')) {
-                // If the dropdown is closed, open it on arrow key press
                 if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
                     categoryDropdown.classList.add('open');
                 }
@@ -2007,7 +1964,7 @@ function setupCalendarEventListeners() {
             }
 
             const options = Array.from(optionsContainer.querySelectorAll('.dropdown-option:not(.no-results)'))
-                                 .filter(opt => opt.style.display !== 'none'); // Only consider visible options
+                                 .filter(opt => opt.style.display !== 'none');
             if (options.length === 0) return;
 
             let currentIndex = options.findIndex(opt => opt.classList.contains('is-highlighted'));
@@ -2020,7 +1977,7 @@ function setupCalendarEventListeners() {
                     }
                     const nextIndex = (currentIndex + 1) % options.length;
                     options[nextIndex].classList.add('is-highlighted');
-                    options[nextIndex].scrollIntoView({ block: 'nearest' }); // Keep highlighted item in view
+                    options[nextIndex].scrollIntoView({ block: 'nearest' });
                     break;
 
                 case 'ArrowUp':
@@ -2041,14 +1998,10 @@ function setupCalendarEventListeners() {
                     break;
 
                 case 'Escape':
-                    // Close dropdown on escape
                     categoryDropdown.classList.remove('open');
                     break;
             }
         });
-        // ====================================================================
-        // END: NEW KEYBOARD NAVIGATION LOGIC
-        // ====================================================================
 
         selectedDisplay.addEventListener('click', (e) => {
             if (e.target !== searchInput) {
@@ -2059,14 +2012,13 @@ function setupCalendarEventListeners() {
         document.addEventListener('click', (e) => {
             if (!categoryDropdown.contains(e.target)) {
                 categoryDropdown.classList.remove('open');
-                // If input is not a valid category, reset it
                 const currentVal = searchInput.value;
                 const hiddenVal = hiddenInput.value;
                 if(hiddenVal && currentVal.toLowerCase() !== hiddenVal.toLowerCase()) {
                     const validOption = optionsContainer.querySelector(`.dropdown-option[data-type="${hiddenVal}"]`);
                     if(validOption) searchInput.value = validOption.textContent.trim();
                 } else if (!hiddenVal) {
-                    searchInput.value = ''; // Clear if nothing was ever selected
+                    searchInput.value = '';
                 }
             }
         });
@@ -2082,13 +2034,13 @@ function setupCalendarEventListeners() {
     if (calendarCloseBtn) calendarCloseBtn.addEventListener('click', () => calendarModal.classList.add('hidden'));
     
     if (calendarPrevMonthBtn) calendarPrevMonthBtn.addEventListener('click', () => {
-        appState.calendar.currentDate.setDate(1); // Set day to 1st to prevent rollover
+        appState.calendar.currentDate.setDate(1);
         appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() - 1);
         renderCalendar();
     });
 
     if (calendarNextMonthBtn) calendarNextMonthBtn.addEventListener('click', () => {
-        appState.calendar.currentDate.setDate(1); // Set day to 1st to prevent rollover
+        appState.calendar.currentDate.setDate(1);
         appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() + 1);
         renderCalendar();
     });
@@ -2449,5 +2401,6 @@ function setupCalendarEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
