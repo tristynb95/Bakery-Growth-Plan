@@ -1952,6 +1952,7 @@ input[type="time"] {
     padding: 0.75rem 0.75rem; /* Increased padding */
     border-left: 4px solid transparent;
     font-weight: 500; /* Slightly lighter for modern feel */
+    transform: perspective(1px) translateZ(0); /* Fix for hover/scroll rendering artefact */
 }
 
 .sidebar-nav a .nav-text {
