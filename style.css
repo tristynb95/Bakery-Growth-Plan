@@ -1926,3 +1926,13 @@ input[type="time"] {
     opacity: 1;
     pointer-events: auto;
 }
+
+/* Add this new rule to the bottom of style.css, inside section 39 or a new section */
+
+/* 48. Dropdown Keyboard Highlight
+-------------------------------------------------- */
+.dropdown-option.is-highlighted,
+.dropdown-option.is-highlighted:hover {
+    background-color: var(--gails-red-light);
+    color: var(--gails-red);
+}
