@@ -37,14 +37,19 @@ function runApp(app) {
         currentView: 'vision',
         planUnsubscribe: null,
         calendarUnsubscribe: null,
+        calendar: { // Add the calendar state here
+            currentDate: new Date(),
+            data: {},
+            editingEventIndex: null
+        }
     };
 
     // --- Module Initializers ---
     // We start each module and give it the tools it needs to do its job.
     initializeAuth(auth);
-    initializeUI(db, appState.currentUser, appState, generateAiActionPlan, null, showPlanView);
-    initializeCalendar(db, appState.currentUser, appState);
-    initializeDashboard(db, appState.currentUser, appState, openModal, handleSelectPlan);
+    initializeUI(db, appState, generateAiActionPlan, null, showPlanView);
+    initializeCalendar(db, appState);
+    initializeDashboard(db, appState, openModal, handleSelectPlan);
     initializePlanView(db, appState, openModal, initializeCharCounters);
 
     // --- Central Control Functions ---
@@ -62,7 +67,9 @@ function runApp(app) {
      */
     function handleBackToDashboard() {
         if (appState.planUnsubscribe) appState.planUnsubscribe();
+        if (appState.calendarUnsubscribe) appState.calendarUnsubscribe(); // Also unsubscribe from calendar
         document.getElementById('app-view').classList.add('hidden');
+        document.getElementById('dashboard-view').classList.remove('hidden'); // Ensure dashboard is visible
         renderDashboard(); // Re-render the dashboard to show the latest data
     }
     
@@ -80,6 +87,10 @@ function runApp(app) {
         const appView = document.getElementById('app-view');
         const initialLoadingView = document.getElementById('initial-loading-view');
         
+        if (appState.planUnsubscribe) appState.planUnsubscribe();
+        if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
+
+
         initialLoadingView.classList.add('hidden');
 
         if (user) {
@@ -89,6 +100,8 @@ function runApp(app) {
             await renderDashboard();
         } else {
             appState.currentUser = null;
+            appState.currentPlanId = null; // Clear plan ID on logout
+            appState.planData = {}; // Clear plan data
             dashboardView.classList.add('hidden');
             appView.classList.add('hidden');
             loginView.classList.remove('hidden');
