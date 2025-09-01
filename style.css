@@ -176,28 +176,6 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 .main-layout { display: grid; grid-template-columns: 280px 1fr; height: 100vh; grid-template-areas: "sidebar main"; }
 #sidebar { grid-area: sidebar; }
 main { grid-area: main; }
-.sidebar-nav a {
-    display: flex; align-items: center; padding: 0.85rem 1rem; border-radius: 0.75rem;
-    font-weight: 600; /* Bolder font */
-    color: var(--gails-text-secondary);
-    transition: all 0.25s ease; border-left: 4px solid transparent;
-    transform: perspective(1px) translateZ(0); /* Promotes to its own layer */
-}
-.sidebar-nav a:hover {
-    background-color: var(--gails-grey-light);
-    color: var(--gails-text-primary);
-    transform: translateX(4px);
-}
-.sidebar-nav a.active {
-    background-color: var(--gails-red-light); color: var(--gails-red);
-    border-left-color: var(--gails-red);
-}
-.sidebar-nav .nav-icon { margin-right: 0.85rem; font-size: 1.35rem; }
-.nav-icon-completed { display: none; margin-right: 0.85rem; font-size: 1.35rem; color: var(--gails-green); }
-.sidebar-nav a.completed .nav-icon { display: none; }
-.sidebar-nav a.completed .nav-icon-completed { display: inline-block; }
-.sidebar-nav a.completed { color: var(--gails-green); }
-.sidebar-nav a.completed:not(.active) { background-color: #F0FDF4; }
 
 /* 5. Core Components
 -------------------------------------------------- */
@@ -1934,4 +1912,177 @@ input[type="time"] {
     pointer-events: auto;
 }
 
+/* ==================================================================== */
+/* 48. Redesigned Sidebar "Plan Journey" Styles
+/* ==================================================================== */
+
+/* Remove default list styling */
+.plan-journey {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+/* Base styles for each navigation item in the journey */
+.journey-item a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    color: var(--gails-text-secondary);
+}
+
+.journey-item a:hover {
+    background-color: var(--gails-grey-light);
+    color: var(--gails-text-primary);
+}
+
+.journey-item a.active {
+    background-color: var(--gails-red-light);
+    color: var(--gails-red);
+    font-weight: 600;
+}
+
+/* The container for the icon, number, or progress ring */
+.journey-icon-container {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    background-color: var(--gails-white); /* Ensures it sits above the connector line */
+}
+.journey-item.journey-item--standalone .journey-icon-container {
+    background-color: transparent; /* No background needed for top/bottom items */
+}
+
+/* The vertical connecting line for the sprints */
+.journey-item--sprint::before {
+    content: '';
+    position: absolute;
+    left: 26px; /* (Icon container width + padding) / 2 - line width / 2 */
+    top: -20px; /* Start line above the icon */
+    height: 100%;
+    width: 2px;
+    background-color: var(--gails-grey-light);
+    z-index: 1;
+    transition: background-color 0.4s ease;
+}
+
+/* Color the connector line green if the step is completed */
+.journey-item--sprint.completed::before {
+    background-color: var(--gails-green);
+}
+
+.nav-text {
+    font-weight: 500;
+    transition: font-weight 0.2s ease;
+}
+
+.journey-item a.active .nav-text {
+    font-weight: 700;
+}
+
+/* Styles for the monthly sprint numbers and progress rings */
+.sprint-number {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gails-text-secondary);
+    transition: color 0.2s ease, transform 0.2s ease;
+    position: absolute;
+}
+.journey-item a.active .sprint-number {
+    color: var(--gails-red);
+}
+
+.progress-ring-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+.progress-ring {
+    transform: rotate(-90deg);
+}
+.progress-ring__track, .progress-ring__progress {
+    fill: none;
+    stroke-width: 3;
+}
+.progress-ring__track {
+    stroke: var(--gails-grey-light);
+}
+.progress-ring__progress {
+    stroke: var(--gails-red);
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease;
+    /* This variable will be updated by JS */
+    stroke-dashoffset: var(--progress-offset, 100.53); /* 2 * PI * 16 */
+}
+
+/* Completion state for sprints */
+.journey-item.completed .sprint-number {
+    transform: scale(0); /* Hide the number */
+    opacity: 0;
+}
+.journey-item.completed .progress-ring__progress {
+    stroke: var(--gails-green);
+    stroke-dashoffset: 0;
+}
+/* Show a checkmark inside the ring on completion */
+.journey-item.completed .journey-icon-container::after {
+    content: '\\F26A'; /* Bootstrap Icon checkmark */
+    font-family: "bootstrap-icons";
+    font-size: 1.5rem;
+    color: var(--gails-green);
+    position: absolute;
+    transform: scale(0);
+    opacity: 0;
+    animation: popIn 0.3s ease forwards 0.1s;
+}
+@keyframes popIn { to { transform: scale(1); opacity: 1; } }
+
+/* Styles for standalone items (Vision & Summary) */
+.journey-item--standalone {
+    margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
+}
+.nav-icon {
+    font-size: 1.5rem;
+}
+.nav-icon-completed {
+    display: none; /* Hidden by default */
+    font-size: 1.5rem;
+    color: var(--gails-green);
+}
+.journey-item.completed a {
+    color: var(--gails-green);
+}
+.journey-item.completed .nav-icon {
+    display: none;
+}
+.journey-item.completed .nav-icon-completed {
+    display: block;
+}
+
+/* --- Cleanup Old Sidebar Styles --- */
+/* Remove old progress donuts and nav icons that are no longer needed */
+.sidebar-nav .nav-icon,
+.sidebar-nav .nav-icon-completed,
+.nav-progress-donut-container {
+    display: none;
+}
+/* Reset base 'a' tag to remove old border */
+.sidebar-nav a {
+    border-left: none;
+}
+.sidebar-nav a:hover {
+    transform: none; /* Disable old hover transform */
+}
 
