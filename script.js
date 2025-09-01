@@ -819,27 +819,38 @@ function runApp(app) {
         return { completed, total };
     }
 
-    function updateSidebarNavStatus() {
-        const updateNavItem = (navId, progress) => {
-            const navLink = document.querySelector(navId);
-            if (!navLink) return;
-            const isComplete = progress.total > 0 && progress.completed === progress.total;
-            navLink.classList.toggle('completed', isComplete);
-            const progressCircle = navLink.querySelector('.progress-donut__progress');
-            if (progressCircle) {
-                const radius = progressCircle.r.baseVal.value;
-                const circumference = 2 * Math.PI * radius;
-                progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
-                const progressFraction = progress.total > 0 ? progress.completed / progress.total : 0;
-                const offset = circumference - (progressFraction * circumference);
-                progressCircle.style.strokeDashoffset = offset;
-            }
-        };
-        updateNavItem('#nav-vision', getVisionProgress());
-        for (let m = 1; m <= 3; m++) {
-            updateNavItem(`#nav-month-${m}`, getMonthProgress(m));
+    // Replace the entire updateSidebarNavStatus function in script.js with this new version
+
+function updateSidebarNavStatus() {
+    const data = appState.planData || {};
+
+    // 1. Handle Vision Section
+    const visionProgress = getVisionProgress(data);
+    const visionItem = document.querySelector('#nav-vision').parentElement;
+    const isVisionComplete = visionProgress.total > 0 && visionProgress.completed === visionProgress.total;
+    visionItem.classList.toggle('completed', isVisionComplete);
+
+    // 2. Handle Monthly Sprint Sections
+    for (let m = 1; m <= 3; m++) {
+        const monthItem = document.querySelector(`#nav-month-${m}`).parentElement;
+        const monthProgress = getMonthProgress(m, data);
+        
+        const isMonthComplete = monthProgress.total > 0 && monthProgress.completed === monthProgress.total;
+        monthItem.classList.toggle('completed', isMonthComplete);
+
+        // Calculate and set the stroke-dashoffset for the SVG progress ring
+        const progressRing = monthItem.querySelector('.progress-ring__progress');
+        if (progressRing) {
+            const radius = progressRing.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            const progressFraction = monthProgress.total > 0 ? monthProgress.completed / monthProgress.total : 0;
+            const offset = circumference - (progressFraction * circumference);
+            
+            // Set the CSS Custom Property which drives the animation
+            progressRing.style.setProperty('--progress-offset', offset);
         }
     }
+}
 
     function calculatePlanCompletion(planData) {
         let totalFields = 0;
@@ -2452,6 +2463,7 @@ function setupCalendarEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
 
