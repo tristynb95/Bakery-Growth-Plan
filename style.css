@@ -2038,7 +2038,7 @@ input[type="time"] {
 /* Show a checkmark inside the ring on completion */
 .journey-item.completed .journey-icon-container::after {
     content: '\\F26A'; /* Bootstrap Icon checkmark */
-    font-family: "bootstrap-icons";
+    font-family: "bootstrap-icons" !important; /* <-- ADD !important HERE */
     font-size: 1.5rem;
     color: var(--gails-green);
     position: absolute;
