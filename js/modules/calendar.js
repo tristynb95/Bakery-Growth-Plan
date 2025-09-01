@@ -91,7 +91,7 @@ export function renderCalendar() {
  * Renders the detailed view for a selected day, showing all its events.
  * @param {string} dateKey - The date key in 'YYYY-MM-DD' format.
  */
-function renderDayDetails(dateKey) {
+export function renderDayDetails(dateKey) { // CORRECTED: Added 'export' keyword
     document.getElementById('add-event-btn').classList.remove('hidden');
     document.getElementById('day-detail-title').classList.remove('hidden');
     selectedDateKey = dateKey;
