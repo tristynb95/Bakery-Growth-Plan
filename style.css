@@ -2006,3 +2006,32 @@ input[type="time"] {
     text-decoration: none;
     transition: background-color 0.2s ease-in-out;
 }
+
+/* 49. Sidebar Scroll Bug Fix
+-------------------------------------------------- */
+
+#sidebar {
+    height: 100vh; /* Ensure the sidebar takes the full viewport height */
+}
+
+#sidebar-scroll-area {
+    overflow-y: auto; /* Show a scrollbar ONLY if content is taller than the available space */
+}
+
+/* Optional: Sleek scrollbar styling for a more polished look */
+#sidebar-scroll-area::-webkit-scrollbar {
+    width: 6px;
+}
+
+#sidebar-scroll-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#sidebar-scroll-area::-webkit-scrollbar-thumb {
+    background: #e5e7eb; /* A light grey from your theme */
+    border-radius: 3px;
+}
+
+#sidebar-scroll-area::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db; /* A slightly darker grey on hover */
+}
