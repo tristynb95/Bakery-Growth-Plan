@@ -1971,20 +1971,20 @@ function setupCalendarEventListeners() {
         };
 
         // MODIFIED: This function now handles both icons and dots
-const selectOption = (option) => {
-    const type = option.dataset.type;
-    const iconContainer = document.getElementById('category-selected-icon-container');
-    const iconElement = option.querySelector('.option-icon, .option-dot');
+        const selectOption = (option) => {
+            const type = option.dataset.type;
+            const iconContainer = document.getElementById('category-selected-icon-container');
+            const iconElement = option.querySelector('.option-icon, .option-dot');
 
-    // Copy the icon/dot element into the selected display
-    iconContainer.innerHTML = iconElement.outerHTML;
-    iconContainer.className = `selected-icon-container ${type}`; // Pass class for styling
-    iconContainer.classList.toggle('has-icon', iconElement.classList.contains('option-icon'));
+            // Copy the icon/dot element into the selected display
+            iconContainer.innerHTML = iconElement.outerHTML;
+            iconContainer.className = `selected-icon-container ${type}`; // Pass class for styling
+            iconContainer.classList.toggle('has-icon', iconElement.classList.contains('option-icon'));
 
-    searchInput.value = option.textContent.trim();
-    hiddenInput.value = type;
-    categoryDropdown.classList.remove('open');
-};
+            searchInput.value = option.textContent.trim();
+            hiddenInput.value = type;
+            categoryDropdown.classList.remove('open');
+        };
 
         searchInput.addEventListener('focus', () => {
             categoryDropdown.classList.add('open');
@@ -1993,6 +1993,62 @@ const selectOption = (option) => {
         });
 
         searchInput.addEventListener('input', filterOptions);
+
+        // ====================================================================
+        // START: NEW KEYBOARD NAVIGATION LOGIC
+        // ====================================================================
+        searchInput.addEventListener('keydown', (e) => {
+            if (!categoryDropdown.classList.contains('open')) {
+                // If the dropdown is closed, open it on arrow key press
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    categoryDropdown.classList.add('open');
+                }
+                return;
+            }
+
+            const options = Array.from(optionsContainer.querySelectorAll('.dropdown-option:not(.no-results)'))
+                                 .filter(opt => opt.style.display !== 'none'); // Only consider visible options
+            if (options.length === 0) return;
+
+            let currentIndex = options.findIndex(opt => opt.classList.contains('is-highlighted'));
+
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (currentIndex >= 0) {
+                        options[currentIndex].classList.remove('is-highlighted');
+                    }
+                    const nextIndex = (currentIndex + 1) % options.length;
+                    options[nextIndex].classList.add('is-highlighted');
+                    options[nextIndex].scrollIntoView({ block: 'nearest' }); // Keep highlighted item in view
+                    break;
+
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (currentIndex >= 0) {
+                        options[currentIndex].classList.remove('is-highlighted');
+                    }
+                    const prevIndex = (currentIndex - 1 + options.length) % options.length;
+                    options[prevIndex].classList.add('is-highlighted');
+                    options[prevIndex].scrollIntoView({ block: 'nearest' });
+                    break;
+
+                case 'Enter':
+                    e.preventDefault();
+                    if (currentIndex >= 0) {
+                        selectOption(options[currentIndex]);
+                    }
+                    break;
+
+                case 'Escape':
+                    // Close dropdown on escape
+                    categoryDropdown.classList.remove('open');
+                    break;
+            }
+        });
+        // ====================================================================
+        // END: NEW KEYBOARD NAVIGATION LOGIC
+        // ====================================================================
 
         selectedDisplay.addEventListener('click', (e) => {
             if (e.target !== searchInput) {
@@ -2026,16 +2082,16 @@ const selectOption = (option) => {
     if (calendarCloseBtn) calendarCloseBtn.addEventListener('click', () => calendarModal.classList.add('hidden'));
     
     if (calendarPrevMonthBtn) calendarPrevMonthBtn.addEventListener('click', () => {
-    appState.calendar.currentDate.setDate(1); // Set day to 1st to prevent rollover
-    appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() - 1);
-    renderCalendar();
-});
+        appState.calendar.currentDate.setDate(1); // Set day to 1st to prevent rollover
+        appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() - 1);
+        renderCalendar();
+    });
 
-if (calendarNextMonthBtn) calendarNextMonthBtn.addEventListener('click', () => {
-    appState.calendar.currentDate.setDate(1); // Set day to 1st to prevent rollover
-    appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() + 1);
-    renderCalendar();
-});
+    if (calendarNextMonthBtn) calendarNextMonthBtn.addEventListener('click', () => {
+        appState.calendar.currentDate.setDate(1); // Set day to 1st to prevent rollover
+        appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() + 1);
+        renderCalendar();
+    });
 
     if (calendarTodayBtn) calendarTodayBtn.addEventListener('click', () => {
         const today = new Date();
@@ -2079,33 +2135,30 @@ if (calendarNextMonthBtn) calendarNextMonthBtn.addEventListener('click', () => {
         }
     });
 
-    // MODIFIED: The reset logic now clears the icon container
-if (addEventBtn) addEventBtn.addEventListener('click', () => {
-    appState.calendar.editingEventIndex = null;
-    if (dayEventList) dayEventList.classList.add('hidden');
-    const form = document.getElementById('add-event-form');
-    if (form) form.classList.remove('hidden');
-    addEventBtn.classList.add('hidden');
-    // Reset standard fields
-    document.getElementById('event-title-input').value = '';
-    document.getElementById('event-all-day-toggle').checked = false;
-    document.getElementById('event-time-inputs-container').classList.remove('hidden');
-    document.getElementById('event-time-from-input').value = '';
-    document.getElementById('event-time-to-input').value = '';
-    document.getElementById('event-description-input').value = '';
+    if (addEventBtn) addEventBtn.addEventListener('click', () => {
+        appState.calendar.editingEventIndex = null;
+        if (dayEventList) dayEventList.classList.add('hidden');
+        const form = document.getElementById('add-event-form');
+        if (form) form.classList.remove('hidden');
+        addEventBtn.classList.add('hidden');
+        document.getElementById('event-title-input').value = '';
+        document.getElementById('event-all-day-toggle').checked = false;
+        document.getElementById('event-time-inputs-container').classList.remove('hidden');
+        document.getElementById('event-time-from-input').value = '';
+        document.getElementById('event-time-to-input').value = '';
+        document.getElementById('event-description-input').value = '';
 
-    // Reset searchable dropdown and icon
-    if (categoryDropdown) {
-        const iconContainer = document.getElementById('category-selected-icon-container');
-        iconContainer.innerHTML = '<span id="category-selected-dot" class="selected-dot"></span>';
-        iconContainer.className = 'selected-icon-container';
-        document.getElementById('category-search-input').value = '';
-        document.getElementById('event-type-input').value = '';
-    }
+        if (categoryDropdown) {
+            const iconContainer = document.getElementById('category-selected-icon-container');
+            iconContainer.innerHTML = '<span id="category-selected-dot" class="selected-dot"></span>';
+            iconContainer.className = 'selected-icon-container';
+            document.getElementById('category-search-input').value = '';
+            document.getElementById('event-type-input').value = '';
+        }
 
-    document.getElementById('add-event-form-title').textContent = 'Add New Event';
-    document.getElementById('save-event-btn').textContent = 'Save Event';
-});
+        document.getElementById('add-event-form-title').textContent = 'Add New Event';
+        document.getElementById('save-event-btn').textContent = 'Save Event';
+    });
 
     if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => {
         appState.calendar.editingEventIndex = null;
@@ -2396,4 +2449,5 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
