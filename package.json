@@ -1,14 +1,21 @@
 {
   "name": "bakery-growth-planner",
   "version": "1.0.0",
+  "type": "module",
   "description": "Netlify functions for the bakery growth planner",
-  "main": "index.js",
+  "main": "src/main.js",
   "scripts": {
+    "dev": "npx vite",
+    "build": "npx vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google/generative-ai": "^0.11.3"
+    "@google/generative-ai": "^0.11.3",
+    "firebase": "^9.6.7"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0"
   }
 }
