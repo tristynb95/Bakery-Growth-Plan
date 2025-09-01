@@ -1,6 +1,7 @@
 import { db, firebase } from './firebase.js';
 import { appState } from './state.js';
-import { updateViewWithRemoteData, renderCalendar, updateUI } from './ui.js';
+import { updateViewWithRemoteData, updateUI } from './ui.js';
+import { renderCalendar } from './calendar.js';
 import { openModal } from './modal.js';
 
 /**
