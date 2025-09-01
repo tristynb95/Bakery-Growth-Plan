@@ -6,7 +6,7 @@ import { saveData } from './modules/api.js';
 import { switchView, handleBackToDashboard, handleSelectPlan, handleCreateNewPlan, handleEditPlanName, handleDeletePlan } from './modules/ui.js';
 import { setupCalendarEventListeners, renderCalendar, renderDayDetails } from './modules/calendar.js';
 import { handleAIActionPlan } from './modules/ai.js';
-import { openModal, closeModal } from './modules/modal.js';
+import { openModal, requestCloseModal } from './modules/modal.js';
 
 /**
  * Main function to initialize the application.
@@ -120,12 +120,12 @@ function setupEventListeners() {
 
     DOMElements.modalCloseBtn.addEventListener('click', () => {
         // This needs to be requestCloseModal from modal.js
-        closeModal();
+        requestCloseModal();
     });
     DOMElements.modalOverlay.addEventListener('mousedown', (e) => {
         if (e.target === DOMElements.modalOverlay) {
             // This needs to be requestCloseModal from modal.js
-            closeModal();
+            requestCloseModal();
         }
     });
 
