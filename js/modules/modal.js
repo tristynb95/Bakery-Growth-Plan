@@ -5,7 +5,7 @@ import { handleSelectPlan, renderDashboard } from './ui.js';
 import { handleAIActionPlan, saveActionPlan, handleRegenerateActionPlan, undo, redo, updateUndoRedoButtons, setupAiModalInteractivity } from './ai.js';
 import { saveData } from './api.js';
 
-function requestCloseModal() {
+export function requestCloseModal() {
     const modalType = DOMElements.modalBox.dataset.type;
 
     if (modalType === 'aiActionPlan_generate' && appState.aiPlanGenerationController) {
