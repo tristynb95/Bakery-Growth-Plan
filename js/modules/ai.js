@@ -1,7 +1,7 @@
 import { appState, undoStack, redoStack, setUndoStack, setRedoStack } from './state.js';
 import { saveData } from './api.js';
 import { openModal } from './modal.js';
-import { parseUkDate } from '../utils.js'; // I'll create a utils.js file for this
+import { parseUkDate } from '../utils.js';
 
 /**
  * Summarizes the current plan data into a text format for the AI.
@@ -15,7 +15,14 @@ export function summarizePlanForAI(planData) {
         tempDiv.innerHTML = text;
         return tempDiv.innerText.trim();
     };
-    let summary = `QUARTERLY NARRATIVE: ${e(planData.quarterlyTheme)}\n\n`;
+    // CORRECTED: Added Manager Name and Bakery Location to the summary for better AI context.
+    let summary = `PLAN CONTEXT:\n`;
+    summary += `Manager Name: ${e(planData.managerName) || 'The Manager'}\n`;
+    summary += `Bakery Location: ${e(planData.bakeryLocation) || 'The Bakery'}\n`;
+    summary += `Quarter: ${e(planData.quarter) || 'Current Quarter'}\n\n`;
+
+    summary += `QUARTERLY NARRATIVE: ${e(planData.quarterlyTheme)}\n\n`;
+
     for (let m = 1; m <= 3; m++) {
         summary += `--- MONTH ${m} ---\n`;
         summary += `GOAL: ${e(planData[`month${m}Goal`])}\n`;
