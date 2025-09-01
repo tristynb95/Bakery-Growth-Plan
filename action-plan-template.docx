@@ -1,0 +1,12 @@
+AI Action Plan
+{month_title} Action Plan
+{quarterly_theme} | {bakery_name}
+
+{#action_steps}
+Action Step: {action_step}
+Pillar: {pillar}
+Owner: {owner}
+Due Date: {due_date}
+Resources: {resources}
+Status: {status}
+{/action_steps}
