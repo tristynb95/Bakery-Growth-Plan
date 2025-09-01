@@ -1,7 +1,10 @@
-import firebase from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js";
-import "https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js";
-import "https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js";
-import "https://www.gstatic.com/firebasejs/9.6.7/firebase-storage-compat.js";
+// Import the main firebase app object
+import firebase from 'https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js';
+
+// Import the services we need. These automatically attach to the firebase object.
+import 'https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js';
+import 'https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js';
+import 'https://www.gstatic.com/firebasejs/9.6.7/firebase-storage-compat.js'; // Added for photo uploads
 
 let app;
 let auth;
