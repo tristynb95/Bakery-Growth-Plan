@@ -1,7 +1,7 @@
 // js/plan-view.js
 
 // Dependencies passed from main.js
-let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare, saveData, summarizePlanForAI;
+let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare;
 
 // --- DOM Element References ---
 const DOMElements = {
@@ -619,15 +619,14 @@ export function showPlanView(planId) {
     });
 }
 
-export function initializePlanView(database, state, modalFunc, charCounterFunc, aiActionPlanFunc, shareFunc, saveDataFunc, summarizeFunc) {
+// MODIFIED: Simplified the function signature
+export function initializePlanView(database, state, modalFunc, charCounterFunc, aiActionPlanFunc, shareFunc) {
     db = database;
     appState = state;
     openModal = modalFunc;
     initializeCharCounters = charCounterFunc;
     handleAIActionPlan = aiActionPlanFunc;
     handleShare = shareFunc;
-    saveData = saveDataFunc;
-    summarizePlanForAI = summarizeFunc;
 
     // --- Event Listeners for the Plan View ---
     DOMElements.mainNav.addEventListener('click', (e) => {
