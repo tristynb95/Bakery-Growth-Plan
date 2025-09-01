@@ -1,3 +1,7 @@
+import firebase from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js";
+import "https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js";
+import "https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js";
+
 let app;
 let auth;
 let db;
@@ -28,4 +32,4 @@ export async function initializeFirebase() {
 }
 
 // Export the initialized services for use in other modules
-export { app, auth, db };
+export { app, auth, db, firebase };
