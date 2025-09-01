@@ -1,6 +1,7 @@
 import firebase from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js";
 import "https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js";
 import "https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js";
+import "https://www.gstatic.com/firebasejs/9.6.7/firebase-storage-compat.js";
 
 let app;
 let auth;
