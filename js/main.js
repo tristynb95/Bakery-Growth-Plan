@@ -5,7 +5,7 @@ import { getFirebaseConfig, generateAiActionPlan } from './api.js';
 import { initializeCalendar } from './calendar.js';
 import { initializeDashboard, renderDashboard } from './dashboard.js';
 import { initializeUI, openModal, closeModal, initializeCharCounters, handleAIActionPlan, handleShare } from './ui.js';
-import { initializePlanView, showPlanView, saveData, summarizePlanForAI } from './plan-view.js';
+import { initializePlanView, showPlanView } from './plan-view.js';
 
 /**
  * Fetches the Firebase config and initializes the Firebase app.
@@ -49,7 +49,8 @@ function runApp(app) {
     initializeUI(db, appState);
     initializeCalendar(db, appState);
     initializeDashboard(db, appState, openModal, handleSelectPlan);
-    initializePlanView(db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare, saveData, summarizePlanForAI);
+    // MODIFIED: Simplified the function call
+    initializePlanView(db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare);
 
 
     // --- Central Control Functions ---
