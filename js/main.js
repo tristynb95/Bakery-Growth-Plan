@@ -4,8 +4,8 @@ import { initializeAuth, setupActivityListeners, clearActivityListeners } from '
 import { getFirebaseConfig, generateAiActionPlan } from './api.js';
 import { initializeCalendar } from './calendar.js';
 import { initializeDashboard, renderDashboard } from './dashboard.js';
-import { initializeUI, openModal, closeModal, initializeCharCounters } from './ui.js';
-import { initializePlanView, showPlanView } from './plan-view.js';
+import { initializeUI, openModal, closeModal, initializeCharCounters, handleAIActionPlan, handleShare } from './ui.js';
+import { initializePlanView, showPlanView, saveData, summarizePlanForAI } from './plan-view.js';
 
 /**
  * Fetches the Firebase config and initializes the Firebase app.
@@ -45,12 +45,12 @@ function runApp(app) {
     };
 
     // --- Module Initializers ---
-    // We start each module and give it the tools it needs to do its job.
     initializeAuth(auth);
     initializeUI(db, appState);
     initializeCalendar(db, appState);
     initializeDashboard(db, appState, openModal, handleSelectPlan);
-    initializePlanView(db, appState, openModal, initializeCharCounters);
+    initializePlanView(db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare, saveData, summarizePlanForAI);
+
 
     // --- Central Control Functions ---
     /**
@@ -76,7 +76,7 @@ function runApp(app) {
         document.getElementById('dashboard-view').classList.remove('hidden'); // Ensure dashboard is visible
         renderDashboard(); // Re-render the dashboard to show the latest data
     }
-    
+
     // --- Event Listeners for Cross-Module Communication ---
     document.addEventListener('logout-request', (e) => {
         if (e.detail && e.detail.isTimeout) {
@@ -84,19 +84,19 @@ function runApp(app) {
         }
         auth.signOut();
     });
+
     document.addEventListener('back-to-dashboard', handleBackToDashboard);
     document.addEventListener('rerender-dashboard', renderDashboard);
     document.addEventListener('plan-selected', (e) => handleSelectPlan(e.detail.planId));
 
 
     // --- Authentication Observer ---
-    // This is the main controller that decides what the user sees.
     auth.onAuthStateChanged(async (user) => {
         const loginView = document.getElementById('login-view');
         const dashboardView = document.getElementById('dashboard-view');
         const appView = document.getElementById('app-view');
         const initialLoadingView = document.getElementById('initial-loading-view');
-        
+
         if (appState.planUnsubscribe) appState.planUnsubscribe();
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
 
