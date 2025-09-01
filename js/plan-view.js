@@ -479,7 +479,7 @@ function renderSummary() {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         if (tempDiv.innerText.trim() === '') { return '...'; }
-        return html.replace(/<p><\/p>/g, '').replace(/<br>/g, ' ');
+        return html;
     };
     const renderMonthSummary = (monthNum) => {
         let weeklyCheckinHTML = '<ul>';
@@ -609,8 +609,8 @@ export function showPlanView(planId) {
         if (doc.exists) {
             appState.planData = doc.data();
             updateUI();
-            const lastViewId = localStorage.getItem('lastViewId');
-            switchView(lastViewId || 'vision');
+            const lastViewId = localStorage.getItem('lastViewId') || 'vision';
+            switchView(lastViewId);
         }
     });
 }
