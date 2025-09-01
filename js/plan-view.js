@@ -1,9 +1,7 @@
 // js/plan-view.js
 
-import { handleShare, handleAIActionPlan } from './ui.js';
-
 // Dependencies passed from main.js
-let db, appState, openModal, initializeCharCounters;
+let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare;
 
 // --- DOM Element References ---
 const DOMElements = {
@@ -197,7 +195,7 @@ function calculatePlanCompletion(planData) {
     return totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
 }
 
-function summarizePlanForAI(planData) {
+export function summarizePlanForAI(planData) {
     const e = (text) => {
         if (!text) return '';
         const tempDiv = document.createElement('div');
@@ -222,9 +220,9 @@ function summarizePlanForAI(planData) {
 
 // --- Data Handling & Saving ---
 
-function saveData(forceImmediate = false, directPayload = null) {
+export function saveData(forceImmediate = false, directPayload = null) {
     if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
-    
+
     const localChanges = {};
     document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
         if (el.id) {
@@ -265,7 +263,7 @@ function saveData(forceImmediate = false, directPayload = null) {
             hasChanges = true;
         }
     }
-    
+
     if (directPayload) {
         for (const key in directPayload) {
             if (directPayload[key] !== appState.planData[key]) {
@@ -276,7 +274,7 @@ function saveData(forceImmediate = false, directPayload = null) {
     }
 
     if (!hasChanges) return Promise.resolve();
-    
+
     clearTimeout(appState.saveTimeout);
 
     const saveToFirestore = async () => {
@@ -307,9 +305,9 @@ function saveData(forceImmediate = false, directPayload = null) {
 function populateViewWithData() {
     document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
         if (el.isContentEditable) {
-             el.innerHTML = appState.planData[el.id] || '';
+            el.innerHTML = appState.planData[el.id] || '';
         } else {
-             el.value = appState.planData[el.id] || '';
+            el.value = appState.planData[el.id] || '';
         }
     });
     document.querySelectorAll('.pillar-buttons').forEach(group => {
@@ -373,7 +371,7 @@ function updateViewWithRemoteData(remoteData) {
             }
         }
         if (el.isContentEditable) {
-             if (el.innerText.trim() === '') {
+            if (el.innerText.trim() === '') {
                 el.classList.add('is-placeholder-showing');
             } else {
                 el.classList.remove('is-placeholder-showing');
@@ -546,20 +544,26 @@ function switchView(viewId) {
     localStorage.setItem('lastViewId', viewId);
 
     const titles = {
-        vision: { title: 'Bakery Growth Plan', subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.'},
-        'month-1': { title: '30 Day Plan', subtitle: 'Lay the foundations for success.'},
-        'month-2': { title: '60 Day Plan', subtitle: 'Build momentum and embed processes.'},
-        'month-3': { title: '90 Day Plan', subtitle: 'Refine execution and review the quarter.'},
-        summary: { title: '90-Day Plan Summary', subtitle: 'A complete overview of your quarterly plan.'}
+        vision: { title: 'Bakery Growth Plan', subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.' },
+        'month-1': { title: '30 Day Plan', subtitle: 'Lay the foundations for success.' },
+        'month-2': { title: '60 Day Plan', subtitle: 'Build momentum and embed processes.' },
+        'month-3': { title: '90 Day Plan', subtitle: 'Refine execution and review the quarter.' },
+        summary: { title: '90-Day Plan Summary', subtitle: 'A complete overview of your quarterly plan.' }
     };
     DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
     DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
 
     if (viewId === 'summary') {
         DOMElements.desktopHeaderButtons.classList.remove('hidden');
+        DOMElements.printBtn.classList.remove('hidden');
+        DOMElements.shareBtn.classList.remove('hidden');
+        DOMElements.aiActionBtn.classList.remove('hidden');
         renderSummary();
     } else {
         DOMElements.desktopHeaderButtons.classList.add('hidden');
+        DOMElements.printBtn.classList.add('hidden');
+        DOMElements.shareBtn.classList.add('hidden');
+        DOMElements.aiActionBtn.classList.add('hidden');
         const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
         DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
         populateViewWithData();
@@ -570,7 +574,7 @@ function switchView(viewId) {
 
     document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
     document.querySelector(`#nav-${viewId}`)?.classList.add('active');
-    
+
     if (initializeCharCounters) {
         initializeCharCounters();
     }
@@ -581,11 +585,11 @@ function switchView(viewId) {
 export function showPlanView(planId) {
     appState.currentPlanId = planId;
     DOMElements.appView.classList.remove('hidden');
-    
+
     if (appState.planUnsubscribe) appState.planUnsubscribe();
 
     const planDocRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(planId);
-    
+
     appState.planUnsubscribe = planDocRef.onSnapshot((doc) => {
         if (doc.exists) {
             const remoteData = doc.data();
@@ -615,11 +619,15 @@ export function showPlanView(planId) {
     });
 }
 
-export function initializePlanView(database, state, modalFunc, charCounterFunc) {
+export function initializePlanView(database, state, modalFunc, charCounterFunc, aiActionPlanFunc, shareFunc, saveDataFunc, summarizeFunc) {
     db = database;
     appState = state;
     openModal = modalFunc;
     initializeCharCounters = charCounterFunc;
+    handleAIActionPlan = aiActionPlanFunc;
+    handleShare = shareFunc;
+    saveData = saveDataFunc;
+    summarizePlanForAI = summarizeFunc;
 
     // --- Event Listeners for the Plan View ---
     DOMElements.mainNav.addEventListener('click', (e) => {
@@ -673,7 +681,7 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc) 
             if (!alreadySelected) statusButton.classList.add('selected');
             saveData(true);
         }
-         const tab = e.target.closest('.weekly-tab');
+        const tab = e.target.closest('.weekly-tab');
         if (tab) {
             e.preventDefault();
             const week = tab.dataset.week;
@@ -684,9 +692,9 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc) 
             });
         }
     });
-    
+
     DOMElements.backToDashboardBtn.addEventListener('click', () => {
-         document.dispatchEvent(new CustomEvent('back-to-dashboard'));
+        document.dispatchEvent(new CustomEvent('back-to-dashboard'));
     });
 
     DOMElements.sidebarLogoutBtn.addEventListener('click', () => {
