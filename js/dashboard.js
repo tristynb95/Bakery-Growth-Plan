@@ -1,7 +1,7 @@
 // js/dashboard.js
 
 // These will be passed in from main.js so this module can talk to the database and the rest of the app.
-let db, currentUser, appState, openModal, handleSelectPlan;
+let db, appState, openModal, handleSelectPlan;
 
 // --- Helper Functions for Progress Calculation ---
 
@@ -116,7 +116,8 @@ function formatLastEditedDate(lastEditedDate) {
  * Fetches plans from the database and renders them as cards on the dashboard.
  */
 export async function renderDashboard() {
-    if (!currentUser) return;
+    // FIX: Use appState.currentUser which is always up-to-date
+    if (!appState.currentUser) return;
 
     const dashboardContent = document.getElementById('dashboard-content');
     const dashboardView = document.getElementById('dashboard-view');
@@ -124,7 +125,8 @@ export async function renderDashboard() {
     
     let plans = [];
     try {
-        const plansRef = db.collection('users').doc(currentUser.uid).collection('plans');
+        // FIX: Use the live user object from appState to get the UID
+        const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
         const snapshot = await plansRef.orderBy('lastEdited', 'desc').get();
         plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
@@ -167,9 +169,9 @@ export async function renderDashboard() {
 /**
  * Sets up all event listeners for the dashboard page.
  */
-export function initializeDashboard(database, user, state, modalOpener, planSelector) {
+// FIX: Removed the 'user' parameter as it was stale and is no longer needed.
+export function initializeDashboard(database, state, modalOpener, planSelector) {
     db = database;
-    currentUser = user;
     appState = state;
     openModal = modalOpener;
     handleSelectPlan = planSelector;
