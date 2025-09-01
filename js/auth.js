@@ -1,7 +1,5 @@
 // js/auth.js
 
-// js/auth.js
-
 // --- SESSION TIMEOUT LOGIC ---
 const SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
 let sessionTimeout = null;
