@@ -823,18 +823,22 @@ function runApp(app) {
         const updateNavItem = (navId, progress) => {
             const navLink = document.querySelector(navId);
             if (!navLink) return;
-            const isComplete = progress.total > 0 && progress.completed === progress.total;
+
+            const progressFraction = progress.total > 0 ? progress.completed / progress.total : 0;
+            const isComplete = progressFraction === 1;
+
             navLink.classList.toggle('completed', isComplete);
+
             const progressCircle = navLink.querySelector('.progress-donut__progress');
             if (progressCircle) {
                 const radius = progressCircle.r.baseVal.value;
                 const circumference = 2 * Math.PI * radius;
                 progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
-                const progressFraction = progress.total > 0 ? progress.completed / progress.total : 0;
                 const offset = circumference - (progressFraction * circumference);
                 progressCircle.style.strokeDashoffset = offset;
             }
         };
+
         updateNavItem('#nav-vision', getVisionProgress());
         for (let m = 1; m <= 3; m++) {
             updateNavItem(`#nav-month-${m}`, getMonthProgress(m));
@@ -2350,6 +2354,32 @@ function setupCalendarEventListeners() {
         else if (mainCard) { handleSelectPlan(mainCard.dataset.planId); }
     });
     DOMElements.mainNav.addEventListener('click', (e) => { e.preventDefault(); const navLink = e.target.closest('a'); if (navLink) { switchView(navLink.id.replace('nav-', '')); }});
+    // Add event listeners for the new Tools navigation
+    const toolsNav = document.getElementById('tools-nav');
+    if (toolsNav) {
+        toolsNav.addEventListener('click', (e) => {
+            e.preventDefault();
+            const navLink = e.target.closest('a');
+            if (!navLink) return;
+
+            // Deselect main nav items
+            document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
+
+            if (navLink.id === 'nav-ai-plan') {
+                handleAIActionPlan();
+            } else if (navLink.id === 'nav-calendar') {
+                const calendarModal = document.getElementById('calendar-modal');
+                if (calendarModal) {
+                     appState.calendar.currentDate = new Date();
+                     const today = new Date();
+                     selectedDateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                     renderCalendar();
+                     renderDayDetails(selectedDateKey);
+                     calendarModal.classList.remove('hidden');
+                }
+            }
+        });
+    }
     DOMElements.contentArea.addEventListener('keydown', (e) => {
         const editor = e.target.closest('[contenteditable="true"]');
         if (!editor) return;
@@ -2452,5 +2482,3 @@ function setupCalendarEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
-
-
