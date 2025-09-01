@@ -1425,9 +1425,9 @@ function runApp(app) {
                 DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
                 break;
             case 'timeout':
-                DOMElements.modalTitle.textContent = "Session Timed Out";
-                DOMElements.modalContent.innerHTML = `<p>For your security, you have been logged out due to inactivity. All of your progress has been saved.</p>`;
-                DOMElements.modalActionBtn.textContent = "OK";
+                DOMElements.modalTitle.textContent = "Session Ended";
+                DOMElements.modalContent.innerHTML = `<p>Your work has been saved automatically. For your security, please sign in to continue.</p>`;
+                DOMElements.modalActionBtn.textContent = "Continue";
                 DOMElements.modalCancelBtn.style.display = 'none';
                 DOMElements.modalActionBtn.onclick = closeModal;
                 break;
@@ -2396,3 +2396,4 @@ if (addEventBtn) addEventBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
