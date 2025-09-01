@@ -1,22 +1,4 @@
-// ====================================================================
-// SECURELY INITIALIZE FIREBASE
-// ====================================================================
-
-async function initializeFirebase() {
-    try {
-        const response = await fetch('/.netlify/functions/config');
-        if (!response.ok) {
-            throw new Error('Could not fetch Firebase configuration.');
-        }
-        const firebaseConfig = await response.json();
-        const app = firebase.initializeApp(firebaseConfig);
-        runViewScript(app);
-    } catch (error) {
-        console.error("Failed to initialize Firebase:", error);
-        document.getElementById('header-title').textContent = 'Error';
-        document.getElementById('header-subtitle').textContent = 'Could not load application configuration. Please contact support.';
-    }
-}
+// This script now relies on the global Firebase instance initialized by app.js
 
 function runViewScript(app) {
     const db = firebase.firestore();
@@ -228,5 +210,12 @@ function runViewScript(app) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    initializeFirebase();
+    // Assumes Firebase is already initialized from the main app script
+    if (window.firebase) {
+        runViewScript(window.firebase.app());
+    } else {
+        console.error("Firebase not initialized. View page cannot function.");
+        // Optionally, display an error message to the user on the page
+        document.body.innerHTML = 'Error: Application failed to load correctly. Please go back to the main page.';
+    }
 });
