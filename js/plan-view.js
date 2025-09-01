@@ -1,7 +1,7 @@
 // js/plan-view.js
 
 // Dependencies passed from main.js
-let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare;
+let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare, saveData, summarizePlanForAI;
 
 // --- DOM Element References ---
 const DOMElements = {
@@ -707,4 +707,22 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
         const planSummary = summarizePlanForAI(appState.planData);
         handleAIActionPlan(appState, saveData, planSummary);
     });
+
+    // --- Radial Menu Button Listeners ---
+    const actionPlanButton = document.getElementById('radial-action-plan');
+    if (actionPlanButton) {
+        actionPlanButton.addEventListener('click', () => {
+            const planSummary = summarizePlanForAI(appState.planData);
+            handleAIActionPlan(appState, saveData, planSummary);
+            document.getElementById('radial-menu-container').classList.remove('open');
+        });
+    }
+
+    const geminiButton = document.getElementById('radial-action-gemini');
+    if (geminiButton) {
+        geminiButton.addEventListener('click', () => {
+            alert("Gemini AI feature coming soon!");
+            document.getElementById('radial-menu-container').classList.remove('open');
+        });
+    }
 }
