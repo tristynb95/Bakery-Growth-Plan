@@ -57,7 +57,7 @@ async function handleModalAction() {
             DOMElements.creationLoadingView.classList.remove('hidden');
             closeModal();
             try {
-                const plansRef = db.collection('users').doc(currentUser.uid).collection('plans');
+                const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
                 const newPlan = await plansRef.add({
                     planName: newPlanName,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -77,7 +77,7 @@ async function handleModalAction() {
             const newName = document.getElementById('editPlanName').value;
             if (newName && newName.trim() !== '') {
                 try {
-                    await db.collection('users').doc(currentUser.uid).collection('plans').doc(planId).update({ planName: newName });
+                    await db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(planId).update({ planName: newName });
                     document.dispatchEvent(new CustomEvent('-rerender-dashboard'));
                 } catch (error) { console.error("Error updating plan name:", error); }
             }
@@ -86,7 +86,7 @@ async function handleModalAction() {
 
         case 'delete':
             try {
-                await db.collection('users').doc(currentUser.uid).collection('plans').doc(planId).delete();
+                await db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(planId).delete();
                 document.dispatchEvent(new CustomEvent('rerender-dashboard'));
             } catch (error) { console.error("Error deleting plan:", error); }
             closeModal();
@@ -173,10 +173,9 @@ export function closeModal() {
 
 // --- Main Initializer ---
 
-export function initializeUI(database, user, state, apiFunction, saveDataFunction, planSelectFunction) {
+export function initializeUI(database, state, apiFunction, saveDataFunction, planSelectFunction) {
     // Connect to other parts of the app
     db = database;
-    currentUser = user;
     appState = state;
     generateAiActionPlan = apiFunction;
     saveData = saveDataFunction;
