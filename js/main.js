@@ -1,6 +1,6 @@
 // js/main.js
 
-import { initializeAuth } from './auth.js';
+import { initializeAuth, setupActivityListeners, clearActivityListeners } from './auth.js';
 import { getFirebaseConfig, generateAiActionPlan } from './api.js';
 import { initializeCalendar } from './calendar.js';
 import { initializeDashboard, renderDashboard } from './dashboard.js';
@@ -74,9 +74,15 @@ function runApp(app) {
     }
     
     // --- Event Listeners for Cross-Module Communication ---
-    document.addEventListener('logout-request', () => auth.signOut());
+    document.addEventListener('logout-request', (e) => {
+        if (e.detail && e.detail.isTimeout) {
+            openModal('timeout');
+        }
+        auth.signOut()
+    });
     document.addEventListener('back-to-dashboard', handleBackToDashboard);
     document.addEventListener('rerender-dashboard', renderDashboard);
+    document.addEventListener('plan-selected', (e) => handleSelectPlan(e.detail.planId));
 
 
     // --- Authentication Observer ---
@@ -90,18 +96,26 @@ function runApp(app) {
         if (appState.planUnsubscribe) appState.planUnsubscribe();
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
 
-
         initialLoadingView.classList.add('hidden');
 
         if (user) {
             appState.currentUser = user;
+            setupActivityListeners(appState); // Start session timer
             loginView.classList.add('hidden');
-            appView.classList.add('hidden');
-            await renderDashboard();
+
+            const lastPlanId = localStorage.getItem('lastPlanId');
+            if (lastPlanId) {
+                handleSelectPlan(lastPlanId);
+            } else {
+                dashboardView.classList.remove('hidden');
+                appView.classList.add('hidden');
+                await renderDashboard();
+            }
         } else {
             appState.currentUser = null;
             appState.currentPlanId = null; // Clear plan ID on logout
             appState.planData = {}; // Clear plan data
+            clearActivityListeners(); // Stop session timer
             dashboardView.classList.add('hidden');
             appView.classList.add('hidden');
             loginView.classList.remove('hidden');
