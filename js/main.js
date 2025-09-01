@@ -47,7 +47,7 @@ function runApp(app) {
     // --- Module Initializers ---
     // We start each module and give it the tools it needs to do its job.
     initializeAuth(auth);
-    initializeUI(db, appState, generateAiActionPlan, null, showPlanView);
+    initializeUI(db, appState);
     initializeCalendar(db, appState);
     initializeDashboard(db, appState, openModal, handleSelectPlan);
     initializePlanView(db, appState, openModal, initializeCharCounters);
@@ -59,6 +59,7 @@ function runApp(app) {
      */
     function handleSelectPlan(planId) {
         document.getElementById('dashboard-view').classList.add('hidden');
+        document.getElementById('radial-menu-container').classList.remove('hidden');
         showPlanView(planId);
     }
 
@@ -68,7 +69,10 @@ function runApp(app) {
     function handleBackToDashboard() {
         if (appState.planUnsubscribe) appState.planUnsubscribe();
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe(); // Also unsubscribe from calendar
+        localStorage.removeItem('lastPlanId');
+        localStorage.removeItem('lastViewId');
         document.getElementById('app-view').classList.add('hidden');
+        document.getElementById('radial-menu-container').classList.add('hidden');
         document.getElementById('dashboard-view').classList.remove('hidden'); // Ensure dashboard is visible
         renderDashboard(); // Re-render the dashboard to show the latest data
     }
@@ -78,7 +82,7 @@ function runApp(app) {
         if (e.detail && e.detail.isTimeout) {
             openModal('timeout');
         }
-        auth.signOut()
+        auth.signOut();
     });
     document.addEventListener('back-to-dashboard', handleBackToDashboard);
     document.addEventListener('rerender-dashboard', renderDashboard);
@@ -102,7 +106,6 @@ function runApp(app) {
             appState.currentUser = user;
             setupActivityListeners(appState); // Start session timer
             loginView.classList.add('hidden');
-
             const lastPlanId = localStorage.getItem('lastPlanId');
             if (lastPlanId) {
                 handleSelectPlan(lastPlanId);
