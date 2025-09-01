@@ -4,7 +4,7 @@ import { generateAiActionPlan } from './api.js';
 import { parseUkDate } from './calendar.js';
 
 // Dependencies that will be passed in from main.js
-let db, appState, saveData;
+let db, appState;
 let activeSaveDataFunction = null; // To hold the saveData function from the current view
 
 // AI Action Plan State
@@ -502,9 +502,16 @@ export function openModal(type, context = {}) {
             DOMElements.modalContent.innerHTML = `<p>Generating a new plan will overwrite your existing action plan and any edits. This cannot be undone.</p>`;
             DOMElements.modalActionBtn.textContent = "Yes, Generate New";
             DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+            // MODIFIED: This is the fix. Use `activeSaveDataFunction` which holds the correct `saveData` function.
             DOMElements.modalActionBtn.onclick = () => {
                 delete appState.planData.aiActionPlan;
-                saveData(true).then(() => handleAIActionPlan(appState, saveData, null)); // Summary will be regenerated
+                if (activeSaveDataFunction) {
+                    activeSaveDataFunction(true, { aiActionPlan: firebase.firestore.FieldValue.delete() }).then(() => {
+                        handleAIActionPlan(appState, activeSaveDataFunction, null);
+                    });
+                } else {
+                    console.error("Save function is not available for regenerating AI Plan.");
+                }
             };
             DOMElements.modalCancelBtn.textContent = "Cancel";
             DOMElements.modalCancelBtn.onclick = () => {
@@ -551,8 +558,7 @@ export function initializeUI(database, state) {
             closeModal();
         }
     });
-    DOMElements.modalActionBtn.addEventListener('click', handleModalAction);
-    DOMElements.modalCancelBtn.addEventListener('click', closeModal);
+    // Removed the global modal action button listener from here as it's now set dynamically in openModal
 
     // --- Mobile Sidebar & Swipe ---
     DOMElements.mobileMenuBtn.addEventListener('click', () => DOMElements.appView.classList.toggle('sidebar-open'));
