@@ -1859,6 +1859,57 @@ function runApp(app) {
         document.getElementById('add-event-form').classList.add('hidden');
     }
 
+    function showEditEventForm(index) {
+    appState.calendar.editingEventIndex = index;
+    const event = appState.calendar.data[selectedDateKey][index];
+
+    // Hide the event list and "Add Event" button, then show the form
+    document.getElementById('day-event-list').classList.add('hidden');
+    document.getElementById('add-event-form').classList.remove('hidden');
+    document.getElementById('add-event-btn').classList.add('hidden');
+    
+    // Update form titles and buttons for editing mode
+    document.getElementById('add-event-form-title').textContent = 'Edit Event';
+    document.getElementById('save-event-btn').textContent = 'Update Event';
+
+    // Populate the form fields with the event data
+    document.getElementById('event-title-input').value = event.title;
+    const allDayCheckbox = document.getElementById('event-all-day-toggle');
+    allDayCheckbox.checked = event.allDay || false;
+    document.getElementById('event-time-inputs-container').classList.toggle('hidden', allDayCheckbox.checked);
+    document.getElementById('event-time-from-input').value = event.timeFrom || '';
+    document.getElementById('event-time-to-input').value = event.timeTo || '';
+    document.getElementById('event-description-input').value = event.description || '';
+
+    // --- Logic to correctly set the category dropdown ---
+    const searchInput = document.getElementById('category-search-input');
+    const hiddenInput = document.getElementById('event-type-input');
+    const iconContainer = document.getElementById('category-selected-icon-container');
+    const optionsContainer = document.querySelector('#category-dropdown .dropdown-options');
+
+    // Clear previous state
+    iconContainer.innerHTML = '<span id="category-selected-dot" class="selected-dot"></span>';
+    iconContainer.className = 'selected-icon-container';
+
+    if (event.type) {
+        const optionToSelect = optionsContainer.querySelector(`.dropdown-option[data-type="${event.type}"]`);
+        if (optionToSelect) {
+            const iconElement = optionToSelect.querySelector('.option-icon, .option-dot');
+            iconContainer.innerHTML = iconElement.outerHTML;
+            iconContainer.classList.add(event.type);
+            iconContainer.classList.toggle('has-icon', iconElement.classList.contains('option-icon'));
+            searchInput.value = optionToSelect.textContent.trim();
+            hiddenInput.value = event.type;
+        } else {
+            searchInput.value = '';
+            hiddenInput.value = '';
+        }
+    } else {
+        searchInput.value = '';
+        hiddenInput.value = '';
+    }
+}
+
     // MODIFIED: Now correctly handles loading an event with an icon
 function setupCalendarEventListeners() {
     const calendarModal = document.getElementById('calendar-modal');
@@ -2401,5 +2452,6 @@ function setupCalendarEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeFirebase();
 });
+
 
 
