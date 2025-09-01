@@ -136,55 +136,76 @@
             <div class="flex-grow">
                 <h3 class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Your Plan</h3>
                <nav class="space-y-1 sidebar-nav" id="main-nav">
-                    <a href="#" id="nav-vision" class="active">
-                        <i class="bi bi-binoculars-fill nav-icon"></i>
-                        <i class="bi bi-check-circle-fill nav-icon-completed"></i>
-                        <span class="nav-text">Quarter Overview</span>
-                        <div class="nav-progress-donut-container">
-                            <svg class="progress-donut" viewBox="0 0 24 24">
-                                <circle class="progress-donut__track" cx="12" cy="12" r="10" fill="transparent" stroke-width="3"></circle>
-                                <circle class="progress-donut__progress" cx="12" cy="12" r="10" fill="transparent" stroke-width="3"></circle>
-                            </svg>
-                        </div>
-                    </a>
-                    <a href="#" id="nav-month-1">
-                        <i class="bi bi-1-circle nav-icon"></i>
-                        <i class="bi bi-check-circle-fill nav-icon-completed"></i>
-                        <span class="nav-text">30 Day Plan</span>
-                        <div class="nav-progress-donut-container">
-                            <svg class="progress-donut" viewBox="0 0 24 24">
-                                <circle class="progress-donut__track" cx="12" cy="12" r="10" fill="transparent" stroke-width="3"></circle>
-                                <circle class="progress-donut__progress" cx="12" cy="12" r="10" fill="transparent" stroke-width="3"></circle>
-                            </svg>
-                        </div>
-                    </a>
-                    <a href="#" id="nav-month-2">
-                        <i class="bi bi-2-circle nav-icon"></i>
-                        <i class="bi bi-check-circle-fill nav-icon-completed"></i>
-                        <span class="nav-text">60 Day Plan</span>
-                        <div class="nav-progress-donut-container">
-                            <svg class="progress-donut" viewBox="0 0 24 24">
-                                <circle class="progress-donut__track" cx="12" cy="12" r="10" fill="transparent" stroke-width="3"></circle>
-                                <circle class="progress-donut__progress" cx="12" cy="12" r="10" fill="transparent" stroke-width="3"></circle>
-                            </svg>
-                        </div>
-                    </a>
-                    <a href="#" id="nav-month-3">
-                        <i class="bi bi-3-circle nav-icon"></i>
-                        <i class="bi bi-check-circle-fill nav-icon-completed"></i>
-                        <span class="nav-text">90 Day Plan</span>
-                        <div class="nav-progress-donut-container">
-                            <svg class="progress-donut" viewBox="0 0 24 24">
-                                <circle class="progress-donut__track" cx="12" cy="12" r="10" fill="transparent" stroke-width="3"></circle>
-                                <circle class="progress-donut__progress" cx="12" cy="12" r="10" fill="transparent" stroke-width="3"></circle>
-                            </svg>
-                        </div>
-                    </a>
-                    <a href="#" id="nav-summary">
-                        <i class="bi bi-file-earmark-text-fill nav-icon"></i>
-                        <span class="nav-text">Full Summary</span>
-                    </a>
-                </nav>
+    <ul class="plan-journey">
+        <li class="journey-item journey-item--standalone">
+            <a href="#" id="nav-vision" class="active">
+                <div class="journey-icon-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-binoculars-fill nav-icon" viewBox="0 0 16 16">
+                        <path d="M4.5 1A1.5 1.5 0 0 0 3 2.5V3h4v-.5A1.5 1.5 0 0 0 5.5 1zM7 4v1h2V4h1v1h.5a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5H11v1H5v-1H4.5A1.5 1.5 0 0 1 3 9.5v-3A1.5 1.5 0 0 1 4.5 5H5V4zM11.5 1A1.5 1.5 0 0 0 10 2.5V3h4v-.5A1.5 1.5 0 0 0 12.5 1z"/>
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle-fill nav-icon-completed" viewBox="0 0 16 16">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                    </svg>
+                </div>
+                <span class="nav-text">Quarter Overview</span>
+            </a>
+        </li>
+
+        <li class="journey-item journey-item--sprint">
+            <a href="#" id="nav-month-1">
+                <div class="journey-icon-container">
+                    <span class="sprint-number">1</span>
+                    <div class="progress-ring-container">
+                        <svg class="progress-ring" viewBox="0 0 36 36">
+                            <circle class="progress-ring__track" r="16" cx="18" cy="18"></circle>
+                            <circle class="progress-ring__progress" r="16" cx="18" cy="18"></circle>
+                        </svg>
+                    </div>
+                </div>
+                <span class="nav-text">30 Day Plan</span>
+            </a>
+        </li>
+        <li class="journey-item journey-item--sprint">
+            <a href="#" id="nav-month-2">
+                <div class="journey-icon-container">
+                    <span class="sprint-number">2</span>
+                     <div class="progress-ring-container">
+                        <svg class="progress-ring" viewBox="0 0 36 36">
+                            <circle class="progress-ring__track" r="16" cx="18" cy="18"></circle>
+                            <circle class="progress-ring__progress" r="16" cx="18" cy="18"></circle>
+                        </svg>
+                    </div>
+                </div>
+                <span class="nav-text">60 Day Plan</span>
+            </a>
+        </li>
+        <li class="journey-item journey-item--sprint">
+            <a href="#" id="nav-month-3">
+                <div class="journey-icon-container">
+                    <span class="sprint-number">3</span>
+                     <div class="progress-ring-container">
+                        <svg class="progress-ring" viewBox="0 0 36 36">
+                            <circle class="progress-ring__track" r="16" cx="18" cy="18"></circle>
+                            <circle class="progress-ring__progress" r="16" cx="18" cy="18"></circle>
+                        </svg>
+                    </div>
+                </div>
+                <span class="nav-text">90 Day Plan</span>
+            </a>
+        </li>
+
+        <li class="journey-item journey-item--standalone">
+            <a href="#" id="nav-summary">
+                <div class="journey-icon-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-file-earmark-text-fill nav-icon" viewBox="0 0 16 16">
+                        <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
+                    </svg>
+                </div>
+                <span class="nav-text">Full Summary</span>
+            </a>
+        </li>
+    </ul>
+</nav>
             </div>
 
             <div class="pt-4 mt-4 border-t border-gray-200">
