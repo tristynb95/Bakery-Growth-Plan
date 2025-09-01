@@ -1546,6 +1546,13 @@ tr:hover .btn-remove-row {
     border-bottom: 1px solid var(--gails-grey-light);
 }
 
+/* Dropdown Keyboard Highlight */
+.dropdown-option.is-highlighted,
+.dropdown-option.is-highlighted:hover {
+    background-color: var(--gails-red-light);
+    color: var(--gails-red);
+}
+
 /* --- MODIFIED: Replaced with new, expanded category color palette --- */
 
 /* Color Dots */
@@ -1927,12 +1934,4 @@ input[type="time"] {
     pointer-events: auto;
 }
 
-/* Add this new rule to the bottom of style.css, inside section 39 or a new section */
 
-/* 48. Dropdown Keyboard Highlight
--------------------------------------------------- */
-.dropdown-option.is-highlighted,
-.dropdown-option.is-highlighted:hover {
-    background-color: var(--gails-red-light);
-    color: var(--gails-red);
-}
