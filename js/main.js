@@ -29,7 +29,6 @@ function runApp(app) {
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // The single source of truth for the application's state
     const appState = {
         planData: {},
         currentUser: null,
@@ -37,52 +36,40 @@ function runApp(app) {
         currentView: 'vision',
         planUnsubscribe: null,
         calendarUnsubscribe: null,
-        calendar: { // Add the calendar state here
+        calendar: {
             currentDate: new Date(),
             data: {},
             editingEventIndex: null
         }
     };
 
-    // --- Module Initializers ---
     initializeAuth(auth);
     initializeUI(db, appState);
     initializeCalendar(db, appState);
     initializeDashboard(db, appState, openModal, handleSelectPlan);
     initializePlanView(db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare);
 
-
-    // --- Central Control Functions ---
-    /**
-     * Hides the dashboard and shows the detailed plan view for a selected plan.
-     * @param {string} planId The ID of the plan to view.
-     */
     function handleSelectPlan(planId) {
         document.getElementById('dashboard-view').classList.add('hidden');
         document.getElementById('radial-menu-container').classList.remove('hidden');
         showPlanView(planId);
     }
 
-    /**
-     * Unsubscribes from plan data and returns to the dashboard view.
-     */
     function handleBackToDashboard() {
         if (appState.planUnsubscribe) appState.planUnsubscribe();
-        if (appState.calendarUnsubscribe) appState.calendarUnsubscribe(); // Also unsubscribe from calendar
+        if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         document.getElementById('app-view').classList.add('hidden');
         document.getElementById('radial-menu-container').classList.add('hidden');
-        document.getElementById('dashboard-view').classList.remove('hidden'); // Ensure dashboard is visible
-        renderDashboard(); // Re-render the dashboard to show the latest data
+        document.getElementById('dashboard-view').classList.remove('hidden');
+        renderDashboard();
     }
 
-    // --- Event Listeners for Cross-Module Communication ---
     document.addEventListener('logout-request', (e) => {
         if (e.detail && e.detail.isTimeout) {
             openModal('timeout');
         }
-        // This is the fix: clear the last viewed plan from local storage on logout
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         auth.signOut();
@@ -92,47 +79,46 @@ function runApp(app) {
     document.addEventListener('rerender-dashboard', renderDashboard);
     document.addEventListener('plan-selected', (e) => handleSelectPlan(e.detail.planId));
 
-
-    // --- Authentication Observer ---
     auth.onAuthStateChanged(async (user) => {
-        const loginView = document.getElementById('login-view');
-        const dashboardView = document.getElementById('dashboard-view');
-        const appView = document.getElementById('app-view');
         const initialLoadingView = document.getElementById('initial-loading-view');
-
+        
         if (appState.planUnsubscribe) appState.planUnsubscribe();
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
-
-        initialLoadingView.classList.add('hidden');
-
+        
         if (user) {
             appState.currentUser = user;
-            setupActivityListeners(appState); // Start session timer
-            loginView.classList.add('hidden');
+            const userDocRef = db.collection('users').doc(user.uid);
+            const userDoc = await userDocRef.get();
+
+            if (!userDoc.exists()) {
+                initialLoadingView.classList.add('hidden');
+                window.location.href = '/profile.html?setup=true';
+                return;
+            }
+
+            setupActivityListeners(appState);
             const lastPlanId = localStorage.getItem('lastPlanId');
             if (lastPlanId) {
                 handleSelectPlan(lastPlanId);
             } else {
-                dashboardView.classList.remove('hidden');
-                appView.classList.add('hidden');
+                document.getElementById('dashboard-view').classList.remove('hidden');
+                document.getElementById('app-view').classList.add('hidden');
                 await renderDashboard();
             }
         } else {
             appState.currentUser = null;
-            appState.currentPlanId = null; // Clear plan ID on logout
-            appState.planData = {}; // Clear plan data
-            clearActivityListeners(); // Stop session timer
-            dashboardView.classList.add('hidden');
-            appView.classList.add('hidden');
-              // --- FIX FOR MODAL BUG ---
-            // Hide all overlays and modals that could persist after logout
+            appState.currentPlanId = null;
+            appState.planData = {};
+            clearActivityListeners();
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('app-view').classList.add('hidden');
             document.getElementById('modal-overlay').classList.add('hidden');
             document.getElementById('calendar-modal').classList.add('hidden');
             document.getElementById('radial-menu-container').classList.add('hidden');
-            loginView.classList.remove('hidden');
+            document.getElementById('login-view').classList.remove('hidden');
         }
+        initialLoadingView.classList.add('hidden');
     });
 }
 
-// Start the entire application once the page content has loaded.
 document.addEventListener('DOMContentLoaded', initializeFirebase);
