@@ -124,6 +124,11 @@ function runApp(app) {
             clearActivityListeners(); // Stop session timer
             dashboardView.classList.add('hidden');
             appView.classList.add('hidden');
+              // --- FIX FOR MODAL BUG ---
+            // Hide all overlays and modals that could persist after logout
+            document.getElementById('modal-overlay').classList.add('hidden');
+            document.getElementById('calendar-modal').classList.add('hidden');
+            document.getElementById('radial-menu-container').classList.add('hidden');
             loginView.classList.remove('hidden');
         }
     });
