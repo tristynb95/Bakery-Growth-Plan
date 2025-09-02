@@ -1683,11 +1683,6 @@ tr:hover .btn-remove-row {
     gap: 0.5rem;
 }
 
-/* Style the new add event button to be more subtle */
-#day-detail-header #add-event-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-}
 
 /* 41. Compact Notes Text Area
 -------------------------------------------------- */
@@ -1950,7 +1945,7 @@ input[type="time"] {
 
 /* 48. Calendar Header Button Height Consistency */
 .calendar-header .btn, .day-detail-header .btn {
-    height: 46px; /* Sets a fixed height for all buttons in the calendar headers */
+    height: 42px; /* Sets a fixed height for all buttons in the calendar headers */
 }
 
 /* 49. Stable Calendar Detail Header */
