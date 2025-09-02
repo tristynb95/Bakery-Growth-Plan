@@ -208,41 +208,41 @@
                 </div>
             </div>
         </aside>
-
+        
         <main class="w-full overflow-y-auto">
-    <div class="p-6 sm:p-8 lg:p-12 printable-area">
-        <header class="flex justify-between items-start mb-8 main-header">
-            <div>
-                <h1 id="header-title" class="text-4xl font-black text-gray-900 font-poppins">Bakery Growth Plan</h1>
-                <p id="header-subtitle" class="mt-1 text-lg text-gray-500">Your 90-Day Sprint to a Better Bakery.</p>
-            </div>
-            <div class="flex items-center gap-4 no-print">
-                <div id="desktop-header-buttons" class="hidden sm:flex items-center gap-2">
-                     <div id="save-indicator" class="flex items-center gap-2 text-sm text-gray-500 transition-opacity duration-300 opacity-0">
-                        <i class="bi bi-check-circle-fill text-green-500"></i>
-                        <span>Saved to Cloud</span>
+            <div class="p-6 sm:p-8 lg:p-12 printable-area">
+                <header class="flex justify-between items-start mb-8 main-header">
+                    <div>
+                        <h1 id="header-title" class="text-4xl font-black text-gray-900 font-poppins">Bakery Growth Plan</h1>
+                        <p id="header-subtitle" class="mt-1 text-lg text-gray-500">Your 90-Day Sprint to a Better Bakery.</p>
                     </div>
-                    <button id="print-btn" class="btn btn-secondary hidden"><i class="bi bi-printer-fill"></i><span>Print</span></button>
-                    <button id="share-btn" class="btn btn-secondary hidden"><i class="bi bi-share-fill"></i><span>Share</span></button>
-                    <button id="ai-action-btn" class="btn btn-primary hidden"><i class="bi bi-stars"></i><span>AI Action Plan</span></button>
+                    <div class="flex items-center gap-4 no-print">
+                        <div id="desktop-header-buttons" class="hidden sm:flex items-center gap-2">
+                             <div id="save-indicator" class="flex items-center gap-2 text-sm text-gray-500 transition-opacity duration-300 opacity-0">
+                                <i class="bi bi-check-circle-fill text-green-500"></i>
+                                <span>Saved to Cloud</span>
+                            </div>
+                            <button id="print-btn" class="btn btn-secondary hidden"><i class="bi bi-printer-fill"></i><span>Print</span></button>
+                            <button id="share-btn" class="btn btn-secondary hidden"><i class="bi bi-share-fill"></i><span>Share</span></button>
+                            <button id="ai-action-btn" class="btn btn-primary hidden"><i class="bi bi-stars"></i><span>AI Action Plan</span></button>
+                        </div>
+                        <button id="mobile-menu-btn" class="btn btn-secondary !p-2 sm:hidden"><i class="bi bi-list text-xl"></i></button>
+                    </div>
+                </header>
+                <div id="content-area">
                 </div>
-                <button id="mobile-menu-btn" class="btn btn-secondary !p-2 sm:hidden"><i class="bi bi-list text-xl"></i></button>
             </div>
-        </header>
-        <div id="content-area">
-        </div>
-    </div>
-     <footer class="text-center text-sm text-gray-500 py-6 no-print">
-        <p>&copy; 2025 GAIL's Bakery Growth Planner | <a href="/privacy-policy.html" class="text-red-600 hover:underline">Privacy Policy</a> | <a href="/terms-and-conditions.html" class="text-red-600 hover:underline">Terms & Conditions</a></p>
-    </footer>
-</main>
+             <footer class="text-center text-sm text-gray-500 py-6 no-print">
+                <p>&copy; 2025 GAIL's Bakery Growth Planner | <a href="/privacy-policy.html" class="text-red-600 hover:underline">Privacy Policy</a> | <a href="/terms-and-conditions.html" class="text-red-600 hover:underline">Terms & Conditions</a></p>
+            </footer>
+        </main>
     </div>
 
     <div id="modal-overlay" class="modal-overlay hidden">
         <div id="modal-box" class="modal-box">
             <div class="modal-header">
                 <h3 id="modal-title" class="text-lg font-bold">Modal Title</h3>
-                <button id="modal-close-btn" class="modal-close-btn">&times;</button>
+                <button id="modal-close-btn" class="btn btn-secondary !p-2"><i class="bi bi-x-lg"></i></button>
             </div>
             <div id="modal-content" class="modal-content">
             </div>
@@ -264,23 +264,23 @@
     </div>
 
     <div id="radial-menu-container" class="radial-menu-container hidden">
-    <div id="radial-menu-overlay" class="radial-menu-overlay"></div>
-    <nav class="radial-menu-items">
-        <button class="radial-menu-item" id="radial-action-gemini" data-tooltip="Gemini AI">
-            <i class="bi bi-stars"></i>
+        <div id="radial-menu-overlay" class="radial-menu-overlay"></div>
+        <nav class="radial-menu-items">
+            <button class="radial-menu-item" id="radial-action-gemini" data-tooltip="Gemini AI">
+                <i class="bi bi-stars"></i>
+            </button>
+            <button class="radial-menu-item" id="radial-action-plan" data-tooltip="Action Plan">
+                <i class="bi bi-list-check"></i>
+            </button>
+            <button class="radial-menu-item" id="radial-action-calendar" data-tooltip="Calendar">
+                <i class="bi bi-calendar-event-fill"></i>
+            </button>
+        </nav>
+        <button id="radial-menu-fab" class="radial-menu-fab btn btn-primary">
+            <i class="bi bi-plus-lg open-icon"></i>
+            <i class="bi bi-x-lg close-icon"></i>
         </button>
-        <button class="radial-menu-item" id="radial-action-plan" data-tooltip="Action Plan">
-            <i class="bi bi-list-check"></i>
-        </button>
-        <button class="radial-menu-item" id="radial-action-calendar" data-tooltip="Calendar">
-            <i class="bi bi-calendar-event-fill"></i>
-        </button>
-    </nav>
-    <button id="radial-menu-fab" class="radial-menu-fab btn btn-primary">
-        <i class="bi bi-plus-lg open-icon"></i>
-        <i class="bi bi-x-lg close-icon"></i>
-    </button>
-</div>
+    </div>
 
     <div id="calendar-modal" class="calendar-modal hidden">
         <div class="calendar-modal-content">
@@ -300,21 +300,20 @@
                 <div id="day-detail-view" class="day-detail-container">
                     <div id="day-detail-header" class="flex items-center justify-between p-4 border-b border-gray-200">
     
-    <div>
-        <h3 id="day-detail-title" class="text-lg font-bold text-gray-800">Tuesday 2 September</h3>
-    </div>
+                        <div>
+                            <h3 id="day-detail-title" class="text-lg font-bold text-gray-800">Tuesday 2 September</h3>
+                        </div>
 
-    <div class="flex items-center gap-2">
-        <button id="add-event-btn" class="btn btn-secondary">
-            <i class="bi bi-plus-lg"></i>
-            <span>Add Event</span>
-        </button>
-        <button id="calendar-close-btn" aria-label="Close" class="btn btn-secondary">
-             <i class="bi bi-x-lg"></i>
-        </button>
-    </div>
-
-</div>
+                        <div class="flex items-center gap-2">
+                            <button id="add-event-btn" class="btn btn-secondary">
+                                <i class="bi bi-plus-lg"></i>
+                                <span>Add Event</span>
+                            </button>
+                            <button id="calendar-close-btn" aria-label="Close" class="btn btn-secondary">
+                                 <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </div>
                     <div id="day-detail-content" class="day-detail-content">
                         <div id="day-event-list" class="day-event-list">
                         </div>
