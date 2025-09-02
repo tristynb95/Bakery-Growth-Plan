@@ -64,7 +64,6 @@ function runProfileScript(app) {
         DOMElements.modalTitle.textContent = title;
         DOMElements.modalContent.innerHTML = `<p>${message}</p>`;
 
-        // Add icons for visual feedback
         if (type === 'success') {
             DOMElements.modalTitle.innerHTML = `<i class="bi bi-check-circle-fill text-green-500 mr-2"></i> ${title}`;
         } else if (type === 'warning') {
@@ -86,10 +85,13 @@ function runProfileScript(app) {
         const name = DOMElements.profileName.value.trim();
         const bakery = DOMElements.profileBakery.value.trim();
 
-        if (isSetupMode && (!name || !bakery)) {
-            openModal('warning', 'Incomplete Profile', 'Please enter your full name and bakery location to continue.');
+        // --- FIX FOR VALIDATION BUG ---
+        // This check now runs for both new and existing users.
+        if (!name || !bakery) {
+            openModal('warning', 'Incomplete Profile', 'Please enter your full name and bakery location to save.');
             return;
         }
+        // --- END FIX ---
 
         const userRef = db.collection('users').doc(currentUser.uid);
         const dataToSave = {
@@ -244,4 +246,3 @@ function runProfileScript(app) {
 }
 
 document.addEventListener('DOMContentLoaded', initializeFirebase);
-
