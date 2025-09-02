@@ -120,11 +120,9 @@ async function loadCalendarData() {
 function renderDayDetails(dateKey) {
     selectedDateKey = dateKey;
 
-    // --- FIX: Logic to control header titles ---
-    document.getElementById('day-detail-title').classList.remove('hidden');
-    document.getElementById('day-detail-form-title').classList.add('hidden');
+    // Set the default state for the header
     document.getElementById('add-event-btn').classList.remove('hidden');
-    // --- END FIX ---
+    document.getElementById('day-detail-subtitle').classList.add('hidden');
     
     document.querySelectorAll('.calendar-day.selected').forEach(d => d.classList.remove('selected'));
     const selectedDayCell = document.querySelector(`.calendar-day[data-date-key="${dateKey}"]`);
@@ -189,13 +187,11 @@ function showEditEventForm(index) {
     appState.calendar.editingEventIndex = index;
     const event = appState.calendar.data[selectedDateKey][index];
 
-    // --- FIX: Control header visibility ---
-    const formTitle = document.getElementById('day-detail-form-title');
-    formTitle.textContent = 'Edit Event';
-    formTitle.classList.remove('hidden');
-    document.getElementById('day-detail-title').classList.add('hidden');
+    // Control header visibility
+    const subtitle = document.getElementById('day-detail-subtitle');
+    subtitle.textContent = `Editing: ${event.title}`;
+    subtitle.classList.remove('hidden');
     document.getElementById('add-event-btn').classList.add('hidden');
-    // --- END FIX ---
 
     document.getElementById('day-event-list').classList.add('hidden');
     document.getElementById('add-event-form').classList.remove('hidden');
@@ -437,16 +433,13 @@ function setupCalendarEventListeners() {
     if (addEventBtn) addEventBtn.addEventListener('click', () => {
         appState.calendar.editingEventIndex = null;
         if (dayEventList) dayEventList.classList.add('hidden');
-        const form = document.getElementById('add-event-form');
-        if (form) form.classList.remove('hidden');
+        document.getElementById('add-event-form').classList.remove('hidden');
 
-        // --- FIX: Control header visibility ---
-        const formTitle = document.getElementById('day-detail-form-title');
-        formTitle.textContent = 'Add New Event';
-        formTitle.classList.remove('hidden');
-        document.getElementById('day-detail-title').classList.add('hidden');
+        // Control header visibility
+        const subtitle = document.getElementById('day-detail-subtitle');
+        subtitle.textContent = 'Adding new event';
+        subtitle.classList.remove('hidden');
         addEventBtn.classList.add('hidden');
-        // --- END FIX ---
 
         document.getElementById('event-title-input').value = '';
         document.getElementById('event-all-day-toggle').checked = false;
@@ -465,15 +458,12 @@ function setupCalendarEventListeners() {
 
     if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => {
         appState.calendar.editingEventIndex = null;
-        const form = document.getElementById('add-event-form');
-        if (form) form.classList.add('hidden');
+        document.getElementById('add-event-form').classList.add('hidden');
         if (dayEventList) dayEventList.classList.remove('hidden');
 
-        // --- FIX: Control header visibility ---
+        // Control header visibility
         document.getElementById('add-event-btn').classList.remove('hidden');
-        document.getElementById('day-detail-title').classList.remove('hidden');
-        document.getElementById('day-detail-form-title').classList.add('hidden');
-        // --- END FIX ---
+        document.getElementById('day-detail-subtitle').classList.add('hidden');
     });
 
     if (saveEventBtn) saveEventBtn.addEventListener('click', async () => {
@@ -537,3 +527,4 @@ export function initializeCalendar(database, state, modalOpener) {
     document.addEventListener('event-deletion-confirmed', confirmEventDeletion);
     setupCalendarEventListeners();
 }
+
