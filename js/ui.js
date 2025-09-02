@@ -228,7 +228,6 @@ async function handleModalAction() {
         case 'create':
             const newPlanNameInput = document.getElementById('newPlanName');
             const newPlanName = newPlanNameInput.value.trim();
-            // MODIFIED: Get quarter value
             const newPlanQuarter = document.getElementById('newPlanQuarter').value.trim();
             const originalButtonText = DOMElements.modalActionBtn.textContent;
             const errorContainer = document.getElementById('modal-error-container');
@@ -258,13 +257,19 @@ async function handleModalAction() {
             closeModal();
             DOMElements.creationLoadingView.classList.remove('hidden');
             try {
-                // MODIFIED: Add quarter to the new plan document
+                // MODIFIED: Fetch user profile data before creating the plan
+                const userDocRef = db.collection('users').doc(appState.currentUser.uid);
+                const userDoc = await userDocRef.get();
+                const userData = userDoc.exists ? userDoc.data() : { name: '', bakery: '' };
+
+                // MODIFIED: Add profile data to the new plan document
                 const newPlan = await plansRef.add({
                     planName: newPlanName,
                     quarter: newPlanQuarter,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     lastEdited: firebase.firestore.FieldValue.serverTimestamp(),
-                    managerName: ''
+                    managerName: userData.name, 
+                    bakeryLocation: userData.bakery
                 });
                 document.dispatchEvent(new CustomEvent('plan-selected', { detail: { planId: newPlan.id } }));
             } catch (error) {
@@ -274,12 +279,10 @@ async function handleModalAction() {
             }
             break;
         case 'edit':
-            // MODIFIED: Get new name and quarter values
             const newName = document.getElementById('editPlanName').value.trim();
             const newQuarter = document.getElementById('editPlanQuarter').value.trim();
             if (newName) {
                 try {
-                    // MODIFIED: Update both name and quarter
                     await db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(planId).update({ 
                         planName: newName,
                         quarter: newQuarter
@@ -414,7 +417,6 @@ export function initializeCharCounters() {
 }
 
 export function openModal(type, context = {}) {
-    // MODIFIED: Destructure currentQuarter from context
     const { planId, currentName, planName, eventTitle, currentQuarter } = context;
     DOMElements.modalBox.dataset.type = type;
     DOMElements.modalBox.dataset.planId = planId;
@@ -436,7 +438,6 @@ export function openModal(type, context = {}) {
     switch (type) {
         case 'create':
             DOMElements.modalTitle.textContent = "Create New Plan";
-            // MODIFIED: Added Quarter input field
             DOMElements.modalContent.innerHTML = `<label for="newPlanName" class="font-semibold block mb-2">Plan Name:</label>
                                                   <input type="text" id="newPlanName" class="form-input" placeholder="e.g., Q4 2025 Focus" value="New Plan ${new Date().toLocaleDateString('en-GB')}">
                                                   <label for="newPlanQuarter" class="font-semibold block mb-2 mt-4">Quarter:</label>
@@ -447,7 +448,6 @@ export function openModal(type, context = {}) {
             break;
         case 'edit':
             DOMElements.modalTitle.textContent = "Edit Plan Details";
-            // MODIFIED: Added Quarter input field and pre-filled its value
             DOMElements.modalContent.innerHTML = `<label for="editPlanName" class="font-semibold block mb-2">Plan Name:</label>
                                                   <input type="text" id="editPlanName" class="form-input" value="${currentName}">
                                                   <label for="editPlanQuarter" class="font-semibold block mb-2 mt-4">Quarter:</label>
