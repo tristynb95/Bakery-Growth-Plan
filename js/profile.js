@@ -113,6 +113,49 @@ function runProfileScript(app) {
             DOMElements.saveProfileBtn.textContent = 'Save Changes';
         }
     }
+    
+    // --- NEW: Image Compression Function ---
+    function compressImage(file, maxSize = 512) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let { width, height } = img;
+
+                    if (width > height) {
+                        if (width > maxSize) {
+                            height *= maxSize / width;
+                            width = maxSize;
+                        }
+                    } else {
+                        if (height > maxSize) {
+                            width *= maxSize / height;
+                            height = maxSize;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        resolve(new File([blob], file.name, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now()
+                        }));
+                    }, 'image/jpeg', 0.9); // Quality set to 90%
+                };
+                img.onerror = reject;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
 
     function loadUserProfile(user) {
         DOMElements.profileEmail.value = user.email;
@@ -228,6 +271,42 @@ function runProfileScript(app) {
             }
         });
     }
+    
+    // --- MODIFIED: Photo Upload Listener with Validation ---
+    DOMElements.photoUploadInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Validation
+        const allowedTypes = ['image/jpeg', 'image/png'];
+        const maxSizeInMB = 2;
+        if (!allowedTypes.includes(file.type)) {
+            openModal('warning', 'Invalid File Type', 'Please select a JPG or PNG image.');
+            return;
+        }
+        if (file.size > maxSizeInMB * 1024 * 1024) {
+            openModal('warning', 'File Too Large', `Please select an image smaller than ${maxSizeInMB}MB.`);
+            return;
+        }
+
+        try {
+            const compressedFile = await compressImage(file);
+            selectedFile = compressedFile;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                DOMElements.photoPreview.src = event.target.result;
+            };
+            reader.readAsDataURL(compressedFile);
+
+            DOMElements.savePhotoBtn.classList.remove('hidden');
+            DOMElements.removePhotoBtn.classList.remove('hidden');
+
+        } catch (error) {
+            console.error("Error compressing image:", error);
+            openModal('warning', 'Image Error', 'Could not process the selected image.');
+        }
+    });
 
     auth.onAuthStateChanged((user) => {
         if (user) {
@@ -249,4 +328,3 @@ function runProfileScript(app) {
 }
 
 document.addEventListener('DOMContentLoaded', initializeFirebase);
-
