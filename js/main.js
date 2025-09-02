@@ -1,10 +1,10 @@
 // js/main.js
 
 import { initializeAuth, setupActivityListeners, clearActivityListeners } from './auth.js';
-import { getFirebaseConfig, generateAiActionPlan } from './api.js';
+import { getFirebaseConfig } from './api.js';
 import { initializeCalendar } from './calendar.js';
 import { initializeDashboard, renderDashboard } from './dashboard.js';
-import { initializeUI, openModal, closeModal, initializeCharCounters, handleAIActionPlan, handleShare } from './ui.js';
+import { initializeUI, openModal } from './ui.js';
 import { initializePlanView, showPlanView } from './plan-view.js';
 
 /**
@@ -45,9 +45,9 @@ function runApp(app) {
 
     initializeAuth(auth);
     initializeUI(db, appState);
-    initializeCalendar(db, appState);
+    initializeCalendar(db, appState, openModal);
     initializeDashboard(db, appState, openModal, handleSelectPlan);
-    initializePlanView(db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare);
+    initializePlanView(db, appState, openModal);
 
     function handleSelectPlan(planId) {
         document.getElementById('dashboard-view').classList.add('hidden');
@@ -89,11 +89,8 @@ function runApp(app) {
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
         
         if (user) {
-            // --- FIX FOR RE-LOGIN BUG ---
-            // Show a loading state and hide the login form immediately to prevent UI overlap.
             initialLoadingView.classList.remove('hidden');
             loginView.classList.add('hidden');
-            // --- END FIX ---
 
             appState.currentUser = user;
             const userDocRef = db.collection('users').doc(user.uid);
@@ -131,4 +128,3 @@ function runApp(app) {
 }
 
 document.addEventListener('DOMContentLoaded', initializeFirebase);
-
