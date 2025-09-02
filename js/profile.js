@@ -23,7 +23,7 @@ function runProfileScript(app) {
 
     const bakeryList = [
         'Beaconsfield', 'Berkhamsted', 'Gerrards Cross', 'Harpenden', 'Henley',
-        'Marlow', 'Radlett', 'Ruipislip', 'St Albans', 'Welwyn Garden City'
+        'Marlow', 'Radlett', 'Ruislip', 'St Albans', 'Welwyn Garden City'
     ].sort();
 
     const DOMElements = {
@@ -52,6 +52,8 @@ function runProfileScript(app) {
     let selectedFile = null;
     let isSetupMode = false;
     const defaultPhotoURL = 'https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png';
+    // --- NEW: Variable to store the original form state ---
+    let originalProfileData = { name: '', bakery: '' };
 
     const params = new URLSearchParams(window.location.search);
     if (params.get('setup') === 'true') {
@@ -73,14 +75,23 @@ function runProfileScript(app) {
         DOMElements.modalOverlay.classList.add('hidden');
     }
 
-    // --- NEW: Form Validity Check ---
+    // --- MODIFIED: Form Validity Check now includes a change check ---
     function checkFormValidity() {
-        const name = DOMElements.profileName.value.trim();
-        const bakery = DOMElements.bakeryHiddenInput.value.trim();
-        const isValid = name && bakery;
-        DOMElements.saveProfileBtn.disabled = !isValid;
+        const currentName = DOMElements.profileName.value.trim();
+        const currentBakery = DOMElements.bakeryHiddenInput.value.trim();
+
+        const isFilled = currentName && currentBakery;
+        const hasChanged = currentName !== originalProfileData.name || currentBakery !== originalProfileData.bakery;
+
+        // In setup mode, we only care if fields are filled. In edit mode, they must be filled AND changed.
+        if (isSetupMode) {
+            DOMElements.saveProfileBtn.disabled = !isFilled;
+        } else {
+            DOMElements.saveProfileBtn.disabled = !isFilled || !hasChanged;
+        }
     }
 
+    // --- MODIFIED: saveProfile now updates the original state on success ---
     async function saveProfile() {
         if (!currentUser) return;
         const name = DOMElements.profileName.value.trim();
@@ -98,20 +109,22 @@ function runProfileScript(app) {
             DOMElements.saveProfileBtn.disabled = true;
             DOMElements.saveProfileBtn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Saving...';
             await userRef.set(dataToSave, { merge: true });
+
             if (isSetupMode) {
                 window.location.href = '/index.html';
             } else {
                 openModal('success', 'Profile Updated', 'Your changes have been saved successfully.');
-                DOMElements.saveProfileBtn.disabled = false;
+                // Update the original data to the new saved state
+                originalProfileData.name = name;
+                originalProfileData.bakery = bakery;
                 DOMElements.saveProfileBtn.textContent = 'Save Changes';
-                checkFormValidity(); // Re-check validity after save
+                checkFormValidity(); // This will now correctly disable the button
             }
         } catch (error) {
             console.error("Error saving profile:", error);
             openModal('warning', 'Save Error', 'Could not save your profile. Please try again.');
-            DOMElements.saveProfileBtn.disabled = false;
             DOMElements.saveProfileBtn.textContent = 'Save Changes';
-            checkFormValidity(); // Re-check validity after error
+            checkFormValidity();
         }
     }
     
@@ -124,29 +137,17 @@ function runProfileScript(app) {
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     let { width, height } = img;
-
                     if (width > height) {
-                        if (width > maxSize) {
-                            height *= maxSize / width;
-                            width = maxSize;
-                        }
+                        if (width > maxSize) { height *= maxSize / width; width = maxSize; }
                     } else {
-                        if (height > maxSize) {
-                            width *= maxSize / height;
-                            height = maxSize;
-                        }
+                        if (height > maxSize) { width *= maxSize / height; height = maxSize; }
                     }
-
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-
                     canvas.toBlob((blob) => {
-                        resolve(new File([blob], file.name, {
-                            type: 'image/jpeg',
-                            lastModified: Date.now()
-                        }));
+                        resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
                     }, 'image/jpeg', 0.9);
                 };
                 img.onerror = reject;
@@ -156,7 +157,7 @@ function runProfileScript(app) {
         });
     }
 
-    // --- MODIFIED: loadUserProfile ---
+    // --- MODIFIED: loadUserProfile now stores the original data ---
     function loadUserProfile(user) {
         DOMElements.profileEmail.value = user.email;
         const userRef = db.collection('users').doc(user.uid);
@@ -166,6 +167,10 @@ function runProfileScript(app) {
                 DOMElements.profileName.value = data.name || '';
                 DOMElements.bakerySearchInput.value = data.bakery || '';
                 DOMElements.bakeryHiddenInput.value = data.bakery || '';
+                
+                // Store original data for change detection
+                originalProfileData = { name: data.name || '', bakery: data.bakery || '' };
+
                 if (data.photoURL) {
                     DOMElements.photoPreview.src = data.photoURL;
                     DOMElements.removePhotoBtn.classList.remove('hidden');
@@ -177,12 +182,11 @@ function runProfileScript(app) {
                 DOMElements.headerSubtitle.textContent = 'Please provide your details to get started.';
                 DOMElements.saveProfileBtn.textContent = 'Save and Continue';
                 isSetupMode = true;
-                checkFormValidity(); // Check validity (will be disabled initially)
+                checkFormValidity();
             }
         });
     }
 
-    // --- MODIFIED: setupBakeryDropdown ---
     function setupBakeryDropdown() {
         const optionsContainer = DOMElements.bakeryDropdown.querySelector('.dropdown-options');
         const searchInput = DOMElements.bakerySearchInput;
@@ -193,12 +197,10 @@ function runProfileScript(app) {
             const searchTerm = searchInput.value.toLowerCase();
             optionsContainer.innerHTML = '';
             const filteredBakeries = bakeryList.filter(b => b.toLowerCase().includes(searchTerm));
-
             if (filteredBakeries.length === 0) {
                 optionsContainer.innerHTML = `<div class="dropdown-option no-results">No bakeries found</div>`;
                 return;
             }
-
             filteredBakeries.forEach(bakery => {
                 const option = document.createElement('div');
                 option.className = 'dropdown-option';
@@ -213,7 +215,7 @@ function runProfileScript(app) {
             searchInput.value = value;
             hiddenInput.value = value;
             DOMElements.bakeryDropdown.classList.remove('open');
-            checkFormValidity(); // Check validity on selection
+            checkFormValidity();
         }
 
         searchInput.addEventListener('focus', () => {
@@ -228,17 +230,12 @@ function runProfileScript(app) {
         });
         
         selectedDisplay.addEventListener('click', (e) => {
-            if (e.target !== searchInput) {
-                searchInput.focus();
-            }
+            if (e.target !== searchInput) { searchInput.focus(); }
         });
 
         searchInput.addEventListener('input', () => {
             filterOptions();
-            // This ensures the hidden input is cleared if the user types something invalid
-            if (!bakeryList.includes(searchInput.value)) {
-                hiddenInput.value = '';
-            }
+            if (!bakeryList.includes(searchInput.value)) { hiddenInput.value = ''; }
             checkFormValidity();
         });
 
@@ -253,11 +250,9 @@ function runProfileScript(app) {
                 DOMElements.bakeryDropdown.classList.add('open');
                 filterOptions();
             }
-
             const options = Array.from(optionsContainer.querySelectorAll('.dropdown-option:not(.no-results)'));
             if (options.length === 0) return;
             let currentIndex = options.findIndex(opt => opt.classList.contains('is-highlighted'));
-
             switch (e.key) {
                 case 'ArrowDown':
                     e.preventDefault();
@@ -287,7 +282,6 @@ function runProfileScript(app) {
     DOMElements.photoUploadInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
         const allowedTypes = ['image/jpeg', 'image/png'];
         const maxSizeInMB = 2;
         if (!allowedTypes.includes(file.type)) {
@@ -298,20 +292,14 @@ function runProfileScript(app) {
             openModal('warning', 'File Too Large', `Please select an image smaller than ${maxSizeInMB}MB.`);
             return;
         }
-
         try {
             const compressedFile = await compressImage(file);
             selectedFile = compressedFile;
-
             const reader = new FileReader();
-            reader.onload = (event) => {
-                DOMElements.photoPreview.src = event.target.result;
-            };
+            reader.onload = (event) => { DOMElements.photoPreview.src = event.target.result; };
             reader.readAsDataURL(compressedFile);
-
             DOMElements.savePhotoBtn.classList.remove('hidden');
             DOMElements.removePhotoBtn.classList.remove('hidden');
-
         } catch (error) {
             console.error("Error compressing image:", error);
             openModal('warning', 'Image Error', 'Could not process the selected image.');
@@ -328,9 +316,7 @@ function runProfileScript(app) {
         }
     });
 
-    // --- NEW: Add event listener for name input ---
     DOMElements.profileName.addEventListener('input', checkFormValidity);
-
     DOMElements.saveProfileBtn.addEventListener('click', saveProfile);
     DOMElements.backToDashboardBtn.addEventListener('click', () => { window.location.href = '/index.html'; });
     DOMElements.modalCloseBtn.addEventListener('click', closeModal);
