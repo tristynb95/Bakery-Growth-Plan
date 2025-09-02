@@ -308,8 +308,7 @@ textarea.form-input {
 .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.75rem; border-bottom: 1px solid #E5E7EB; }
 .modal-content { padding: 1.75rem; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1.25rem 1.75rem; background-color: var(--gails-bg); border-bottom-left-radius: 1.25rem; border-bottom-right-radius: 1.25rem; }
-.modal-close-btn { background: none; border: none; font-size: 1.75rem; line-height: 1; cursor: pointer; color: var(--gails-text-secondary); }
-.modal-close-btn:hover { color: var(--gails-text-primary); }
+
 
 /* 8. Print-Specific Styles
 -------------------------------------------------- */
