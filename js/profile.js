@@ -21,12 +21,21 @@ function runProfileScript(app) {
     const db = firebase.firestore();
     const storage = firebase.storage();
 
+    const bakeryList = [
+        'Beaconsfield', 'Berkhamsted', 'Gerrards Cross', 'Harpenden', 'Henley',
+        'Marlow', 'Radlett', 'Ruislip', 'St Albans', 'Welwyn Garden City'
+    ].sort();
+
     const DOMElements = {
         // Core Profile fields
         profileName: document.getElementById('profile-name'),
-        profileBakery: document.getElementById('profile-bakery'),
         profileEmail: document.getElementById('profile-email'),
         saveProfileBtn: document.getElementById('save-profile-btn'),
+
+        // Bakery Dropdown fields
+        bakeryDropdown: document.getElementById('bakery-dropdown'),
+        bakerySearchInput: document.getElementById('bakery-search-input'),
+        bakeryHiddenInput: document.getElementById('profile-bakery-hidden'),
 
         // Header and navigation
         headerTitle: document.getElementById('header-title'),
@@ -53,23 +62,19 @@ function runProfileScript(app) {
     let isSetupMode = false;
     const defaultPhotoURL = 'https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png';
 
-    // Check for setup mode from URL parameter
     const params = new URLSearchParams(window.location.search);
     if (params.get('setup') === 'true') {
         isSetupMode = true;
     }
 
-    // --- Custom Modal Functions ---
     function openModal(type, title, message) {
         DOMElements.modalTitle.textContent = title;
         DOMElements.modalContent.innerHTML = `<p>${message}</p>`;
-
         if (type === 'success') {
             DOMElements.modalTitle.innerHTML = `<i class="bi bi-check-circle-fill text-green-500 mr-2"></i> ${title}`;
         } else if (type === 'warning') {
             DOMElements.modalTitle.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-yellow-500 mr-2"></i> ${title}`;
         }
-
         DOMElements.modalOverlay.classList.remove('hidden');
     }
 
@@ -77,35 +82,23 @@ function runProfileScript(app) {
         DOMElements.modalOverlay.classList.add('hidden');
     }
 
-
-    // --- Profile Name/Bakery Save Function ---
     async function saveProfile() {
         if (!currentUser) return;
-
         const name = DOMElements.profileName.value.trim();
-        const bakery = DOMElements.profileBakery.value.trim();
+        const bakery = DOMElements.bakeryHiddenInput.value.trim();
 
-        // --- FIX FOR VALIDATION BUG ---
-        // This check now runs for both new and existing users.
         if (!name || !bakery) {
-            openModal('warning', 'Incomplete Profile', 'Please enter your full name and bakery location to save.');
+            openModal('warning', 'Incomplete Profile', 'Please enter your full name and select your bakery to save.');
             return;
         }
-        // --- END FIX ---
 
         const userRef = db.collection('users').doc(currentUser.uid);
-        const dataToSave = {
-            name: name,
-            bakery: bakery,
-            email: currentUser.email
-        };
+        const dataToSave = { name, bakery, email: currentUser.email };
 
         try {
             DOMElements.saveProfileBtn.disabled = true;
             DOMElements.saveProfileBtn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Saving...';
-
             await userRef.set(dataToSave, { merge: true });
-
             if (isSetupMode) {
                 window.location.href = '/index.html';
             } else {
@@ -121,28 +114,18 @@ function runProfileScript(app) {
         }
     }
 
-    // --- Load User Profile Function ---
     function loadUserProfile(user) {
         DOMElements.profileEmail.value = user.email;
         const userRef = db.collection('users').doc(user.uid);
-
         userRef.get().then((doc) => {
             if (doc.exists && !isSetupMode) {
-                DOMElements.headerTitle.textContent = 'Your Profile';
-                DOMElements.headerSubtitle.textContent = 'Manage your account details.';
-                DOMElements.saveProfileBtn.textContent = 'Save Changes';
-                DOMElements.backToDashboardBtn.classList.remove('hidden');
-
                 const data = doc.data();
                 DOMElements.profileName.value = data.name || '';
-                DOMElements.profileBakery.value = data.bakery || '';
-
+                DOMElements.bakerySearchInput.value = data.bakery || '';
+                DOMElements.bakeryHiddenInput.value = data.bakery || '';
                 if (data.photoURL) {
                     DOMElements.photoPreview.src = data.photoURL;
                     DOMElements.removePhotoBtn.classList.remove('hidden');
-                } else {
-                    DOMElements.photoPreview.src = defaultPhotoURL;
-                    DOMElements.removePhotoBtn.classList.add('hidden');
                 }
             } else {
                 DOMElements.headerTitle.textContent = 'Welcome! Let\'s Set Up Your Profile.';
@@ -150,80 +133,107 @@ function runProfileScript(app) {
                 DOMElements.saveProfileBtn.textContent = 'Save and Continue';
                 isSetupMode = true;
             }
-        }).catch(error => {
-            console.error("Error fetching user data:", error);
         });
     }
 
-    // --- Photo Management Functions ---
-    function handleFileSelect(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (file.size > 5 * 1024 * 1024) {
-            openModal('warning', 'File Too Large', 'Please select an image file smaller than 5MB.');
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            DOMElements.photoPreview.src = event.target.result;
-            DOMElements.savePhotoBtn.classList.remove('hidden');
-            DOMElements.removePhotoBtn.classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-        selectedFile = file;
-    }
+    function setupBakeryDropdown() {
+        const optionsContainer = DOMElements.bakeryDropdown.querySelector('.dropdown-options');
+        const searchInput = DOMElements.bakerySearchInput;
+        const hiddenInput = DOMElements.bakeryHiddenInput;
+        const selectedDisplay = DOMElements.bakeryDropdown.querySelector('.dropdown-selected');
 
-    async function savePhoto() {
-        if (!selectedFile || !currentUser) return;
-        const uploadPath = `profile_photos/${currentUser.uid}/${selectedFile.name}`;
-        const fileRef = storage.ref(uploadPath);
-        try {
-            DOMElements.savePhotoBtn.disabled = true;
-            DOMElements.savePhotoBtn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i><span>Saving...</span>';
-            const snapshot = await fileRef.put(selectedFile);
-            const photoURL = await snapshot.ref.getDownloadURL();
-            await db.collection('users').doc(currentUser.uid).set({ photoURL: photoURL }, { merge: true });
-            DOMElements.savePhotoBtn.classList.add('hidden');
-            DOMElements.photoPreview.src = photoURL;
-            selectedFile = null;
-            openModal('success', 'Photo Updated', 'Your new profile photo has been saved.');
-        } catch (error) {
-            console.error("Error uploading photo:", error);
-            openModal('warning', 'Upload Error', 'There was an error uploading your photo. Please try again.');
-        } finally {
-            DOMElements.savePhotoBtn.disabled = false;
-            DOMElements.savePhotoBtn.innerHTML = '<i class="bi bi-save-fill"></i><span>Save Photo</span>';
-        }
-    }
+        function filterOptions() {
+            const searchTerm = searchInput.value.toLowerCase();
+            optionsContainer.innerHTML = '';
+            const filteredBakeries = bakeryList.filter(b => b.toLowerCase().includes(searchTerm));
 
-    async function removePhoto() {
-        if (!currentUser) return;
-        if (!confirm("Are you sure you want to remove your profile photo?")) return;
-        const userRef = db.collection('users').doc(currentUser.uid);
-        try {
-            await userRef.update({ photoURL: firebase.firestore.FieldValue.delete() });
-            try {
-                const photoRef = storage.refFromURL(DOMElements.photoPreview.src);
-                await photoRef.delete();
-            } catch (storageError) {
-                console.warn("Could not delete photo from storage:", storageError.message);
+            if (filteredBakeries.length === 0) {
+                optionsContainer.innerHTML = `<div class="dropdown-option no-results">No bakeries found</div>`;
+                return;
             }
-            DOMElements.photoPreview.src = defaultPhotoURL;
-            DOMElements.removePhotoBtn.classList.add('hidden');
-            DOMElements.savePhotoBtn.classList.add('hidden');
-            selectedFile = null;
-            openModal('success', 'Photo Removed', 'Your profile photo has been removed successfully.');
-        } catch (error) {
-            console.error("Error removing photo:", error);
-            openModal('warning', 'Error', 'There was an error removing your photo.');
+
+            filteredBakeries.forEach(bakery => {
+                const option = document.createElement('div');
+                option.className = 'dropdown-option';
+                option.textContent = bakery;
+                option.dataset.value = bakery;
+                optionsContainer.appendChild(option);
+            });
         }
+
+        function selectOption(option) {
+            const value = option.dataset.value;
+            searchInput.value = value;
+            hiddenInput.value = value;
+            DOMElements.bakeryDropdown.classList.remove('open');
+        }
+
+        searchInput.addEventListener('focus', () => {
+            DOMElements.bakeryDropdown.classList.add('open');
+            filterOptions();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!DOMElements.bakeryDropdown.contains(e.target)) {
+                DOMElements.bakeryDropdown.classList.remove('open');
+            }
+        });
+        
+        selectedDisplay.addEventListener('click', (e) => {
+            if (e.target !== searchInput) {
+                searchInput.focus();
+            }
+        });
+
+        searchInput.addEventListener('input', filterOptions);
+
+        optionsContainer.addEventListener('click', (e) => {
+            const option = e.target.closest('.dropdown-option:not(.no-results)');
+            if (option) selectOption(option);
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            const isOpen = DOMElements.bakeryDropdown.classList.contains('open');
+            if (!isOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+                DOMElements.bakeryDropdown.classList.add('open');
+                filterOptions();
+            }
+
+            const options = Array.from(optionsContainer.querySelectorAll('.dropdown-option:not(.no-results)'));
+            if (options.length === 0) return;
+            let currentIndex = options.findIndex(opt => opt.classList.contains('is-highlighted'));
+
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (currentIndex >= 0) options[currentIndex].classList.remove('is-highlighted');
+                    const nextIndex = (currentIndex + 1) % options.length;
+                    options[nextIndex].classList.add('is-highlighted');
+                    options[nextIndex].scrollIntoView({ block: 'nearest' });
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (currentIndex >= 0) options[currentIndex].classList.remove('is-highlighted');
+                    const prevIndex = (currentIndex - 1 + options.length) % options.length;
+                    options[prevIndex].classList.add('is-highlighted');
+                    options[prevIndex].scrollIntoView({ block: 'nearest' });
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    if (currentIndex >= 0) selectOption(options[currentIndex]);
+                    break;
+                case 'Escape':
+                    DOMElements.bakeryDropdown.classList.remove('open');
+                    break;
+            }
+        });
     }
 
-    // --- Auth Observer and Event Listeners ---
     auth.onAuthStateChanged((user) => {
         if (user) {
             currentUser = user;
             loadUserProfile(user);
+            setupBakeryDropdown();
         } else {
             window.location.href = '/index.html';
         }
@@ -231,18 +241,12 @@ function runProfileScript(app) {
 
     DOMElements.saveProfileBtn.addEventListener('click', saveProfile);
     DOMElements.backToDashboardBtn.addEventListener('click', () => { window.location.href = '/index.html'; });
-    DOMElements.photoUploadInput.addEventListener('change', handleFileSelect);
-    DOMElements.savePhotoBtn.addEventListener('click', savePhoto);
-    DOMElements.removePhotoBtn.addEventListener('click', removePhoto);
-
-    // Modal listeners
     DOMElements.modalCloseBtn.addEventListener('click', closeModal);
     DOMElements.modalActionBtn.addEventListener('click', closeModal);
     DOMElements.modalOverlay.addEventListener('mousedown', (e) => {
-        if (e.target === DOMElements.modalOverlay) {
-            closeModal();
-        }
+        if (e.target === DOMElements.modalOverlay) closeModal();
     });
 }
 
 document.addEventListener('DOMContentLoaded', initializeFirebase);
+
