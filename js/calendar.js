@@ -541,6 +541,10 @@ function setupCalendarEventListeners() {
 
         try {
             await calendarRef.set(dataToUpdate, { merge: true });
+            
+            // FIX: Manually update the local state to ensure the UI refreshes correctly.
+            appState.calendar.data[selectedDateKey] = dayEvents;
+
             appState.calendar.editingEventIndex = null;
             renderCalendar();
             renderDayDetails(selectedDateKey);
