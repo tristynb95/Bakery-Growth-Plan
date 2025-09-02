@@ -1,5 +1,5 @@
 // js/plan-view.js
-import { calculatePlanCompletion, getVisionProgress, getMonthProgress, isWeekComplete } from './utils.js';
+import { calculatePlanCompletion, getVisionProgress, getMonthProgress, isWeekComplete, isContentEmpty } from './utils.js';
 
 // Dependencies passed from main.js
 let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare;
@@ -180,15 +180,11 @@ export function summarizePlanForAI(planData) {
 export function saveData(forceImmediate = false, directPayload = null) {
     if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
 
-    // If a direct payload is provided (e.g., for saving the AI plan), merge it into the state
     if (directPayload) {
         appState.planData = { ...appState.planData, ...directPayload };
     }
     
-    // The state is already updated by the event listeners, so we just need to save it.
-    // We add a check to see if there are any actual changes to save.
-    // This is a simplified check; a more robust solution might involve deep-checking or tracking a 'dirty' flag.
-    if (appState.isSaving) return Promise.resolve(); // Prevent concurrent saves
+    if (appState.isSaving) return Promise.resolve();
 
     clearTimeout(appState.saveTimeout);
 
@@ -196,11 +192,10 @@ export function saveData(forceImmediate = false, directPayload = null) {
         appState.isSaving = true;
         const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
         
-        // Create a clean copy of the data to save, excluding any client-side only flags
         const dataToSave = { ...appState.planData };
-        delete dataToSave.isSaving; // Example of a client-side flag
+        delete dataToSave.isSaving;
 
-        await docRef.set({ // Using set with merge:true is often safer than update
+        await docRef.set({
             ...dataToSave,
             lastEdited: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
@@ -255,7 +250,6 @@ function populateViewWithData() {
             }
         });
     }
-    // Make sure placeholders are correct after populating data
     document.querySelectorAll('#app-view [contenteditable="true"]').forEach(el => {
         if (el.innerText.trim() === '') {
             el.classList.add('is-placeholder-showing');
@@ -267,7 +261,7 @@ function populateViewWithData() {
 
 function updateViewWithRemoteData(remoteData) {
     if (appState.currentView === 'summary') {
-        renderSummary(); // Re-render summary view on data change
+        renderSummary();
         return;
     }
     if (DOMElements.appView.classList.contains('hidden')) {
@@ -278,7 +272,6 @@ function updateViewWithRemoteData(remoteData) {
         updateWeeklyTabCompletion(monthNum, remoteData);
     }
     document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
-        // Only update if the element is not currently focused by the user
         if (document.activeElement !== el) {
             if (el.id && remoteData[el.id] !== undefined) {
                 if (el.isContentEditable) {
@@ -300,11 +293,10 @@ function updateViewWithRemoteData(remoteData) {
             }
         }
     });
-    // This logic handles multi-select buttons like pillars
     document.querySelectorAll('.pillar-buttons').forEach(group => {
         const stepKey = group.dataset.stepKey;
         const dataKey = `${stepKey}_pillar`;
-        const pillars = remoteData[dataKey]; // This will be an array or undefined
+        const pillars = remoteData[dataKey];
         group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
         if (Array.isArray(pillars)) {
             pillars.forEach(pillar => {
@@ -313,7 +305,6 @@ function updateViewWithRemoteData(remoteData) {
             });
         }
     });
-    // This logic handles single-select buttons like weekly status
     if (appState.currentView.startsWith('month-')) {
         const monthNum = appState.currentView.split('-')[1];
         document.querySelectorAll('.status-buttons').forEach(group => {
@@ -515,11 +506,10 @@ export function showPlanView(planId) {
     appState.planUnsubscribe = planDocRef.onSnapshot((doc) => {
         if (doc.exists) {
             const remoteData = doc.data();
-            // A more robust check to prevent unnecessary re-renders
             if (JSON.stringify(remoteData) !== JSON.stringify(appState.planData)) {
                 appState.planData = remoteData;
-                updateViewWithRemoteData(remoteData); // Use the more robust function
-                updateUI(); // This updates sidebar, progress bars etc.
+                updateViewWithRemoteData(remoteData);
+                updateUI();
             }
         } else {
             console.error("Plan document not found! Returning to dashboard.");
@@ -530,7 +520,6 @@ export function showPlanView(planId) {
         document.dispatchEvent(new CustomEvent('back-to-dashboard'));
     });
 
-    // We need to fetch the data once before setting the view
     planDocRef.get().then(doc => {
         if (doc.exists) {
             appState.planData = doc.data();
@@ -650,7 +639,6 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
         handleAIActionPlan(appState, saveData, planSummary);
     });
 
-    // --- Radial Menu Button Listeners ---
     const actionPlanButton = document.getElementById('radial-action-plan');
     if (actionPlanButton) {
         actionPlanButton.addEventListener('click', () => {
