@@ -36,6 +36,7 @@ const templates = {
                    </div>`,
         requiredFields: ['quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
     },
+    // MODIFIED: Added a dynamic h3 title for the weekly check-in
     month: (monthNum) => `
             <div class="space-y-8">
                 <div class="content-card p-6 md:p-8">
@@ -100,6 +101,7 @@ const templates = {
                             `).join('')}
                         </nav>
                     </div>
+                    <h3 id="weekly-checkin-title" class="text-xl font-bold font-poppins mb-6">Week 1 Check-in</h3>
                     <div id="weekly-tab-content">
                         ${[1, 2, 3, 4].map(w => `
                             <div class="weekly-tab-panel ${w !== 1 ? 'hidden' : ''}" data-week-panel="${w}">
@@ -607,16 +609,19 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
 
             if (!alreadySelected) {
                 statusButton.classList.add('selected');
-                payload[key] = statusButton.dataset.status;
-                appState.planData[key] = statusButton.dataset.status;
+                const newStatus = statusButton.dataset.status;
+                payload[key] = newStatus;
+                appState.planData[key] = newStatus;
             } else {
                 payload[key] = firebase.firestore.FieldValue.delete();
                 delete appState.planData[key];
             }
 
-            // Immediately update the database for this action
             const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
-            docRef.update(payload).catch(error => console.error("Error updating status:", error));
+            docRef.update({
+                ...payload,
+                lastEdited: firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(error => console.error("Error updating status:", error));
         }
         const tab = e.target.closest('.weekly-tab');
         if (tab) {
@@ -627,6 +632,11 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
             document.querySelectorAll('.weekly-tab-panel').forEach(p => {
                 p.classList.toggle('hidden', p.dataset.weekPanel !== week);
             });
+            // MODIFIED: Update the title when a tab is clicked
+            const titleElement = document.getElementById('weekly-checkin-title');
+            if (titleElement) {
+                titleElement.textContent = `Week ${week} Check-in`;
+            }
         }
     });
 
