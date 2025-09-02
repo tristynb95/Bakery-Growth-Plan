@@ -81,19 +81,25 @@ function runApp(app) {
 
     auth.onAuthStateChanged(async (user) => {
         const initialLoadingView = document.getElementById('initial-loading-view');
+        const loginView = document.getElementById('login-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const appView = document.getElementById('app-view');
         
         if (appState.planUnsubscribe) appState.planUnsubscribe();
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
         
         if (user) {
+            // --- FIX FOR RE-LOGIN BUG ---
+            // Show a loading state and hide the login form immediately to prevent UI overlap.
+            initialLoadingView.classList.remove('hidden');
+            loginView.classList.add('hidden');
+            // --- END FIX ---
+
             appState.currentUser = user;
             const userDocRef = db.collection('users').doc(user.uid);
             const userDoc = await userDocRef.get();
 
-            // --- FIX FOR LOGIN BUG ---
-            // Changed userDoc.exists() to userDoc.exists to match Firebase v8 compat syntax
             if (!userDoc.exists) {
-            // --- END FIX ---
                 initialLoadingView.classList.add('hidden');
                 window.location.href = '/profile.html?setup=true';
                 return;
@@ -104,8 +110,8 @@ function runApp(app) {
             if (lastPlanId) {
                 handleSelectPlan(lastPlanId);
             } else {
-                document.getElementById('dashboard-view').classList.remove('hidden');
-                document.getElementById('app-view').classList.add('hidden');
+                dashboardView.classList.remove('hidden');
+                appView.classList.add('hidden');
                 await renderDashboard();
             }
         } else {
@@ -113,12 +119,12 @@ function runApp(app) {
             appState.currentPlanId = null;
             appState.planData = {};
             clearActivityListeners();
-            document.getElementById('dashboard-view').classList.add('hidden');
-            document.getElementById('app-view').classList.add('hidden');
+            dashboardView.classList.add('hidden');
+            appView.classList.add('hidden');
             document.getElementById('modal-overlay').classList.add('hidden');
             document.getElementById('calendar-modal').classList.add('hidden');
             document.getElementById('radial-menu-container').classList.add('hidden');
-            document.getElementById('login-view').classList.remove('hidden');
+            loginView.classList.remove('hidden');
         }
         initialLoadingView.classList.add('hidden');
     });
