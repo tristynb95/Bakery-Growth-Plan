@@ -56,6 +56,7 @@ The architecture is decoupled, with a static frontend that communicates with a s
 Follow these instructions to set up and run the project locally for development.
 
 <h4>Prerequisites</h4>
+
 - Node.js (v18 or later recommended)
 
 - npm or yarn
