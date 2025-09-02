@@ -228,6 +228,9 @@ async function handleModalAction() {
         case 'create':
             const newPlanNameInput = document.getElementById('newPlanName');
             const newPlanName = newPlanNameInput.value.trim();
+            // MODIFIED: Get quarter value
+            const newPlanQuarter = document.getElementById('newPlanQuarter').value.trim();
+            const originalButtonText = DOMElements.modalActionBtn.textContent;
             const errorContainer = document.getElementById('modal-error-container');
             if(errorContainer) errorContainer.innerHTML = '';
             newPlanNameInput.classList.remove('input-error');
@@ -246,22 +249,23 @@ async function handleModalAction() {
                    errorContainer.innerHTML = `<p class="auth-error" style="display:block; margin: 0; width: 100%;">A plan with this name already exists.</p>`;
                 }
                 DOMElements.modalActionBtn.disabled = false;
-                DOMElements.modalActionBtn.textContent = "Create Plan";
+                DOMElements.modalActionBtn.textContent = originalButtonText;
                 setTimeout(() => newPlanNameInput.classList.remove('shake'), 500);
                 return;
             }
             DOMElements.modalActionBtn.disabled = false;
-            DOMElements.modalActionBtn.textContent = "Create Plan";
+            DOMElements.modalActionBtn.textContent = originalButtonText;
             closeModal();
             DOMElements.creationLoadingView.classList.remove('hidden');
             try {
+                // MODIFIED: Add quarter to the new plan document
                 const newPlan = await plansRef.add({
                     planName: newPlanName,
+                    quarter: newPlanQuarter,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     lastEdited: firebase.firestore.FieldValue.serverTimestamp(),
                     managerName: ''
                 });
-                // Instead of calling handleSelectPlan directly, dispatch an event
                 document.dispatchEvent(new CustomEvent('plan-selected', { detail: { planId: newPlan.id } }));
             } catch (error) {
                 console.error("Error creating new plan:", error);
@@ -270,10 +274,16 @@ async function handleModalAction() {
             }
             break;
         case 'edit':
-            const newName = document.getElementById('editPlanName').value;
-            if (newName && newName.trim() !== '') {
+            // MODIFIED: Get new name and quarter values
+            const newName = document.getElementById('editPlanName').value.trim();
+            const newQuarter = document.getElementById('editPlanQuarter').value.trim();
+            if (newName) {
                 try {
-                    await db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(planId).update({ planName: newName });
+                    // MODIFIED: Update both name and quarter
+                    await db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(planId).update({ 
+                        planName: newName,
+                        quarter: newQuarter
+                    });
                     document.dispatchEvent(new CustomEvent('rerender-dashboard'));
                 } catch (error) { console.error("Error updating plan name:", error); }
             }
@@ -404,12 +414,12 @@ export function initializeCharCounters() {
 }
 
 export function openModal(type, context = {}) {
-    const { planId, currentName, planName, eventTitle } = context;
+    // MODIFIED: Destructure currentQuarter from context
+    const { planId, currentName, planName, eventTitle, currentQuarter } = context;
     DOMElements.modalBox.dataset.type = type;
     DOMElements.modalBox.dataset.planId = planId;
     const footer = DOMElements.modalActionBtn.parentNode;
 
-    // Robust cleanup
     footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
     DOMElements.modalActionBtn.style.display = 'inline-flex';
     DOMElements.modalCancelBtn.style.display = 'inline-flex';
@@ -426,15 +436,22 @@ export function openModal(type, context = {}) {
     switch (type) {
         case 'create':
             DOMElements.modalTitle.textContent = "Create New Plan";
+            // MODIFIED: Added Quarter input field
             DOMElements.modalContent.innerHTML = `<label for="newPlanName" class="font-semibold block mb-2">Plan Name:</label>
-                                              <input type="text" id="newPlanName" class="form-input" placeholder="e.g., Q4 2025 Focus" value="New Plan ${new Date().toLocaleDateString('en-GB')}">
-                                              <div id="modal-error-container" class="modal-error-container"></div>`;
+                                                  <input type="text" id="newPlanName" class="form-input" placeholder="e.g., Q4 2025 Focus" value="New Plan ${new Date().toLocaleDateString('en-GB')}">
+                                                  <label for="newPlanQuarter" class="font-semibold block mb-2 mt-4">Quarter:</label>
+                                                  <input type="text" id="newPlanQuarter" class="form-input" placeholder="e.g., Q3 FY26">
+                                                  <div id="modal-error-container" class="modal-error-container"></div>`;
             DOMElements.modalActionBtn.textContent = "Create Plan";
             document.getElementById('newPlanName').addEventListener('keyup', (e) => { if (e.key === 'Enter') handleModalAction(); });
             break;
         case 'edit':
-            DOMElements.modalTitle.textContent = "Edit Plan Name";
-            DOMElements.modalContent.innerHTML = `<label for="editPlanName" class="font-semibold block mb-2">Plan Name:</label><input type="text" id="editPlanName" class="form-input" value="${currentName}">`;
+            DOMElements.modalTitle.textContent = "Edit Plan Details";
+            // MODIFIED: Added Quarter input field and pre-filled its value
+            DOMElements.modalContent.innerHTML = `<label for="editPlanName" class="font-semibold block mb-2">Plan Name:</label>
+                                                  <input type="text" id="editPlanName" class="form-input" value="${currentName}">
+                                                  <label for="editPlanQuarter" class="font-semibold block mb-2 mt-4">Quarter:</label>
+                                                  <input type="text" id="editPlanQuarter" class="form-input" placeholder="e.g., Q3 FY26" value="${currentQuarter || ''}">`;
             DOMElements.modalActionBtn.textContent = "Save Changes";
             document.getElementById('editPlanName').addEventListener('keyup', (e) => { if (e.key === 'Enter') handleModalAction(); });
             break;
