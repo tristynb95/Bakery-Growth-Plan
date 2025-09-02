@@ -8,6 +8,8 @@ let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleS
 const DOMElements = {
     appView: document.getElementById('app-view'),
     contentArea: document.getElementById('content-area'),
+    // MODIFIED: Added reference to the main scrollable container
+    mainContent: document.querySelector('#app-view main'),
     mainNav: document.getElementById('main-nav'),
     headerTitle: document.getElementById('header-title'),
     headerSubtitle: document.getElementById('header-subtitle'),
@@ -451,7 +453,9 @@ function renderSummary() {
     </div>`;
 }
 
+// MODIFIED: Added scroll to top
 function switchView(viewId) {
+    DOMElements.mainContent.scrollTop = 0;
     appState.currentView = viewId;
     localStorage.setItem('lastPlanId', appState.currentPlanId);
     localStorage.setItem('lastViewId', viewId);
@@ -538,7 +542,6 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
     handleAIActionPlan = aiActionPlanFunc;
     handleShare = shareFunc;
 
-    // --- Event Listeners for the Plan View ---
     DOMElements.mainNav.addEventListener('click', (e) => {
         e.preventDefault();
         const navLink = e.target.closest('a');
