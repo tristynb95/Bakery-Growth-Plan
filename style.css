@@ -1688,6 +1688,7 @@ tr:hover .btn-remove-row {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     font-size: 0.875rem;
+       height: 40px; /* Enforce a consistent height */
 }
 
 #calendar-close-btn {
