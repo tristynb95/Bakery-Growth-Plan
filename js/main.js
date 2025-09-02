@@ -46,7 +46,8 @@ function runApp(app) {
     initializeUI(db, appState);
     initializeCalendar(db, appState, openModal);
     initializeDashboard(db, appState, openModal, handleSelectPlan);
-    initializePlanView(db, appState, openModal);
+    initializePlanView(db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare);
+
 
     function handleSelectPlan(planId) {
         document.getElementById('dashboard-view').classList.add('hidden');
