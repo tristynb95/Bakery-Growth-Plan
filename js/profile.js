@@ -23,32 +23,23 @@ function runProfileScript(app) {
 
     const bakeryList = [
         'Beaconsfield', 'Berkhamsted', 'Gerrards Cross', 'Harpenden', 'Henley',
-        'Marlow', 'Radlett', 'Ruislip', 'St Albans', 'Welwyn Garden City'
+        'Marlow', 'Radlett', 'Ruipislip', 'St Albans', 'Welwyn Garden City'
     ].sort();
 
     const DOMElements = {
-        // Core Profile fields
         profileName: document.getElementById('profile-name'),
         profileEmail: document.getElementById('profile-email'),
         saveProfileBtn: document.getElementById('save-profile-btn'),
-
-        // Bakery Dropdown fields
         bakeryDropdown: document.getElementById('bakery-dropdown'),
         bakerySearchInput: document.getElementById('bakery-search-input'),
         bakeryHiddenInput: document.getElementById('profile-bakery-hidden'),
-
-        // Header and navigation
         headerTitle: document.getElementById('header-title'),
         headerSubtitle: document.getElementById('header-subtitle'),
         backToDashboardBtn: document.getElementById('back-to-dashboard-btn'),
-
-        // Photo fields
         photoPreview: document.getElementById('profile-photo-preview'),
         photoUploadInput: document.getElementById('photo-upload-input'),
         savePhotoBtn: document.getElementById('save-photo-btn'),
         removePhotoBtn: document.getElementById('remove-photo-btn'),
-
-        // Modal fields
         modalOverlay: document.getElementById('modal-overlay'),
         modalBox: document.getElementById('modal-box'),
         modalTitle: document.getElementById('modal-title'),
@@ -82,6 +73,14 @@ function runProfileScript(app) {
         DOMElements.modalOverlay.classList.add('hidden');
     }
 
+    // --- NEW: Form Validity Check ---
+    function checkFormValidity() {
+        const name = DOMElements.profileName.value.trim();
+        const bakery = DOMElements.bakeryHiddenInput.value.trim();
+        const isValid = name && bakery;
+        DOMElements.saveProfileBtn.disabled = !isValid;
+    }
+
     async function saveProfile() {
         if (!currentUser) return;
         const name = DOMElements.profileName.value.trim();
@@ -105,16 +104,17 @@ function runProfileScript(app) {
                 openModal('success', 'Profile Updated', 'Your changes have been saved successfully.');
                 DOMElements.saveProfileBtn.disabled = false;
                 DOMElements.saveProfileBtn.textContent = 'Save Changes';
+                checkFormValidity(); // Re-check validity after save
             }
         } catch (error) {
             console.error("Error saving profile:", error);
             openModal('warning', 'Save Error', 'Could not save your profile. Please try again.');
             DOMElements.saveProfileBtn.disabled = false;
             DOMElements.saveProfileBtn.textContent = 'Save Changes';
+            checkFormValidity(); // Re-check validity after error
         }
     }
     
-    // --- NEW: Image Compression Function ---
     function compressImage(file, maxSize = 512) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -147,7 +147,7 @@ function runProfileScript(app) {
                             type: 'image/jpeg',
                             lastModified: Date.now()
                         }));
-                    }, 'image/jpeg', 0.9); // Quality set to 90%
+                    }, 'image/jpeg', 0.9);
                 };
                 img.onerror = reject;
             };
@@ -156,31 +156,33 @@ function runProfileScript(app) {
         });
     }
 
-
+    // --- MODIFIED: loadUserProfile ---
     function loadUserProfile(user) {
-    DOMElements.profileEmail.value = user.email;
-    const userRef = db.collection('users').doc(user.uid);
-    userRef.get().then((doc) => {
-        if (doc.exists && !isSetupMode) {
-            const data = doc.data();
-            DOMElements.profileName.value = data.name || '';
-            DOMElements.bakerySearchInput.value = data.bakery || '';
-            DOMElements.bakeryHiddenInput.value = data.bakery || '';
-            if (data.photoURL) {
-                DOMElements.photoPreview.src = data.photoURL;
-                DOMElements.removePhotoBtn.classList.remove('hidden');
+        DOMElements.profileEmail.value = user.email;
+        const userRef = db.collection('users').doc(user.uid);
+        userRef.get().then((doc) => {
+            if (doc.exists && !isSetupMode) {
+                const data = doc.data();
+                DOMElements.profileName.value = data.name || '';
+                DOMElements.bakerySearchInput.value = data.bakery || '';
+                DOMElements.bakeryHiddenInput.value = data.bakery || '';
+                if (data.photoURL) {
+                    DOMElements.photoPreview.src = data.photoURL;
+                    DOMElements.removePhotoBtn.classList.remove('hidden');
+                }
+                DOMElements.backToDashboardBtn.classList.remove('hidden');
+                checkFormValidity(); // Check validity on load
+            } else {
+                DOMElements.headerTitle.textContent = 'Welcome! Let\'s Set Up Your Profile.';
+                DOMElements.headerSubtitle.textContent = 'Please provide your details to get started.';
+                DOMElements.saveProfileBtn.textContent = 'Save and Continue';
+                isSetupMode = true;
+                checkFormValidity(); // Check validity (will be disabled initially)
             }
-            // MODIFIED: This line makes the "Back" button visible for existing users
-            DOMElements.backToDashboardBtn.classList.remove('hidden');
-        } else {
-            DOMElements.headerTitle.textContent = 'Welcome! Let\'s Set Up Your Profile.';
-            DOMElements.headerSubtitle.textContent = 'Please provide your details to get started.';
-            DOMElements.saveProfileBtn.textContent = 'Save and Continue';
-            isSetupMode = true;
-        }
-    });
-}
+        });
+    }
 
+    // --- MODIFIED: setupBakeryDropdown ---
     function setupBakeryDropdown() {
         const optionsContainer = DOMElements.bakeryDropdown.querySelector('.dropdown-options');
         const searchInput = DOMElements.bakerySearchInput;
@@ -211,6 +213,7 @@ function runProfileScript(app) {
             searchInput.value = value;
             hiddenInput.value = value;
             DOMElements.bakeryDropdown.classList.remove('open');
+            checkFormValidity(); // Check validity on selection
         }
 
         searchInput.addEventListener('focus', () => {
@@ -230,7 +233,14 @@ function runProfileScript(app) {
             }
         });
 
-        searchInput.addEventListener('input', filterOptions);
+        searchInput.addEventListener('input', () => {
+            filterOptions();
+            // This ensures the hidden input is cleared if the user types something invalid
+            if (!bakeryList.includes(searchInput.value)) {
+                hiddenInput.value = '';
+            }
+            checkFormValidity();
+        });
 
         optionsContainer.addEventListener('click', (e) => {
             const option = e.target.closest('.dropdown-option:not(.no-results)');
@@ -274,12 +284,10 @@ function runProfileScript(app) {
         });
     }
     
-    // --- MODIFIED: Photo Upload Listener with Validation ---
     DOMElements.photoUploadInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Validation
         const allowedTypes = ['image/jpeg', 'image/png'];
         const maxSizeInMB = 2;
         if (!allowedTypes.includes(file.type)) {
@@ -319,6 +327,9 @@ function runProfileScript(app) {
             window.location.href = '/index.html';
         }
     });
+
+    // --- NEW: Add event listener for name input ---
+    DOMElements.profileName.addEventListener('input', checkFormValidity);
 
     DOMElements.saveProfileBtn.addEventListener('click', saveProfile);
     DOMElements.backToDashboardBtn.addEventListener('click', () => { window.location.href = '/index.html'; });
