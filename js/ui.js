@@ -286,6 +286,10 @@ async function handleModalAction() {
             } catch (error) { console.error("Error deleting plan:", error); }
             closeModal();
             break;
+        case 'confirmDeleteEvent':
+            document.dispatchEvent(new CustomEvent('event-deletion-confirmed'));
+            closeModal();
+            break;
     }
 }
 
@@ -400,7 +404,7 @@ export function initializeCharCounters() {
 }
 
 export function openModal(type, context = {}) {
-    const { planId, currentName, planName } = context;
+    const { planId, currentName, planName, eventTitle } = context;
     DOMElements.modalBox.dataset.type = type;
     DOMElements.modalBox.dataset.planId = planId;
     const footer = DOMElements.modalActionBtn.parentNode;
@@ -502,7 +506,6 @@ export function openModal(type, context = {}) {
             DOMElements.modalContent.innerHTML = `<p>Generating a new plan will overwrite your existing action plan and any edits. This cannot be undone.</p>`;
             DOMElements.modalActionBtn.textContent = "Yes, Generate New";
             DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
-            // MODIFIED: This is the fix. Use `activeSaveDataFunction` which holds the correct `saveData` function.
             DOMElements.modalActionBtn.onclick = () => {
                 delete appState.planData.aiActionPlan;
                 if (activeSaveDataFunction) {
@@ -536,6 +539,12 @@ export function openModal(type, context = {}) {
                 updateUndoRedoButtons();
             };
             break;
+        case 'confirmDeleteEvent':
+            DOMElements.modalTitle.textContent = "Confirm Deletion";
+            DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete the event: <strong class="font-bold">${eventTitle}</strong>?</p><p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action cannot be undone.</p>`;
+            DOMElements.modalActionBtn.textContent = "Confirm Delete";
+            DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+            break;
     }
     DOMElements.modalOverlay.classList.remove('hidden');
 }
@@ -558,17 +567,14 @@ export function initializeUI(database, state) {
             closeModal();
         }
     });
-    // Removed the global modal action button listener from here as it's now set dynamically in openModal
 
     // --- Mobile Sidebar & Swipe ---
     DOMElements.mobileMenuBtn.addEventListener('click', () => DOMElements.appView.classList.toggle('sidebar-open'));
     DOMElements.sidebarOverlay.addEventListener('click', () => DOMElements.appView.classList.remove('sidebar-open'));
 
-    // --- FIX FOR SWIPE GESTURE ---
     let touchStartX = 0;
-    const swipeThreshold = 50; // Minimum pixels to be considered a swipe
+    const swipeThreshold = 50; 
 
-    // Listen for swipe right on the main content to open the sidebar
     DOMElements.mainContent.addEventListener('touchstart', e => {
         touchStartX = e.changedTouches[0].screenX;
     }, { passive: true });
@@ -580,7 +586,6 @@ export function initializeUI(database, state) {
         }
     });
 
-    // Listen for swipe left on the sidebar itself to close it
     DOMElements.sidebar.addEventListener('touchstart', e => {
         touchStartX = e.changedTouches[0].screenX;
     }, { passive: true });
@@ -591,7 +596,6 @@ export function initializeUI(database, state) {
             DOMElements.appView.classList.remove('sidebar-open');
         }
     });
-    // --- END FIX ---
 
     // --- Radial Menu ---
     if (DOMElements.radialMenuFab) {
