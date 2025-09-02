@@ -1,4 +1,5 @@
 // js/plan-view.js
+import { calculatePlanCompletion, getVisionProgress, getMonthProgress, isWeekComplete } from './utils.js';
 
 // Dependencies passed from main.js
 let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare;
@@ -138,63 +139,6 @@ const templates = {
 
 // --- Progress Calculation & Data Helpers ---
 
-function isContentEmpty(htmlContent) {
-    if (!htmlContent) return true;
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlContent;
-    return tempDiv.innerText.trim() === '';
-}
-
-function getVisionProgress(planData) {
-    const data = planData || appState.planData;
-    const requiredFields = templates.vision.requiredFields;
-    const total = requiredFields.length;
-    const completed = requiredFields.filter(field => !isContentEmpty(data[field])).length;
-    return { completed, total };
-}
-
-function isWeekComplete(monthNum, weekNum, planData) {
-    const data = planData || appState.planData;
-    const status = data[`m${monthNum}s5_w${weekNum}_status`];
-    const win = data[`m${monthNum}s5_w${weekNum}_win`];
-    const spotlight = data[`m${monthNum}s5_w${weekNum}_spotlight`];
-    const shine = data[`m${monthNum}s5_w${weekNum}_shine`];
-    return !!status && !isContentEmpty(win) && !isContentEmpty(spotlight) && !isContentEmpty(shine);
-}
-
-function getMonthProgress(monthNum, planData) {
-    const data = planData || appState.planData;
-    const requiredFields = [
-        `m${monthNum}s1_battle`, `m${monthNum}s1_pillar`, `m${monthNum}s2_levers`,
-        `m${monthNum}s2_powerup_q`, `m${monthNum}s2_powerup_a`, `m${monthNum}s3_people`,
-        `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
-        `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
-    ];
-    for (let w = 1; w <= 4; w++) {
-        requiredFields.push(`m${monthNum}s5_w${w}_status`, `m${monthNum}s5_w${w}_win`, `m${monthNum}s5_w${w}_spotlight`, `m${monthNum}s5_w${w}_shine`);
-    }
-    if (monthNum == 3) {
-        requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
-    }
-    const total = requiredFields.length;
-    const completed = requiredFields.filter(field => !isContentEmpty(data[field])).length;
-    return { completed, total };
-}
-
-function calculatePlanCompletion(planData) {
-    let totalFields = 0;
-    let completedFields = 0;
-    const visionProgress = getVisionProgress(planData);
-    totalFields += visionProgress.total;
-    completedFields += visionProgress.completed;
-    for (let m = 1; m <= 3; m++) {
-        const monthProgress = getMonthProgress(m, planData);
-        totalFields += monthProgress.total;
-        completedFields += monthProgress.completed;
-    }
-    return totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
-}
-
 export function summarizePlanForAI(planData) {
     const e = (text) => {
         if (!text) return '';
@@ -277,7 +221,6 @@ export function saveData(forceImmediate = false, directPayload = null) {
         });
     }
 }
-
 
 // --- UI Rendering & Updates ---
 
@@ -416,9 +359,9 @@ function updateSidebarNavStatus() {
             progressCircle.style.strokeDashoffset = offset;
         }
     };
-    updateNavItem('#nav-vision', getVisionProgress());
+    updateNavItem('#nav-vision', getVisionProgress(appState.planData));
     for (let m = 1; m <= 3; m++) {
-        updateNavItem(`#nav-month-${m}`, getMonthProgress(m));
+        updateNavItem(`#nav-month-${m}`, getMonthProgress(m, appState.planData));
     }
 }
 
