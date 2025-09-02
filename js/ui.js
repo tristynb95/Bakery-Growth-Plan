@@ -564,6 +564,35 @@ export function initializeUI(database, state) {
     DOMElements.mobileMenuBtn.addEventListener('click', () => DOMElements.appView.classList.toggle('sidebar-open'));
     DOMElements.sidebarOverlay.addEventListener('click', () => DOMElements.appView.classList.remove('sidebar-open'));
 
+    // --- FIX FOR SWIPE GESTURE ---
+    let touchStartX = 0;
+    const swipeThreshold = 50; // Minimum pixels to be considered a swipe
+
+    // Listen for swipe right on the main content to open the sidebar
+    DOMElements.mainContent.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    DOMElements.mainContent.addEventListener('touchend', e => {
+        const touchEndX = e.changedTouches[0].screenX;
+        if (touchEndX > touchStartX + swipeThreshold) {
+            DOMElements.appView.classList.add('sidebar-open');
+        }
+    });
+
+    // Listen for swipe left on the sidebar itself to close it
+    DOMElements.sidebar.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    DOMElements.sidebar.addEventListener('touchend', e => {
+        const touchEndX = e.changedTouches[0].screenX;
+        if (touchEndX < touchStartX - swipeThreshold) {
+            DOMElements.appView.classList.remove('sidebar-open');
+        }
+    });
+    // --- END FIX ---
+
     // --- Radial Menu ---
     if (DOMElements.radialMenuFab) {
         DOMElements.radialMenuFab.addEventListener('click', () => DOMElements.radialMenuContainer.classList.toggle('open'));
