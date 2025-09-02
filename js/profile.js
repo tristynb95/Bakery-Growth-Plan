@@ -52,7 +52,6 @@ function runProfileScript(app) {
     let selectedFile = null;
     let isSetupMode = false;
     const defaultPhotoURL = 'https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png';
-    // --- NEW: Variable to store the original form state ---
     let originalProfileData = { name: '', bakery: '' };
 
     const params = new URLSearchParams(window.location.search);
@@ -75,7 +74,6 @@ function runProfileScript(app) {
         DOMElements.modalOverlay.classList.add('hidden');
     }
 
-    // --- MODIFIED: Form Validity Check now includes a change check ---
     function checkFormValidity() {
         const currentName = DOMElements.profileName.value.trim();
         const currentBakery = DOMElements.bakeryHiddenInput.value.trim();
@@ -83,7 +81,6 @@ function runProfileScript(app) {
         const isFilled = currentName && currentBakery;
         const hasChanged = currentName !== originalProfileData.name || currentBakery !== originalProfileData.bakery;
 
-        // In setup mode, we only care if fields are filled. In edit mode, they must be filled AND changed.
         if (isSetupMode) {
             DOMElements.saveProfileBtn.disabled = !isFilled;
         } else {
@@ -91,7 +88,6 @@ function runProfileScript(app) {
         }
     }
 
-    // --- MODIFIED: saveProfile now updates the original state on success ---
     async function saveProfile() {
         if (!currentUser) return;
         const name = DOMElements.profileName.value.trim();
@@ -114,11 +110,10 @@ function runProfileScript(app) {
                 window.location.href = '/index.html';
             } else {
                 openModal('success', 'Profile Updated', 'Your changes have been saved successfully.');
-                // Update the original data to the new saved state
                 originalProfileData.name = name;
                 originalProfileData.bakery = bakery;
                 DOMElements.saveProfileBtn.textContent = 'Save Changes';
-                checkFormValidity(); // This will now correctly disable the button
+                checkFormValidity();
             }
         } catch (error) {
             console.error("Error saving profile:", error);
@@ -157,7 +152,6 @@ function runProfileScript(app) {
         });
     }
 
-    // --- MODIFIED: loadUserProfile now stores the original data ---
     function loadUserProfile(user) {
         DOMElements.profileEmail.value = user.email;
         const userRef = db.collection('users').doc(user.uid);
@@ -168,7 +162,6 @@ function runProfileScript(app) {
                 DOMElements.bakerySearchInput.value = data.bakery || '';
                 DOMElements.bakeryHiddenInput.value = data.bakery || '';
                 
-                // Store original data for change detection
                 originalProfileData = { name: data.name || '', bakery: data.bakery || '' };
 
                 if (data.photoURL) {
@@ -176,7 +169,7 @@ function runProfileScript(app) {
                     DOMElements.removePhotoBtn.classList.remove('hidden');
                 }
                 DOMElements.backToDashboardBtn.classList.remove('hidden');
-                checkFormValidity(); // Check validity on load
+                checkFormValidity();
             } else {
                 DOMElements.headerTitle.textContent = 'Welcome! Let\'s Set Up Your Profile.';
                 DOMElements.headerSubtitle.textContent = 'Please provide your details to get started.';
@@ -223,6 +216,18 @@ function runProfileScript(app) {
             filterOptions();
         });
 
+        // MODIFIED: Added blur event listener for validation
+        searchInput.addEventListener('blur', () => {
+            // A short delay allows a click on the dropdown to register before the blur event fires
+            setTimeout(() => {
+                if (!bakeryList.includes(searchInput.value)) {
+                    searchInput.value = '';
+                    hiddenInput.value = '';
+                    checkFormValidity();
+                }
+            }, 200);
+        });
+
         document.addEventListener('click', (e) => {
             if (!DOMElements.bakeryDropdown.contains(e.target)) {
                 DOMElements.bakeryDropdown.classList.remove('open');
@@ -235,7 +240,9 @@ function runProfileScript(app) {
 
         searchInput.addEventListener('input', () => {
             filterOptions();
-            if (!bakeryList.includes(searchInput.value)) { hiddenInput.value = ''; }
+            if (!bakeryList.includes(searchInput.value)) {
+                hiddenInput.value = '';
+            }
             checkFormValidity();
         });
 
