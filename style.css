@@ -1504,8 +1504,7 @@ tr:hover .btn-remove-row {
     background-color: var(--gails-white);
     border: 1px solid var(--gails-grey-mid);
     border-radius: 0.5rem;
-    /* MODIFIED: Removed left padding, which was moving the text */
-    padding: 1rem 1.15rem 1rem 0;
+    padding: 1rem 1.15rem; /* MODIFIED: Reinstated left padding to align with other inputs */
     cursor: pointer;
     transition: all 0.2s;
     gap: 0.75rem;
@@ -1579,7 +1578,6 @@ tr:hover .btn-remove-row {
     background-color: var(--gails-grey-mid); /* Default color */
 }
 
-/* --- ADD THESE NEW RULES FOR CATEGORY ICONS --- */
 .selected-icon-container {
     display: flex;
     align-items: center;
@@ -1587,8 +1585,8 @@ tr:hover .btn-remove-row {
     width: 14px;
     height: 14px;
     flex-shrink: 0;
-    /* MODIFIED: This is the specific line that moves the icon over */
-    margin-left: 1.5rem;
+    /* MODIFIED: Removed margin to allow parent padding to control alignment */
+    margin-left: 0;
 }
 
 .option-icon {
