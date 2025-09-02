@@ -90,7 +90,10 @@ function runApp(app) {
             const userDocRef = db.collection('users').doc(user.uid);
             const userDoc = await userDocRef.get();
 
-            if (!userDoc.exists()) {
+            // --- FIX FOR LOGIN BUG ---
+            // Changed userDoc.exists() to userDoc.exists to match Firebase v8 compat syntax
+            if (!userDoc.exists) {
+            // --- END FIX ---
                 initialLoadingView.classList.add('hidden');
                 window.location.href = '/profile.html?setup=true';
                 return;
@@ -122,3 +125,4 @@ function runApp(app) {
 }
 
 document.addEventListener('DOMContentLoaded', initializeFirebase);
+
