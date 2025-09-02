@@ -1,88 +1,8 @@
 // js/dashboard.js
+import { calculatePlanCompletion } from './utils.js';
 
 // These will be passed in from main.js so this module can talk to the database and the rest of the app.
 let db, appState, openModal, handleSelectPlan;
-
-// --- Helper Functions for Progress Calculation ---
-
-// A small, local version of the templates object, just for the dashboard's needs.
-const templates = {
-    vision: {
-        requiredFields: ['managerName', 'bakeryLocation', 'quarter', 'quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
-    }
-};
-
-/**
- * Checks if a piece of content (like from a text box) is effectively empty.
- * @param {string} htmlContent The content to check.
- * @returns {boolean} True if the content is empty.
- */
-function isContentEmpty(htmlContent) {
-    if (!htmlContent) return true;
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlContent;
-    return tempDiv.innerText.trim() === '';
-}
-
-/**
- * Calculates the completion progress for the "Vision" section of a plan.
- * @param {object} planData The data for the plan.
- * @returns {{completed: number, total: number}}
- */
-function getVisionProgress(planData) {
-    const requiredFields = templates.vision.requiredFields;
-    const total = requiredFields.length;
-    const completed = requiredFields.filter(field => !isContentEmpty(planData[field])).length;
-    return { completed, total };
-}
-
-/**
- * Calculates the completion progress for a specific month within a plan.
- * @param {number} monthNum The month number (1, 2, or 3).
- * @param {object} planData The data for the plan.
- * @returns {{completed: number, total: number}}
- */
-function getMonthProgress(monthNum, planData) {
-    const requiredFields = [
-        `m${monthNum}s1_battle`, `m${monthNum}s1_pillar`, `m${monthNum}s2_levers`,
-        `m${monthNum}s2_powerup_q`, `m${monthNum}s2_powerup_a`, `m${monthNum}s3_people`,
-        `m${monthNum}s4_people`, `m${monthNum}s4_product`, `m${monthNum}s4_customer`, `m${monthNum}s4_place`,
-        `m${monthNum}s6_win`, `m${monthNum}s6_challenge`, `m${monthNum}s6_next`
-    ];
-    for (let w = 1; w <= 4; w++) {
-        requiredFields.push(`m${monthNum}s5_w${w}_status`);
-        requiredFields.push(`m${monthNum}s5_w${w}_win`);
-        requiredFields.push(`m${monthNum}s5_w${w}_spotlight`);
-        requiredFields.push(`m${monthNum}s5_w${w}_shine`);
-    }
-    if (monthNum == 3) {
-        requiredFields.push('m3s7_achievements', 'm3s7_challenges', 'm3s7_narrative', 'm3s7_next_quarter');
-    }
-    const total = requiredFields.length;
-    const completed = requiredFields.filter(field => !isContentEmpty(planData[field])).length;
-    return { completed, total };
-}
-
-/**
- * Calculates the total completion percentage of a given plan.
- * @param {object} planData The data for a specific plan.
- * @returns {number} The completion percentage (0-100).
- */
-function calculatePlanCompletion(planData) {
-    let totalFields = 0;
-    let completedFields = 0;
-
-    const visionProgress = getVisionProgress(planData);
-    totalFields += visionProgress.total;
-    completedFields += visionProgress.completed;
-
-    for (let m = 1; m <= 3; m++) {
-        const monthProgress = getMonthProgress(m, planData);
-        totalFields += monthProgress.total;
-        completedFields += monthProgress.completed;
-    }
-    return totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
-}
 
 /**
  * Formats a Firestore timestamp into a user-friendly string like "Today at 14:30".
@@ -116,7 +36,6 @@ function formatLastEditedDate(lastEditedDate) {
  * Fetches plans from the database and renders them as cards on the dashboard.
  */
 export async function renderDashboard() {
-    // FIX: Use appState.currentUser which is always up-to-date
     if (!appState.currentUser) return;
 
     const dashboardContent = document.getElementById('dashboard-content');
@@ -125,7 +44,6 @@ export async function renderDashboard() {
     
     let plans = [];
     try {
-        // FIX: Use the live user object from appState to get the UID
         const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
         const snapshot = await plansRef.orderBy('lastEdited', 'desc').get();
         plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -169,7 +87,6 @@ export async function renderDashboard() {
 /**
  * Sets up all event listeners for the dashboard page.
  */
-// FIX: Removed the 'user' parameter as it was stale and is no longer needed.
 export function initializeDashboard(database, state, modalOpener, planSelector) {
     db = database;
     appState = state;
@@ -181,7 +98,6 @@ export function initializeDashboard(database, state, modalOpener, planSelector) 
     const dashboardProfileBtn = document.getElementById('dashboard-profile-btn');
 
     dashboardLogoutBtn.addEventListener('click', () => {
-        // This will call a logout function defined in main.js
         document.dispatchEvent(new CustomEvent('logout-request'));
     });
     
