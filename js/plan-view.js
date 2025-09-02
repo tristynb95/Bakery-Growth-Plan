@@ -36,6 +36,7 @@ const templates = {
                    </div>`,
         requiredFields: ['quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
     },
+    // MODIFIED: Merged the weekly title into the progress label
     month: (monthNum) => `
             <div class="space-y-8">
                 <div class="content-card p-6 md:p-8">
@@ -100,12 +101,11 @@ const templates = {
                             `).join('')}
                         </nav>
                     </div>
-                    <h3 id="weekly-checkin-title" class="text-lg font-bold text-gray-800 pb-3 mb-6 border-b border-gray-200">Week 1 Check-in</h3>
                     <div id="weekly-tab-content">
                         ${[1, 2, 3, 4].map(w => `
                             <div class="weekly-tab-panel ${w !== 1 ? 'hidden' : ''}" data-week-panel="${w}">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                                    <div class="md:col-span-2"><label class="font-semibold block mb-3 text-gray-700">Progress:</label><div class="flex items-center space-x-2 status-buttons" data-week="${w}"><button class="status-button" data-status="on-track">ON TRACK</button><button class="status-button" data-status="issues">ISSUES</button><button class="status-button" data-status="off-track">OFF TRACK</button></div></div>
+                                    <div class="md:col-span-2"><label id="weekly-progress-label-${w}" class="font-semibold block mb-3 text-gray-700">Week ${w} Progress:</label><div class="flex items-center space-x-2 status-buttons" data-week="${w}"><button class="status-button" data-status="on-track">ON TRACK</button><button class="status-button" data-status="issues">ISSUES</button><button class="status-button" data-status="off-track">OFF TRACK</button></div></div>
                                     <div><label for="m${monthNum}s5_w${w}_win" class="font-semibold block mb-2 text-gray-700">A Win or Learning:</label><div id="m${monthNum}s5_w${w}_win" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., The team hit 80% availability on Thursday!" data-maxlength="400"></div></div>
                                     <div><label for="m${monthNum}s5_w${w}_spotlight" class="font-semibold block mb-2 text-gray-700">Breadhead Spotlight:</label><div id="m${monthNum}s5_w${w}_spotlight" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., Sarah, for making a customer's day by remembering their name and usual order—a perfect example of our SHINE values." data-maxlength="400"></div></div>
                                     <div class="md:col-span-2"><label for="m${monthNum}s5_w${w}_shine" class="font-semibold block mb-2 text-gray-700">This Week's SHINE Focus:</label><div id="m${monthNum}s5_w${w}_shine" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., Ensuring every customer is greeted within 30 seconds." data-maxlength="400"></div></div>
@@ -583,7 +583,6 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
         }
     });
 
-    // MODIFIED: This entire event listener is updated
     DOMElements.contentArea.addEventListener('click', (e) => {
         const pillarButton = e.target.closest('.pillar-button');
         if (pillarButton) {
@@ -642,10 +641,11 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
             document.querySelectorAll('.weekly-tab-panel').forEach(p => {
                 p.classList.toggle('hidden', p.dataset.weekPanel !== week);
             });
-            const titleElement = document.getElementById('weekly-checkin-title');
-            if (titleElement) {
-                titleElement.textContent = `Week ${week} Check-in`;
-            }
+            // Update all progress labels
+            document.querySelectorAll('[id^="weekly-progress-label-"]').forEach((label) => {
+                const labelWeek = label.id.split('-').pop();
+                label.textContent = `Week ${labelWeek} Progress:`;
+            });
         }
     });
 
