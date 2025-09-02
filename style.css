@@ -945,9 +945,10 @@ tr:hover .btn-remove-row {
     padding: 2rem;
 }
 
-.profile-container .form-input {
+.profile-container .form-input:disabled {
     background-color: var(--gails-grey-light);
     cursor: not-allowed;
+    color: var(--gails-text-secondary);
 }
 
 .btn-remove-photo {
