@@ -596,23 +596,27 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
         }
         const statusButton = e.target.closest('.status-button');
         if (statusButton) {
-            // MODIFIED: This entire block is updated for deselection
             const alreadySelected = statusButton.classList.contains('selected');
-            statusButton.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
+            const parent = statusButton.parentElement;
+            parent.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
             
+            const monthNum = appState.currentView.split('-')[1];
+            const week = parent.dataset.week;
+            const key = `m${monthNum}s5_w${week}_status`;
+            const payload = {};
+
             if (!alreadySelected) {
                 statusButton.classList.add('selected');
-                const monthNum = appState.currentView.split('-')[1];
-                const week = statusButton.closest('.status-buttons').dataset.week;
-                const key = `m${monthNum}s5_w${week}_status`;
+                payload[key] = statusButton.dataset.status;
                 appState.planData[key] = statusButton.dataset.status;
             } else {
-                const monthNum = appState.currentView.split('-')[1];
-                const week = statusButton.closest('.status-buttons').dataset.week;
-                const key = `m${monthNum}s5_w${week}_status`;
+                payload[key] = firebase.firestore.FieldValue.delete();
                 delete appState.planData[key];
             }
-            saveData(true);
+
+            // Immediately update the database for this action
+            const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
+            docRef.update(payload).catch(error => console.error("Error updating status:", error));
         }
         const tab = e.target.closest('.weekly-tab');
         if (tab) {
