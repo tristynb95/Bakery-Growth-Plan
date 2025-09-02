@@ -52,7 +52,7 @@ This application is built with a modern, scalable, and secure architecture, prio
 The architecture is decoupled, with a static frontend that communicates with a secure serverless backend. This approach ensures that sensitive API keys (for Firebase and Google AI) are never exposed on the client-side. Firestore provides real-time data synchronisation, which is essential for a seamless user experience across devices.
 
 <br>
-<h3>⚙️ Getting Started**</h3>
+<h3>⚙️ Getting Started</h3>
 Follow these instructions to set up and run the project locally for development.
 
 <h4>Prerequisites</h4>
