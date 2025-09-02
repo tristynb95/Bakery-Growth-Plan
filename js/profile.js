@@ -158,26 +158,28 @@ function runProfileScript(app) {
 
 
     function loadUserProfile(user) {
-        DOMElements.profileEmail.value = user.email;
-        const userRef = db.collection('users').doc(user.uid);
-        userRef.get().then((doc) => {
-            if (doc.exists && !isSetupMode) {
-                const data = doc.data();
-                DOMElements.profileName.value = data.name || '';
-                DOMElements.bakerySearchInput.value = data.bakery || '';
-                DOMElements.bakeryHiddenInput.value = data.bakery || '';
-                if (data.photoURL) {
-                    DOMElements.photoPreview.src = data.photoURL;
-                    DOMElements.removePhotoBtn.classList.remove('hidden');
-                }
-            } else {
-                DOMElements.headerTitle.textContent = 'Welcome! Let\'s Set Up Your Profile.';
-                DOMElements.headerSubtitle.textContent = 'Please provide your details to get started.';
-                DOMElements.saveProfileBtn.textContent = 'Save and Continue';
-                isSetupMode = true;
+    DOMElements.profileEmail.value = user.email;
+    const userRef = db.collection('users').doc(user.uid);
+    userRef.get().then((doc) => {
+        if (doc.exists && !isSetupMode) {
+            const data = doc.data();
+            DOMElements.profileName.value = data.name || '';
+            DOMElements.bakerySearchInput.value = data.bakery || '';
+            DOMElements.bakeryHiddenInput.value = data.bakery || '';
+            if (data.photoURL) {
+                DOMElements.photoPreview.src = data.photoURL;
+                DOMElements.removePhotoBtn.classList.remove('hidden');
             }
-        });
-    }
+            // MODIFIED: This line makes the "Back" button visible for existing users
+            DOMElements.backToDashboardBtn.classList.remove('hidden');
+        } else {
+            DOMElements.headerTitle.textContent = 'Welcome! Let\'s Set Up Your Profile.';
+            DOMElements.headerSubtitle.textContent = 'Please provide your details to get started.';
+            DOMElements.saveProfileBtn.textContent = 'Save and Continue';
+            isSetupMode = true;
+        }
+    });
+}
 
     function setupBakeryDropdown() {
         const optionsContainer = DOMElements.bakeryDropdown.querySelector('.dropdown-options');
