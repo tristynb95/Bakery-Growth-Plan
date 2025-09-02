@@ -236,69 +236,34 @@ export function summarizePlanForAI(planData) {
 export function saveData(forceImmediate = false, directPayload = null) {
     if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
 
-    const localChanges = {};
-    document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]').forEach(el => {
-        if (el.id) {
-            localChanges[el.id] = el.isContentEditable ? el.innerHTML : el.value;
-        }
-    });
-
-    document.querySelectorAll('.pillar-buttons').forEach(group => {
-        const stepKey = group.dataset.stepKey;
-        const dataKey = `${stepKey}_pillar`;
-        const selectedButtons = group.querySelectorAll('.selected');
-        if (selectedButtons.length > 0) {
-            localChanges[dataKey] = Array.from(selectedButtons).map(btn => btn.dataset.pillar);
-        } else {
-            localChanges[dataKey] = firebase.firestore.FieldValue.delete();
-        }
-    });
-
-    if (appState.currentView.startsWith('month-')) {
-        const monthNum = appState.currentView.split('-')[1];
-        document.querySelectorAll('.status-buttons').forEach(group => {
-            const week = group.dataset.week;
-            const selected = group.querySelector('.selected');
-            const key = `m${monthNum}s5_w${week}_status`;
-            if (selected) {
-                localChanges[key] = selected.dataset.status;
-            } else {
-                localChanges[key] = firebase.firestore.FieldValue.delete();
-            }
-        });
-    }
-
-    const changedData = {};
-    let hasChanges = false;
-    for (const key in localChanges) {
-        if (JSON.stringify(localChanges[key]) !== JSON.stringify(appState.planData[key])) {
-            changedData[key] = localChanges[key];
-            hasChanges = true;
-        }
-    }
-
+    // If a direct payload is provided (e.g., for saving the AI plan), merge it into the state
     if (directPayload) {
-        for (const key in directPayload) {
-            if (directPayload[key] !== appState.planData[key]) {
-                changedData[key] = directPayload[key];
-                hasChanges = true;
-            }
-        }
+        appState.planData = { ...appState.planData, ...directPayload };
     }
-
-    if (!hasChanges) return Promise.resolve();
+    
+    // The state is already updated by the event listeners, so we just need to save it.
+    // We add a check to see if there are any actual changes to save.
+    // This is a simplified check; a more robust solution might involve deep-checking or tracking a 'dirty' flag.
+    if (appState.isSaving) return Promise.resolve(); // Prevent concurrent saves
 
     clearTimeout(appState.saveTimeout);
 
     const saveToFirestore = async () => {
+        appState.isSaving = true;
         const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
-        const dataToSave = {
-            ...changedData,
+        
+        // Create a clean copy of the data to save, excluding any client-side only flags
+        const dataToSave = { ...appState.planData };
+        delete dataToSave.isSaving; // Example of a client-side flag
+
+        await docRef.set({ // Using set with merge:true is often safer than update
+            ...dataToSave,
             lastEdited: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        await docRef.update(dataToSave);
+        }, { merge: true });
+        
         DOMElements.saveIndicator.classList.remove('opacity-0');
         setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
+        appState.isSaving = false;
     };
 
     if (forceImmediate) {
@@ -312,6 +277,7 @@ export function saveData(forceImmediate = false, directPayload = null) {
         });
     }
 }
+
 
 // --- UI Rendering & Updates ---
 
@@ -650,14 +616,20 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
     });
 
     DOMElements.contentArea.addEventListener('input', (e) => {
-        if (e.target.matches('input, [contenteditable="true"]')) {
-            saveData();
+        const target = e.target;
+        if (target.matches('input, [contenteditable="true"]')) {
+            const key = target.id;
+            const value = target.isContentEditable ? target.innerHTML : target.value;
+            if (appState.planData[key] !== value) {
+                appState.planData[key] = value;
+                saveData();
+            }
         }
-        if (e.target.isContentEditable) {
-            if (e.target.innerText.trim() === '') {
-                e.target.classList.add('is-placeholder-showing');
+        if (target.isContentEditable) {
+            if (target.innerText.trim() === '') {
+                target.classList.add('is-placeholder-showing');
             } else {
-                e.target.classList.remove('is-placeholder-showing');
+                target.classList.remove('is-placeholder-showing');
             }
         }
     });
@@ -682,6 +654,11 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
         const pillarButton = e.target.closest('.pillar-button');
         if (pillarButton) {
             pillarButton.classList.toggle('selected');
+            const group = pillarButton.closest('.pillar-buttons');
+            const stepKey = group.dataset.stepKey;
+            const dataKey = `${stepKey}_pillar`;
+            const selectedPillars = Array.from(group.querySelectorAll('.selected')).map(btn => btn.dataset.pillar);
+            appState.planData[dataKey] = selectedPillars.length > 0 ? selectedPillars : firebase.firestore.FieldValue.delete();
             saveData(true);
             return;
         }
@@ -689,7 +666,18 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
         if (statusButton) {
             const alreadySelected = statusButton.classList.contains('selected');
             statusButton.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
-            if (!alreadySelected) statusButton.classList.add('selected');
+            if (!alreadySelected) {
+                statusButton.classList.add('selected');
+                const monthNum = appState.currentView.split('-')[1];
+                const week = statusButton.closest('.status-buttons').dataset.week;
+                const key = `m${monthNum}s5_w${week}_status`;
+                appState.planData[key] = statusButton.dataset.status;
+            } else {
+                const monthNum = appState.currentView.split('-')[1];
+                const week = statusButton.closest('.status-buttons').dataset.week;
+                const key = `m${monthNum}s5_w${week}_status`;
+                delete appState.planData[key];
+            }
             saveData(true);
         }
         const tab = e.target.closest('.weekly-tab');
