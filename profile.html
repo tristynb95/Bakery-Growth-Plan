@@ -56,8 +56,18 @@
                         <input type="text" id="profile-name" class="form-input" placeholder="e.g., Tristen Bayley">
                     </div>
                      <div>
-                        <label for="profile-bakery" class="font-semibold block mb-2">Your Bakery:</label>
-                        <input type="text" id="profile-bakery" class="form-input" placeholder="e.g., Marlow">
+                        <label for="bakery-search-input" class="font-semibold block mb-2">Your Bakery:</label>
+                        <!-- Custom Dropdown for Bakery Selection -->
+                        <div id="bakery-dropdown" class="custom-dropdown">
+                            <div class="dropdown-selected" tabindex="0">
+                                <input type="text" id="bakery-search-input" class="dropdown-search-input" placeholder="Search for your bakery..." autocomplete="off">
+                                <i class="bi bi-chevron-down dropdown-caret"></i>
+                            </div>
+                            <div class="dropdown-options">
+                                <!-- Bakery options will be populated by JavaScript -->
+                            </div>
+                            <input type="hidden" id="profile-bakery-hidden">
+                        </div>
                     </div>
                     <div>
                         <label for="profile-email" class="font-semibold block mb-2">Email:</label>
