@@ -78,15 +78,10 @@ function renderCalendar() {
             const allDayEvents = appState.calendar.data[dateKey] || [];
             
             if (Array.isArray(allDayEvents) && allDayEvents.length > 0) {
-                // Set Day Density for Heat Map
                 if (allDayEvents.length >= 8) dayCell.classList.add('day-density-4');
                 else if (allDayEvents.length >= 6) dayCell.classList.add('day-density-3');
                 else if (allDayEvents.length >= 4) dayCell.classList.add('day-density-2');
                 else if (allDayEvents.length >= 1) dayCell.classList.add('day-density-1');
-
-                // --- NEW UNLIMITED DOT RENDERING LOGIC ---
-
-                // 1. Render birthday indicator separately
                 const hasBirthday = allDayEvents.some(e => e.type === 'birthday');
                 if (hasBirthday) {
                     const indicator = document.createElement('div');
@@ -94,13 +89,10 @@ function renderCalendar() {
                     indicator.innerHTML = '<i class="bi bi-cake2"></i>';
                     dayCell.appendChild(indicator);
                 }
-
-                // 2. Render dots for ALL other events
                 const otherEvents = allDayEvents.filter(e => e.type !== 'birthday');
                 if (otherEvents.length > 0) {
                     const eventsContainer = document.createElement('div');
                     eventsContainer.classList.add('event-dots-container');
-                    
                     otherEvents.forEach(event => {
                         const dot = document.createElement('div');
                         dot.className = `event-dot ${event.type}`;
@@ -108,12 +100,10 @@ function renderCalendar() {
                     });
                     dayCell.appendChild(eventsContainer);
                 }
-                // --- END of New Logic ---
             }
             calendarGrid.appendChild(dayCell);
         }
     }
-
 
 async function loadCalendarData() {
     if (!appState.currentUser || !appState.currentPlanId) return;
@@ -127,89 +117,89 @@ async function loadCalendarData() {
         }
     }
 
-
 function renderDayDetails(dateKey) {
+    selectedDateKey = dateKey;
+
+    // --- FIX: Logic to control header titles ---
+    document.getElementById('day-detail-title').classList.remove('hidden');
+    document.getElementById('day-detail-form-title').classList.add('hidden');
     document.getElementById('add-event-btn').classList.remove('hidden');
-        document.getElementById('day-detail-title').classList.remove('hidden');
-        selectedDateKey = dateKey;
+    // --- END FIX ---
+    
+    document.querySelectorAll('.calendar-day.selected').forEach(d => d.classList.remove('selected'));
+    const selectedDayCell = document.querySelector(`.calendar-day[data-date-key="${dateKey}"]`);
+    if (selectedDayCell) selectedDayCell.classList.add('selected');
+    
+    const [year, month, day] = dateKey.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    const formattedDate = date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    
+    document.getElementById('day-detail-title').textContent = formattedDate;
+    document.getElementById('add-event-form').classList.add('hidden');
 
-        document.querySelectorAll('.calendar-day.selected').forEach(d => d.classList.remove('selected'));
-        const selectedDayCell = document.querySelector(`.calendar-day[data-date-key="${dateKey}"]`);
-        if (selectedDayCell) selectedDayCell.classList.add('selected');
+    const eventList = document.getElementById('day-event-list');
+    eventList.classList.remove('hidden');
+    eventList.innerHTML = '';
+    const dayEvents = appState.calendar.data[dateKey] || [];
 
-        const [year, month, day] = dateKey.split('-').map(Number);
-        const date = new Date(year, month - 1, day);
-        const formattedDate = date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-        
-        document.getElementById('day-detail-title').textContent = formattedDate;
-        document.getElementById('add-event-form').classList.add('hidden');
+    if (dayEvents.length > 0) {
+        dayEvents.sort((a,b) => {
+            if (a.allDay && !b.allDay) return -1;
+            if (!a.allDay && b.allDay) return 1;
+            return (a.timeFrom || '').localeCompare(b.timeFrom || '');
+        });
+        dayEvents.forEach((event, index) => {
+            const eventItem = document.createElement('div');
+            eventItem.classList.add('event-item');
+            eventItem.dataset.index = index;
+            
+            let timeHTML = '';
+            if (event.allDay) {
+                timeHTML = `<p class="event-item-time font-semibold">All Day</p>`;
+            } else if (event.timeFrom) {
+                let timeString = event.timeFrom;
+                if (event.timeTo) timeString += ` - ${event.timeTo}`;
+                timeHTML = `<p class="event-item-time">${timeString}</p>`;
+            }
+            
+            const descriptionHTML = event.description ? `<p class="event-item-description">${event.description.replace(/\n/g, '<br>')}</p>` : '';
 
-        const eventList = document.getElementById('day-event-list');
-        eventList.classList.remove('hidden');
-        eventList.innerHTML = '';
-        const dayEvents = appState.calendar.data[dateKey] || [];
-
-        if (dayEvents.length > 0) {
-            dayEvents.sort((a,b) => {
-                if (a.allDay && !b.allDay) return -1;
-                if (!a.allDay && b.allDay) return 1;
-                return (a.timeFrom || '').localeCompare(b.timeFrom || '');
-            });
-            dayEvents.forEach((event, index) => {
-                const eventItem = document.createElement('div');
-                eventItem.classList.add('event-item');
-                eventItem.dataset.index = index;
-                
-                let timeHTML = '';
-                if (event.allDay) {
-                    timeHTML = `<p class="event-item-time font-semibold">All Day</p>`;
-                } else if (event.timeFrom) {
-                    let timeString = event.timeFrom;
-                    if (event.timeTo) {
-                        timeString += ` - ${event.timeTo}`;
-                    }
-                    timeHTML = `<p class="event-item-time">${timeString}</p>`;
-                }
-                
-                const descriptionHTML = event.description ? `<p class="event-item-description">${event.description.replace(/\n/g, '<br>')}</p>` : '';
-
-                eventItem.innerHTML = `
-                    <div class="event-item-header">
-                        <div>
-                            <h5 class="event-item-title">${event.title}</h5>
-                            ${timeHTML}
-                        </div>
-                        <div class="flex items-center gap-2">
-                             <span class="event-type-badge ${event.type}">${event.type}</span>
-                             <button class="btn-remove-row btn-remove-event" data-index="${index}" title="Delete event"><i class="bi bi-x-lg"></i></button>
-                        </div>
+            eventItem.innerHTML = `
+                <div class="event-item-header">
+                    <div>
+                        <h5 class="event-item-title">${event.title}</h5>
+                        ${timeHTML}
                     </div>
-                    ${descriptionHTML}
-                `;
-                eventList.appendChild(eventItem);
-            });
-        } else {
-            eventList.innerHTML = '<p class="text-gray-500 text-center py-4">No events scheduled for this day.</p>';
-        }
-        
-        
-        document.getElementById('add-event-form').classList.add('hidden');
+                    <div class="flex items-center gap-2">
+                         <span class="event-type-badge ${event.type}">${event.type}</span>
+                         <button class="btn-remove-row btn-remove-event" data-index="${index}" title="Delete event"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                </div>
+                ${descriptionHTML}`;
+            eventList.appendChild(eventItem);
+        });
+    } else {
+        eventList.innerHTML = '<p class="text-gray-500 text-center py-4">No events scheduled for this day.</p>';
     }
+    
+    document.getElementById('add-event-form').classList.add('hidden');
+}
 
 function showEditEventForm(index) {
     appState.calendar.editingEventIndex = index;
     const event = appState.calendar.data[selectedDateKey][index];
 
-    // Hide the event list and "Add Event" button, then show the form
+    // --- FIX: Control header visibility ---
+    const formTitle = document.getElementById('day-detail-form-title');
+    formTitle.textContent = 'Edit Event';
+    formTitle.classList.remove('hidden');
+    document.getElementById('day-detail-title').classList.add('hidden');
+    document.getElementById('add-event-btn').classList.add('hidden');
+    // --- END FIX ---
+
     document.getElementById('day-event-list').classList.add('hidden');
     document.getElementById('add-event-form').classList.remove('hidden');
-    document.getElementById('add-event-btn').classList.add('hidden');
-    
-    // Update form titles and buttons for editing mode
-    document.getElementById('add-event-form-title').textContent = 'Edit Event';
-    document.getElementById('save-event-btn').textContent = 'Update Event';
 
-    // Populate the form fields with the event data
     document.getElementById('event-title-input').value = event.title;
     const allDayCheckbox = document.getElementById('event-all-day-toggle');
     allDayCheckbox.checked = event.allDay || false;
@@ -218,13 +208,11 @@ function showEditEventForm(index) {
     document.getElementById('event-time-to-input').value = event.timeTo || '';
     document.getElementById('event-description-input').value = event.description || '';
 
-    // --- Logic to correctly set the category dropdown ---
     const searchInput = document.getElementById('category-search-input');
     const hiddenInput = document.getElementById('event-type-input');
     const iconContainer = document.getElementById('category-selected-icon-container');
     const optionsContainer = document.querySelector('#category-dropdown .dropdown-options');
 
-    // Clear previous state
     iconContainer.innerHTML = '<span id="category-selected-dot" class="selected-dot"></span>';
     iconContainer.className = 'selected-icon-container';
 
@@ -261,7 +249,6 @@ async function confirmEventDeletion() {
 
     try {
         await calendarRef.set(dataToUpdate, { merge: true });
-        // Manually update local state to ensure UI refreshes correctly
         if (dayEvents.length > 0) {
             appState.calendar.data[dateKey] = dayEvents;
         } else {
@@ -273,7 +260,7 @@ async function confirmEventDeletion() {
         console.error("Error removing event:", error);
         alert("Could not remove the event. Please try again.");
     } finally {
-        eventToDelete = null; // Reset after the operation
+        eventToDelete = null;
     }
 }
 
@@ -312,13 +299,10 @@ function setupCalendarEventListeners() {
 
         const filterOptions = () => {
             const highlighted = optionsContainer.querySelector('.is-highlighted');
-            if (highlighted) {
-                highlighted.classList.remove('is-highlighted');
-            }
+            if (highlighted) highlighted.classList.remove('is-highlighted');
             const searchTerm = searchInput.value.toLowerCase();
             const options = optionsContainer.querySelectorAll('.dropdown-option:not(.no-results)');
             let visibleCount = 0;
-
             options.forEach(option => {
                 const text = option.textContent.trim().toLowerCase();
                 if (text.includes(searchTerm)) {
@@ -328,7 +312,6 @@ function setupCalendarEventListeners() {
                     option.style.display = 'none';
                 }
             });
-
             let noResultsMsg = optionsContainer.querySelector('.no-results');
             if (visibleCount === 0) {
                 if (!noResultsMsg) {
@@ -347,11 +330,9 @@ function setupCalendarEventListeners() {
             const type = option.dataset.type;
             const iconContainer = document.getElementById('category-selected-icon-container');
             const iconElement = option.querySelector('.option-icon, .option-dot');
-
             iconContainer.innerHTML = iconElement.outerHTML;
             iconContainer.className = `selected-icon-container ${type}`;
             iconContainer.classList.toggle('has-icon', iconElement.classList.contains('option-icon'));
-
             searchInput.value = option.textContent.trim();
             hiddenInput.value = type;
             categoryDropdown.classList.remove('open');
@@ -362,63 +343,40 @@ function setupCalendarEventListeners() {
             searchInput.select();
             filterOptions();
         });
-
         searchInput.addEventListener('input', filterOptions);
-
         searchInput.addEventListener('keydown', (e) => {
             if (!categoryDropdown.classList.contains('open')) {
-                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                    categoryDropdown.classList.add('open');
-                }
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') categoryDropdown.classList.add('open');
                 return;
             }
-
-            const options = Array.from(optionsContainer.querySelectorAll('.dropdown-option:not(.no-results)'))
-                                 .filter(opt => opt.style.display !== 'none');
+            const options = Array.from(optionsContainer.querySelectorAll('.dropdown-option:not(.no-results)')).filter(opt => opt.style.display !== 'none');
             if (options.length === 0) return;
-
             let currentIndex = options.findIndex(opt => opt.classList.contains('is-highlighted'));
-
             switch (e.key) {
                 case 'ArrowDown':
                     e.preventDefault();
-                    if (currentIndex >= 0) {
-                        options[currentIndex].classList.remove('is-highlighted');
-                    }
+                    if (currentIndex >= 0) options[currentIndex].classList.remove('is-highlighted');
                     const nextIndex = (currentIndex + 1) % options.length;
                     options[nextIndex].classList.add('is-highlighted');
                     options[nextIndex].scrollIntoView({ block: 'nearest' });
                     break;
-
                 case 'ArrowUp':
                     e.preventDefault();
-                    if (currentIndex >= 0) {
-                        options[currentIndex].classList.remove('is-highlighted');
-                    }
+                    if (currentIndex >= 0) options[currentIndex].classList.remove('is-highlighted');
                     const prevIndex = (currentIndex - 1 + options.length) % options.length;
                     options[prevIndex].classList.add('is-highlighted');
                     options[prevIndex].scrollIntoView({ block: 'nearest' });
                     break;
-
                 case 'Enter':
                     e.preventDefault();
-                    if (currentIndex >= 0) {
-                        selectOption(options[currentIndex]);
-                    }
+                    if (currentIndex >= 0) selectOption(options[currentIndex]);
                     break;
-
                 case 'Escape':
                     categoryDropdown.classList.remove('open');
                     break;
             }
         });
-
-        selectedDisplay.addEventListener('click', (e) => {
-            if (e.target !== searchInput) {
-                searchInput.focus();
-            }
-        });
-        
+        selectedDisplay.addEventListener('click', (e) => { if (e.target !== searchInput) searchInput.focus(); });
         document.addEventListener('click', (e) => {
             if (!categoryDropdown.contains(e.target)) {
                 categoryDropdown.classList.remove('open');
@@ -432,29 +390,23 @@ function setupCalendarEventListeners() {
                 }
             }
         });
-
         optionsContainer.addEventListener('click', (e) => {
             const option = e.target.closest('.dropdown-option:not(.no-results)');
-            if (option) {
-                selectOption(option);
-            }
+            if (option) selectOption(option);
         });
     }
 
     if (calendarCloseBtn) calendarCloseBtn.addEventListener('click', () => calendarModal.classList.add('hidden'));
-    
     if (calendarPrevMonthBtn) calendarPrevMonthBtn.addEventListener('click', () => {
         appState.calendar.currentDate.setDate(1);
         appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() - 1);
         renderCalendar();
     });
-
     if (calendarNextMonthBtn) calendarNextMonthBtn.addEventListener('click', () => {
         appState.calendar.currentDate.setDate(1);
         appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() + 1);
         renderCalendar();
     });
-
     if (calendarTodayBtn) calendarTodayBtn.addEventListener('click', () => {
         const today = new Date();
         appState.calendar.currentDate = today;
@@ -462,27 +414,20 @@ function setupCalendarEventListeners() {
         renderCalendar();
         renderDayDetails(dateKey);
     });
-
     if (calendarGrid) calendarGrid.addEventListener('click', (e) => {
         const dayCell = e.target.closest('.calendar-day');
-        if (dayCell && dayCell.dataset.dateKey) {
-            renderDayDetails(dayCell.dataset.dateKey);
-        }
+        if (dayCell && dayCell.dataset.dateKey) renderDayDetails(dayCell.dataset.dateKey);
     });
     
     if (dayEventList) dayEventList.addEventListener('click', async (e) => {
         const removeBtn = e.target.closest('.btn-remove-event');
         const eventItem = e.target.closest('.event-item');
-
         if (removeBtn) {
             e.stopPropagation();
             const indexToRemove = parseInt(removeBtn.dataset.index, 10);
             const eventTitle = eventItem.querySelector('.event-item-title').textContent;
-            
-            // Store the event info and open the custom modal
             eventToDelete = { dateKey: selectedDateKey, index: indexToRemove };
             openModal('confirmDeleteEvent', { eventTitle });
-            
         } else if (eventItem) {
             const index = parseInt(eventItem.dataset.index, 10);
             showEditEventForm(index);
@@ -494,14 +439,21 @@ function setupCalendarEventListeners() {
         if (dayEventList) dayEventList.classList.add('hidden');
         const form = document.getElementById('add-event-form');
         if (form) form.classList.remove('hidden');
+
+        // --- FIX: Control header visibility ---
+        const formTitle = document.getElementById('day-detail-form-title');
+        formTitle.textContent = 'Add New Event';
+        formTitle.classList.remove('hidden');
+        document.getElementById('day-detail-title').classList.add('hidden');
         addEventBtn.classList.add('hidden');
+        // --- END FIX ---
+
         document.getElementById('event-title-input').value = '';
         document.getElementById('event-all-day-toggle').checked = false;
         document.getElementById('event-time-inputs-container').classList.remove('hidden');
         document.getElementById('event-time-from-input').value = '';
         document.getElementById('event-time-to-input').value = '';
         document.getElementById('event-description-input').value = '';
-
         if (categoryDropdown) {
             const iconContainer = document.getElementById('category-selected-icon-container');
             iconContainer.innerHTML = '<span id="category-selected-dot" class="selected-dot"></span>';
@@ -509,19 +461,19 @@ function setupCalendarEventListeners() {
             document.getElementById('category-search-input').value = '';
             document.getElementById('event-type-input').value = '';
         }
-
-        document.getElementById('add-event-form-title').textContent = 'Add New Event';
-        document.getElementById('save-event-btn').textContent = 'Save Event';
     });
 
     if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => {
         appState.calendar.editingEventIndex = null;
         const form = document.getElementById('add-event-form');
         if (form) form.classList.add('hidden');
-
         if (dayEventList) dayEventList.classList.remove('hidden');
+
+        // --- FIX: Control header visibility ---
         document.getElementById('add-event-btn').classList.remove('hidden');
         document.getElementById('day-detail-title').classList.remove('hidden');
+        document.getElementById('day-detail-form-title').classList.add('hidden');
+        // --- END FIX ---
     });
 
     if (saveEventBtn) saveEventBtn.addEventListener('click', async () => {
@@ -531,7 +483,6 @@ function setupCalendarEventListeners() {
             alert('Please provide a title and select an event type.');
             return;
         }
-
         const isAllDay = allDayCheckbox.checked;
         const eventData = {
             title: title,
@@ -541,30 +492,21 @@ function setupCalendarEventListeners() {
             type: eventType,
             description: document.getElementById('event-description-input').value.trim(),
         };
-
         const dayEvents = appState.calendar.data[selectedDateKey] || [];
-        
         if (appState.calendar.editingEventIndex !== null) {
             dayEvents[appState.calendar.editingEventIndex] = eventData;
         } else {
             dayEvents.push(eventData);
         }
-
         const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
         const dataToUpdate = {};
         dataToUpdate[selectedDateKey] = dayEvents;
-
         try {
             await calendarRef.set(dataToUpdate, { merge: true });
-            
-            // FIX: Manually update the local state to ensure the UI refreshes correctly.
             appState.calendar.data[selectedDateKey] = dayEvents;
-
             appState.calendar.editingEventIndex = null;
             renderCalendar();
             renderDayDetails(selectedDateKey);
-            document.getElementById('add-event-btn').classList.remove('hidden');
-            document.getElementById('day-detail-title').classList.remove('hidden');
         } catch (error) {
             console.error("Error saving event:", error);
             alert("Could not save the event. Please try again.");
@@ -572,22 +514,17 @@ function setupCalendarEventListeners() {
     });
 }
 
-
-// This is the main function we'll export. It kicks everything off.
 export function initializeCalendar(database, state, modalOpener) {
     db = database;
-    appState = state; // We get the app's state from main.js
+    appState = state;
     openModal = modalOpener;
 
-    // Set up the radial menu button to open the calendar
     const calendarButton = document.getElementById('radial-action-calendar');
     if (calendarButton) {
         calendarButton.addEventListener('click', () => {
             appState.calendar.currentDate = new Date();
             const today = new Date();
             selectedDateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-            
-            // We need to load the latest data before rendering
             loadCalendarData().then(() => {
                 renderCalendar();
                 renderDayDetails(selectedDateKey);
@@ -597,9 +534,6 @@ export function initializeCalendar(database, state, modalOpener) {
         });
     }
 
-    // Listen for the confirmation event from the modal
     document.addEventListener('event-deletion-confirmed', confirmEventDeletion);
-
-    // This sets up all the other buttons (next month, save event, etc.)
     setupCalendarEventListeners();
 }
