@@ -1,6 +1,7 @@
 // js/calendar.js
 
-let db, appState, selectedDateKey;
+let db, appState, openModal, selectedDateKey;
+let eventToDelete = null; // Variable to store which event to delete before confirmation
 
 // Helper function to parse UK-style dates that might be entered in the AI plan
 export function parseUkDate(str) {
@@ -246,6 +247,35 @@ function showEditEventForm(index) {
     }
 }
 
+async function confirmEventDeletion() {
+    if (!eventToDelete) return;
+
+    const { dateKey, index } = eventToDelete;
+    const dayEvents = appState.calendar.data[dateKey] || [];
+    
+    dayEvents.splice(index, 1);
+
+    const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
+    const dataToUpdate = {};
+    dataToUpdate[dateKey] = dayEvents.length > 0 ? dayEvents : firebase.firestore.FieldValue.delete();
+
+    try {
+        await calendarRef.set(dataToUpdate, { merge: true });
+        // Manually update local state to ensure UI refreshes correctly
+        if (dayEvents.length > 0) {
+            appState.calendar.data[dateKey] = dayEvents;
+        } else {
+            delete appState.calendar.data[dateKey];
+        }
+        renderCalendar();
+        renderDayDetails(dateKey);
+    } catch (error) {
+        console.error("Error removing event:", error);
+        alert("Could not remove the event. Please try again.");
+    } finally {
+        eventToDelete = null; // Reset after the operation
+    }
+}
 
 function setupCalendarEventListeners() {
     const calendarModal = document.getElementById('calendar-modal');
@@ -281,17 +311,10 @@ function setupCalendarEventListeners() {
         const hiddenInput = document.getElementById('event-type-input');
 
         const filterOptions = () => {
-            // ====================================================================
-            // START: MODIFIED LOGIC
-            // ====================================================================
-            // Clear any existing highlights whenever the input changes (filter is run)
             const highlighted = optionsContainer.querySelector('.is-highlighted');
             if (highlighted) {
                 highlighted.classList.remove('is-highlighted');
             }
-            // ====================================================================
-            // END: MODIFIED LOGIC
-            // ====================================================================
             const searchTerm = searchInput.value.toLowerCase();
             const options = optionsContainer.querySelectorAll('.dropdown-option:not(.no-results)');
             let visibleCount = 0;
@@ -453,21 +476,13 @@ function setupCalendarEventListeners() {
 
         if (removeBtn) {
             e.stopPropagation();
-            if (!confirm('Are you sure you want to delete this event?')) return;
             const indexToRemove = parseInt(removeBtn.dataset.index, 10);
-            const dayEvents = appState.calendar.data[selectedDateKey] || [];
-            dayEvents.splice(indexToRemove, 1);
-            const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
-            const dataToUpdate = {};
-            dataToUpdate[selectedDateKey] = dayEvents.length > 0 ? dayEvents : firebase.firestore.FieldValue.delete();
-            try {
-                await calendarRef.set(dataToUpdate, { merge: true });
-                renderCalendar();
-                renderDayDetails(selectedDateKey);
-            } catch (error) {
-                console.error("Error removing event:", error);
-                alert("Could not remove the event. Please try again.");
-            }
+            const eventTitle = eventItem.querySelector('.event-item-title').textContent;
+            
+            // Store the event info and open the custom modal
+            eventToDelete = { dateKey: selectedDateKey, index: indexToRemove };
+            openModal('confirmDeleteEvent', { eventTitle });
+            
         } else if (eventItem) {
             const index = parseInt(eventItem.dataset.index, 10);
             showEditEventForm(index);
@@ -559,9 +574,10 @@ function setupCalendarEventListeners() {
 
 
 // This is the main function we'll export. It kicks everything off.
-export function initializeCalendar(database, state) {
+export function initializeCalendar(database, state, modalOpener) {
     db = database;
     appState = state; // We get the app's state from main.js
+    openModal = modalOpener;
 
     // Set up the radial menu button to open the calendar
     const calendarButton = document.getElementById('radial-action-calendar');
@@ -580,6 +596,9 @@ export function initializeCalendar(database, state) {
             });
         });
     }
+
+    // Listen for the confirmation event from the modal
+    document.addEventListener('event-deletion-confirmed', confirmEventDeletion);
 
     // This sets up all the other buttons (next month, save event, etc.)
     setupCalendarEventListeners();
