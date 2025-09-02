@@ -1,4 +1,4 @@
-// js/main.js
+// js/main.js - Provide the entire file content below
 
 import { initializeAuth, setupActivityListeners, clearActivityListeners } from './auth.js';
 import { getFirebaseConfig } from './api.js';
@@ -6,6 +6,20 @@ import { initializeCalendar } from './calendar.js';
 import { initializeDashboard, renderDashboard } from './dashboard.js';
 import { initializeUI, openModal, handleAIActionPlan, handleShare, initializeCharCounters } from './ui.js';
 import { initializePlanView, showPlanView } from './plan-view.js';
+
+/**
+ * Fetches the Firebase config and initializes the Firebase app.
+ */
+async function initializeFirebase() {
+    try {
+        const firebaseConfig = await getFirebaseConfig();
+        const app = firebase.initializeApp(firebaseConfig);
+        runApp(app);
+    } catch (error) {
+        console.error("Failed to initialize Firebase:", error);
+        document.body.innerHTML = '<div style="text-align: center; padding: 40px; font-family: sans-serif;"><h1>Error</h1><p>Could not load application configuration. Please contact support.</p></div>';
+    }
+}
 
 /**
  * Runs the main application logic after Firebase has been initialized.
@@ -27,7 +41,6 @@ function runApp(app) {
             data: {},
             editingEventIndex: null
         },
-        // Add a controller property to the app state for the AI plan generation
         aiPlanGenerationController: null 
     };
 
@@ -35,7 +48,6 @@ function runApp(app) {
     initializeUI(db, appState);
     initializeCalendar(db, appState, openModal);
     initializeDashboard(db, appState, openModal, handleSelectPlan);
-    // Pass all the required handler functions from ui.js into plan-view.js
     initializePlanView(db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare);
 
     function handleSelectPlan(planId) {
