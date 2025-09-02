@@ -76,6 +76,23 @@
         </footer>
     </div>
 
+    <!-- Custom Modal Structure -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div id="modal-box" class="modal-box">
+            <div class="modal-header">
+                <h3 id="modal-title" class="text-lg font-bold">Modal Title</h3>
+                <button id="modal-close-btn" class="modal-close-btn">&times;</button>
+            </div>
+            <div id="modal-content" class="modal-content">
+                <!-- Modal message will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button id="modal-action-btn" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
