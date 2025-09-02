@@ -38,6 +38,14 @@ function runProfileScript(app) {
         photoUploadInput: document.getElementById('photo-upload-input'),
         savePhotoBtn: document.getElementById('save-photo-btn'),
         removePhotoBtn: document.getElementById('remove-photo-btn'),
+
+        // Modal fields
+        modalOverlay: document.getElementById('modal-overlay'),
+        modalBox: document.getElementById('modal-box'),
+        modalTitle: document.getElementById('modal-title'),
+        modalContent: document.getElementById('modal-content'),
+        modalActionBtn: document.getElementById('modal-action-btn'),
+        modalCloseBtn: document.getElementById('modal-close-btn'),
     };
 
     let currentUser = null;
@@ -51,6 +59,26 @@ function runProfileScript(app) {
         isSetupMode = true;
     }
 
+    // --- Custom Modal Functions ---
+    function openModal(type, title, message) {
+        DOMElements.modalTitle.textContent = title;
+        DOMElements.modalContent.innerHTML = `<p>${message}</p>`;
+
+        // Add icons for visual feedback
+        if (type === 'success') {
+            DOMElements.modalTitle.innerHTML = `<i class="bi bi-check-circle-fill text-green-500 mr-2"></i> ${title}`;
+        } else if (type === 'warning') {
+            DOMElements.modalTitle.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-yellow-500 mr-2"></i> ${title}`;
+        }
+
+        DOMElements.modalOverlay.classList.remove('hidden');
+    }
+
+    function closeModal() {
+        DOMElements.modalOverlay.classList.add('hidden');
+    }
+
+
     // --- Profile Name/Bakery Save Function ---
     async function saveProfile() {
         if (!currentUser) return;
@@ -59,7 +87,7 @@ function runProfileScript(app) {
         const bakery = DOMElements.profileBakery.value.trim();
 
         if (isSetupMode && (!name || !bakery)) {
-            alert('Please enter your full name and bakery location to continue.');
+            openModal('warning', 'Incomplete Profile', 'Please enter your full name and bakery location to continue.');
             return;
         }
 
@@ -79,13 +107,13 @@ function runProfileScript(app) {
             if (isSetupMode) {
                 window.location.href = '/index.html';
             } else {
-                alert('Profile updated successfully!');
+                openModal('success', 'Profile Updated', 'Your changes have been saved successfully.');
                 DOMElements.saveProfileBtn.disabled = false;
                 DOMElements.saveProfileBtn.textContent = 'Save Changes';
             }
         } catch (error) {
             console.error("Error saving profile:", error);
-            alert('Could not save profile. Please try again.');
+            openModal('warning', 'Save Error', 'Could not save your profile. Please try again.');
             DOMElements.saveProfileBtn.disabled = false;
             DOMElements.saveProfileBtn.textContent = 'Save Changes';
         }
@@ -130,7 +158,7 @@ function runProfileScript(app) {
         const file = e.target.files[0];
         if (!file) return;
         if (file.size > 5 * 1024 * 1024) {
-            alert('File is too large. Please select a file smaller than 5MB.');
+            openModal('warning', 'File Too Large', 'Please select an image file smaller than 5MB.');
             return;
         }
         const reader = new FileReader();
@@ -156,10 +184,10 @@ function runProfileScript(app) {
             DOMElements.savePhotoBtn.classList.add('hidden');
             DOMElements.photoPreview.src = photoURL;
             selectedFile = null;
-            alert('Profile photo updated successfully!');
+            openModal('success', 'Photo Updated', 'Your new profile photo has been saved.');
         } catch (error) {
             console.error("Error uploading photo:", error);
-            alert('There was an error uploading your photo. Please try again.');
+            openModal('warning', 'Upload Error', 'There was an error uploading your photo. Please try again.');
         } finally {
             DOMElements.savePhotoBtn.disabled = false;
             DOMElements.savePhotoBtn.innerHTML = '<i class="bi bi-save-fill"></i><span>Save Photo</span>';
@@ -182,10 +210,10 @@ function runProfileScript(app) {
             DOMElements.removePhotoBtn.classList.add('hidden');
             DOMElements.savePhotoBtn.classList.add('hidden');
             selectedFile = null;
-            alert('Profile photo removed.');
+            openModal('success', 'Photo Removed', 'Your profile photo has been removed successfully.');
         } catch (error) {
             console.error("Error removing photo:", error);
-            alert('There was an error removing your photo.');
+            openModal('warning', 'Error', 'There was an error removing your photo.');
         }
     }
 
@@ -204,6 +232,15 @@ function runProfileScript(app) {
     DOMElements.photoUploadInput.addEventListener('change', handleFileSelect);
     DOMElements.savePhotoBtn.addEventListener('click', savePhoto);
     DOMElements.removePhotoBtn.addEventListener('click', removePhoto);
+
+    // Modal listeners
+    DOMElements.modalCloseBtn.addEventListener('click', closeModal);
+    DOMElements.modalActionBtn.addEventListener('click', closeModal);
+    DOMElements.modalOverlay.addEventListener('mousedown', (e) => {
+        if (e.target === DOMElements.modalOverlay) {
+            closeModal();
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', initializeFirebase);
