@@ -28,14 +28,12 @@ const DOMElements = {
 
 // --- HTML Templates for Views ---
 const templates = {
-    // MODIFIED: Removed the top card with Manager, Bakery, and Quarter inputs
     vision: {
         html: `<div class="space-y-8">
                         <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-sm"><h3 class="font-bold text-lg text-amber-900 mb-2">Our Mission</h3><p class="text-xl font-semibold text-gray-800">"To make world-class, craft baking a part of every neighbourhood."</p></div>
                         <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">Quarterly Vision: <i class="bi bi-info-circle info-icon" title="The big, overarching mission for the next 90 days."></i></label><div id="quarterlyTheme" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Become the undisputed neighbourhood favourite by mastering our availability." data-maxlength="400"></div></div>
                         <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Key Monthly Objectives</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1: <i class="bi bi-info-circle info-icon" title="High-level goal for the first 30-day sprint."></i></label><div id="month1Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PRODUCT: Master afternoon availability and reduce waste." data-maxlength="300"></div></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2: <i class="bi bi-info-circle info-icon" title="High-level goal for the second 30-day sprint."></i></label><div id="month2Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PLACE: Embed new production processes and daily checks." data-maxlength="300"></div></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3: <i class="bi bi-info-circle info-icon" title="High-level goal for the third 30-day sprint."></i></label><div id="month3Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PEOPLE: Develop team skills for consistent execution." data-maxlength="300"></div></div></div></div>
                    </div>`,
-        // MODIFIED: Removed fields from progress calculation
         requiredFields: ['quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
     },
     month: (monthNum) => `
@@ -598,8 +596,10 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
         }
         const statusButton = e.target.closest('.status-button');
         if (statusButton) {
+            // MODIFIED: This entire block is updated for deselection
             const alreadySelected = statusButton.classList.contains('selected');
             statusButton.parentElement.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
+            
             if (!alreadySelected) {
                 statusButton.classList.add('selected');
                 const monthNum = appState.currentView.split('-')[1];
