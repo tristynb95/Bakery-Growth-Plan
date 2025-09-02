@@ -4,9 +4,8 @@ import { initializeAuth, setupActivityListeners, clearActivityListeners } from '
 import { getFirebaseConfig } from './api.js';
 import { initializeCalendar } from './calendar.js';
 import { initializeDashboard, renderDashboard } from './dashboard.js';
-import { initializeUI, openModal } from './ui.js';
+import { initializeUI, openModal, handleAIActionPlan, handleShare, initializeCharCounters } from './ui.js';
 import { initializePlanView, showPlanView } from './plan-view.js';
-
 /**
  * Fetches the Firebase config and initializes the Firebase app.
  */
