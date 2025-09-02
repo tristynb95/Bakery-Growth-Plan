@@ -299,20 +299,19 @@
 
                 <div id="day-detail-view" class="day-detail-container">
                     <div id="day-detail-header" class="day-detail-header">
-    <div class="flex items-center gap-4">
-        <h3 id="day-detail-title" class="font-bold text-lg">Select a day</h3>
-        <button id="add-event-btn" class="btn btn-secondary"><i class="bi bi-plus-lg"></i> Add Event</button>
-    </div>
-    <div class="day-detail-actions">
-        <button id="calendar-close-btn" class="modal-close-btn">&times;</button>
-    </div>
-</div>
+                        <div class="flex items-center gap-4">
+                            <h3 id="day-detail-title" class="font-bold text-lg">Select a day</h3>
+                            <h3 id="day-detail-form-title" class="font-bold text-lg hidden">Add New Event</h3>
+                            <button id="add-event-btn" class="btn btn-secondary"><i class="bi bi-plus-lg"></i> Add Event</button>
+                        </div>
+                        <div class="day-detail-actions">
+                            <button id="calendar-close-btn" class="modal-close-btn">&times;</button>
+                        </div>
+                    </div>
                     <div id="day-detail-content" class="day-detail-content">
                         <div id="day-event-list" class="day-event-list">
                         </div>
                         <div id="add-event-form" class="add-event-form-redesigned is-compact hidden">
-                            <h4 id="add-event-form-title" class="add-event-form-title">Add New Event</h4>
-
                             <div class="form-field-group">
                                 <i class="bi bi-chat-left-text form-field-icon"></i>
                                 <input type="text" id="event-title-input" class="form-input" placeholder="Event Title" autocomplete="off">
@@ -345,34 +344,34 @@
                                 <label class="form-section-label">Category</label>
                                 <div id="category-dropdown" class="custom-dropdown">
                                     <div class="dropdown-selected" tabindex="0">
-    <div id="category-selected-icon-container" class="selected-icon-container">
-        <span id="category-selected-dot" class="selected-dot"></span>
-    </div>
-    <input type="text" id="category-search-input" class="dropdown-search-input" placeholder="Search or select..." autocomplete="off">
-    <i class="bi bi-chevron-down dropdown-caret"></i>
-</div>
+                                        <div id="category-selected-icon-container" class="selected-icon-container">
+                                            <span id="category-selected-dot" class="selected-dot"></span>
+                                        </div>
+                                        <input type="text" id="category-search-input" class="dropdown-search-input" placeholder="Search or select..." autocomplete="off">
+                                        <i class="bi bi-chevron-down dropdown-caret"></i>
+                                    </div>
                                     <div class="dropdown-options">
-    <div class="dropdown-option" data-type="one-to-one"><span class="option-dot one-to-one"></span> 1 to 1</div>
-<div class="dropdown-option" data-type="birthday"><i class="bi bi-cake2 option-icon birthday"></i> Birthday</div>
-    <div class="dropdown-option" data-type="bm-self-audit"><span class="option-dot bm-self-audit"></span> BM Self Audit</div>
-    <div class="dropdown-option" data-type="cascade"><span class="option-dot cascade"></span> Cascade</div>
-    <div class="dropdown-option" data-type="coffee-cake"><span class="option-dot coffee-cake"></span> Coffee & Cake</div>
-    <div class="dropdown-option" data-type="cross-training"><span class="option-dot cross-training"></span> Cross-Training</div>
-    <div class="dropdown-option" data-type="meeting"><span class="option-dot meeting"></span> Meeting</div>
-    <div class="dropdown-option" data-type="new-product-launch"><span class="option-dot new-product-launch"></span> New Product Launch</div>
-    <div class="dropdown-option" data-type="on-boarding"><span class="option-dot on-boarding"></span> On-Boarding</div>
-    <div class="dropdown-option" data-type="personal"><span class="option-dot personal"></span> Personal</div>
-    <div class="dropdown-option" data-type="probation-end"><span class="option-dot probation-end"></span> Probation End</div>
-    <div class="dropdown-option" data-type="promo-launch"><span class="option-dot promo-launch"></span> Promo Launch</div>
-    <div class="dropdown-option" data-type="quarterly-awards"><span class="option-dot quarterly-awards"></span> Quarterly Awards</div>
-    <div class="dropdown-option" data-type="recruitment"><span class="option-dot recruitment"></span> Recruitment</div>
-    <div class="dropdown-option" data-type="reminder"><span class="option-dot reminder"></span> Reminder</div>
-    <div class="dropdown-option" data-type="requested-off"><span class="option-dot requested-off"></span> Requested Off</div>
-    <div class="dropdown-option" data-type="rise-deadline"><span class="option-dot rise-deadline"></span> RISE Deadline</div>
-    <div class="dropdown-option" data-type="rise-with-gails"><span class="option-dot rise-with-gails"></span> Rise With GAIL's</div>
-    <div class="dropdown-option" data-type="training"><span class="option-dot training"></span> Training</div>
-    <div class="dropdown-option" data-type="work-anniversary"><span class="option-dot work-anniversary"></span> Work Anniversary</div>
-</div>
+                                        <div class="dropdown-option" data-type="one-to-one"><span class="option-dot one-to-one"></span> 1 to 1</div>
+                                        <div class="dropdown-option" data-type="birthday"><i class="bi bi-cake2 option-icon birthday"></i> Birthday</div>
+                                        <div class="dropdown-option" data-type="bm-self-audit"><span class="option-dot bm-self-audit"></span> BM Self Audit</div>
+                                        <div class="dropdown-option" data-type="cascade"><span class="option-dot cascade"></span> Cascade</div>
+                                        <div class="dropdown-option" data-type="coffee-cake"><span class="option-dot coffee-cake"></span> Coffee & Cake</div>
+                                        <div class="dropdown-option" data-type="cross-training"><span class="option-dot cross-training"></span> Cross-Training</div>
+                                        <div class="dropdown-option" data-type="meeting"><span class="option-dot meeting"></span> Meeting</div>
+                                        <div class="dropdown-option" data-type="new-product-launch"><span class="option-dot new-product-launch"></span> New Product Launch</div>
+                                        <div class="dropdown-option" data-type="on-boarding"><span class="option-dot on-boarding"></span> On-Boarding</div>
+                                        <div class="dropdown-option" data-type="personal"><span class="option-dot personal"></span> Personal</div>
+                                        <div class="dropdown-option" data-type="probation-end"><span class="option-dot probation-end"></span> Probation End</div>
+                                        <div class="dropdown-option" data-type="promo-launch"><span class="option-dot promo-launch"></span> Promo Launch</div>
+                                        <div class="dropdown-option" data-type="quarterly-awards"><span class="option-dot quarterly-awards"></span> Quarterly Awards</div>
+                                        <div class="dropdown-option" data-type="recruitment"><span class="option-dot recruitment"></span> Recruitment</div>
+                                        <div class="dropdown-option" data-type="reminder"><span class="option-dot reminder"></span> Reminder</div>
+                                        <div class="dropdown-option" data-type="requested-off"><span class="option-dot requested-off"></span> Requested Off</div>
+                                        <div class="dropdown-option" data-type="rise-deadline"><span class="option-dot rise-deadline"></span> RISE Deadline</div>
+                                        <div class="dropdown-option" data-type="rise-with-gails"><span class="option-dot rise-with-gails"></span> Rise With GAIL's</div>
+                                        <div class="dropdown-option" data-type="training"><span class="option-dot training"></span> Training</div>
+                                        <div class="dropdown-option" data-type="work-anniversary"><span class="option-dot work-anniversary"></span> Work Anniversary</div>
+                                    </div>
                                     <input type="hidden" id="event-type-input">
                                 </div>
                             </div>
