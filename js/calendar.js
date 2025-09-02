@@ -120,9 +120,8 @@ async function loadCalendarData() {
 function renderDayDetails(dateKey) {
     selectedDateKey = dateKey;
 
-    // Set the default state for the header
+    // Set the default state for the header and form
     document.getElementById('add-event-btn').classList.remove('hidden');
-    document.getElementById('day-detail-subtitle').classList.add('hidden');
     
     document.querySelectorAll('.calendar-day.selected').forEach(d => d.classList.remove('selected'));
     const selectedDayCell = document.querySelector(`.calendar-day[data-date-key="${dateKey}"]`);
@@ -187,10 +186,9 @@ function showEditEventForm(index) {
     appState.calendar.editingEventIndex = index;
     const event = appState.calendar.data[selectedDateKey][index];
 
-    // Control header visibility
-    const subtitle = document.getElementById('day-detail-subtitle');
-    subtitle.textContent = `Editing: ${event.title}`;
-    subtitle.classList.remove('hidden');
+    // Control header and form visibility
+    const formTitle = document.getElementById('add-event-form-title');
+    formTitle.textContent = 'Edit Event';
     document.getElementById('add-event-btn').classList.add('hidden');
 
     document.getElementById('day-event-list').classList.add('hidden');
@@ -435,10 +433,9 @@ function setupCalendarEventListeners() {
         if (dayEventList) dayEventList.classList.add('hidden');
         document.getElementById('add-event-form').classList.remove('hidden');
 
-        // Control header visibility
-        const subtitle = document.getElementById('day-detail-subtitle');
-        subtitle.textContent = 'Adding new event';
-        subtitle.classList.remove('hidden');
+        // Control header and form title visibility
+        const formTitle = document.getElementById('add-event-form-title');
+        formTitle.textContent = 'Add New Event';
         addEventBtn.classList.add('hidden');
 
         document.getElementById('event-title-input').value = '';
@@ -463,7 +460,6 @@ function setupCalendarEventListeners() {
 
         // Control header visibility
         document.getElementById('add-event-btn').classList.remove('hidden');
-        document.getElementById('day-detail-subtitle').classList.add('hidden');
     });
 
     if (saveEventBtn) saveEventBtn.addEventListener('click', async () => {
@@ -527,4 +523,3 @@ export function initializeCalendar(database, state, modalOpener) {
     document.addEventListener('event-deletion-confirmed', confirmEventDeletion);
     setupCalendarEventListeners();
 }
-
