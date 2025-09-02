@@ -1,4 +1,5 @@
 // js/dashboard.js
+
 import { calculatePlanCompletion } from './utils.js';
 
 // These will be passed in from main.js so this module can talk to the database and the rest of the app.
@@ -56,10 +57,11 @@ export async function renderDashboard() {
         const completion = calculatePlanCompletion(plan);
         const editedDate = formatLastEditedDate(plan.lastEdited);
         const planName = plan.planName || 'Untitled Plan';
+        // MODIFIED: Added data-plan-quarter attribute to the edit button
         dashboardHTML += `
             <div class="plan-card">
                 <div class="plan-card-actions">
-                    <button class="plan-action-btn edit-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Edit Name"><i class="bi bi-pencil-square"></i></button>
+                    <button class="plan-action-btn edit-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" data-plan-quarter="${plan.quarter || ''}" title="Edit Details"><i class="bi bi-pencil-square"></i></button>
                     <button class="plan-action-btn delete-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Delete Plan"><i class="bi bi-trash3-fill"></i></button>
                 </div>
                 <div class="plan-card-main" data-plan-id="${plan.id}">
@@ -105,6 +107,7 @@ export function initializeDashboard(database, state, modalOpener, planSelector) 
         window.location.href = '/profile.html';
     });
     
+    // MODIFIED: The event listener now reads and passes the quarter data
     dashboardContent.addEventListener('click', (e) => {
         const createBtn = e.target.closest('#create-new-plan-btn');
         const mainCard = e.target.closest('.plan-card-main');
@@ -113,7 +116,11 @@ export function initializeDashboard(database, state, modalOpener, planSelector) 
         
         if (editBtn) {
             e.stopPropagation();
-            openModal('edit', { planId: editBtn.dataset.planId, currentName: editBtn.dataset.planName });
+            openModal('edit', { 
+                planId: editBtn.dataset.planId, 
+                currentName: editBtn.dataset.planName,
+                currentQuarter: editBtn.dataset.planQuarter 
+            });
         } else if (deleteBtn) {
             e.stopPropagation();
             openModal('delete', { planId: deleteBtn.dataset.planId, planName: deleteBtn.dataset.planName });
