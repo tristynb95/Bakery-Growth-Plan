@@ -7,7 +7,7 @@ The Bakery Growth Planner is a modern web application designed to empower GAIL's
 This tool serves as a central hub for managers to define their vision, set actionable goals, track progress, and foster team development, ensuring alignment with GAIL's core pillars: People, Product, Customer, and Place.
 
 <br>
-<h4>✨ Key Features:</h4>
+<h3>✨ Key Features:</h3>
 
 📝 Guided 30-60-90 Day Plan: An intuitive, step-by-step template that walks managers through creating a comprehensive quarterly plan, from high-level vision to weekly check-ins.
 
@@ -24,7 +24,7 @@ This tool serves as a central hub for managers to define their vision, set actio
 👤 User Profiles: A dedicated space for managers to manage their account details and profile photo.
 
 <br>
-<h4>🚀 Roadmap & Future Features</h4>
+<h3>🚀 Roadmap & Future Features</h3>
 🧠 Myers-Briggs Integration: AI-generated action plans tailored to a manager's specific Myers-Briggs personality type for more effective strategies.
 
 💬 AI Companion Chatbot: An intelligent assistant to support managers with real-time planning, execution advice, and data analysis.
@@ -32,7 +32,7 @@ This tool serves as a central hub for managers to define their vision, set actio
 👨‍👩‍👧‍👦 Team "Family Tree": A module to visualise your team structure, track individual development goals, and manage training schedules.
 
 <br>
-<h4>🛠️ Tech Stack & Architecture</h4>
+<h3>🛠️ Tech Stack & Architecture</h3>
 This application is built with a modern, scalable, and secure architecture, prioritising performance and maintainability.
 
 - Frontend: Vanilla JavaScript (ES Modules), HTML5, Tailwind CSS
@@ -52,7 +52,7 @@ This application is built with a modern, scalable, and secure architecture, prio
 The architecture is decoupled, with a static frontend that communicates with a secure serverless backend. This approach ensures that sensitive API keys (for Firebase and Google AI) are never exposed on the client-side. Firestore provides real-time data synchronisation, which is essential for a seamless user experience across devices.
 
 <br>
-**⚙️ Getting Started**</h4>
+<h3>⚙️ Getting Started**</h3>
 Follow these instructions to set up and run the project locally for development.
 
 <h4>Prerequisites</h4>
@@ -92,7 +92,7 @@ netlify dev
 This command will start the Vite development server and the Netlify functions emulator. You can access the application at the URL provided in the terminal (usually http://localhost:8888).
 
 <br>
-<h4>📁 Folder Structure</h4>
+<h3>📁 Folder Structure</h3>
 /
 ├── js/                  # Frontend JavaScript modules
 │   ├── api.js           # Handles API calls to Netlify functions
@@ -116,7 +116,7 @@ This command will start the Vite development server and the Netlify functions em
 └── netlify.toml         # Netlify deployment configuration
 
 <br>
-<h4>🤝 Contributing**</h4>
+<h3>🤝 Contributing**</h3>
 Contributions are welcome! Please follow these steps to contribute:
 
 Fork the repository.
@@ -130,7 +130,7 @@ Push to the branch (git push origin feature/your-feature-name).
 Open a Pull Request.
 
 <br>
-<h4>📄 License**</h4>
+<h3>📄 License**</h3>
 This project is proprietary and intended for use by GAIL's Bakery managers. All rights reserved.
 
 <br>
