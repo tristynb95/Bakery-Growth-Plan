@@ -25,7 +25,7 @@ export function isContentEmpty(htmlContent) {
  * @param {object} planData The data for the plan.
  * @returns {{completed: number, total: number}} An object with completed and total field counts.
  */
-function getVisionProgress(planData) {
+export function getVisionProgress(planData) {
     const requiredFields = templates.vision.requiredFields;
     const total = requiredFields.length;
     const completed = requiredFields.filter(field => !isContentEmpty(planData[field])).length;
@@ -54,7 +54,7 @@ export function isWeekComplete(monthNum, weekNum, planData) {
  * @param {object} planData The data for the plan.
  * @returns {{completed: number, total: number}} An object with completed and total field counts.
  */
-function getMonthProgress(monthNum, planData) {
+export function getMonthProgress(monthNum, planData) {
     const requiredFields = [
         `m${monthNum}s1_battle`, `m${monthNum}s1_pillar`, `m${monthNum}s2_levers`,
         `m${monthNum}s2_powerup_q`, `m${monthNum}s2_powerup_a`, `m${monthNum}s3_people`,
