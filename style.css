@@ -1934,3 +1934,8 @@ input[type="time"] {
     opacity: 1;
     pointer-events: auto;
 }
+
+/* 48. Calendar Header Button Height Consistency */
+.calendar-header .btn, .day-detail-header .btn {
+    height: 42px; /* Sets a fixed height for all buttons in the calendar headers */
+}
