@@ -290,7 +290,20 @@ textarea.form-input {
 
 /* 7. Custom Modal Styles
 -------------------------------------------------- */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(5px); z-index: 1020; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.modal-overlay { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0; 
+    background-color: rgba(17, 24, 39, 0.7); 
+    backdrop-filter: blur(5px); 
+    z-index: 1020; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 1rem; 
+}
 .modal-box { background-color: var(--gails-white); border-radius: 1.25rem; box-shadow: var(--shadow-lg); width: 100%; max-width: 500px; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.75rem; border-bottom: 1px solid #E5E7EB; }
 .modal-content { padding: 1.75rem; }
@@ -1938,4 +1951,17 @@ input[type="time"] {
 /* 48. Calendar Header Button Height Consistency */
 .calendar-header .btn, .day-detail-header .btn {
     height: 42px; /* Sets a fixed height for all buttons in the calendar headers */
+}
+
+/* 49. Stable Calendar Detail Header */
+.day-detail-header-main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* This ensures the container doesn't shrink when the subtitle is hidden */
+    min-height: 42px;
+}
+
+#day-detail-subtitle {
+    margin-top: -4px; /* Adjust vertical alignment */
 }
