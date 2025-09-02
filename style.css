@@ -1690,6 +1690,11 @@ tr:hover .btn-remove-row {
     font-size: 0.875rem;
 }
 
+#calendar-close-btn {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
 
 /* 41. Compact Notes Text Area
 -------------------------------------------------- */
