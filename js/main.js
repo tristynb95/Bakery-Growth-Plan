@@ -71,6 +71,14 @@ function runApp(app) {
         if (e.detail && e.detail.isTimeout) {
             openModal('timeout');
         }
+        // MODIFICATION: Check for session revival logout
+        if (e.detail && e.detail.isRevival) {
+            const authError = document.getElementById('auth-error');
+            if (authError) {
+                authError.textContent = 'For your security, please sign in again.';
+                authError.style.display = 'block';
+            }
+        }
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
         auth.signOut();
@@ -90,6 +98,16 @@ function runApp(app) {
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
         
         if (user) {
+            // --- ADDED THIS BLOCK ---
+            const lastActivity = localStorage.getItem('lastActivity');
+            const MAX_INACTIVITY_PERIOD = 8 * 60 * 60 * 1000; // 8 hours
+            if (lastActivity && (new Date().getTime() - lastActivity > MAX_INACTIVITY_PERIOD)) {
+                console.log("Maximum inactivity period exceeded. Forcing logout.");
+                document.dispatchEvent(new CustomEvent('logout-request', { detail: { isRevival: true } }));
+                return;
+            }
+            // --- END BLOCK ---
+
             initialLoadingView.classList.remove('hidden');
             loginView.classList.add('hidden');
 
