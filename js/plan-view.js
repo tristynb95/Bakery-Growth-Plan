@@ -539,6 +539,7 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
     initializeCharCounters = charCounterFunc;
     handleAIActionPlan = aiActionPlanFunc;
     handleShare = shareFunc;
+    state.forceSave = () => saveData(true);
 
     DOMElements.mainNav.addEventListener('click', (e) => {
         e.preventDefault();
