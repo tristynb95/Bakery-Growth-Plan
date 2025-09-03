@@ -118,9 +118,11 @@ export function initializeAuth(auth) {
             .catch(error => {
                 let friendlyMessage = 'An unexpected error occurred. Please try again.';
                 switch (error.code) {
+                    // --- MODIFIED LINE START ---
                     case 'auth/email-already-in-use':
-                        friendlyMessage = 'An account with this email address already exists. Please try logging in.';
+                        friendlyMessage = 'This email may already be registered. Please try logging in instead.';
                         break;
+                    // --- MODIFIED LINE END ---
                     case 'auth/weak-password':
                         friendlyMessage = 'The password is too weak. Please choose a stronger password.';
                         break;
