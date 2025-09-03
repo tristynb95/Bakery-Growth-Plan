@@ -80,6 +80,7 @@ function runApp(app) {
         }
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
+        localStorage.removeItem('lastActivity'); // <-- THE FIX IS HERE
         auth.signOut();
     });
 
@@ -145,3 +146,4 @@ function runApp(app) {
 }
 
 document.addEventListener('DOMContentLoaded', initializeFirebase);
+
