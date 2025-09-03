@@ -71,7 +71,6 @@ function runApp(app) {
         if (e.detail && e.detail.isTimeout) {
             openModal('timeout');
         }
-        // MODIFICATION: Check for session revival logout
         if (e.detail && e.detail.isRevival) {
             const authError = document.getElementById('auth-error');
             if (authError) {
@@ -98,7 +97,6 @@ function runApp(app) {
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
         
         if (user) {
-            // --- ADDED THIS BLOCK ---
             const lastActivity = localStorage.getItem('lastActivity');
             const MAX_INACTIVITY_PERIOD = 8 * 60 * 60 * 1000; // 8 hours
             if (lastActivity && (new Date().getTime() - lastActivity > MAX_INACTIVITY_PERIOD)) {
@@ -106,7 +104,7 @@ function runApp(app) {
                 document.dispatchEvent(new CustomEvent('logout-request', { detail: { isRevival: true } }));
                 return;
             }
-            // --- END BLOCK ---
+            localStorage.setItem('lastActivity', new Date().getTime());
 
             initialLoadingView.classList.remove('hidden');
             loginView.classList.add('hidden');
