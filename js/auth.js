@@ -12,15 +12,16 @@ function handleLogout(isTimeout = false) {
     document.dispatchEvent(new CustomEvent('logout-request', { detail: { isTimeout } }));
 }
 
-function resetSessionTimeout(appState) {
+async function resetSessionTimeout(appState) {
     clearTimeout(sessionTimeout);
     localStorage.setItem('lastActivity', new Date().getTime());
     sessionTimeout = setTimeout(async () => {
         if (appState.currentUser) {
-            // Before logging out, we should try to save any pending data.
-            // This requires a bit more thought on how to trigger a save from here.
-            // For now, we'll just log out.
-            console.log("Session timeout, logging out.");
+            console.log("Session timeout, saving data before logging out.");
+            // Check if the forceSave function exists on the appState and call it
+            if (appState.forceSave) {
+                await appState.forceSave();
+            }
             handleLogout(true);
         }
     }, SESSION_DURATION);
