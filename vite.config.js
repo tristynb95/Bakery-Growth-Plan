@@ -9,7 +9,8 @@ export default defineConfig({
         profile: 'profile.html',
         terms: 'terms-and-conditions.html',
         privacy: 'privacy-policy.html',
-        view: 'view.html'
+        view: 'view.html',
+        action: 'action.html'
       }
     }
   },
