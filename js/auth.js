@@ -177,9 +177,13 @@ export function initializeAuth(auth) {
                 resetMessageContainer.innerHTML = `<p class="auth-success">If an account exists for this email, a password reset link has been sent. Please check your inbox.</p>`;
             })
             .catch((error) => {
-                // We show the same success message to prevent people from guessing emails
-                resetMessageContainer.innerHTML = `<p class="auth-success">If an account exists for this email, a password reset link has been sent. Please check your inbox.</p>`;
-                console.error("Password Reset Error:", error.message);
+                if (error.code === 'auth/invalid-email') {
+                    resetMessageContainer.innerHTML = `<p class="auth-error" style="display:block; margin-bottom: 1rem;">The email address is not valid. Please enter a valid email.</p>`;
+                } else {
+                    // For all other errors (like user-not-found), show the generic success message
+                    resetMessageContainer.innerHTML = `<p class="auth-success">If an account exists for this email, a password reset link has been sent. Please check your inbox.</p>`;
+                }
+                console.error("Password Reset Error:", error.code, error.message);
             })
             .finally(() => {
                 setTimeout(() => {
