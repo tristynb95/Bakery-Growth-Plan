@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAIL's | Account Action</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+</head>
+<body class="antialiased">
+
+    <div class="auth-container">
+        <div id="action-handler-box" class="auth-box">
+            <img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/92/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo" class="auth-logo">
+
+            <!-- Loading View -->
+            <div id="loading-view">
+                <h2 class="auth-title">Verifying...</h2>
+                <div class="flex justify-center mt-4">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+
+            <!-- Reset Password View -->
+            <div id="reset-password-view" class="hidden">
+                <h2 class="auth-title">Choose a New Password</h2>
+                <p class="text-center text-gray-500 -mt-2 mb-4">Your new password must be at least six characters long.</p>
+                <p id="reset-error" class="auth-error"></p>
+                <input type="password" id="new-password" class="form-input" placeholder="New Password">
+                <button id="reset-password-btn" class="btn btn-primary w-full mt-4">Save New Password</button>
+            </div>
+
+            <!-- Success View -->
+            <div id="success-view" class="hidden text-center">
+                <h2 class="auth-title">Password Updated</h2>
+                <p class="text-gray-600 mt-2">Your password has been successfully reset. You can now sign in with your new password.</p>
+                <a href="/index.html" class="btn btn-primary w-full mt-6">Back to Login</a>
+            </div>
+
+             <!-- Error View -->
+            <div id="error-view" class="hidden text-center">
+                <h2 class="auth-title">Link Invalid</h2>
+                <p id="error-message" class="text-gray-600 mt-2">This password reset link is invalid or has expired. Please request a new one.</p>
+                <a href="/index.html" class="btn btn-secondary w-full mt-6">Back to Login</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
+    <script src="js/action.js"></script>
+
+</body>
+</html>
