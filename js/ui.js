@@ -257,12 +257,10 @@ async function handleModalAction() {
             closeModal();
             DOMElements.creationLoadingView.classList.remove('hidden');
             try {
-                // MODIFIED: Fetch user profile data before creating the plan
                 const userDocRef = db.collection('users').doc(appState.currentUser.uid);
                 const userDoc = await userDocRef.get();
                 const userData = userDoc.exists ? userDoc.data() : { name: '', bakery: '' };
 
-                // MODIFIED: Add profile data to the new plan document
                 const newPlan = await plansRef.add({
                     planName: newPlanName,
                     quarter: newPlanQuarter,
@@ -573,19 +571,17 @@ export function closeModal() {
 // --- Main Initializer ---
 
 export function initializeUI(database, state) {
-    // Connect to other parts of the app
     db = database;
     appState = state;
 
-    // --- Modal Event Listeners ---
-    DOMElements.modalCloseBtn.addEventListener('click', closeModal);
+    // MODIFIED: This now calls the correct function
+    DOMElements.modalCloseBtn.addEventListener('click', requestCloseModal);
     DOMElements.modalOverlay.addEventListener('mousedown', (e) => {
         if (e.target === DOMElements.modalOverlay) {
-            closeModal();
+            requestCloseModal();
         }
     });
 
-    // --- Mobile Sidebar & Swipe ---
     DOMElements.mobileMenuBtn.addEventListener('click', () => DOMElements.appView.classList.toggle('sidebar-open'));
     DOMElements.sidebarOverlay.addEventListener('click', () => DOMElements.appView.classList.remove('sidebar-open'));
 
@@ -614,13 +610,11 @@ export function initializeUI(database, state) {
         }
     });
 
-    // --- Radial Menu ---
     if (DOMElements.radialMenuFab) {
         DOMElements.radialMenuFab.addEventListener('click', () => DOMElements.radialMenuContainer.classList.toggle('open'));
         DOMElements.radialMenuOverlay.addEventListener('click', () => DOMElements.radialMenuContainer.classList.remove('open'));
     }
 
-    // --- Cookie Banner ---
     if (localStorage.getItem('gails_cookie_consent') === null) {
         DOMElements.cookieBanner.classList.remove('hidden');
     }
