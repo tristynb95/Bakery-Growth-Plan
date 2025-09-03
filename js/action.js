@@ -24,6 +24,8 @@ function runActionHandler(app) {
         successView: document.getElementById('success-view'),
         errorView: document.getElementById('error-view'),
         newPasswordInput: document.getElementById('new-password'),
+        confirmNewPasswordInput: document.getElementById('confirm-new-password'),
+        passwordToggles: document.querySelectorAll('.password-toggle'),
         resetPasswordBtn: document.getElementById('reset-password-btn'),
         resetError: document.getElementById('reset-error'),
         errorMessage: document.getElementById('error-message'),
@@ -56,8 +58,17 @@ function runActionHandler(app) {
 
                 const handleReset = () => {
                     const newPassword = DOMElements.newPasswordInput.value;
+                    const confirmPassword = DOMElements.confirmNewPasswordInput.value;
+                    DOMElements.resetError.style.display = 'none';
+
                     if (newPassword.length < 6) {
                         DOMElements.resetError.textContent = 'Password must be at least 6 characters long.';
+                        DOMElements.resetError.style.display = 'block';
+                        return;
+                    }
+                    
+                    if (newPassword !== confirmPassword) {
+                        DOMElements.resetError.textContent = 'Passwords do not match.';
                         DOMElements.resetError.style.display = 'block';
                         return;
                     }
@@ -80,6 +91,25 @@ function runActionHandler(app) {
                 DOMElements.resetPasswordBtn.addEventListener('click', handleReset);
                 DOMElements.newPasswordInput.addEventListener('keyup', (e) => {
                     if (e.key === 'Enter') handleReset();
+                });
+                DOMElements.confirmNewPasswordInput.addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter') handleReset();
+                });
+
+                DOMElements.passwordToggles.forEach(toggle => {
+                    toggle.addEventListener('click', () => {
+                        const input = toggle.previousElementSibling;
+                        const icon = toggle.querySelector('i');
+                        if (input.type === 'password') {
+                            input.type = 'text';
+                            icon.classList.remove('bi-eye-slash-fill');
+                            icon.classList.add('bi-eye-fill');
+                        } else {
+                            input.type = 'password';
+                            icon.classList.remove('bi-eye-fill');
+                            icon.classList.add('bi-eye-slash-fill');
+                        }
+                    });
                 });
 
             })
