@@ -18,7 +18,6 @@
         <div id="action-handler-box" class="auth-box">
             <img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/92/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo" class="auth-logo">
 
-            <!-- Loading View -->
             <div id="loading-view">
                 <h2 class="auth-title">Verifying...</h2>
                 <div class="flex justify-center mt-4">
@@ -26,24 +25,36 @@
                 </div>
             </div>
 
-            <!-- Reset Password View -->
             <div id="reset-password-view" class="hidden">
                 <h2 class="auth-title">Choose a New Password</h2>
                 <p class="text-center text-gray-500 -mt-2 mb-4">Your new password must be at least six characters long.</p>
                 <p id="reset-error" class="auth-error"></p>
-                <input type="password" id="new-password" class="form-input" placeholder="New Password">
-                <button id="reset-password-btn" class="btn btn-primary w-full mt-4">Save New Password</button>
+
+                <div class="space-y-4">
+                    <div class="relative">
+                        <input type="password" id="new-password" class="form-input !pr-10" placeholder="New Password">
+                        <button class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 password-toggle">
+                            <i class="bi bi-eye-slash-fill"></i>
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="confirm-new-password" class="form-input !pr-10" placeholder="Confirm New Password">
+                        <button class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 password-toggle">
+                            <i class="bi bi-eye-slash-fill"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button id="reset-password-btn" class="btn btn-primary w-full mt-6">Save New Password</button>
             </div>
 
-            <!-- Success View -->
             <div id="success-view" class="hidden text-center">
                 <h2 class="auth-title">Password Updated</h2>
                 <p class="text-gray-600 mt-2">Your password has been successfully reset. You can now sign in with your new password.</p>
                 <a href="/index.html" class="btn btn-primary w-full mt-6">Back to Login</a>
             </div>
 
-             <!-- Error View -->
-            <div id="error-view" class="hidden text-center">
+             <div id="error-view" class="hidden text-center">
                 <h2 class="auth-title">Link Invalid</h2>
                 <p id="error-message" class="text-gray-600 mt-2">This password reset link is invalid or has expired. Please request a new one.</p>
                 <a href="/index.html" class="btn btn-secondary w-full mt-6">Back to Login</a>
