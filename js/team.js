@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-             // This is a placeholder as the main script handles authentication
-             window.location.href = '/index.html';
+            // Dispatch a global event that the main.js script will catch
+            document.dispatchEvent(new CustomEvent('logout-request'));
         });
     }
 });
