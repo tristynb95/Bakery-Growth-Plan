@@ -2152,3 +2152,11 @@ input[type="time"] {
       text-align: center;
     }
 }
+
+/* Find this existing rule and update the font-size */
+.main-title {
+    font-size: 3rem; /* UPDATED from 2.5rem */
+    font-weight: 900;
+    color: var(--gails-text-primary);
+    line-height: 1.1;
+}
