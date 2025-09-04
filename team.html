@@ -9,13 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="team.css">
 </head>
 <body class="antialiased bg-gray-50">
 
     <div id="team-view">
         <header class="dashboard-header">
-            <a href="/index.html"><img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/92/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo" class="h-9"></a>
+            <a href="/index.html"><img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/2/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo" class="h-9"></a>
             <div>
                 <button id="back-to-dashboard-btn" class="btn btn-secondary"><i class="bi bi-grid-1x2-fill"></i> Dashboard</button>
                 <button id="profile-btn" class="btn btn-secondary"><i class="bi bi-person-circle"></i> My Profile</button>
@@ -24,69 +23,87 @@
         </header>
 
         <main class="p-6 sm:p-8 lg:p-12">
-            <div class="max-w-6xl mx-auto">
-                <div class="mb-12">
-                    <h1 class="main-title font-poppins">Team Hub</h1>
-                    <p class="subtitle">Your all-in-one hub for team management and development.</p>
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-wrap justify-between items-center gap-6 mb-8">
+                    <div>
+                        <h1 class="main-title font-poppins">Our Team</h1>
+                        <p class="subtitle">Manage, develop, and celebrate your Breadheads.</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="search-wrapper">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" id="team-search-input" class="form-input" placeholder="Search team members...">
+                        </div>
+                        <button id="add-member-btn" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add New</button>
+                    </div>
                 </div>
 
-                <div class="bento-grid">
-                    <a href="#" class="bento-tile tile-large bg-gails-red text-white">
-                        <div class="tile-content">
-                            <i class="bi bi-person-vcard-fill tile-icon"></i>
-                            <h3 class="tile-title">Our Team</h3>
-                            <p class="tile-description">Visualise your team structure, roles, and contact information.</p>
-                        </div>
-                    </a>
-                    <a href="#" class="bento-tile">
-                        <div class="tile-content">
-                            <i class="bi bi-grid-3x3-gap-fill tile-icon"></i>
-                            <h3 class="tile-title">Skill Mapper</h3>
-                            <p class="tile-description">Track team skills and identify training gaps.</p>
-                        </div>
-                    </a>
-                    <a href="#" class="bento-tile">
-                        <div class="tile-content">
-                            <i class="bi bi-book-half tile-icon"></i>
-                            <h3 class="tile-title">The Playbook</h3>
-                            <p class="tile-description">Access and manage all standard operating procedures.</p>
-                        </div>
-                    </a>
-                    <a href="#" class="bento-tile">
-                        <div class="tile-content">
-                            <i class="bi bi-person-check-fill tile-icon"></i>
-                            <h3 class="tile-title">RISE Profiles</h3>
-                            <p class="tile-description">Manage individual development and training plans.</p>
-                        </div>
-                    </a>
-                    <a href="#" class="bento-tile">
-                        <div class="tile-content">
-                             <i class="bi bi-chat-heart-fill tile-icon"></i>
-                            <h3 class="tile-title">Coffee & Cake</h3>
-                            <p class="tile-description">Schedule and log notes from your informal 1:1s.</p>
-                        </div>
-                    </a>
-                     <a href="#" class="bento-tile tile-wide">
-                        <div class="tile-content">
-                             <i class="bi bi-megaphone-fill tile-icon"></i>
-                            <h3 class="tile-title">Team Shoutouts</h3>
-                            <p class="tile-description">A digital noticeboard for peer-to-peer recognition to foster a positive environment.</p>
-                        </div>
-                    </a>
-                    <a href="#" class="bento-tile">
-                        <div class="tile-content">
-                            <i class="bi bi-emoji-smile-fill tile-icon"></i>
-                            <h3 class="tile-title">Weekly Pulse</h3>
-                            <p class="tile-description">Gauge team morale with quick, anonymous polls.</p>
-                        </div>
-                    </a>
-                    <a href="#" class="bento-tile">
-                        <div class="tile-content">
-                            <i class="bi bi-box-arrow-left tile-icon"></i>
-                            <h3 class="tile-title">Exit Interviews</h3>
-                            <p class="tile-description">Log feedback from departing employees.</p>
-                        </div>
-                    </a>
+                <div id="team-grid" class="team-grid mb-16">
+                    </div>
+
+                <div class="border-t pt-12">
+                     <div class="mb-8">
+                        <h2 class="main-title font-poppins">Team Tools & Resources</h2>
+                        <p class="subtitle">Your all-in-one hub for team management and development.</p>
+                    </div>
+                    <div class="bento-grid">
+                        <a href="#" class="bento-tile">
+                            <div class="tile-content">
+                                <i class="bi bi-diagram-3-fill tile-icon"></i>
+                                <h3 class="tile-title">Team Family Tree</h3>
+                                <p class="tile-description">Visualise your team structure and reporting lines.</p>
+                            </div>
+                        </a>
+                        <a href="#" class="bento-tile">
+                            <div class="tile-content">
+                                <i class="bi bi-grid-3x3-gap-fill tile-icon"></i>
+                                <h3 class="tile-title">Skill Mapper</h3>
+                                <p class="tile-description">Track team skills and identify training gaps.</p>
+                            </div>
+                        </a>
+                        <a href="#" class="bento-tile">
+                            <div class="tile-content">
+                                <i class="bi bi-book-half tile-icon"></i>
+                                <h3 class="tile-title">The Playbook</h3>
+                                <p class="tile-description">Access and manage all standard operating procedures.</p>
+                            </div>
+                        </a>
+                        <a href="#" class="bento-tile">
+                            <div class="tile-content">
+                                <i class="bi bi-person-check-fill tile-icon"></i>
+                                <h3 class="tile-title">RISE Profiles</h3>
+                                <p class="tile-description">Manage individual development and training plans.</p>
+                            </div>
+                        </a>
+                        <a href="#" class="bento-tile">
+                            <div class="tile-content">
+                                 <i class="bi bi-chat-heart-fill tile-icon"></i>
+                                <h3 class="tile-title">Coffee & Cake</h3>
+                                <p class="tile-description">Schedule and log notes from your informal 1:1s.</p>
+                            </div>
+                        </a>
+                         <a href="#" class="bento-tile tile-wide">
+                            <div class="tile-content">
+                                 <i class="bi bi-megaphone-fill tile-icon"></i>
+                                <h3 class="tile-title">Team Shoutouts</h3>
+                                <p class="tile-description">A digital noticeboard for peer-to-peer recognition.</p>
+                            </div>
+                        </a>
+                        <a href="#" class="bento-tile">
+                            <div class="tile-content">
+                                <i class="bi bi-emoji-smile-fill tile-icon"></i>
+                                <h3 class="tile-title">Weekly Pulse</h3>
+                                <p class="tile-description">Gauge team morale with quick, anonymous polls.</p>
+                            </div>
+                        </a>
+                        <a href="#" class="bento-tile">
+                            <div class="tile-content">
+                                <i class="bi bi-box-arrow-left tile-icon"></i>
+                                <h3 class="tile-title">Exit Interviews</h3>
+                                <p class="tile-description">Log feedback from departing employees.</p>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
         </main>
