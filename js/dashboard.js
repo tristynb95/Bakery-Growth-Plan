@@ -11,7 +11,7 @@ let db, appState, openModal, handleSelectPlan;
  * @returns {string} The formatted date string.
  */
 function formatLastEditedDate(lastEditedDate) {
-    if (!lastEditedDate || !!lastEditedDate.toDate) {
+    if (!lastEditedDate || !lastEditedDate.toDate) {
         return 'N/A';
     }
     const now = new Date();
@@ -41,6 +41,15 @@ export async function renderDashboard() {
 
     const dashboardContent = document.getElementById('dashboard-content');
     const dashboardView = document.getElementById('dashboard-view');
+
+    // ================== THE FIX ==================
+    // If we're not on the main dashboard page, these elements won't exist.
+    // Exit the function gracefully before trying to modify them.
+    if (!dashboardView || !dashboardContent) {
+        return;
+    }
+    // =============================================
+
     dashboardView.classList.remove('hidden'); // Show the dashboard
     
     let plans = [];
@@ -57,7 +66,6 @@ export async function renderDashboard() {
         const completion = calculatePlanCompletion(plan);
         const editedDate = formatLastEditedDate(plan.lastEdited);
         const planName = plan.planName || 'Untitled Plan';
-        // MODIFIED: Added data-plan-quarter attribute to the edit button
         dashboardHTML += `
             <div class="plan-card">
                 <div class="plan-card-actions">
@@ -97,13 +105,11 @@ export function initializeDashboard(database, state, modalOpener, planSelector) 
 
     const dashboardContent = document.getElementById('dashboard-content');
     
-    // ================== THE FIX ==================
     // If the main dashboard content area doesn't exist on the current page,
     // exit the function to prevent errors.
     if (!dashboardContent) {
         return;
     }
-    // =============================================
 
     const dashboardLogoutBtn = document.getElementById('dashboard-logout-btn');
     const dashboardProfileBtn = document.getElementById('dashboard-profile-btn');
