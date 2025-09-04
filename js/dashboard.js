@@ -98,6 +98,7 @@ export function initializeDashboard(database, state, modalOpener, planSelector) 
     const dashboardContent = document.getElementById('dashboard-content');
     const dashboardLogoutBtn = document.getElementById('dashboard-logout-btn');
     const dashboardProfileBtn = document.getElementById('dashboard-profile-btn');
+    const dashboardTeamBtn = document.getElementById('dashboard-team-btn');
 
     dashboardLogoutBtn.addEventListener('click', () => {
         document.dispatchEvent(new CustomEvent('logout-request'));
@@ -106,8 +107,13 @@ export function initializeDashboard(database, state, modalOpener, planSelector) 
     dashboardProfileBtn.addEventListener('click', () => {
         window.location.href = '/profile.html';
     });
+
+    if (dashboardTeamBtn) {
+        dashboardTeamBtn.addEventListener('click', () => {
+            window.location.href = '/team.html';
+        });
+    }
     
-    // MODIFIED: The event listener now reads and passes the quarter data
     dashboardContent.addEventListener('click', (e) => {
         const createBtn = e.target.closest('#create-new-plan-btn');
         const mainCard = e.target.closest('.plan-card-main');
