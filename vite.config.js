@@ -10,7 +10,8 @@ export default defineConfig({
         terms: 'terms-and-conditions.html',
         privacy: 'privacy-policy.html',
         view: 'view.html',
-        action: 'action.html'
+        action: 'action.html',
+        team: 'team.html'
       }
     }
   },
