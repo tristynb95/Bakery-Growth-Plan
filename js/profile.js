@@ -29,13 +29,13 @@ function runProfileScript(app) {
     const DOMElements = {
         profileName: document.getElementById('profile-name'),
         profileEmail: document.getElementById('profile-email'),
-        saveProfileBtn: document.getElementById('save-profile-btn'),
+        headerSaveBtn: document.getElementById('header-save-btn'),
+        headerBackBtn: document.getElementById('header-back-btn'),
         bakeryDropdown: document.getElementById('bakery-dropdown'),
         bakerySearchInput: document.getElementById('bakery-search-input'),
         bakeryHiddenInput: document.getElementById('profile-bakery-hidden'),
         headerTitle: document.getElementById('header-title'),
         headerSubtitle: document.getElementById('header-subtitle'),
-        backToDashboardBtn: document.getElementById('back-to-dashboard-btn'),
         photoPreview: document.getElementById('profile-photo-preview'),
         photoUploadInput: document.getElementById('photo-upload-input'),
         savePhotoBtn: document.getElementById('save-photo-btn'),
@@ -82,9 +82,9 @@ function runProfileScript(app) {
         const hasChanged = currentName !== originalProfileData.name || currentBakery !== originalProfileData.bakery;
 
         if (isSetupMode) {
-            DOMElements.saveProfileBtn.disabled = !isFilled;
+            DOMElements.headerSaveBtn.disabled = !isFilled;
         } else {
-            DOMElements.saveProfileBtn.disabled = !isFilled || !hasChanged;
+            DOMElements.headerSaveBtn.disabled = !isFilled || !hasChanged;
         }
     }
 
@@ -102,8 +102,8 @@ function runProfileScript(app) {
         const dataToSave = { name, bakery, email: currentUser.email };
 
         try {
-            DOMElements.saveProfileBtn.disabled = true;
-            DOMElements.saveProfileBtn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Saving...';
+            DOMElements.headerSaveBtn.disabled = true;
+            DOMElements.headerSaveBtn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Saving...';
             await userRef.set(dataToSave, { merge: true });
 
             if (isSetupMode) {
@@ -112,13 +112,13 @@ function runProfileScript(app) {
                 openModal('success', 'Profile Updated', 'Your changes have been saved successfully.');
                 originalProfileData.name = name;
                 originalProfileData.bakery = bakery;
-                DOMElements.saveProfileBtn.textContent = 'Save Changes';
+                DOMElements.headerSaveBtn.innerHTML = '<i class="bi bi-check-lg"></i> Save Changes';
                 checkFormValidity();
             }
         } catch (error) {
             console.error("Error saving profile:", error);
             openModal('warning', 'Save Error', 'Could not save your profile. Please try again.');
-            DOMElements.saveProfileBtn.textContent = 'Save Changes';
+            DOMElements.headerSaveBtn.innerHTML = '<i class="bi bi-check-lg"></i> Save Changes';
             checkFormValidity();
         }
     }
@@ -168,12 +168,12 @@ function runProfileScript(app) {
                     DOMElements.photoPreview.src = data.photoURL;
                     DOMElements.removePhotoBtn.classList.remove('hidden');
                 }
-                DOMElements.backToDashboardBtn.classList.remove('hidden');
+                DOMElements.headerBackBtn.classList.remove('hidden');
                 checkFormValidity();
             } else {
                 DOMElements.headerTitle.textContent = 'Welcome! Let\'s Set Up Your Profile.';
                 DOMElements.headerSubtitle.textContent = 'Please provide your details to get started.';
-                DOMElements.saveProfileBtn.textContent = 'Save and Continue';
+                DOMElements.headerSaveBtn.textContent = 'Save and Continue';
                 isSetupMode = true;
                 checkFormValidity();
             }
@@ -216,9 +216,7 @@ function runProfileScript(app) {
             filterOptions();
         });
 
-        // MODIFIED: Added blur event listener for validation
         searchInput.addEventListener('blur', () => {
-            // A short delay allows a click on the dropdown to register before the blur event fires
             setTimeout(() => {
                 if (!bakeryList.includes(searchInput.value)) {
                     searchInput.value = '';
@@ -324,8 +322,8 @@ function runProfileScript(app) {
     });
 
     DOMElements.profileName.addEventListener('input', checkFormValidity);
-    DOMElements.saveProfileBtn.addEventListener('click', saveProfile);
-    DOMElements.backToDashboardBtn.addEventListener('click', () => { window.location.href = '/index.html'; });
+    DOMElements.headerSaveBtn.addEventListener('click', saveProfile);
+    DOMElements.headerBackBtn.addEventListener('click', () => { window.location.href = '/index.html'; });
     DOMElements.modalCloseBtn.addEventListener('click', closeModal);
     DOMElements.modalActionBtn.addEventListener('click', closeModal);
     DOMElements.modalOverlay.addEventListener('mousedown', (e) => {
@@ -334,3 +332,4 @@ function runProfileScript(app) {
 }
 
 document.addEventListener('DOMContentLoaded', initializeFirebase);
+
