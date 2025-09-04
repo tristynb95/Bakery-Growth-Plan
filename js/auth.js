@@ -1,14 +1,28 @@
 // js/auth.js
 
+let auth; // The Firebase auth instance
+
 // --- SESSION TIMEOUT LOGIC ---
 const SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
 let sessionTimeout = null;
 
-// This will be called from main.js when the user logs out.
+/**
+ * The single, reliable function for signing out a user.
+ * It clears session data from local storage and then signs the user out.
+ */
+export function handleSignOut() {
+    if (auth) {
+        localStorage.removeItem('lastPlanId');
+        localStorage.removeItem('lastViewId');
+        localStorage.removeItem('lastActivity');
+        auth.signOut();
+    } else {
+        console.error("Auth module not initialized. Cannot sign out.");
+    }
+}
+
 function handleLogout(isTimeout = false) {
     console.log('Logout event triggered...');
-    // The actual sign out is handled by the onAuthStateChanged listener in main.js
-    // We just need to trigger it.
     document.dispatchEvent(new CustomEvent('logout-request', { detail: { isTimeout } }));
 }
 
@@ -18,7 +32,6 @@ async function resetSessionTimeout(appState) {
     sessionTimeout = setTimeout(async () => {
         if (appState.currentUser) {
             console.log("Session timeout, saving data before logging out.");
-            // Check if the forceSave function exists on the appState and call it
             if (appState.forceSave) {
                 await appState.forceSave();
             }
@@ -28,37 +41,30 @@ async function resetSessionTimeout(appState) {
 }
 
 export function setupActivityListeners(appState) {
-    // Pass appState here to avoid making it a global module variable
     const resetFn = () => resetSessionTimeout(appState);
     window.addEventListener('mousemove', resetFn);
     window.addEventListener('mousedown', resetFn);
     window.addEventListener('keypress', resetFn);
     window.addEventListener('touchmove', resetFn);
     window.addEventListener('scroll', resetFn, true);
-    resetSessionTimeout(appState); // Start the timer immediately
+    resetSessionTimeout(appState);
 }
 
 export function clearActivityListeners() {
-    // We need to be able to remove the specific listener function.
-    // This is a simplification. For a real implementation, we would need to store the listener function reference.
-    // For this refactoring, we'll assume a page reload clears them effectively upon logout.
     clearTimeout(sessionTimeout);
-    // A more robust implementation would be:
-    // window.removeEventListener('mousemove', resetFn); ...and so on for all listeners.
 }
 
-
-// This function will be in charge of setting up all the buttons and inputs for the login/register screens.
-export function initializeAuth(auth) {
+/**
+ * Initializes the auth module with the Firebase auth instance and sets up UI listeners.
+ * @param {object} _auth The initialized Firebase auth instance.
+ */
+export function initializeAuth(_auth) {
+    auth = _auth;
     const loginBtn = document.getElementById('login-btn');
 
-    // ================== THE FIX ==================
-    // If the login button doesn't exist, we're not on the login page.
-    // So, we exit the function to prevent errors.
     if (!loginBtn) {
-        return;
+        return; // Not on the login page, exit gracefully.
     }
-    // =============================================
 
     // --- DOM Elements for Authentication ---
     const emailInput = document.getElementById('email');
@@ -127,11 +133,9 @@ export function initializeAuth(auth) {
             .catch(error => {
                 let friendlyMessage = 'An unexpected error occurred. Please try again.';
                 switch (error.code) {
-                    // --- MODIFIED LINE START ---
                     case 'auth/email-already-in-use':
                         friendlyMessage = 'This email may already be registered. Please try logging in instead.';
                         break;
-                    // --- MODIFIED LINE END ---
                     case 'auth/weak-password':
                         friendlyMessage = 'The password is too weak. Please choose a stronger password.';
                         break;
@@ -192,7 +196,6 @@ export function initializeAuth(auth) {
                 if (error.code === 'auth/invalid-email') {
                     resetMessageContainer.innerHTML = `<p class="auth-error" style="display:block; margin-bottom: 1rem;">The email address is not valid. Please enter a valid email.</p>`;
                 } else {
-                    // For all other errors (like user-not-found), show the generic success message
                     resetMessageContainer.innerHTML = `<p class="auth-success">If an account exists for this email, a password reset link has been sent. Please check your inbox.</p>`;
                 }
                 console.error("Password Reset Error:", error.code, error.message);
