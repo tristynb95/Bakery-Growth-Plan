@@ -2167,3 +2167,181 @@ input[type="time"] {
         grid-template-columns: repeat(4, 1fr);
     }
 }
+
+/* 51. Team Hub Redesign
+-------------------------------------------------- */
+
+.page-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.hub-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto;
+    gap: 1.5rem;
+    grid-template-areas:
+        "snapshot card1 card2"
+        "shoutouts card3 card4";
+}
+
+.hub-snapshot { grid-area: snapshot; }
+.hub-shoutouts { grid-area: shoutouts; }
+
+.bento-tile-large {
+    background-color: var(--gails-white);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    border: 1px solid #E5E7EB;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    grid-column: span 1;
+}
+
+.hub-card {
+    background: linear-gradient(145deg, var(--gails-white) 0%, #F9FAFB 100%);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    border: 1px solid #E5E7EB;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hub-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--gails-red);
+}
+
+.tile-icon-large {
+    font-size: 2.5rem;
+    color: var(--gails-red);
+    margin-bottom: 1rem;
+    background: var(--gails-red-light);
+    width: 60px;
+    height: 60px;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tile-link {
+    margin-top: auto;
+    font-weight: 600;
+    color: var(--gails-red);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: gap 0.2s ease;
+}
+
+.tile-link:hover {
+    gap: 0.75rem;
+    text-decoration: underline;
+}
+
+/* Snapshot Tile */
+.snapshot-header {
+    border-bottom: 1px solid #F3F4F6;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+.tile-title-large {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+.snapshot-date {
+    font-size: 0.875rem;
+    color: var(--gails-text-secondary);
+    font-weight: 500;
+}
+.snapshot-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 1rem;
+}
+.stat-large {
+    text-align: center;
+}
+.stat-large-value {
+    font-family: 'Poppins', sans-serif;
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--gails-red);
+    line-height: 1;
+}
+.stat-large-label {
+    font-weight: 500;
+    color: var(--gails-text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Shoutouts Tile */
+.hub-shoutouts {
+    background: linear-gradient(to top, #374151, #1F2937);
+    color: var(--gails-white);
+    justify-content: center;
+    text-align: center;
+}
+.shoutout-content .bi-megaphone-fill {
+    font-size: 2rem;
+    color: var(--gails-gold);
+}
+.shoutout-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-top: 1rem;
+}
+.shoutout-author {
+    display: block;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: #9CA3AF;
+}
+
+/* Responsive Grid for Team Hub */
+@media (max-width: 1024px) {
+    .hub-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-areas:
+            "snapshot snapshot"
+            "card1 card2"
+            "card3 card4"
+            "shoutouts shoutouts";
+    }
+}
+
+@media (max-width: 767px) {
+    .hub-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "snapshot"
+            "shoutouts"
+            "card1"
+            "card2"
+            "card3"
+            "card4";
+    }
+    .page-header {
+      justify-content: center;
+      text-align: center;
+    }
+}
