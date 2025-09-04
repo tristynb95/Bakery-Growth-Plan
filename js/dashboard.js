@@ -11,7 +11,7 @@ let db, appState, openModal, handleSelectPlan;
  * @returns {string} The formatted date string.
  */
 function formatLastEditedDate(lastEditedDate) {
-    if (!lastEditedDate || !lastEditedDate.toDate) {
+    if (!lastEditedDate || !!lastEditedDate.toDate) {
         return 'N/A';
     }
     const now = new Date();
@@ -96,6 +96,15 @@ export function initializeDashboard(database, state, modalOpener, planSelector) 
     handleSelectPlan = planSelector;
 
     const dashboardContent = document.getElementById('dashboard-content');
+    
+    // ================== THE FIX ==================
+    // If the main dashboard content area doesn't exist on the current page,
+    // exit the function to prevent errors.
+    if (!dashboardContent) {
+        return;
+    }
+    // =============================================
+
     const dashboardLogoutBtn = document.getElementById('dashboard-logout-btn');
     const dashboardProfileBtn = document.getElementById('dashboard-profile-btn');
     const dashboardTeamBtn = document.getElementById('dashboard-team-btn');
