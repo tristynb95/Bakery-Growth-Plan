@@ -574,7 +574,14 @@ export function initializeUI(database, state) {
     db = database;
     appState = state;
 
-    // MODIFIED: This now calls the correct function
+    // ================== THE FIX ==================
+    // If we're on a page without the main UI elements (like the modal),
+    // exit the function to prevent errors when adding event listeners.
+    if (!DOMElements.modalCloseBtn || !DOMElements.mobileMenuBtn) {
+        return;
+    }
+    // =============================================
+
     DOMElements.modalCloseBtn.addEventListener('click', requestCloseModal);
     DOMElements.modalOverlay.addEventListener('mousedown', (e) => {
         if (e.target === DOMElements.modalOverlay) {
