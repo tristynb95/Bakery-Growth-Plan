@@ -1,3 +1,7 @@
+// js/team.js
+
+import { handleSignOut } from './auth.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const backToDashboardBtn = document.getElementById('back-to-dashboard-btn');
     const manageTeamBtn = document.getElementById('manage-team-btn');
@@ -17,8 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            // Dispatch a global event that the main.js script will catch
-            document.dispatchEvent(new CustomEvent('logout-request'));
+            // Call the imported sign-out function directly for immediate and reliable logout.
+            handleSignOut();
         });
     }
 });
