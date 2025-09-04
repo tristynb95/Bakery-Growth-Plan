@@ -2152,3 +2152,123 @@ input[type="time"] {
       text-align: center;
     }
 }
+
+/* 51. Manage Team Page Styles
+-------------------------------------------------- */
+
+/* KPI Cards */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.kpi-card {
+    background-color: var(--gails-white);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid #E5E7EB;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.kpi-icon {
+    font-size: 2rem;
+    color: var(--gails-red);
+}
+
+.kpi-value {
+    display: block;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 2rem;
+    color: var(--gails-text-primary);
+    line-height: 1;
+}
+
+.kpi-label {
+    font-size: 0.875rem;
+    color: var(--gails-text-secondary);
+}
+
+/* Team Roster Grid */
+.team-roster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.team-roster-card {
+    background-color: var(--gails-white);
+    border-radius: 1rem;
+    border: 1px solid #E5E7EB;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: all 0.2s ease-in-out;
+}
+
+.team-roster-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--gails-red);
+}
+
+.team-roster-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+}
+
+.profile-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gails-red-light);
+}
+
+.member-name {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--gails-text-primary);
+}
+
+.member-position {
+    color: var(--gails-text-secondary);
+    font-weight: 500;
+}
+
+.team-roster-card .card-body {
+    padding: 0 1.25rem 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.status-tag {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    line-height: 1.5;
+}
+
+.status-tag.status-keyholder {
+    background-color: var(--gails-gold);
+    color: #78350F;
+}
+
+.status-tag.status-training {
+    background-color: #DBEAFE;
+    color: #1E4491;
+}
+
+.team-roster-card .card-footer {
+    background-color: #F9FAFB;
+    padding: 1rem;
+    border-top: 1px solid #F3F4F6;
+}
