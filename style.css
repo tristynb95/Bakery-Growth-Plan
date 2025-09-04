@@ -1978,18 +1978,32 @@ input[type="time"] {
 /* 50. Team Page Specific Styles */
 /* team.css */
 
+/* Page Titles */
+.main-title {
+    font-size: 2.5rem; /* 40px */
+    font-weight: 900;
+    color: var(--gails-text-primary);
+    line-height: 1.1;
+}
+.subtitle {
+    margin-top: 0.5rem;
+    font-size: 1.125rem; /* 18px */
+    color: var(--gails-text-secondary);
+}
+
+
 /* Main Bento Grid Layout */
 .bento-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem; /* Reduced gap */
 }
 
 /* Individual Tile Styling */
 .bento-tile {
     background-color: var(--gails-white);
     border-radius: 1.25rem;
-    padding: 2rem;
+    padding: 1.5rem; /* Reduced padding */
     border: 1px solid #E5E7EB;
     box-shadow: var(--shadow-md);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -2012,23 +2026,23 @@ input[type="time"] {
 }
 
 .tile-icon {
-    font-size: 2.5rem;
+    font-size: 2rem; /* Reduced icon size */
     color: var(--gails-red);
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem; /* Reduced margin */
 }
 
 .tile-title {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
-    font-size: 1.5rem;
+    font-size: 1.25rem; /* Reduced title size */
     color: var(--gails-text-primary);
 }
 
 .tile-description {
     color: var(--gails-text-secondary);
-    font-size: 0.95rem;
-    line-height: 1.6;
-    margin-top: 0.5rem;
+    font-size: 0.875rem; /* Reduced description size */
+    line-height: 1.5;
+    margin-top: 0.25rem; /* Reduced margin */
 }
 
 /* Modifier for large tile */
@@ -2062,5 +2076,11 @@ input[type="time"] {
 @media (min-width: 1024px) {
     .bento-grid {
         grid-template-columns: repeat(4, 1fr);
+    }
+    .main-title {
+        font-size: 3rem; /* 48px */
+    }
+    .subtitle {
+        font-size: 1.25rem; /* 20px */
     }
 }
