@@ -1974,3 +1974,39 @@ input[type="time"] {
 #day-detail-subtitle {
     margin-top: -4px; /* Adjust vertical alignment */
 }
+
+/* Team Page Specific Styles */
+.feature-card {
+    background-color: var(--gails-white);
+    border-radius: 1.25rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid #E5E7EB;
+    padding: 2rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.feature-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--gails-red);
+}
+
+.feature-card .icon {
+    font-size: 2.5rem;
+    color: var(--gails-red);
+    margin-bottom: 1rem;
+}
+
+.feature-card h3 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--gails-text-primary);
+}
+
+.feature-card p {
+    color: var(--gails-text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
