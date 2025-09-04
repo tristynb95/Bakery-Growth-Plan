@@ -1,10 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const profileBtn = document.getElementById('dashboard-profile-btn');
+    const backBtn = document.getElementById('back-to-dashboard-btn');
+    const editBtn = document.getElementById('edit-team-details-btn');
     const logoutBtn = document.getElementById('dashboard-logout-btn');
 
-    if (profileBtn) {
-        profileBtn.addEventListener('click', () => {
-            window.location.href = '/profile.html';
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            window.location.href = '/index.html';
+        });
+    }
+
+    if (editBtn) {
+        editBtn.addEventListener('click', () => {
+            alert('Edit Team Details functionality will be available soon.');
         });
     }
 
