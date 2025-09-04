@@ -1975,7 +1975,7 @@ input[type="time"] {
     margin-top: -4px; /* Adjust vertical alignment */
 }
 
-/* Team Page Specific Styles */
+/* 50. Team Page Specific Styles */
 .feature-card {
     background-color: var(--gails-white);
     border-radius: 1.25rem;
