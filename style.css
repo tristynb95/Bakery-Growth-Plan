@@ -1976,74 +1976,91 @@ input[type="time"] {
 }
 
 /* 50. Team Page Specific Styles */
-.feature-card {
-    background-color: var(--gails-white);
-    border-radius: 1.25rem;
-    box-shadow: var(--shadow-md);
-    border: 1px solid #E5E7EB;
-    padding: 2rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
+/* team.css */
+
+/* Main Bento Grid Layout */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
 }
 
-.feature-card:hover {
+/* Individual Tile Styling */
+.bento-tile {
+    background-color: var(--gails-white);
+    border-radius: 1.25rem;
+    padding: 2rem;
+    border: 1px solid #E5E7EB;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    color: var(--gails-text-primary);
+    display: flex;
+    flex-direction: column;
+}
+
+.bento-tile:hover {
     transform: translateY(-6px);
     box-shadow: var(--shadow-lg);
     border-color: var(--gails-red);
 }
 
-.feature-card .icon {
+.tile-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.tile-icon {
     font-size: 2.5rem;
     color: var(--gails-red);
     margin-bottom: 1rem;
 }
 
-.feature-card h3 {
+.tile-title {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     color: var(--gails-text-primary);
 }
 
-.feature-card p {
+.tile-description {
     color: var(--gails-text-secondary);
     font-size: 0.95rem;
     line-height: 1.6;
+    margin-top: 0.5rem;
 }
 
-/* 'Coming Soon' Hover Effect */
-.feature-card {
-    position: relative; /* Establishes a positioning context for the overlay */
-    overflow: hidden; /* Ensures the overlay respects the card's rounded corners */
+/* Modifier for large tile */
+.tile-large {
+    grid-row: span 2;
 }
 
-.feature-card::before {
-    content: 'Coming Soon';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-
-    /* Styling for the overlay */
-    background-color: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(4px);
-    
-    /* Text styling and centering */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--gails-red);
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1.25rem;
-
-    /* Animation */
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-    pointer-events: none; /* Allows the card to still be clickable if needed */
+/* Modifier for wide tile */
+.tile-wide {
+    grid-column: span 2;
 }
 
-.feature-card:hover::before {
-    opacity: 1;
+/* Styles for tiles with special background colors */
+.bento-tile.bg-gails-red {
+    background-color: var(--gails-red);
+}
+
+.bento-tile.bg-gails-red .tile-icon,
+.bento-tile.bg-gails-red .tile-title,
+.bento-tile.bg-gails-red .tile-description {
+    color: var(--gails-white);
+}
+
+/* Responsive adjustments for the grid */
+@media (min-width: 768px) {
+    .bento-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .bento-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
