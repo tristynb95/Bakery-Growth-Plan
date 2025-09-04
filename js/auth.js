@@ -50,10 +50,19 @@ export function clearActivityListeners() {
 
 // This function will be in charge of setting up all the buttons and inputs for the login/register screens.
 export function initializeAuth(auth) {
+    const loginBtn = document.getElementById('login-btn');
+
+    // ================== THE FIX ==================
+    // If the login button doesn't exist, we're not on the login page.
+    // So, we exit the function to prevent errors.
+    if (!loginBtn) {
+        return;
+    }
+    // =============================================
+
     // --- DOM Elements for Authentication ---
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
-    const loginBtn = document.getElementById('login-btn');
     const authError = document.getElementById('auth-error');
     const forgotPasswordBtn = document.getElementById('forgot-password-btn');
     const resetView = document.getElementById('reset-view');
