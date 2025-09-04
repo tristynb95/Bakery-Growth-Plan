@@ -107,15 +107,15 @@ function runApp(app) {
             }
             localStorage.setItem('lastActivity', new Date().getTime());
 
-            initialLoadingView.classList.remove('hidden');
-            loginView.classList.add('hidden');
+            if (initialLoadingView) initialLoadingView.classList.remove('hidden');
+            if (loginView) loginView.classList.add('hidden');
 
             appState.currentUser = user;
             const userDocRef = db.collection('users').doc(user.uid);
             const userDoc = await userDocRef.get();
 
             if (!userDoc.exists) {
-                initialLoadingView.classList.add('hidden');
+                if (initialLoadingView) initialLoadingView.classList.add('hidden');
                 window.location.href = '/profile.html?setup=true';
                 return;
             }
@@ -125,8 +125,8 @@ function runApp(app) {
             if (lastPlanId) {
                 handleSelectPlan(lastPlanId);
             } else {
-                dashboardView.classList.remove('hidden');
-                appView.classList.add('hidden');
+                if (dashboardView) dashboardView.classList.remove('hidden');
+                if (appView) appView.classList.add('hidden');
                 await renderDashboard();
             }
         } else {
@@ -134,14 +134,25 @@ function runApp(app) {
             appState.currentPlanId = null;
             appState.planData = {};
             clearActivityListeners();
-            dashboardView.classList.add('hidden');
-            appView.classList.add('hidden');
-            document.getElementById('modal-overlay').classList.add('hidden');
-            document.getElementById('calendar-modal').classList.add('hidden');
-            document.getElementById('radial-menu-container').classList.add('hidden');
-            loginView.classList.remove('hidden');
+
+            // ================== THE FIX ==================
+            // Only hide elements if they exist on the current page.
+            if (dashboardView) dashboardView.classList.add('hidden');
+            if (appView) appView.classList.add('hidden');
+            
+            const modalOverlay = document.getElementById('modal-overlay');
+            if (modalOverlay) modalOverlay.classList.add('hidden');
+
+            const calendarModal = document.getElementById('calendar-modal');
+            if (calendarModal) calendarModal.classList.add('hidden');
+            
+            const radialMenu = document.getElementById('radial-menu-container');
+            if (radialMenu) radialMenu.classList.add('hidden');
+            
+            if (loginView) loginView.classList.remove('hidden');
+            // =============================================
         }
-        initialLoadingView.classList.add('hidden');
+        if (initialLoadingView) initialLoadingView.classList.add('hidden');
     });
 }
 
