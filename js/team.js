@@ -9,9 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (profileBtn) {
-        profileBtn.addEventListener('click', () => {
-            window.location.href = '/profile.html';
+    if (manageTeamBtn) {
+        manageTeamBtn.addEventListener('click', () => {
+            window.location.href = '/manage-team.html';
         });
     }
 
