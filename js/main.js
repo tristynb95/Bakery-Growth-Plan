@@ -1,6 +1,6 @@
 // js/main.js - Provide the entire file content below
 
-import { initializeAuth, setupActivityListeners, clearActivityListeners } from './auth.js';
+import { initializeAuth, setupActivityListeners, clearActivityListeners, handleSignOut } from './auth.js';
 import { getFirebaseConfig } from './api.js';
 import { initializeCalendar } from './calendar.js';
 import { initializeDashboard, renderDashboard } from './dashboard.js';
@@ -78,10 +78,7 @@ function runApp(app) {
                 authError.style.display = 'block';
             }
         }
-        localStorage.removeItem('lastPlanId');
-        localStorage.removeItem('lastViewId');
-        localStorage.removeItem('lastActivity'); // <-- THE FIX IS HERE
-        auth.signOut();
+        handleSignOut();
     });
 
     document.addEventListener('back-to-dashboard', handleBackToDashboard);
@@ -135,8 +132,11 @@ function runApp(app) {
             appState.planData = {};
             clearActivityListeners();
 
-            // ================== THE FIX ==================
-            // Only hide elements if they exist on the current page.
+            if (window.location.pathname !== '/index.html' && window.location.pathname !== '/' && window.location.pathname !== '/action.html') {
+                window.location.href = '/index.html';
+                return; 
+            }
+            
             if (dashboardView) dashboardView.classList.add('hidden');
             if (appView) appView.classList.add('hidden');
             
@@ -150,7 +150,6 @@ function runApp(app) {
             if (radialMenu) radialMenu.classList.add('hidden');
             
             if (loginView) loginView.classList.remove('hidden');
-            // =============================================
         }
         if (initialLoadingView) initialLoadingView.classList.add('hidden');
     });
