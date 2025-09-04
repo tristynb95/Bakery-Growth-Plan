@@ -540,6 +540,14 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
     handleAIActionPlan = aiActionPlanFunc;
     handleShare = shareFunc;
     state.forceSave = () => saveData(true);
+    
+    // ================== THE FIX ==================
+    // If we're not on the main plan view page, the sidebar nav won't exist.
+    // This check prevents the script from crashing on other pages.
+    if (!DOMElements.mainNav) {
+        return;
+    }
+    // =============================================
 
     DOMElements.mainNav.addEventListener('click', (e) => {
         e.preventDefault();
