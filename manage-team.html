@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAIL's | Manage Team</title>
+    <title>GAIL's | Team Member Profile</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,13 +11,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
-<body id="manage-team-page" class="antialiased bg-gray-50">
+<body class="antialiased bg-gray-50">
 
-    <div id="team-view">
+    <div id="team-profile-view">
         <header class="dashboard-header">
             <a href="/index.html"><img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/92/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo" class="h-9"></a>
             <div>
-                <button id="back-to-hub-btn" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back to Team Hub</button>
+                <button id="back-to-manage-team-btn" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Manage Team</button>
                 <button id="dashboard-logout-btn" class="btn btn-secondary"><i class="bi bi-box-arrow-right"></i> Logout</button>
             </div>
         </header>
@@ -25,66 +25,85 @@
         <main class="p-6 sm:p-8 lg:p-12">
             <div class="max-w-7xl mx-auto">
 
-                <div class="page-header mb-8">
-                    <div>
-                        <h1 class="text-4xl font-black text-gray-900 font-poppins">Manage Team</h1>
-                        <p class="subtitle">View, edit, and organise your team members.</p>
+                <div class="profile-header-container">
+                    <div class="flex items-center gap-6">
+                        <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Maria Lopez" class="profile-header-photo">
+                        <div>
+                            <h1 class="text-4xl font-black text-gray-900 font-poppins">Maria Lopez</h1>
+                            <p class="subtitle -mt-1">Senior Barista</p>
+                             <div class="flex flex-wrap gap-2 mt-3">
+                                <span class="status-tag status-keyholder"><i class="bi bi-key-fill"></i> Key Holder</span>
+                                <span class="status-tag status-training"><i class="bi bi-star-fill"></i> Training: Latte Art</span>
+                                <span class="status-tag status-part-time">Part-Time</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary"><i class="bi bi-pencil-square"></i> Edit Profile</button>
+                        <button class="btn btn-primary"><i class="bi bi-chat-heart-fill"></i> New 1-to-1</button>
                     </div>
                 </div>
 
-                <div class="kpi-grid mb-8">
-                    </div>
+                <div class="profile-grid-layout mt-8">
+                    <aside class="profile-sidebar space-y-6">
+                        <div class="content-card p-6">
+                            <h3 class="profile-card-title">Key Details</h3>
+                            <ul class="detail-list">
+                                <li><i class="bi bi-cake2-fill"></i> <strong>Start Date:</strong> 15 Aug 2023</li>
+                                <li><i class="bi bi-clock-history"></i> <strong>Tenure:</strong> 1 year, 2 months</li>
+                                <li><i class="bi bi-telephone-fill"></i> <strong>Phone:</strong> 07700 900123</li>
+                                <li><i class="bi bi-envelope-fill"></i> <strong>Email:</strong> m.lopez@gailsbread.co.uk</li>
+                            </ul>
+                        </div>
+                         <div class="content-card p-6">
+                            <h3 class="profile-card-title">Development Progress</h3>
+                            <p class="text-sm text-gray-500 mb-3">RISE Plan: Barista to Senior Barista</p>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: 75%;"></div>
+                            </div>
+                            <div class="flex justify-between items-center text-sm mt-1">
+                                <span class="font-semibold">75% Complete</span>
+                                <a href="#" class="tile-link !text-sm">View Plan <i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </aside>
 
-                <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
-                    <div class="search-wrapper">
-                        <i class="bi bi-search search-icon"></i>
-                        <input type="text" id="team-search-input" class="form-input" placeholder="Search by name or position...">
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <button class="btn btn-secondary"><i class="bi bi-funnel-fill"></i> Filter</button>
-                        <button id="add-member-btn" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add New Member</button>
-                    </div>
-                </div>
+                    <div class="profile-main-content">
+                        <div class="tab-navigation">
+                            <button class="tab-link active" data-tab="development">Development Plan</button>
+                            <button class="tab-link" data-tab="one-to-ones">1-to-1s</button>
+                            <button class="tab-link" data-tab="performance">Performance</button>
+                            <button class="tab-link" data-tab="documents">Documents</button>
+                        </div>
 
-                <div id="team-roster-container" class="team-roster-grid">
-                    <p id="no-members-message" class="text-gray-500 hidden">You haven't added any team members yet. Click "Add New Member" to get started.</p>
+                        <div class="tab-content-area">
+                            <div id="development" class="tab-panel active">
+                                <div class="content-card p-6">
+                                    <p>Content for Development Plan...</p>
+                                </div>
+                            </div>
+
+                            <div id="one-to-ones" class="tab-panel">
+                                <div class="content-card p-6">
+                                    <p>Content for 1-to-1s...</p>
+                                </div>
+                            </div>
+                            <div id="performance" class="tab-panel">
+                               <div class="content-card p-6">
+                                    <p>Content for Performance...</p>
+                                </div>
+                            </div>
+                             <div id="documents" class="tab-panel">
+                               <div class="content-card p-6">
+                                    <p>Content for Documents...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
-
-    <div id="member-modal-overlay" class="modal-overlay hidden">
-        <div id="member-modal-box" class="modal-box">
-            <div class="modal-header">
-                <h3 id="member-modal-title" class="text-lg font-bold">Add New Team Member</h3>
-                <button id="member-modal-close-btn" class="btn btn-secondary !p-2"><i class="bi bi-x-lg"></i></button>
-            </div>
-            <div id="member-modal-content" class="modal-content space-y-4">
-                <div>
-                    <label for="member-name" class="font-semibold block mb-2">Full Name:</label>
-                    <input type="text" id="member-name" class="form-input" placeholder="e.g., Maria Lopez">
-                </div>
-                <div>
-                    <label for="member-position" class="font-semibold block mb-2">Position:</label>
-                    <input type="text" id="member-position" class="form-input" placeholder="e.g., Senior Barista">
-                </div>
-                 <div>
-                    <label for="member-email" class="font-semibold block mb-2">Email:</label>
-                    <input type="email" id="member-email" class="form-input" placeholder="e.g., m.lopez@gailsbread.co.uk">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="member-modal-cancel-btn" class="btn btn-secondary">Cancel</button>
-                <button id="member-modal-action-btn" class="btn btn-primary">Save Member</button>
-            </div>
-        </div>
-    </div>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
-
-    <script src="js/main.js" type="module"></script>
-    <script src="js/manage-team.js" type="module"></script>
+    <script src="js/employee-profile.js"></script>
 </body>
 </html>
