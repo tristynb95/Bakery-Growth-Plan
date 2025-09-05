@@ -2381,3 +2381,54 @@ input[type="time"] {
 .tab-panel.active {
     display: block;
 }
+
+/* 53. Tags Input Component
+-------------------------------------------------- */
+
+.tags-input-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--gails-grey-mid);
+    border-radius: 0.5rem;
+    background-color: var(--gails-white);
+    transition: all 0.2s;
+}
+
+.tags-input-container:focus-within {
+    border-color: var(--gails-red);
+    box-shadow: var(--shadow-focus);
+}
+
+.tags-input-container input {
+    border: none;
+    outline: none;
+    background-color: transparent;
+    flex-grow: 1;
+    padding: 0.25rem;
+    min-width: 150px;
+}
+
+.tag-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--gails-red-light);
+    color: var(--gails-red);
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.tag-remove-btn {
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.tag-remove-btn:hover {
+    color: var(--gails-red-dark);
+}
