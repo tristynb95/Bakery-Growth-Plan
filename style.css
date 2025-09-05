@@ -2272,3 +2272,112 @@ input[type="time"] {
     padding: 1rem;
     border-top: 1px solid #F3F4F6;
 }
+
+/* 52. Employee Profile Page Styles
+-------------------------------------------------- */
+
+.profile-header-container {
+    background-color: var(--gails-white);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    border: 1px solid #E5E7EB;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.profile-header-photo {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--gails-white);
+    box-shadow: 0 0 0 3px var(--gails-red);
+}
+
+.status-tag.status-part-time {
+    background-color: #E0E7FF; /* Indigo 100 */
+    color: #3730A3; /* Indigo 800 */
+}
+
+.profile-grid-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+    .profile-grid-layout {
+        grid-template-columns: 320px 1fr; /* Fixed sidebar, flexible content */
+    }
+}
+
+.profile-card-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #F3F4F6;
+    padding-bottom: 0.75rem;
+}
+
+.detail-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    space-y: 0.75rem;
+}
+
+.detail-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--gails-text-primary);
+}
+
+.detail-list li i {
+    color: var(--gails-red);
+    font-size: 1.1rem;
+}
+
+/* Tab Navigation */
+.tab-navigation {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid #E5E7EB;
+    margin-bottom: 1.5rem;
+}
+
+.tab-link {
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    color: var(--gails-text-secondary);
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px; /* Overlaps the main border */
+    transition: all 0.2s ease-in-out;
+}
+
+.tab-link:hover {
+    color: var(--gails-text-primary);
+}
+
+.tab-link.active {
+    color: var(--gails-red);
+    border-bottom-color: var(--gails-red);
+}
+
+.tab-panel {
+    display: none;
+    animation: fadeIn 0.5s ease;
+}
+
+.tab-panel.active {
+    display: block;
+}
