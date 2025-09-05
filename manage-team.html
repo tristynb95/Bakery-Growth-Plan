@@ -33,35 +33,7 @@
                 </div>
 
                 <div class="kpi-grid mb-8">
-                    <div class="kpi-card">
-                        <i class="bi bi-people-fill kpi-icon"></i>
-                        <div>
-                            <span class="kpi-value">12</span>
-                            <span class="kpi-label">Total Team Members</span>
-                        </div>
                     </div>
-                    <div class="kpi-card">
-                        <i class="bi bi-person-plus-fill kpi-icon"></i>
-                        <div>
-                            <span class="kpi-value">2</span>
-                            <span class="kpi-label">New Starters (30 Days)</span>
-                        </div>
-                    </div>
-                    <div class="kpi-card">
-                        <i class="bi bi-person-check-fill kpi-icon"></i>
-                        <div>
-                            <span class="kpi-value">8</span>
-                            <span class="kpi-label">Key Holders</span>
-                        </div>
-                    </div>
-                     <div class="kpi-card">
-                        <i class="bi bi-clock-history kpi-icon"></i>
-                        <div>
-                            <span class="kpi-value">1.2 yrs</span>
-                            <span class="kpi-label">Average Tenure</span>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
                     <div class="search-wrapper">
@@ -70,32 +42,44 @@
                     </div>
                     <div class="flex items-center gap-4">
                         <button class="btn btn-secondary"><i class="bi bi-funnel-fill"></i> Filter</button>
-                        <button class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add New Member</button>
+                        <button id="add-member-btn" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add New Member</button>
                     </div>
                 </div>
 
-                <div class="team-roster-grid">
-                    <div class="team-roster-card">
-                        <div class="card-header">
-                            <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Maria Lopez" class="profile-photo">
-                            <div>
-                                <h3 class="member-name">Maria Lopez</h3>
-                                <p class="member-position">Senior Barista</p>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <span class="status-tag status-keyholder">Key Holder</span>
-                            <span class="status-tag status-training">Training: Latte Art</span>
-                        </div>
-                        <div class="card-footer">
-                            <a href="#" class="btn btn-secondary w-full">View Profile</a>
-                        </div>
-                    </div>
-                    </div>
-
+                <div id="team-roster-container" class="team-roster-grid">
+                    <p id="no-members-message" class="text-gray-500 hidden">You haven't added any team members yet. Click "Add New Member" to get started.</p>
+                </div>
             </div>
         </main>
     </div>
+
+    <div id="member-modal-overlay" class="modal-overlay hidden">
+        <div id="member-modal-box" class="modal-box">
+            <div class="modal-header">
+                <h3 id="member-modal-title" class="text-lg font-bold">Add New Team Member</h3>
+                <button id="member-modal-close-btn" class="btn btn-secondary !p-2"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div id="member-modal-content" class="modal-content space-y-4">
+                <div>
+                    <label for="member-name" class="font-semibold block mb-2">Full Name:</label>
+                    <input type="text" id="member-name" class="form-input" placeholder="e.g., Maria Lopez">
+                </div>
+                <div>
+                    <label for="member-position" class="font-semibold block mb-2">Position:</label>
+                    <input type="text" id="member-position" class="form-input" placeholder="e.g., Senior Barista">
+                </div>
+                 <div>
+                    <label for="member-email" class="font-semibold block mb-2">Email:</label>
+                    <input type="email" id="member-email" class="form-input" placeholder="e.g., m.lopez@gailsbread.co.uk">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="member-modal-cancel-btn" class="btn btn-secondary">Cancel</button>
+                <button id="member-modal-action-btn" class="btn btn-primary">Save Member</button>
+            </div>
+        </div>
+    </div>
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
