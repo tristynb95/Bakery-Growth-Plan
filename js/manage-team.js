@@ -1,47 +1,124 @@
 // js/manage-team.js
 
-// Import the sign-out function for consistent logout behaviour
 import { handleSignOut } from './auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Data ---
+    const positions = [
+        'Assistant Bakery Manager', 'Baker', 'Bakery Manager', 'Barista', 
+        'Head Baker', 'Head Barista', 'Team Leader', 'Team Member'
+    ].sort();
+
     // --- Page Navigation ---
     const backToHubBtn = document.getElementById('back-to-hub-btn');
     const logoutBtn = document.getElementById('dashboard-logout-btn');
+    if (backToHubBtn) { backToHubBtn.addEventListener('click', () => { window.location.href = '/team.html'; }); }
+    if (logoutBtn) { logoutBtn.addEventListener('click', () => { handleSignOut(); }); }
 
-    if (backToHubBtn) {
-        backToHubBtn.addEventListener('click', () => { window.location.href = '/team.html'; });
-    }
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => { handleSignOut(); });
-    }
-
-    // --- Add/Edit Member Modal Logic ---
+    // --- Modal Elements ---
     const addMemberBtn = document.getElementById('add-member-btn');
     const modalOverlay = document.getElementById('member-modal-overlay');
     const modalCloseBtn = document.getElementById('member-modal-close-btn');
     const modalCancelBtn = document.getElementById('member-modal-cancel-btn');
     const modalActionBtn = document.getElementById('member-modal-action-btn');
 
-    // Tag Input Elements
+    // --- Tag Input Elements ---
     const coursesContainer = document.getElementById('member-courses-container');
     const coursesInput = document.getElementById('member-courses-input');
     let courses = new Set();
 
+    // --- Custom Dropdown Functionality ---
+    function setupPositionDropdown() {
+        const dropdown = document.getElementById('position-dropdown');
+        const searchInput = document.getElementById('position-search-input');
+        const hiddenInput = document.getElementById('member-position');
+        const optionsContainer = dropdown.querySelector('.dropdown-options');
+
+        function filterOptions(searchTerm = '') {
+            optionsContainer.innerHTML = '';
+            const filtered = positions.filter(p => p.toLowerCase().includes(searchTerm.toLowerCase()));
+            
+            if (filtered.length === 0) {
+                optionsContainer.innerHTML = `<div class="dropdown-option no-results">No positions found</div>`;
+                return;
+            }
+
+            filtered.forEach(position => {
+                const option = document.createElement('div');
+                option.className = 'dropdown-option';
+                option.textContent = position;
+                option.dataset.value = position;
+                option.addEventListener('click', () => selectOption(option));
+                optionsContainer.appendChild(option);
+            });
+        }
+
+        function selectOption(option) {
+            searchInput.value = option.textContent;
+            hiddenInput.value = option.dataset.value;
+            dropdown.classList.remove('open');
+        }
+
+        searchInput.addEventListener('focus', () => {
+            dropdown.classList.add('open');
+            filterOptions(searchInput.value);
+        });
+
+        searchInput.addEventListener('input', () => filterOptions(searchInput.value));
+
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            if (!dropdown.classList.contains('open')) return;
+
+            const options = Array.from(optionsContainer.querySelectorAll('.dropdown-option:not(.no-results)'));
+            if (options.length === 0) return;
+            
+            let currentIndex = options.findIndex(opt => opt.classList.contains('is-highlighted'));
+
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (currentIndex > -1) options[currentIndex].classList.remove('is-highlighted');
+                    const nextIndex = (currentIndex + 1) % options.length;
+                    options[nextIndex].classList.add('is-highlighted');
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (currentIndex > -1) options[currentIndex].classList.remove('is-highlighted');
+                    const prevIndex = (currentIndex - 1 + options.length) % options.length;
+                    options[prevIndex].classList.add('is-highlighted');
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    if (currentIndex > -1) selectOption(options[currentIndex]);
+                    break;
+                case 'Escape':
+                    dropdown.classList.remove('open');
+                    break;
+            }
+        });
+    }
+
+    // --- Tag Input Functionality ---
     function createTag(label) {
         const tag = document.createElement('div');
         tag.classList.add('tag-item');
-        tag.innerHTML = `
-            <span>${label}</span>
-            <i class="bi bi-x-lg tag-remove-btn" data-label="${label}"></i>
-        `;
+        tag.innerHTML = `<span>${label}</span><i class="bi bi-x-lg tag-remove-btn" data-label="${label}"></i>`;
         coursesContainer.insertBefore(tag, coursesInput);
     }
-
+    
+    // --- Main Modal Functions ---
     function resetForm() {
         document.getElementById('member-first-name').value = '';
         document.getElementById('member-last-name').value = '';
+        document.getElementById('position-search-input').value = '';
         document.getElementById('member-position').value = '';
-        document.getElementById('member-contract-type').value = ''; // Reset dropdown
+        document.getElementById('member-contract-type').value = '';
         document.getElementById('member-start-date').value = '';
         document.getElementById('member-key-holder').checked = false;
         coursesInput.value = '';
@@ -58,25 +135,19 @@ document.addEventListener('DOMContentLoaded', () => {
         modalOverlay.classList.add('hidden');
     }
     
-    // Event Listeners for Modal
+    // --- Event Listener Setup ---
     if (addMemberBtn) { addMemberBtn.addEventListener('click', openModal); }
     if (modalCloseBtn) { modalCloseBtn.addEventListener('click', closeModal); }
     if (modalCancelBtn) { modalCancelBtn.addEventListener('click', closeModal); }
-    if (modalOverlay) {
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) closeModal();
-        });
-    }
+    if (modalOverlay) { modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); }); }
 
-    // Tag Input Logic
     if (coursesInput) {
         coursesInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 const label = coursesInput.value.trim();
                 if (label && !courses.has(label)) {
-                    courses.add(label);
-                    createTag(label);
+                    courses.add(label); createTag(label);
                 }
                 coursesInput.value = '';
             }
@@ -86,8 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (coursesContainer) {
         coursesContainer.addEventListener('click', (e) => {
             if (e.target.classList.contains('tag-remove-btn')) {
-                const labelToRemove = e.target.dataset.label;
-                courses.delete(labelToRemove);
+                courses.delete(e.target.dataset.label);
                 e.target.parentElement.remove();
             }
         });
@@ -98,17 +168,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const newMember = {
                 firstName: document.getElementById('member-first-name').value,
                 lastName: document.getElementById('member-last-name').value,
-                position: document.getElementById('member-position').value,
-                contractType: document.getElementById('member-contract-type').value, // Get dropdown value
+                position: document.getElementById('member-position').value, // Reads from the hidden input
+                contractType: document.getElementById('member-contract-type').value,
                 startDate: document.getElementById('member-start-date').value,
                 isKeyHolder: document.getElementById('member-key-holder').checked,
                 completedCourses: Array.from(courses)
             };
+            
+            // Basic validation
+            if (!newMember.firstName || !newMember.lastName || !newMember.position) {
+                alert('Please fill in at least the First Name, Last Name, and Position.');
+                return;
+            }
 
             console.log('Saving member:', newMember);
             // Add Firestore save logic here...
-            
             closeModal();
         });
     }
+    
+    // Initialise components
+    setupPositionDropdown();
 });
