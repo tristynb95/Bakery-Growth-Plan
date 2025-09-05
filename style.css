@@ -129,14 +129,15 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 .plan-card {
     background-color: var(--gails-white);
     border: 1px solid #E5E7EB;
-    border-radius: 1.25rem; /* Slightly more rounded */
-    padding: 2rem; /* Increased padding */
+    border-radius: 1.25rem;
+    padding: 2rem;
     box-shadow: var(--shadow-md);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* OPTIMISATION: Transition only the transform property */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
     position: relative;
-    min-height: 250px; /* This is the fix */
+    min-height: 250px;
 }
 .plan-card:hover {
     transform: translateY(-6px);
@@ -201,7 +202,20 @@ main { grid-area: main; }
 
 /* 5. Core Components
 -------------------------------------------------- */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: 0.75rem; /* More rounded */ font-weight: 600; transition: all 0.2s ease-in-out; padding: 0.75rem 1.5rem; /* More padding */ border: 1px solid transparent; cursor: pointer; white-space: nowrap; }
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    /* OPTIMISATION: Be specific about transitions */
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+}
 .btn-primary { background-color: var(--gails-red); color: var(--gails-white); box-shadow: var(--shadow-sm); }
 .btn-primary:hover { background-color: var(--gails-red-dark); transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .btn-secondary { background-color: var(--gails-white); color: var(--gails-text-primary); border-color: var(--gails-grey-mid); }
