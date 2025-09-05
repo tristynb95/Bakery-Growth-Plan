@@ -1875,7 +1875,17 @@ input[type="time"] {
     z-index: 999;
     opacity: 0;
     transform: translate(0, 0) scale(0.5);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* --- PERFORMANCE FIX STARTS HERE --- */
+    /* Be specific about what properties to animate for better performance */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.2s ease, /* Keep hover transitions fast */
+                color 0.2s ease;
+    
+    /* Hint to the browser to prepare for animation */
+    will-change: transform, opacity;
+    /* --- PERFORMANCE FIX ENDS HERE --- */
+}
 }
 
 .radial-menu-item:hover {
