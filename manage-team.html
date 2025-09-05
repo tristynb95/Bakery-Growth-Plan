@@ -54,7 +54,8 @@
     </div>
 
     <div id="member-modal-overlay" class="modal-overlay hidden">
-        <div id="member-modal-box" class="modal-box !max-w-2xl"> <div class="modal-header">
+        <div id="member-modal-box" class="modal-box !max-w-2xl">
+            <div class="modal-header">
                 <h3 id="member-modal-title" class="text-lg font-bold">Add New Team Member</h3>
                 <button id="member-modal-close-btn" class="btn btn-secondary !p-2"><i class="bi bi-x-lg"></i></button>
             </div>
@@ -69,18 +70,16 @@
                         <input type="text" id="member-last-name" class="form-input" placeholder="e.g., Lopez">
                     </div>
                     <div>
-                        <label for="member-position" class="font-semibold block mb-2">Position:</label>
-                        <select id="member-position" class="form-input">
-                            <option value="" disabled selected>Select a position...</option>
-                            <option value="Assistant Bakery Manager">Assistant Bakery Manager</option>
-                            <option value="Baker">Baker</option>
-                            <option value="Bakery Manager">Bakery Manager</option>
-                            <option value="Barista">Barista</option>
-                            <option value="Head Baker">Head Baker</option>
-                            <option value="Head Barista">Head Barista</option>
-                            <option value="Team Leader">Team Leader</option>
-                            <option value="Team Member">Team Member</option>
-                        </select>
+                        <label for="position-search-input" class="font-semibold block mb-2">Position:</label>
+                        <div id="position-dropdown" class="custom-dropdown">
+                            <div class="dropdown-selected" tabindex="0">
+                                <input type="text" id="position-search-input" class="dropdown-search-input" placeholder="Search or select a position..." autocomplete="off">
+                                <i class="bi bi-chevron-down dropdown-caret"></i>
+                            </div>
+                            <div class="dropdown-options">
+                                </div>
+                            <input type="hidden" id="member-position">
+                        </div>
                     </div>
                      <div>
                         <label for="member-contract-type" class="font-semibold block mb-2">Contract Type:</label>
@@ -90,7 +89,6 @@
                             <option value="Part-Time">Part-Time</option>
                         </select>
                     </div>
-
                     <div>
                         <label for="member-start-date" class="font-semibold block mb-2">Start Date:</label>
                         <input type="date" id="member-start-date" class="form-input">
@@ -102,7 +100,6 @@
                             <span class="slider"></span>
                         </label>
                     </div>
-
                     <div class="md:col-span-2">
                         <label for="member-courses-input" class="font-semibold block mb-2">Completed Courses:</label>
                         <div id="member-courses-container" class="tags-input-container">
