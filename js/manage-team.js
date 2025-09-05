@@ -34,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
             <span>${label}</span>
             <i class="bi bi-x-lg tag-remove-btn" data-label="${label}"></i>
         `;
-        // Insert the new tag before the input field
         coursesContainer.insertBefore(tag, coursesInput);
     }
 
@@ -42,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('member-first-name').value = '';
         document.getElementById('member-last-name').value = '';
         document.getElementById('member-position').value = '';
+        document.getElementById('member-contract-type').value = ''; // Reset dropdown
         document.getElementById('member-start-date').value = '';
         document.getElementById('member-key-holder').checked = false;
         coursesInput.value = '';
@@ -99,15 +99,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 firstName: document.getElementById('member-first-name').value,
                 lastName: document.getElementById('member-last-name').value,
                 position: document.getElementById('member-position').value,
+                contractType: document.getElementById('member-contract-type').value, // Get dropdown value
                 startDate: document.getElementById('member-start-date').value,
                 isKeyHolder: document.getElementById('member-key-holder').checked,
-                completedCourses: Array.from(courses) // Convert Set to Array for Firestore
+                completedCourses: Array.from(courses)
             };
 
             console.log('Saving member:', newMember);
             // Add Firestore save logic here...
-            // e.g., db.collection('users').doc(managerUID).collection('team').add(newMember);
-
+            
             closeModal();
         });
     }
