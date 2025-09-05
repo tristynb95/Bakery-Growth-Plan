@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchInput = document.getElementById('position-search-input');
         const hiddenInput = document.getElementById('member-position');
         const optionsContainer = dropdown.querySelector('.dropdown-options');
+        const selectedDisplay = dropdown.querySelector('.dropdown-selected'); // <-- FIX: Get reference to the container
 
         function filterOptions(searchTerm = '') {
             optionsContainer.innerHTML = '';
@@ -59,25 +60,35 @@ document.addEventListener('DOMContentLoaded', () => {
             dropdown.classList.remove('open');
         }
 
+        // --- BUG FIX 1: Make the entire component clickable ---
+        selectedDisplay.addEventListener('click', () => {
+            searchInput.focus();
+        });
+
         searchInput.addEventListener('focus', () => {
             dropdown.classList.add('open');
             filterOptions(searchInput.value);
         });
 
         searchInput.addEventListener('input', () => filterOptions(searchInput.value));
-
+        
+        // --- BUG FIX 2: Refined click-away logic ---
         document.addEventListener('click', (e) => {
             if (!dropdown.contains(e.target)) {
                 dropdown.classList.remove('open');
+                // UX Improvement: If user clicks away with invalid text, reset it.
+                const currentVal = searchInput.value;
+                const hiddenVal = hiddenInput.value;
+                if (currentVal && currentVal !== hiddenVal) {
+                    searchInput.value = hiddenVal; // Revert to last valid selection
+                }
             }
         });
 
         searchInput.addEventListener('keydown', (e) => {
             if (!dropdown.classList.contains('open')) return;
-
             const options = Array.from(optionsContainer.querySelectorAll('.dropdown-option:not(.no-results)'));
             if (options.length === 0) return;
-            
             let currentIndex = options.findIndex(opt => opt.classList.contains('is-highlighted'));
 
             switch (e.key) {
@@ -168,21 +179,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const newMember = {
                 firstName: document.getElementById('member-first-name').value,
                 lastName: document.getElementById('member-last-name').value,
-                position: document.getElementById('member-position').value, // Reads from the hidden input
+                position: document.getElementById('member-position').value,
                 contractType: document.getElementById('member-contract-type').value,
                 startDate: document.getElementById('member-start-date').value,
                 isKeyHolder: document.getElementById('member-key-holder').checked,
                 completedCourses: Array.from(courses)
             };
             
-            // Basic validation
             if (!newMember.firstName || !newMember.lastName || !newMember.position) {
                 alert('Please fill in at least the First Name, Last Name, and Position.');
                 return;
             }
 
             console.log('Saving member:', newMember);
-            // Add Firestore save logic here...
             closeModal();
         });
     }
