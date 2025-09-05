@@ -33,35 +33,7 @@
                 </div>
 
                 <div class="kpi-grid mb-8">
-                    <div class="kpi-card">
-                        <i class="bi bi-people-fill kpi-icon"></i>
-                        <div>
-                            <span class="kpi-value">12</span>
-                            <span class="kpi-label">Total Team Members</span>
-                        </div>
                     </div>
-                    <div class="kpi-card">
-                        <i class="bi bi-person-plus-fill kpi-icon"></i>
-                        <div>
-                            <span class="kpi-value">2</span>
-                            <span class="kpi-label">New Starters (30 Days)</span>
-                        </div>
-                    </div>
-                    <div class="kpi-card">
-                        <i class="bi bi-person-check-fill kpi-icon"></i>
-                        <div>
-                            <span class="kpi-value">8</span>
-                            <span class="kpi-label">Key Holders</span>
-                        </div>
-                    </div>
-                     <div class="kpi-card">
-                        <i class="bi bi-clock-history kpi-icon"></i>
-                        <div>
-                            <span class="kpi-value">1.2 yrs</span>
-                            <span class="kpi-label">Average Tenure</span>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
                     <div class="search-wrapper">
@@ -75,22 +47,6 @@
                 </div>
 
                 <div id="team-roster-container" class="team-roster-grid">
-                    <div class="team-roster-card">
-                        <div class="card-header">
-                            <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Maria Lopez" class="profile-photo">
-                            <div>
-                                <h3 class="member-name">Maria Lopez</h3>
-                                <p class="member-position">Senior Barista</p>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <span class="status-tag status-keyholder">Key Holder</span>
-                            <span class="status-tag status-training">Training: Latte Art</span>
-                        </div>
-                        <div class="card-footer">
-                            <a href="employee-profile.html" class="btn btn-secondary w-full">View Profile</a>
-                        </div>
-                    </div>
                     <p id="no-members-message" class="text-gray-500 hidden">You haven't added any team members yet. Click "Add New Member" to get started.</p>
                 </div>
             </div>
@@ -116,12 +72,20 @@
                         <label for="member-position" class="font-semibold block mb-2">Position:</label>
                         <input type="text" id="member-position" class="form-input" placeholder="e.g., Senior Barista">
                     </div>
+                     <div>
+                        <label for="member-contract-type" class="font-semibold block mb-2">Contract Type:</label>
+                        <select id="member-contract-type" class="form-input">
+                            <option value="" disabled selected>Select contract type...</option>
+                            <option value="Full-Time">Full-Time</option>
+                            <option value="Part-Time">Part-Time</option>
+                        </select>
+                    </div>
+
                     <div>
                         <label for="member-start-date" class="font-semibold block mb-2">Start Date:</label>
                         <input type="date" id="member-start-date" class="form-input">
                     </div>
-                    
-                    <div class="md:col-span-2 flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <label for="member-key-holder" class="font-semibold">Key Holder?</label>
                         <label class="toggle-switch">
                             <input type="checkbox" id="member-key-holder">
