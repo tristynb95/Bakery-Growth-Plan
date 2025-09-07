@@ -41,7 +41,7 @@ function runApp(app) {
             data: {},
             editingEventIndex: null
         },
-        aiPlanGenerationController: null 
+        aiPlanGenerationController: null
     };
 
     initializeAuth(auth);
@@ -59,8 +59,8 @@ function runApp(app) {
     function handleBackToDashboard() {
         if (appState.planUnsubscribe) appState.planUnsubscribe();
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
-        localStorage.removeItem('lastPlanId');
-        localStorage.removeItem('lastViewId');
+        sessionStorage.removeItem('lastPlanId');
+        sessionStorage.removeItem('lastViewId');
         document.getElementById('app-view').classList.add('hidden');
         document.getElementById('radial-menu-container').classList.add('hidden');
         document.getElementById('dashboard-view').classList.remove('hidden');
@@ -90,10 +90,10 @@ function runApp(app) {
         const loginView = document.getElementById('login-view');
         const dashboardView = document.getElementById('dashboard-view');
         const appView = document.getElementById('app-view');
-        
+
         if (appState.planUnsubscribe) appState.planUnsubscribe();
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
-        
+
         if (user) {
             const lastActivity = localStorage.getItem('lastActivity');
             const MAX_INACTIVITY_PERIOD = 8 * 60 * 60 * 1000; // 8 hours
@@ -118,7 +118,7 @@ function runApp(app) {
             }
 
             setupActivityListeners(appState);
-            const lastPlanId = localStorage.getItem('lastPlanId');
+            const lastPlanId = sessionStorage.getItem('lastPlanId');
             if (lastPlanId) {
                 handleSelectPlan(lastPlanId);
             } else {
@@ -134,21 +134,21 @@ function runApp(app) {
 
             if (window.location.pathname !== '/index.html' && window.location.pathname !== '/' && window.location.pathname !== '/action.html') {
                 window.location.href = '/index.html';
-                return; 
+                return;
             }
-            
+
             if (dashboardView) dashboardView.classList.add('hidden');
             if (appView) appView.classList.add('hidden');
-            
+
             const modalOverlay = document.getElementById('modal-overlay');
             if (modalOverlay) modalOverlay.classList.add('hidden');
 
             const calendarModal = document.getElementById('calendar-modal');
             if (calendarModal) calendarModal.classList.add('hidden');
-            
+
             const radialMenu = document.getElementById('radial-menu-container');
             if (radialMenu) radialMenu.classList.add('hidden');
-            
+
             if (loginView) loginView.classList.remove('hidden');
         }
         if (initialLoadingView) initialLoadingView.classList.add('hidden');
