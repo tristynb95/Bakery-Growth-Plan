@@ -2517,15 +2517,6 @@ input[type="time"] {
 /* 54. Gemini AI Chat Modal Styles
 -------------------------------------------------- */
 
-.chat-modal-box {
-    max-width: 800px;
-    height: 85vh;
-    max-height: 700px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
 .chat-modal-content {
     flex-grow: 1;
     padding: 0;
@@ -2537,8 +2528,7 @@ input[type="time"] {
 .chat-conversation-area {
     padding: 1.5rem;
     flex-grow: 1;
-    scroll-behavior: smooth; /* ADDED: This enables smooth scrolling */
-
+    scroll-behavior: smooth;
 }
 
 /* Welcome Screen */
@@ -2550,16 +2540,18 @@ input[type="time"] {
     padding: 2rem;
     height: 100%;
     text-align: center;
+    background-color: var(--gails-bg);
 }
 .welcome-icon-container {
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background-color: var(--gails-red-light);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 1.5rem;
+    background-color: var(--gails-white);
+    border: 1px solid var(--gails-grey-light);
 }
 .welcome-icon-container .bi-stars {
     font-size: 2rem;
@@ -2575,22 +2567,25 @@ input[type="time"] {
     width: 100%;
 }
 .prompt-starter-card {
-    background-color: var(--gails-bg);
-    border: 1px solid var(--gails-grey-mid);
     border-radius: 0.75rem;
     padding: 1rem;
     text-align: left;
     cursor: pointer;
     transition: all 0.2s ease;
+    background-color: var(--gails-white);
+    border: 1px solid var(--gails-grey-light);
 }
 .prompt-starter-card:hover {
     border-color: var(--gails-red);
-    background-color: var(--gails-red-light);
+    background-color: var(--gails-white);
     transform: translateY(-4px);
     box-shadow: var(--shadow-md);
 }
 
 /* Message Bubbles */
+.chat-conversation-area {
+    background-color: var(--gails-white);
+}
 .chat-message-wrapper {
     display: flex;
     margin-bottom: 1rem;
@@ -2613,12 +2608,13 @@ input[type="time"] {
     border-bottom-left-radius: 0.25rem;
 }
 
+/* Chat Input Area */
 .chat-modal-footer {
-    border-top: 1px solid #E5E7EB;
-    background-color: var(--gails-white);
-    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--gails-grey-light);
+    background-color: var(--gails-bg);
+    padding: 1rem;
     display: flex;
-    flex-direction: column; /* This stacks the input and the disclaimer text */
+    flex-direction: column;
 }
 .chat-input-wrapper {
     position: relative;
@@ -2627,10 +2623,10 @@ input[type="time"] {
 }
 .chat-input {
     width: 100%;
-    padding: 0.75rem 3.25rem 0.75rem 1rem; /* Adjusted right padding */
+    padding: 0.75rem 3.25rem 0.75rem 1rem;
     border-radius: 1.5rem;
     border: 1px solid var(--gails-grey-mid);
-    background-color: var(--gails-grey-light);
+    background-color: var(--gails-white);
     resize: none;
     max-height: 150px;
     overflow-y: auto;
@@ -2640,15 +2636,12 @@ input[type="time"] {
     outline: none;
     border-color: var(--gails-red);
     box-shadow: var(--shadow-focus);
-    background-color: var(--gails-white);
 }
 
 .chat-send-btn {
     position: absolute;
     right: 6px;
-    bottom: 6px; /* MODIFIED: Anchored to the bottom */
-    /* REMOVED: top: 50%; */
-    /* REMOVED: transform: translateY(-50%); */
+    bottom: 6px;
     border-radius: 50%;
     width: 36px;
     height: 36px;
@@ -2681,22 +2674,6 @@ input[type="time"] {
     40% { transform: scale(1.0); }
 }
 
-/* Chat Responsive */
-@media (max-width: 640px) {
-    .chat-modal-box {
-        height: 90vh;
-        max-height: none;
-    }
-    .prompt-starters-grid {
-        grid-template-columns: 1fr;
-    }
-    .chat-bubble {
-        max-width: 90%;
-    }
-}
-
-/* Add these new/modified rules to the end of your stylesheet */
-
 /* 55. Gemini Chat Modal (Fixed Side Panel)
 -------------------------------------------------- */
 #gemini-chat-modal {
@@ -2728,6 +2705,9 @@ input[type="time"] {
     border-radius: 0; /* No rounded corners for a clean side panel look */
     border-left: 1px solid var(--gails-grey-mid); /* A subtle border for separation */
     box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 
     /* Animation: Slide in from the right */
     opacity: 1; 
@@ -2777,7 +2757,30 @@ input[type="time"] {
     padding: 1rem;
 }
 
-/* Add to the end of style.css */
+.history-item {
+    padding: 1rem;
+    border-bottom: 1px solid var(--gails-grey-light);
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.history-item:hover {
+    background-color: var(--gails-red-light);
+}
+
+.history-item-title {
+    font-weight: 600;
+    color: var(--gails-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 0.25rem;
+}
+
+.history-item-date {
+    font-size: 0.8rem;
+    color: var(--gails-text-secondary);
+}
 
 /* 57. Chat History Panel Enhancements */
 .history-item {
