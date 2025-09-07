@@ -178,4 +178,513 @@ export function summarizePlanForAI(planData) {
 }
 
 function cacheFormElements() {
-    cachedFormElements = Array.from(document.querySelectorAll('#app-view input, #app-view [contenteditable="true
+    cachedFormElements = Array.from(document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]'));
+}
+
+// --- Data Handling & Saving ---
+
+export function saveData(forceImmediate = false, directPayload = null) {
+    if (!appState.currentUser || !appState.currentPlanId) return Promise.resolve();
+
+    if (directPayload) {
+        appState.planData = { ...appState.planData, ...directPayload };
+    }
+    
+    if (appState.isSaving) return Promise.resolve();
+
+    clearTimeout(appState.saveTimeout);
+
+    const saveToFirestore = async () => {
+        appState.isSaving = true;
+        const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
+        
+        const dataToSave = { ...appState.planData };
+        delete dataToSave.isSaving;
+
+        await docRef.set({
+            ...dataToSave,
+            lastEdited: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        
+        DOMElements.saveIndicator.classList.remove('opacity-0');
+        setTimeout(() => DOMElements.saveIndicator.classList.add('opacity-0'), 2000);
+        appState.isSaving = false;
+    };
+
+    if (forceImmediate) {
+        return saveToFirestore();
+    } else {
+        return new Promise(resolve => {
+            appState.saveTimeout = setTimeout(async () => {
+                await saveToFirestore();
+                resolve();
+            }, 1000);
+        });
+    }
+}
+
+// --- UI Rendering & Updates ---
+
+function populateViewWithData() {
+    cachedFormElements.forEach(el => {
+        if (el.isContentEditable) {
+            el.innerHTML = appState.planData[el.id] || '';
+        } else {
+            el.value = appState.planData[el.id] || '';
+        }
+    });
+    document.querySelectorAll('.pillar-buttons').forEach(group => {
+        const stepKey = group.dataset.stepKey;
+        const dataKey = `${stepKey}_pillar`;
+        const pillars = appState.planData[dataKey] || [];
+        group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+        pillars.forEach(pillar => {
+            const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
+            if (buttonToSelect) buttonToSelect.classList.add('selected');
+        });
+    });
+    if (appState.currentView.startsWith('month-')) {
+        const monthNum = appState.currentView.split('-')[1];
+        document.querySelectorAll('.status-buttons').forEach(group => {
+            const week = group.dataset.week;
+            const key = `m${monthNum}s5_w${week}_status`;
+            const status = appState.planData[key];
+            group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+            if (status) {
+                const buttonToSelect = group.querySelector(`[data-status="${status}"]`);
+                if (buttonToSelect) buttonToSelect.classList.add('selected');
+            }
+        });
+    }
+    document.querySelectorAll('#app-view [contenteditable="true"]').forEach(el => {
+        if (el.innerText.trim() === '') {
+            el.classList.add('is-placeholder-showing');
+        } else {
+            el.classList.remove('is-placeholder-showing');
+        }
+    });
+}
+
+function updateViewWithRemoteData(remoteData) {
+    if (appState.currentView === 'summary') {
+        renderSummary();
+        return;
+    }
+    if (DOMElements.appView.classList.contains('hidden')) {
+        return;
+    }
+    if (appState.currentView.startsWith('month-')) {
+        const monthNum = parseInt(appState.currentView.split('-')[1], 10);
+        updateWeeklyTabCompletion(monthNum, remoteData);
+    }
+    cachedFormElements.forEach(el => {
+        if (document.activeElement !== el) {
+            if (el.id && remoteData[el.id] !== undefined) {
+                if (el.isContentEditable) {
+                    if (el.innerHTML !== remoteData[el.id]) {
+                        el.innerHTML = remoteData[el.id];
+                    }
+                } else {
+                    if (el.value !== remoteData[el.id]) {
+                        el.value = remoteData[el.id];
+                    }
+                }
+            }
+        }
+        if (el.isContentEditable) {
+            if (el.innerText.trim() === '') {
+                el.classList.add('is-placeholder-showing');
+            } else {
+                el.classList.remove('is-placeholder-showing');
+            }
+        }
+    });
+    document.querySelectorAll('.pillar-buttons').forEach(group => {
+        const stepKey = group.dataset.stepKey;
+        const dataKey = `${stepKey}_pillar`;
+        const pillars = remoteData[dataKey];
+        group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+        if (Array.isArray(pillars)) {
+            pillars.forEach(pillar => {
+                const buttonToSelect = group.querySelector(`[data-pillar="${pillar}"]`);
+                if (buttonToSelect) buttonToSelect.classList.add('selected');
+            });
+        }
+    });
+    if (appState.currentView.startsWith('month-')) {
+        const monthNum = appState.currentView.split('-')[1];
+        document.querySelectorAll('.status-buttons').forEach(group => {
+            const week = group.dataset.week;
+            const key = `m${monthNum}s5_w${week}_status`;
+            const status = remoteData[key];
+            group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+            if (status) {
+                const buttonToSelect = group.querySelector(`[data-status="${status}"]`);
+                if (buttonToSelect) buttonToSelect.classList.add('selected');
+            }
+        });
+    }
+}
+
+function updateWeeklyTabCompletion(monthNum, planData) {
+    for (let w = 1; w <= 4; w++) {
+        const isComplete = isWeekComplete(monthNum, w, planData);
+        const tab = document.querySelector(`.weekly-tab[data-week="${w}"]`);
+        if (tab) {
+            const tickIcon = tab.querySelector('.week-complete-icon');
+            if (tickIcon) {
+                tickIcon.classList.toggle('hidden', !isComplete);
+            }
+        }
+    }
+}
+
+function updateSidebarNavStatus() {
+    const updateNavItem = (navId, progress) => {
+        const navLink = document.querySelector(navId);
+        if (!navLink) return;
+        const isComplete = progress.total > 0 && progress.completed === progress.total;
+        navLink.classList.toggle('completed', isComplete);
+        const progressCircle = navLink.querySelector('.progress-donut__progress');
+        if (progressCircle) {
+            const radius = progressCircle.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+            const progressFraction = progress.total > 0 ? progress.completed / progress.total : 0;
+            const offset = circumference - (progressFraction * circumference);
+            progressCircle.style.strokeDashoffset = offset;
+        }
+    };
+    updateNavItem('#nav-vision', getVisionProgress(appState.planData));
+    for (let m = 1; m <= 3; m++) {
+        updateNavItem(`#nav-month-${m}`, getMonthProgress(m, appState.planData));
+    }
+}
+
+function updateOverallProgress() {
+    const percentage = calculatePlanCompletion(appState.planData);
+    DOMElements.progressPercentage.textContent = `${percentage}%`;
+    DOMElements.progressBarFill.style.width = `${percentage}%`;
+}
+
+
+function updateSidebarInfo() {
+    const managerName = appState.planData.managerName || '';
+    DOMElements.sidebarName.textContent = managerName || 'Your Name';
+    DOMElements.sidebarBakery.textContent = appState.planData.bakeryLocation || "Your Bakery";
+    if (managerName) {
+        const names = managerName.trim().split(' ');
+        const firstInitial = names[0] ? names[0][0] : '';
+        const lastInitial = names.length > 1 ? names[names.length - 1][0] : '';
+        DOMElements.sidebarInitials.textContent = (firstInitial + lastInitial).toUpperCase();
+    } else {
+        DOMElements.sidebarInitials.textContent = '--';
+    }
+}
+
+function updateUI() {
+    updateSidebarInfo();
+    updateOverallProgress();
+    updateSidebarNavStatus();
+}
+
+function renderSummary() {
+    const formData = appState.planData;
+    const e = (html) => {
+        if (!html) return '...';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        if (tempDiv.innerText.trim() === '') { return '...'; }
+        return html;
+    };
+    const renderMonthSummary = (monthNum) => {
+        let weeklyCheckinHTML = '<ul>';
+        let hasLoggedWeeks = false;
+        for (let w = 1; w <= 4; w++) {
+            const status = formData[`m${monthNum}s5_w${w}_status`];
+            const win = formData[`m${monthNum}s5_w${w}_win`];
+            const spotlight = formData[`m${monthNum}s5_w${w}_spotlight`];
+            const shine = formData[`m${monthNum}s5_w${w}_shine`];
+
+            if (status) {
+                hasLoggedWeeks = true;
+                const statusText = status.replace('-', ' ').toUpperCase();
+                const statusBadgeHTML = `<span class="summary-status-badge status-${status}">${statusText}</span>`;
+                let checkinContent = '';
+                if (!isContentEmpty(win)) checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Win/Learning:</strong> ${e(win)}</p>`;
+                if (!isContentEmpty(spotlight)) checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Breadhead Spotlight:</strong> ${e(spotlight)}</p>`;
+                if (!isContentEmpty(shine)) checkinContent += `<p class="text-sm text-gray-600"><strong>SHINE Focus:</strong> ${e(shine)}</p>`;
+                if (checkinContent === '') checkinContent = '<p class="text-sm text-gray-500 italic">No details logged.</p>';
+
+                weeklyCheckinHTML += `<li class="mb-3 pb-3 border-b last:border-b-0"><div class="flex justify-between items-center mb-2"><strong class="font-semibold text-gray-700">Week ${w}</strong>${statusBadgeHTML}</div>${checkinContent}</li>`;
+            }
+        }
+        if (!hasLoggedWeeks) weeklyCheckinHTML = '<p class="text-sm text-gray-500">No weekly check-ins logged.</p>';
+        else weeklyCheckinHTML += '</ul>';
+
+        const pillars = formData[`m${monthNum}s1_pillar`];
+        const pillarIcons = { 'people': 'bi-people-fill', 'product': 'bi-cup-hot-fill', 'customer': 'bi-heart-fill', 'place': 'bi-shop' };
+        let pillarBadgesHTML = '';
+        if (Array.isArray(pillars) && pillars.length > 0) {
+            pillarBadgesHTML = pillars.map(p => `<span class="pillar-badge"><i class="bi ${pillarIcons[p]}"></i> ${p.charAt(0).toUpperCase() + p.slice(1)}</span>`).join('');
+        }
+        let pillarHTML = pillarBadgesHTML ? `<div class="flex items-center gap-2 mb-4 flex-wrap"><span class="font-semibold text-sm text-gray-500">Pillar Focus:</span>${pillarBadgesHTML}</div>` : '';
+
+        return `<div class="content-card p-0 overflow-hidden mt-8">
+            <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">${monthNum * 30} Day Plan</h2>
+            <div class="summary-grid">
+                <div class="p-6">
+                    ${pillarHTML}
+                    <div class="summary-section"><h3 class="summary-heading">Must-Win Battle</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div></div>
+                    <div class="summary-section"><h3 class="summary-heading">Key Actions</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div>
+                    <div class="summary-section"><h3 class="summary-heading">Developing Our Breadheads</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div></div>
+                </div>
+                <div class="p-6 bg-gray-50/70 border-l">
+                    <div class="summary-section"><h3 class="summary-heading">Upholding Pillars</h3><ul class="space-y-3 mt-2"><li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-heart-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_customer`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-shop w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_place`])}</span></li></ul></div>
+                    <div class="summary-section"><h3 class="summary-heading">Weekly Momentum</h3>${weeklyCheckinHTML}</div>
+                    <div class="summary-section"><h3 class="summary-heading">End of Month Review</h3><ul class="space-y-3 mt-2"><li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong>Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong>Challenge:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong>Next:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li></ul></div>
+                </div>
+            </div>
+        </div>`;
+    };
+    DOMElements.contentArea.innerHTML = `<div class="space-y-8 summary-content">
+        <div class="content-card p-6"><h2 class="text-2xl font-bold font-poppins mb-4">Quarter Overview</h2><div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4"><div><h4 class="font-semibold text-sm text-gray-500">Manager</h4><p class="text-gray-800 font-medium">${formData.managerName || '...'}</p></div><div><h4 class="font-semibold text-sm text-gray-500">Bakery</h4><p class="text-gray-800 font-medium">${formData.bakeryLocation || '...'}</p></div><div><h4 class="font-semibold text-sm text-gray-500">Quarter</h4><p class="text-gray-800 font-medium">${formData.quarter || '...'}</p></div></div><div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Vision</h4><div class="text-gray-800 prose prose-sm">${e(formData.quarterlyTheme)}</div></div><div><h3 class="text-lg font-bold border-b pb-2 mb-3">Key Monthly Objectives</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm"><div><strong class="font-semibold text-gray-600 block">Month 1:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month1Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 2:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month2Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 3:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month3Goal)}</div></div></div></div></div>
+        ${renderMonthSummary(1)}
+        ${renderMonthSummary(2)}
+        ${renderMonthSummary(3)}
+        <div class="content-card p-6 mt-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);"><h2 class="text-2xl font-bold mb-4" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2><div class="space-y-4"><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Biggest Achievements</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_achievements)}</div></div><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_challenges)}</div></div><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Narrative</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_narrative)}</div></div><div><h3 class="font-bold text-lg flex items-center gap-2" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Focus For Next Quarter</h3><div class="text-gray-700 mt-1 prose prose-sm">${e(formData.m3s7_next_quarter)}</div></div></div></div>
+    </div>`;
+}
+
+function switchView(viewId) {
+    DOMElements.mainContent.scrollTop = 0;
+    appState.currentView = viewId;
+    sessionStorage.setItem('lastPlanId', appState.currentPlanId);
+    sessionStorage.setItem('lastViewId', viewId);
+
+    const titles = {
+        vision: { title: 'Bakery Growth Plan', subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.' },
+        'month-1': { title: '30 Day Plan', subtitle: 'Lay the foundations for success.' },
+        'month-2': { title: '60 Day Plan', subtitle: 'Build momentum and embed processes.' },
+        'month-3': { title: '90 Day Plan', subtitle: 'Refine execution and review the quarter.' },
+        summary: { title: '90-Day Plan Summary', subtitle: 'A complete overview of your quarterly plan.' }
+    };
+    DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
+    DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
+
+    const isSummaryView = viewId === 'summary';
+
+    DOMElements.desktopHeaderButtons.classList.toggle('hidden', !isSummaryView);
+
+    if (isSummaryView) {
+        renderSummary();
+    } else {
+        const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
+        DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
+        
+        cacheFormElements();
+        populateViewWithData();
+
+        if (monthNum) {
+            updateWeeklyTabCompletion(monthNum, appState.planData);
+        }
+    }
+
+    document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
+    document.querySelector(`#nav-${viewId}`)?.classList.add('active');
+
+    if (initializeCharCounters) {
+        initializeCharCounters();
+    }
+}
+
+// --- Main Functions ---
+
+export function showPlanView(planId) {
+    appState.currentPlanId = planId;
+    DOMElements.appView.classList.remove('hidden');
+
+    if (appState.planUnsubscribe) appState.planUnsubscribe();
+
+    const planDocRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(planId);
+
+    appState.planUnsubscribe = planDocRef.onSnapshot((doc) => {
+        if (doc.exists) {
+            const remoteData = doc.data();
+            if (JSON.stringify(remoteData) !== JSON.stringify(appState.planData)) {
+                appState.planData = remoteData;
+                updateViewWithRemoteData(remoteData);
+                updateUI();
+            }
+        } else {
+            console.error("Plan document not found! Returning to dashboard.");
+            document.dispatchEvent(new CustomEvent('back-to-dashboard'));
+        }
+    }, (error) => {
+        console.error("Error listening to plan changes:", error);
+        document.dispatchEvent(new CustomEvent('back-to-dashboard'));
+    });
+
+    planDocRef.get().then(doc => {
+        if (doc.exists) {
+            appState.planData = doc.data();
+            updateUI();
+            const lastViewId = sessionStorage.getItem('lastViewId') || 'vision';
+            switchView(lastViewId);
+        }
+    });
+}
+
+export function initializePlanView(database, state, modalFunc, charCounterFunc, aiActionPlanFunc, shareFunc) {
+    db = database;
+    appState = state;
+    openModal = modalFunc;
+    initializeCharCounters = charCounterFunc;
+    handleAIActionPlan = aiActionPlanFunc;
+    handleShare = shareFunc;
+    state.forceSave = () => saveData(true);
+    
+    if (!DOMElements.mainNav) {
+        return;
+    }
+
+    DOMElements.mainNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        const navLink = e.target.closest('a');
+        if (navLink) {
+            switchView(navLink.id.replace('nav-', ''));
+        }
+    });
+
+    DOMElements.contentArea.addEventListener('input', (e) => {
+        const target = e.target;
+        if (target.matches('input, [contenteditable="true"]')) {
+            const key = target.id;
+            const value = target.isContentEditable ? target.innerHTML : target.value;
+            if (appState.planData[key] !== value) {
+                appState.planData[key] = value;
+                saveData();
+            }
+        }
+        if (target.isContentEditable) {
+            if (target.innerText.trim() === '') {
+                target.classList.add('is-placeholder-showing');
+            } else {
+                target.classList.remove('is-placeholder-showing');
+            }
+        }
+    });
+
+    DOMElements.contentArea.addEventListener('keydown', (e) => {
+        const editor = e.target.closest('[contenteditable="true"]');
+        if (!editor) return;
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+            e.preventDefault();
+            document.execCommand('bold', false, null);
+        }
+        const maxLength = parseInt(editor.dataset.maxlength, 10);
+        if (maxLength) {
+            const isControlKey = e.key.length > 1 || e.ctrlKey || e.metaKey;
+            if (editor.innerText.length >= maxLength && !isControlKey) {
+                e.preventDefault();
+            }
+        }
+    });
+
+    DOMElements.contentArea.addEventListener('click', (e) => {
+        const pillarButton = e.target.closest('.pillar-button');
+        if (pillarButton) {
+            pillarButton.classList.toggle('selected');
+            const group = pillarButton.closest('.pillar-buttons');
+            const stepKey = group.dataset.stepKey;
+            const dataKey = `${stepKey}_pillar`;
+            const selectedPillars = Array.from(group.querySelectorAll('.selected')).map(btn => btn.dataset.pillar);
+            
+            const payload = {};
+            payload[dataKey] = selectedPillars.length > 0 ? selectedPillars : firebase.firestore.FieldValue.delete();
+            appState.planData[dataKey] = selectedPillars.length > 0 ? selectedPillars : undefined;
+            if (selectedPillars.length === 0) delete appState.planData[dataKey];
+            
+            const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
+            docRef.update({
+                ...payload,
+                lastEdited: firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(error => console.error("Error updating pillar:", error));
+            return;
+        }
+
+        const statusButton = e.target.closest('.status-button');
+        if (statusButton) {
+            const alreadySelected = statusButton.classList.contains('selected');
+            const parent = statusButton.parentElement;
+            parent.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
+            
+            const monthNum = appState.currentView.split('-')[1];
+            const week = parent.dataset.week;
+            const key = `m${monthNum}s5_w${week}_status`;
+            const payload = {};
+
+            if (!alreadySelected) {
+                statusButton.classList.add('selected');
+                const newStatus = statusButton.dataset.status;
+                payload[key] = newStatus;
+                appState.planData[key] = newStatus;
+            } else {
+                payload[key] = firebase.firestore.FieldValue.delete();
+                delete appState.planData[key];
+            }
+
+            const docRef = db.collection("users").doc(appState.currentUser.uid).collection("plans").doc(appState.currentPlanId);
+            docRef.update({
+                ...payload,
+                lastEdited: firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(error => console.error("Error updating status:", error));
+        }
+        const tab = e.target.closest('.weekly-tab');
+        if (tab) {
+            e.preventDefault();
+            const week = tab.dataset.week;
+            document.querySelectorAll('.weekly-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            document.querySelectorAll('.weekly-tab-panel').forEach(p => {
+                p.classList.toggle('hidden', p.dataset.weekPanel !== week);
+            });
+            document.querySelectorAll('[id^="weekly-progress-label-"]').forEach((label) => {
+                const labelWeek = label.id.split('-').pop();
+                label.textContent = `Week ${labelWeek} Progress:`;
+            });
+        }
+    });
+
+    DOMElements.backToDashboardBtn.addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent('back-to-dashboard'));
+    });
+
+    DOMElements.sidebarLogoutBtn.addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent('logout-request'));
+    });
+
+    DOMElements.printBtn.addEventListener('click', () => window.print());
+    DOMElements.shareBtn.addEventListener('click', () => handleShare(db, appState));
+    DOMElements.aiActionBtn.addEventListener('click', () => {
+        const planSummary = summarizePlanForAI(appState.planData);
+        handleAIActionPlan(appState, saveData, planSummary);
+    });
+
+    const actionPlanButton = document.getElementById('radial-action-plan');
+    if (actionPlanButton) {
+        actionPlanButton.addEventListener('click', () => {
+            const planSummary = summarizePlanForAI(appState.planData);
+            handleAIActionPlan(appState, saveData, planSummary);
+            document.getElementById('radial-menu-container').classList.remove('open');
+        });
+    }
+
+    const geminiButton = document.getElementById('radial-action-gemini');
+    if (geminiButton) {
+        geminiButton.addEventListener('click', () => {
+            alert("Gemini AI feature coming soon!");
+            document.getElementById('radial-menu-container').classList.remove('open');
+        });
+    }
+}
