@@ -2677,40 +2677,32 @@ input[type="time"] {
 /* 55. Gemini Chat Modal (Fixed Side Panel)
 -------------------------------------------------- */
 #gemini-chat-modal {
-    /* Create a full-screen flex container */
-    justify-content: flex-end; /* Align the panel to the right */
-    align-items: stretch; /* Ensure the panel can fill the height */
-    
-    /* Restore the overlay to dim the background when the panel is open */
-    background-color: rgba(17, 24, 39, 0.6); 
+    /* Create a full-screen flex container, aligned to the right */
+    justify-content: flex-end;
+    align-items: stretch;
+
+    /* Overlay styles to dim the background */
+    background-color: rgba(17, 24, 39, 0.6);
     backdrop-filter: blur(4px);
-    pointer-events: auto; /* Allow clicks on the overlay to close */
-}
-
-/* Clicking the overlay now closes the modal */
-#gemini-chat-modal.modal-overlay {
-    cursor: pointer;
-}
-#gemini-chat-modal .chat-modal-box {
-    cursor: default;
+    cursor: pointer; /* Allow clicks on the overlay to close the modal */
 }
 
 #gemini-chat-modal .chat-modal-box {
-    /* Sizing and positioning */
-    max-width: 500px; /* A good width for a side panel */
+    /* Sizing and positioning for the side panel */
+    max-width: 500px;
     width: 100%;
-    height: 100vh; /* Full screen height */
+    height: 100vh;
     max-height: 100vh; /* Override any previous max-height */
     margin: 0;
     border-radius: 0; /* No rounded corners for a clean side panel look */
-    border-left: 1px solid var(--gails-grey-mid); /* A subtle border for separation */
+    border-left: 1px solid var(--gails-grey-mid);
     box-shadow: var(--shadow-lg);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    cursor: default; /* Reset cursor for the modal content */
 
-    /* Animation: Slide in from the right */
-    opacity: 1; 
+    /* Animation for sliding in from the right */
     transform: translateX(100%);
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     will-change: transform;
@@ -2719,11 +2711,6 @@ input[type="time"] {
 /* This class is added by JS to trigger the slide-in animation */
 #gemini-chat-modal:not(.hidden) .chat-modal-box {
     transform: translateX(0);
-}
-
-/* Remove the grab cursor since it's no longer draggable */
-.chat-modal-header {
-    cursor: default;
 }
 
 /* On mobile, the panel should take up the full screen */
