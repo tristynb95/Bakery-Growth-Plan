@@ -106,9 +106,11 @@ function addMessageToUI(sender, text, isLoading = false) {
  * Replaces the typing indicator with the final AI response text.
  */
 function updateLastAiMessageInUI(text) {
-    const lastBubble = DOMElements.conversationView.querySelector('.ai-bubble:last-child');
-    if (lastBubble) {
-        lastBubble.innerHTML = ''; // Remove typing indicator
+    // FIX: Find ALL AI bubbles and select the last one in the list. This is more robust.
+    const allAiBubbles = DOMElements.conversationView.querySelectorAll('.ai-bubble');
+    if (allAiBubbles.length > 0) {
+        const lastBubble = allAiBubbles[allAiBubbles.length - 1];
+        lastBubble.innerHTML = ''; // Clear the typing indicator
         lastBubble.textContent = text;
         scrollToMessage(); // Re-scroll after content is added, as height may have changed
     }
