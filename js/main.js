@@ -6,6 +6,7 @@ import { initializeCalendar } from './calendar.js';
 import { initializeDashboard, renderDashboard } from './dashboard.js';
 import { initializeUI, openModal, handleAIActionPlan, handleShare, initializeCharCounters } from './ui.js';
 import { initializePlanView, showPlanView } from './plan-view.js';
+import { initializeChat } from './chat.js'; // <-- IMPORT the new chat module
 
 /**
  * Fetches the Firebase config and initializes the Firebase app.
@@ -41,7 +42,7 @@ function runApp(app) {
             data: {},
             editingEventIndex: null
         },
-        aiPlanGenerationController: null
+        aiPlanGenerationController: null 
     };
 
     initializeAuth(auth);
@@ -49,6 +50,7 @@ function runApp(app) {
     initializeCalendar(db, appState, openModal);
     initializeDashboard(db, appState, openModal, handleSelectPlan);
     initializePlanView(db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare);
+    initializeChat(appState); // <-- INITIALIZE the new chat module
 
     function handleSelectPlan(planId) {
         document.getElementById('dashboard-view').classList.add('hidden');
@@ -90,10 +92,10 @@ function runApp(app) {
         const loginView = document.getElementById('login-view');
         const dashboardView = document.getElementById('dashboard-view');
         const appView = document.getElementById('app-view');
-
+        
         if (appState.planUnsubscribe) appState.planUnsubscribe();
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
-
+        
         if (user) {
             const lastActivity = localStorage.getItem('lastActivity');
             const MAX_INACTIVITY_PERIOD = 8 * 60 * 60 * 1000; // 8 hours
@@ -134,21 +136,21 @@ function runApp(app) {
 
             if (window.location.pathname !== '/index.html' && window.location.pathname !== '/' && window.location.pathname !== '/action.html') {
                 window.location.href = '/index.html';
-                return;
+                return; 
             }
-
+            
             if (dashboardView) dashboardView.classList.add('hidden');
             if (appView) appView.classList.add('hidden');
-
+            
             const modalOverlay = document.getElementById('modal-overlay');
             if (modalOverlay) modalOverlay.classList.add('hidden');
 
             const calendarModal = document.getElementById('calendar-modal');
             if (calendarModal) calendarModal.classList.add('hidden');
-
+            
             const radialMenu = document.getElementById('radial-menu-container');
             if (radialMenu) radialMenu.classList.add('hidden');
-
+            
             if (loginView) loginView.classList.remove('hidden');
         }
         if (initialLoadingView) initialLoadingView.classList.add('hidden');
