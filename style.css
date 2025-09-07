@@ -2697,16 +2697,16 @@ input[type="time"] {
 
 /* Add these new/modified rules to the end of your stylesheet */
 
-/* 55. Gemini Chat Modal (Side Panel - REVISED)
+/* 55. Gemini Chat Modal (Fixed Side Panel)
 -------------------------------------------------- */
 #gemini-chat-modal {
+    /* Create a full-screen flex container */
+    justify-content: flex-end; /* Align the panel to the right */
+    align-items: stretch; /* Ensure the panel can fill the height */
+    
     /* Restore the overlay to dim the background when the panel is open */
     background-color: rgba(17, 24, 39, 0.6); 
     backdrop-filter: blur(4px);
-    
-    /* Position the container to align the child (modal box) to the right */
-    justify-content: flex-end; 
-    align-items: stretch; 
     pointer-events: auto; /* Allow clicks on the overlay to close */
 }
 
@@ -2718,13 +2718,12 @@ input[type="time"] {
     cursor: default;
 }
 
-
 #gemini-chat-modal .chat-modal-box {
     /* Sizing and positioning */
-    max-width: 500px; /* New, larger width */
+    max-width: 500px; /* A good width for a side panel */
     width: 100%;
-    height: 100vh; /* Full height */
-    max-height: 100vh; /* Override previous max-height */
+    height: 100vh; /* Full screen height */
+    max-height: 100vh; /* Override any previous max-height */
     margin: 0;
     border-radius: 0; /* No rounded corners for a clean side panel look */
     border-left: 1px solid var(--gails-grey-mid); /* A subtle border for separation */
@@ -2737,7 +2736,7 @@ input[type="time"] {
     will-change: transform;
 }
 
-/* The state when the modal is made visible (by removing the .hidden class) */
+/* This class is added by JS to trigger the slide-in animation */
 #gemini-chat-modal:not(.hidden) .chat-modal-box {
     transform: translateX(0);
 }
@@ -2754,29 +2753,7 @@ input[type="time"] {
     }
 }
 
-
-/* 56. Draggable Modal Styles
--------------------------------------------------- */
-
-/* Style for the drag handle in the modal header */
-.chat-modal-header {
-    cursor: grab;
-    touch-action: none;
-}
-
-/* When the header is being actively dragged */
-.chat-modal-box.is-dragging .modal-header {
-    cursor: grabbing;
-}
-
-/* Prevent text selection and pointer events on the content while dragging */
-.chat-modal-box.is-dragging .modal-content,
-.chat-modal-box.is-dragging .modal-footer {
-    user-select: none;
-    pointer-events: none;
-}
-
-/* 57. Chat History Panel Styles
+/* 56. Chat History Panel Styles
 -------------------------------------------------- */
 .chat-history-panel {
     display: flex;
@@ -2802,7 +2779,7 @@ input[type="time"] {
 
 /* Add to the end of style.css */
 
-/* 58. Chat History Panel Enhancements */
+/* 57. Chat History Panel Enhancements */
 .history-item {
     padding: 1rem;
     border-bottom: 1px solid var(--gails-grey-light);
@@ -2830,7 +2807,7 @@ input[type="time"] {
 
 /* Add these new/modified rules to the end of your stylesheet */
 
-/* 59. Polished Chat Modal UI
+/* 58. Polished Chat Modal UI
 -------------------------------------------------- */
 
 /* Welcome Screen Refinements */
