@@ -2693,7 +2693,6 @@ input[type="time"] {
     }
 }
 
-
 /* 55. Gemini Chat Modal (Side Panel Variant)
 -------------------------------------------------- */
 
@@ -2703,6 +2702,9 @@ input[type="time"] {
     justify-content: flex-end;
     /* This prevents the main content from scrolling when the modal is open */
     overflow: hidden; 
+    /* MODIFICATION: Make the backdrop transparent for the chat modal only */
+    background-color: transparent;
+    backdrop-filter: none;
 }
 
 /* Overrides for the chat modal box to create the side panel effect */
@@ -2712,6 +2714,7 @@ input[type="time"] {
     margin: 0 2rem 8rem 2rem; /* Positions the panel above the radial menu */
     max-height: 600px; /* Set a max height for the panel */
     height: 70vh; /* A good default height */
+    box-shadow: var(--shadow-lg); /* MODIFICATION: Use a stronger shadow for separation */
     
     /* Animation for entry */
     opacity: 0;
@@ -2740,6 +2743,7 @@ input[type="time"] {
     }
 }
 
+
 /* 56. Draggable Modal Styles
 -------------------------------------------------- */
 
@@ -2752,7 +2756,8 @@ input[type="time"] {
 }
 
 /* When the header is being actively dragged */
-.chat-modal-box.is-dragging .modal-header {
+.chat-modal-box.is-dragging .modal-header,
+.chat-modal-box.is-dragging .chat-drag-handle {
     cursor: grabbing;
 }
 
