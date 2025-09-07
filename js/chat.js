@@ -149,10 +149,12 @@ async function handleSendMessage() {
 async function loadChatHistory(conversationId) {
     if (!appState.currentUser || !appState.currentPlanId || !db) return;
 
-    chatHistory = [];
+    // --- Start of Fix ---
+
+    // 1. Immediately clear the UI to provide instant feedback.
     DOMElements.conversationView.innerHTML = '';
+    
     currentConversationId = conversationId;
-    // Remember this conversation ID for the session
     sessionStorage.setItem('gails_lastConversationId', conversationId);
 
     const messagesRef = db.collection('users').doc(appState.currentUser.uid)
@@ -162,12 +164,34 @@ async function loadChatHistory(conversationId) {
                           .orderBy('timestamp', 'asc');
     try {
         const snapshot = await messagesRef.get();
+
+        // 2. Build the new history in a temporary local array first.
+        const newHistory = [];
+        const fragment = document.createDocumentFragment();
+
         snapshot.forEach(doc => {
             const data = doc.data();
-            chatHistory.push({ role: data.role, parts: [{ text: data.text }] });
-            addMessageToUI(data.role, data.text);
+            // Add to the temporary history array
+            newHistory.push({ role: data.role, parts: [{ text: data.text }] });
+
+            // Build the UI in an efficient off-screen fragment
+            const wrapper = document.createElement('div');
+            wrapper.className = `chat-message-wrapper justify-${data.role === 'user' ? 'end' : 'start'}`;
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble ${data.role === 'user' ? 'user-bubble' : 'ai-bubble'}`;
+            bubble.textContent = data.text;
+            wrapper.appendChild(bubble);
+            fragment.appendChild(wrapper);
         });
+
+        // 3. Once complete, atomically update the global state and the DOM.
+        chatHistory = newHistory;
+        DOMElements.conversationView.appendChild(fragment);
+
+        // --- End of Fix ---
+
         showConversationView();
+        scrollToMessage(); // Scroll to the bottom after rendering
     } catch (error) {
         console.error("Error loading chat history:", error);
         addMessageToUI('model', 'Could not load previous messages.');
