@@ -31,17 +31,15 @@ function scrollToMessage() {
 
 function closeChatModal() {
     if (DOMElements.modal) {
-        // We add a class to trigger the slide-out animation
         if (DOMElements.modalBox) {
              DOMElements.modalBox.style.transform = 'translateX(100%)';
         }
-        // Wait for the animation to finish before hiding the overlay
         setTimeout(() => {
             DOMElements.modal.classList.add('hidden');
              if (DOMElements.modalBox) {
                 DOMElements.modalBox.removeAttribute('style');
             }
-        }, 400); // Should match the transition duration in CSS
+        }, 400);
     }
 }
 
@@ -79,6 +77,7 @@ function updateLastAiMessageInUI(text) {
 function startNewConversation() {
     currentConversationId = null;
     chatHistory = [];
+    sessionStorage.removeItem('gails_lastConversationId'); // Forget the last chat
     DOMElements.conversationView.innerHTML = '';
     showConversationView();
 }
@@ -93,6 +92,8 @@ async function saveMessage(messageObject) {
     if (!currentConversationId) {
         const conversationDocRef = conversationsRef.doc();
         currentConversationId = conversationDocRef.id;
+        // Save the new ID to the session so it's remembered on refresh
+        sessionStorage.setItem('gails_lastConversationId', currentConversationId);
         await conversationDocRef.set({
             firstMessage: messageObject.text,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -147,6 +148,8 @@ async function loadChatHistory(conversationId) {
     chatHistory = [];
     DOMElements.conversationView.innerHTML = '';
     currentConversationId = conversationId;
+    // Remember this conversation ID for the session
+    sessionStorage.setItem('gails_lastConversationId', conversationId);
 
     const messagesRef = db.collection('users').doc(appState.currentUser.uid)
                           .collection('plans').doc(appState.currentPlanId)
@@ -221,22 +224,29 @@ export async function openChat() {
         DOMElements.modal.classList.remove('hidden');
         DOMElements.chatInput.focus();
 
-        const conversationsRef = db.collection('users').doc(appState.currentUser.uid)
-                               .collection('plans').doc(appState.currentPlanId)
-                               .collection('conversations')
-                               .orderBy('createdAt', 'desc')
-                               .limit(1);
-        try {
-            const snapshot = await conversationsRef.get();
-            if (snapshot.empty) {
+        const lastConversationId = sessionStorage.getItem('gails_lastConversationId');
+
+        if (lastConversationId) {
+            await loadChatHistory(lastConversationId);
+        } else {
+            // Fallback to the most recent conversation in Firestore if no session is stored
+            const conversationsRef = db.collection('users').doc(appState.currentUser.uid)
+                                   .collection('plans').doc(appState.currentPlanId)
+                                   .collection('conversations')
+                                   .orderBy('createdAt', 'desc')
+                                   .limit(1);
+            try {
+                const snapshot = await conversationsRef.get();
+                if (snapshot.empty) {
+                    startNewConversation();
+                } else {
+                    const recentId = snapshot.docs[0].id;
+                    await loadChatHistory(recentId);
+                }
+            } catch (error) {
+                console.error("Error loading last conversation:", error);
                 startNewConversation();
-            } else {
-                const lastConversationId = snapshot.docs[0].id;
-                await loadChatHistory(lastConversationId);
             }
-        } catch (error) {
-            console.error("Error loading last conversation:", error);
-            startNewConversation();
         }
     }
 }
@@ -247,10 +257,6 @@ export function initializeChat(_appState, _db) {
 
     if (!DOMElements.modal) return;
 
-    // Draggable functionality is removed
-    // makeDraggable(DOMElements.modalBox, DOMElements.header);
-
-    // Clicking the overlay (but not the modal box itself) closes it
     DOMElements.modal.addEventListener('click', (e) => {
         if (e.target === DOMElements.modal) {
             closeChatModal();
