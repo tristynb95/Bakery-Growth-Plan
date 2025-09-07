@@ -1,5 +1,6 @@
 // js/plan-view.js
 import { calculatePlanCompletion, getVisionProgress, getMonthProgress, isWeekComplete, isContentEmpty } from './utils.js';
+import { openChat } from './chat.js'; // <-- IMPORT the openChat function
 
 // Dependencies passed from main.js
 let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare;
@@ -683,13 +684,7 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
     const geminiButton = document.getElementById('radial-action-gemini');
     if (geminiButton) {
         geminiButton.addEventListener('click', () => {
-            // NEW LOGIC TO OPEN THE CHAT MODAL
-            const chatModal = document.getElementById('gemini-chat-modal');
-            if (chatModal) {
-                chatModal.classList.remove('hidden');
-                // You would add more logic here to initialize the chat
-            }
-            
+            openChat(); // <-- UPDATE this to call the new function
             document.getElementById('radial-menu-container').classList.remove('open');
         });
     }
