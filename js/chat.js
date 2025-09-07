@@ -14,7 +14,7 @@ const DOMElements = {
     header: document.getElementById('chat-modal-header'),
     closeBtn: document.getElementById('chat-modal-close-btn'),
     optionsBtn: document.getElementById('chat-options-btn'),
-    newChatBtn: document.getElementById('chat-new-btn'), // New button
+    newChatBtn: document.getElementById('chat-new-btn'),
     conversationView: document.getElementById('chat-conversation-area'),
     welcomeScreen: document.getElementById('chat-welcome-screen'),
     chatInput: document.getElementById('chat-input'),
@@ -25,16 +25,13 @@ const DOMElements = {
 };
 
 /**
- * Scrolls the conversation area to bring the specified element into view.
- * @param {HTMLElement} element The element to scroll to.
+ * Scrolls the conversation container to the bottom.
  */
-function scrollToMessage(element) {
+function scrollToMessage() {
     const container = DOMElements.conversationView;
-    // Calculate the ideal scroll position to place the message at the bottom of the view
-    const desiredScrollTop = element.offsetTop - container.clientHeight + element.clientHeight;
-    container.scrollTop = desiredScrollTop;
+    // This is the most reliable method to scroll a container to its absolute bottom
+    container.scrollTop = container.scrollHeight;
 }
-
 
 function makeDraggable(modal, handle) {
     let offsetX, offsetY, isDragging = false;
@@ -82,7 +79,7 @@ function closeChatModal() {
 }
 
 /**
- * Adds a message bubble to the conversation UI. Purely a UI function.
+ * Adds a message bubble to the conversation UI.
  */
 function addMessageToUI(sender, text, isLoading = false) {
     DOMElements.welcomeScreen.classList.add('hidden');
@@ -102,8 +99,7 @@ function addMessageToUI(sender, text, isLoading = false) {
     
     wrapper.appendChild(bubble);
     DOMElements.conversationView.appendChild(wrapper);
-    // MODIFICATION: Use the new scroll function
-    scrollToMessage(wrapper);
+    scrollToMessage(); // Scroll after adding new message/indicator
 }
 
 /**
@@ -114,12 +110,7 @@ function updateLastAiMessageInUI(text) {
     if (lastBubble) {
         lastBubble.innerHTML = ''; // Remove typing indicator
         lastBubble.textContent = text;
-
-        // MODIFICATION: Re-scroll after content is added to account for height changes
-        const messageWrapper = lastBubble.parentElement;
-        if (messageWrapper) {
-            scrollToMessage(messageWrapper);
-        }
+        scrollToMessage(); // Re-scroll after content is added, as height may have changed
     }
 }
 
@@ -140,7 +131,6 @@ function startNewConversation() {
 async function saveMessage(messageObject) {
     if (!appState.currentUser || !appState.currentPlanId || !db) return;
 
-    // If it's a new conversation, create an ID first
     if (!currentConversationId) {
         const conversationRef = db.collection('users').doc(appState.currentUser.uid)
                                    .collection('plans').doc(appState.currentPlanId)
@@ -232,9 +222,6 @@ async function loadChatHistory(conversationId) {
     }
 }
 
-
-// --- View Management ---
-
 function showConversationView() {
     DOMElements.historyPanel.classList.add('hidden');
     DOMElements.conversationView.classList.remove('hidden');
@@ -244,9 +231,6 @@ function showConversationView() {
     }
 }
 
-/**
- * Fetches and displays the list of past conversations.
- */
 async function showHistoryView() {
     DOMElements.welcomeScreen.classList.add('hidden');
     DOMElements.conversationView.classList.add('hidden');
@@ -296,7 +280,6 @@ export function openChat() {
         DOMElements.chatInput.focus();
     }
 }
-
 
 export function initializeChat(_appState, _db) {
     appState = _appState;
