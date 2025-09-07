@@ -24,63 +24,27 @@ const DOMElements = {
     backToChatBtn: document.getElementById('back-to-chat-btn'),
 };
 
-/**
- * Scrolls the conversation container to the bottom.
- */
 function scrollToMessage() {
     const container = DOMElements.conversationView;
-    // This is the most reliable method to scroll a container to its absolute bottom
     container.scrollTop = container.scrollHeight;
-}
-
-function makeDraggable(modal, handle) {
-    let offsetX, offsetY, isDragging = false;
-
-    const onMouseDown = (e) => {
-        if (e.button !== 0 || e.target.closest('button')) return;
-        isDragging = true;
-        const modalRect = modal.getBoundingClientRect();
-        modal.style.position = 'absolute';
-        modal.style.left = `${modalRect.left}px`;
-        modal.style.top = `${modalRect.top}px`;
-        modal.style.margin = '0';
-        offsetX = e.clientX - modal.offsetLeft;
-        offsetY = e.clientY - modal.offsetTop;
-        modal.classList.add('is-dragging');
-        document.body.style.userSelect = 'none';
-    };
-    const onMouseMove = (e) => {
-        if (!isDragging) return;
-        let newX = e.clientX - offsetX;
-        let newY = e.clientY - offsetY;
-        const parentRect = modal.offsetParent.getBoundingClientRect();
-        newX = Math.max(0, Math.min(newX, parentRect.width - modal.offsetWidth));
-        newY = Math.max(0, Math.min(newY, parentRect.height - modal.offsetHeight));
-        modal.style.left = `${newX}px`;
-        modal.style.top = `${newY}px`;
-    };
-    const onMouseUp = () => {
-        isDragging = false;
-        modal.classList.remove('is-dragging');
-        document.body.style.userSelect = '';
-    };
-    handle.addEventListener('mousedown', onMouseDown);
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
 }
 
 function closeChatModal() {
     if (DOMElements.modal) {
-        DOMElements.modal.classList.add('hidden');
+        // We add a class to trigger the slide-out animation
         if (DOMElements.modalBox) {
-            DOMElements.modalBox.removeAttribute('style');
+             DOMElements.modalBox.style.transform = 'translateX(100%)';
         }
+        // Wait for the animation to finish before hiding the overlay
+        setTimeout(() => {
+            DOMElements.modal.classList.add('hidden');
+             if (DOMElements.modalBox) {
+                DOMElements.modalBox.removeAttribute('style');
+            }
+        }, 400); // Should match the transition duration in CSS
     }
 }
 
-/**
- * Adds a message bubble to the conversation UI.
- */
 function addMessageToUI(sender, text, isLoading = false) {
     DOMElements.welcomeScreen.classList.add('hidden');
     DOMElements.historyPanel.classList.add('hidden');
@@ -99,26 +63,19 @@ function addMessageToUI(sender, text, isLoading = false) {
     
     wrapper.appendChild(bubble);
     DOMElements.conversationView.appendChild(wrapper);
-    scrollToMessage(); // Scroll after adding new message/indicator
+    scrollToMessage();
 }
 
-/**
- * Replaces the typing indicator with the final AI response text.
- */
 function updateLastAiMessageInUI(text) {
-    // FIX: Find ALL AI bubbles and select the last one in the list. This is more robust.
     const allAiBubbles = DOMElements.conversationView.querySelectorAll('.ai-bubble');
     if (allAiBubbles.length > 0) {
         const lastBubble = allAiBubbles[allAiBubbles.length - 1];
-        lastBubble.innerHTML = ''; // Clear the typing indicator
+        lastBubble.innerHTML = '';
         lastBubble.textContent = text;
-        scrollToMessage(); // Re-scroll after content is added, as height may have changed
+        scrollToMessage();
     }
 }
 
-/**
- * Starts a new, empty conversation.
- */
 function startNewConversation() {
     currentConversationId = null;
     chatHistory = [];
@@ -126,25 +83,24 @@ function startNewConversation() {
     showConversationView();
 }
 
-/**
- * Saves a single message object to the Firestore database under a specific conversation.
- * @param {{role: string, text: string}} messageObject
- */
 async function saveMessage(messageObject) {
     if (!appState.currentUser || !appState.currentPlanId || !db) return;
+    
+    const conversationsRef = db.collection('users').doc(appState.currentUser.uid)
+                               .collection('plans').doc(appState.currentPlanId)
+                               .collection('conversations');
 
     if (!currentConversationId) {
-        const conversationRef = db.collection('users').doc(appState.currentUser.uid)
-                                   .collection('plans').doc(appState.currentPlanId)
-                                   .collection('conversations').doc();
-        currentConversationId = conversationRef.id;
+        const conversationDocRef = conversationsRef.doc();
+        currentConversationId = conversationDocRef.id;
+        await conversationDocRef.set({
+            firstMessage: messageObject.text,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
     }
 
-    const messageRef = db.collection('users').doc(appState.currentUser.uid)
-                         .collection('plans').doc(appState.currentPlanId)
-                         .collection('conversations').doc(currentConversationId)
-                         .collection('messages');
-
+    const messageRef = conversationsRef.doc(currentConversationId).collection('messages');
+    
     try {
         await messageRef.add({
             ...messageObject,
@@ -155,9 +111,6 @@ async function saveMessage(messageObject) {
     }
 }
 
-/**
- * The main function to process sending a message from the user.
- */
 async function handleSendMessage() {
     const messageText = DOMElements.chatInput.value.trim();
     if (!messageText) return;
@@ -188,10 +141,6 @@ async function handleSendMessage() {
     }
 }
 
-/**
- * Loads a specific conversation from Firestore.
- * @param {string} conversationId The ID of the conversation to load.
- */
 async function loadChatHistory(conversationId) {
     if (!appState.currentUser || !appState.currentPlanId || !db) return;
 
@@ -204,14 +153,8 @@ async function loadChatHistory(conversationId) {
                           .collection('conversations').doc(conversationId)
                           .collection('messages')
                           .orderBy('timestamp', 'asc');
-
     try {
         const snapshot = await messagesRef.get();
-        if (snapshot.empty) {
-            console.warn("No messages found for this conversation.");
-            return;
-        }
-
         snapshot.forEach(doc => {
             const data = doc.data();
             chatHistory.push({ role: data.role, parts: [{ text: data.text }] });
@@ -246,7 +189,8 @@ async function showHistoryView() {
 
     const conversationsRef = db.collection('users').doc(appState.currentUser.uid)
                                .collection('plans').doc(appState.currentPlanId)
-                               .collection('conversations');
+                               .collection('conversations')
+                               .orderBy('createdAt', 'desc');
     try {
         const snapshot = await conversationsRef.get();
         if (snapshot.empty) {
@@ -255,31 +199,45 @@ async function showHistoryView() {
         }
 
         DOMElements.historyList.innerHTML = '';
-        for (const doc of snapshot.docs) {
-            const firstMessageSnapshot = await doc.ref.collection('messages').orderBy('timestamp', 'asc').limit(1).get();
-            if (!firstMessageSnapshot.empty) {
-                const firstMessage = firstMessageSnapshot.docs[0].data();
-                const historyItem = document.createElement('div');
-                historyItem.className = 'history-item';
-                historyItem.dataset.id = doc.id;
-                historyItem.innerHTML = `
-                    <p class="history-item-title">${firstMessage.text}</p>
-                    <p class="history-item-date">${firstMessage.timestamp.toDate().toLocaleDateString()}</p>
-                `;
-                DOMElements.historyList.appendChild(historyItem);
-            }
-        }
+        snapshot.forEach(doc => {
+            const conversation = doc.data();
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.dataset.id = doc.id;
+            historyItem.innerHTML = `
+                <p class="history-item-title">${conversation.firstMessage}</p>
+                <p class="history-item-date">${conversation.createdAt.toDate().toLocaleDateString()}</p>
+            `;
+            DOMElements.historyList.appendChild(historyItem);
+        });
     } catch (error) {
         console.error("Error fetching conversation list:", error);
         DOMElements.historyList.innerHTML = '<p class="text-center text-red-500 p-4">Failed to load conversation history.</p>';
     }
 }
 
-export function openChat() {
+export async function openChat() {
     if (DOMElements.modal) {
-        startNewConversation();
         DOMElements.modal.classList.remove('hidden');
         DOMElements.chatInput.focus();
+
+        const conversationsRef = db.collection('users').doc(appState.currentUser.uid)
+                               .collection('plans').doc(appState.currentPlanId)
+                               .collection('conversations')
+                               .orderBy('createdAt', 'desc')
+                               .limit(1);
+        try {
+            const snapshot = await conversationsRef.get();
+            if (snapshot.empty) {
+                startNewConversation();
+            } else {
+                const lastConversationId = snapshot.docs[0].id;
+                await loadChatHistory(lastConversationId);
+            }
+        } catch (error) {
+            console.error("Error loading last conversation:", error);
+            startNewConversation();
+        }
     }
 }
 
@@ -289,7 +247,16 @@ export function initializeChat(_appState, _db) {
 
     if (!DOMElements.modal) return;
 
-    makeDraggable(DOMElements.modalBox, DOMElements.header);
+    // Draggable functionality is removed
+    // makeDraggable(DOMElements.modalBox, DOMElements.header);
+
+    // Clicking the overlay (but not the modal box itself) closes it
+    DOMElements.modal.addEventListener('click', (e) => {
+        if (e.target === DOMElements.modal) {
+            closeChatModal();
+        }
+    });
+
     DOMElements.closeBtn.addEventListener('click', closeChatModal);
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !DOMElements.modal.classList.contains('hidden')) {
