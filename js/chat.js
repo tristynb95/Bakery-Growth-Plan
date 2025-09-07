@@ -67,6 +67,9 @@ function closeChatModal() {
     }
 }
 
+/**
+ * Adds a message bubble to the conversation UI. Purely a UI function.
+ */
 function addMessageToUI(sender, text, isLoading = false) {
     DOMElements.welcomeScreen.classList.add('hidden');
     DOMElements.historyPanel.classList.add('hidden');
@@ -88,53 +91,109 @@ function addMessageToUI(sender, text, isLoading = false) {
     DOMElements.conversationView.scrollTop = DOMElements.conversationView.scrollHeight;
 }
 
+/**
+ * Replaces the typing indicator with the final AI response text.
+ */
 function updateLastAiMessageInUI(text) {
     const lastBubble = DOMElements.conversationView.querySelector('.ai-bubble:last-child');
     if (lastBubble) {
-        lastBubble.innerHTML = '';
+        lastBubble.innerHTML = ''; // Remove typing indicator
         lastBubble.textContent = text;
     }
 }
 
-async function fetchAndRenderHistory() {
-    DOMElements.historyList.innerHTML = '<div class="loading-spinner mx-auto mt-8"></div>';
-    
-    // In a real implementation, you would fetch from Firestore here.
-    // For now, we will simulate with a placeholder.
-    setTimeout(() => {
-        DOMElements.historyList.innerHTML = `
-            <div class="p-4 text-center text-gray-500">
-                Chat history is not yet connected to the database.
-            </div>
-        `;
-    }, 1000);
-}
-
-async function handleSendMessage() {
-    const message = DOMElements.chatInput.value.trim();
-    if (!message) return;
-
-    chatHistory.push({ role: 'user', parts: [{ text: message }] });
-    addMessageToUI('user', message);
-
-    const initialHeight = DOMElements.chatInput.scrollHeight;
-    DOMElements.chatInput.value = '';
-    DOMElements.chatInput.style.height = `${initialHeight}px`;
-    addMessageToUI('ai', '', true);
+/**
+ * Saves a single message object to the Firestore database.
+ * @param {{role: string, text: string}} messageObject
+ */
+async function saveMessage(messageObject) {
+    if (!appState.currentUser || !appState.currentPlanId || !db) return;
 
     try {
+        const historyRef = db.collection('users').doc(appState.currentUser.uid)
+                             .collection('plans').doc(appState.currentPlanId)
+                             .collection('chatHistory');
+        
+        await historyRef.add({
+            ...messageObject,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (error) {
+        console.error("Error saving chat message:", error);
+        // Optionally, add UI feedback that the message failed to save.
+    }
+}
+
+/**
+ * The main function to process sending a message from the user.
+ */
+async function handleSendMessage() {
+    const messageText = DOMElements.chatInput.value.trim();
+    if (!messageText) return;
+
+    // 1. Optimistically update UI and local state
+    const userMessage = { role: 'user', parts: [{ text: messageText }] };
+    chatHistory.push(userMessage);
+    addMessageToUI('user', messageText);
+    saveMessage({ role: 'user', text: messageText }); // Save user message in the background
+
+    // 2. Clear input and show loading indicator
+    DOMElements.chatInput.value = '';
+    DOMElements.chatInput.style.height = 'auto';
+    addMessageToUI('model', '', true);
+
+    try {
+        // 3. Get context and call API
         const planSummary = summarizePlanForAI(appState.planData);
-        const responseText = await getGeminiChatResponse(planSummary, chatHistory, message);
-        chatHistory.push({ role: 'model', parts: [{ text: responseText }] });
+        const responseText = await getGeminiChatResponse(planSummary, chatHistory, messageText);
+        
+        // 4. Update UI and local state with response
         updateLastAiMessageInUI(responseText);
-        // Here you would save the updated chatHistory to Firestore
+        const aiMessage = { role: 'model', parts: [{ text: responseText }] };
+        chatHistory.push(aiMessage);
+        saveMessage({ role: 'model', text: responseText }); // Save AI message in the background
+
     } catch (error) {
         console.error("Chat error:", error);
         const errorMessage = error.message || 'Sorry, I encountered an error. Please try again.';
-        chatHistory.push({ role: 'model', parts: [{ text: errorMessage }] });
         updateLastAiMessageInUI(errorMessage);
     }
 }
+
+/**
+ * Loads previous messages from Firestore for the current plan.
+ */
+async function loadChatHistory() {
+    if (!appState.currentUser || !appState.currentPlanId || !db) {
+        showConversationView(); // Show welcome screen if no context
+        return;
+    }
+
+    const historyRef = db.collection('users').doc(appState.currentUser.uid)
+                         .collection('plans').doc(appState.currentPlanId)
+                         .collection('chatHistory')
+                         .orderBy('timestamp', 'asc'); // Fetch in chronological order
+    
+    try {
+        const snapshot = await historyRef.get();
+        if (snapshot.empty) {
+            showConversationView(); // No history, show welcome screen
+            return;
+        }
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            chatHistory.push({ role: data.role, parts: [{ text: data.text }] });
+            addMessageToUI(data.role, data.text);
+        });
+    } catch (error) {
+        console.error("Error loading chat history:", error);
+        addMessageToUI('model', 'Could not load previous messages.');
+    }
+}
+
+
+// --- View Management ---
 
 function showConversationView() {
     DOMElements.historyPanel.classList.add('hidden');
@@ -149,18 +208,25 @@ function showHistoryView() {
     DOMElements.welcomeScreen.classList.add('hidden');
     DOMElements.conversationView.classList.add('hidden');
     DOMElements.historyPanel.classList.remove('hidden');
-    fetchAndRenderHistory();
+    
+    DOMElements.historyList.innerHTML = '<div class="loading-spinner mx-auto mt-8"></div>';
+    // Placeholder for actual history rendering from DB
+    setTimeout(() => {
+        DOMElements.historyList.innerHTML = `<div class="p-4 text-center text-gray-500">Feature to view and load past conversations is coming soon.</div>`;
+    }, 500);
 }
 
 export function openChat() {
     if (DOMElements.modal) {
+        // Reset local state and UI before loading new history
         chatHistory = [];
         DOMElements.conversationView.innerHTML = '';
-        showConversationView();
         DOMElements.modal.classList.remove('hidden');
         DOMElements.chatInput.focus();
+        loadChatHistory();
     }
 }
+
 
 export function initializeChat(_appState, _db) {
     appState = _appState;
