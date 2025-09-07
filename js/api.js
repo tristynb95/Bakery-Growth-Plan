@@ -40,3 +40,31 @@ export async function generateAiActionPlan(planSummary, signal) {
     // Clean the response to remove any markdown backticks
     return data.actionPlan.replace(/^```(html)?\s*/, '').replace(/```$/, '').trim();
 }
+
+/**
+ * Sends the current chat context to the backend for an AI response.
+ * @param {string} planSummary - A text summary of the user's plan.
+ * @param {Array} chatHistory - An array of previous chat messages.
+ * @param {string} userMessage - The new message from the user.
+ * @returns {Promise<string>} The AI's text response.
+ */
+export async function getGeminiChatResponse(planSummary, chatHistory, userMessage) {
+    const response = await fetch('/.netlify/functions/generate-chat-response', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planSummary, chatHistory, userMessage }),
+    });
+
+    if (!response.ok) {
+        let errorResult;
+        try {
+            errorResult = await response.json();
+        } catch (e) {
+            throw new Error(response.statusText || 'The AI assistant failed to respond.');
+        }
+        throw new Error(errorResult.error || 'The AI assistant failed to generate a response.');
+    }
+
+    const data = await response.json();
+    return data.response;
+}
