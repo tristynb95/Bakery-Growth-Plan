@@ -399,6 +399,60 @@
             </div>
         </div>
     </div>
+    
+    <div id="gemini-chat-modal" class="modal-overlay hidden">
+        <div class="modal-box chat-modal-box">
+            <div class="modal-header">
+                <div class="flex items-center gap-3">
+                    <i class="bi bi-stars gails-red-text text-xl"></i>
+                    <h3 id="chat-modal-title" class="text-lg font-bold">Your AI Planning Partner</h3>
+                </div>
+                <button id="chat-modal-close-btn" class="btn btn-secondary !p-2"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div id="chat-modal-content" class="modal-content chat-modal-content">
+                
+                <div id="chat-welcome-screen" class="chat-welcome-screen">
+                    <div class="welcome-icon-container">
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold font-poppins text-center">How can I help you today?</h2>
+                    <p class="text-gray-500 text-center -mt-1">I can see your plan. Ask me anything about it.</p>
+                    <div class="prompt-starters-grid">
+                        <button class="prompt-starter-card">
+                            <p class="font-semibold">Review a goal</p>
+                            <p class="text-xs text-gray-500">"Is my Month 1 'Must-Win Battle' specific enough?"</p>
+                        </button>
+                        <button class="prompt-starter-card">
+                            <p class="font-semibold">Suggest ideas</p>
+                            <p class="text-xs text-gray-500">"Suggest 3 team 'Power-Up Questions' based on my plan"</p>
+                        </button>
+                         <button class="prompt-starter-card">
+                            <p class="font-semibold">Help me reflect</p>
+                            <p class="text-xs text-gray-500">"Help me write a reflection for my toughest challenge"</p>
+                        </button>
+                         <button class="prompt-starter-card">
+                            <p class="font-semibold">Identify blind spots</p>
+                            <p class="text-xs text-gray-500">"What are potential blind spots in my Month 3 objectives?"</p>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="chat-conversation-area" class="chat-conversation-area">
+                </div>
+
+            </div>
+            <div class="modal-footer chat-modal-footer">
+                <div class="chat-input-wrapper">
+                    <textarea id="chat-input" class="chat-input" placeholder="Ask about your plan..." rows="1"></textarea>
+                    <button id="chat-send-btn" class="btn btn-primary chat-send-btn" aria-label="Send message">
+                        <i class="bi bi-arrow-up"></i>
+                    </button>
+                </div>
+                <p class="text-xs text-center text-gray-400 mt-2">Gemini AI can make mistakes. Consider checking important information.</p>
+            </div>
+        </div>
+    </div>
+
 
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
