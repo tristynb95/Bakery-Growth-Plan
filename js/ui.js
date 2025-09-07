@@ -50,6 +50,59 @@ function managePlaceholder(editor) {
     }
 }
 
+// ====================================================================
+// NEW: Draggable Modal Logic
+// ====================================================================
+function makeDraggable(modal, handle) {
+    let offsetX, offsetY, isDragging = false;
+
+    const onMouseDown = (e) => {
+        // Only drag with the primary mouse button, and not on other interactive elements
+        if (e.button !== 0 || e.target.closest('button')) return;
+        
+        isDragging = true;
+        
+        // Convert fixed position to absolute relative to the overlay for dragging
+        const modalRect = modal.getBoundingClientRect();
+        modal.style.position = 'absolute';
+        modal.style.left = `${modalRect.left}px`;
+        modal.style.top = `${modalRect.top}px`;
+        modal.style.margin = '0'; // Remove margins that affect positioning
+
+        offsetX = e.clientX - modal.offsetLeft;
+        offsetY = e.clientY - modal.offsetTop;
+        
+        modal.classList.add('is-dragging');
+        document.body.style.userSelect = 'none'; // Prevent text selection on the whole page
+    };
+
+    const onMouseMove = (e) => {
+        if (!isDragging) return;
+        
+        let newX = e.clientX - offsetX;
+        let newY = e.clientY - offsetY;
+
+        // Constrain movement within the viewport
+        const parentRect = modal.offsetParent.getBoundingClientRect();
+        
+        newX = Math.max(0, Math.min(newX, parentRect.width - modal.offsetWidth));
+        newY = Math.max(0, Math.min(newY, parentRect.height - modal.offsetHeight));
+
+        modal.style.left = `${newX}px`;
+        modal.style.top = `${newY}px`;
+    };
+
+    const onMouseUp = () => {
+        isDragging = false;
+        modal.classList.remove('is-dragging');
+        document.body.style.userSelect = ''; // Re-enable text selection
+    };
+
+    handle.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+}
+
 // --- AI Action Plan Logic (with Undo/Redo) ---
 function updateUndoRedoButtons() {
     const undoBtn = document.getElementById('undo-btn');
@@ -633,4 +686,22 @@ export function initializeUI(database, state) {
         localStorage.setItem('gails_cookie_consent', 'false');
         DOMElements.cookieBanner.classList.add('hidden');
     });
+
+    // --- Logic for auto-growing chat textarea ---
+    const chatInput = document.getElementById('chat-input');
+    if (chatInput) {
+        const initialHeight = chatInput.scrollHeight;
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = `${initialHeight}px`; // Reset height to recalculate
+            const scrollHeight = chatInput.scrollHeight;
+            chatInput.style.height = `${scrollHeight}px`;
+        });
+    }
+
+    // --- Activate the draggable functionality for the chat modal ---
+    const chatModal = document.querySelector('#gemini-chat-modal .chat-modal-box');
+    const chatModalHeader = document.getElementById('chat-modal-header');
+    if (chatModal && chatModalHeader) {
+        makeDraggable(chatModal, chatModalHeader);
+    }
 }
