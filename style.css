@@ -2514,106 +2514,24 @@ input[type="time"] {
     color: var(--gails-red-dark);
 }
 
-/* 54. Gemini AI Chat Modal (v2 Redesign)
+/* 54. Gemini AI Chat Modal Styles
 -------------------------------------------------- */
 
-/* --- Main Modal Container & Overlay --- */
-#gemini-chat-modal {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    background-color: rgba(24, 31, 42, 0.6);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-#gemini-chat-modal:not(.hidden) {
-    opacity: 1;
-}
-
-.chat-modal-box {
-    width: 100%;
-    max-width: 800px; /* A more generous width on desktop */
-    height: 90vh;
-    max-height: 800px;
-    background-color: var(--gails-bg);
-    border-radius: 1.5rem; /* A modern, larger radius */
-    box-shadow: var(--shadow-lg);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    /* Entry animation */
-    transform: scale(0.95);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#gemini-chat-modal:not(.hidden) .chat-modal-box {
-    transform: scale(1);
-    opacity: 1;
-}
-
-/* --- Header --- */
-.chat-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--gails-grey-light);
-    flex-shrink: 0;
-}
-
-/* Square icon buttons for the header */
-.btn-icon {
-    padding: 0.6rem;
-    font-size: 1.1rem;
-    line-height: 1;
-}
-.btn-icon .bi {
-    margin: 0;
-}
-
-/* --- Body & Sliding Panels --- */
-.chat-modal-body {
+.chat-modal-content {
     flex-grow: 1;
-    position: relative;
-    overflow: hidden;
-    background-color: var(--gails-white);
-}
-
-.chat-panel {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    background-color: var(--gails-white);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
 }
 
-#chat-history-panel {
-    transform: translateX(100%);
-    background-color: var(--gails-bg);
-}
-
-.chat-modal-box.history-is-open #chat-history-panel {
-    transform: translateX(0);
-}
-
-/* --- Conversation & Welcome Screen --- */
 .chat-conversation-area {
     padding: 1.5rem;
     flex-grow: 1;
-    overflow-y: auto;
     scroll-behavior: smooth;
 }
 
+/* Welcome Screen */
 .chat-welcome-screen {
     display: flex;
     flex-direction: column;
@@ -2622,67 +2540,316 @@ input[type="time"] {
     padding: 2rem;
     height: 100%;
     text-align: center;
+    background-color: var(--gails-bg);
+}
+.welcome-icon-container {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
     background-color: var(--gails-white);
+    border: 1px solid var(--gails-grey-light);
+}
+.welcome-icon-container .bi-stars {
+    font-size: 2rem;
+    color: var(--gails-red);
 }
 
-/* --- Chat Bubbles & Input Area --- */
+/* Prompt Starters */
+.prompt-starters-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2rem;
+    width: 100%;
+}
+.prompt-starter-card {
+    border-radius: 0.75rem;
+    padding: 1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: var(--gails-white);
+    border: 1px solid var(--gails-grey-light);
+}
+.prompt-starter-card:hover {
+    border-color: var(--gails-red);
+    background-color: var(--gails-white);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Message Bubbles */
+.chat-conversation-area {
+    background-color: var(--gails-white);
+}
 .chat-message-wrapper {
     display: flex;
     margin-bottom: 1rem;
-    animation: fadeIn 0.5s ease forwards;
 }
-
 .chat-bubble {
-    max-width: 85%;
-    padding: 0.75rem 1.25rem;
+    max-width: 80%;
+    padding: 0.75rem 1rem;
     border-radius: 1.25rem;
     line-height: 1.5;
     word-wrap: break-word;
 }
-
 .user-bubble {
     background-color: var(--gails-red);
     color: var(--gails-white);
-    border-bottom-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.25rem;
 }
-
 .ai-bubble {
     background-color: var(--gails-grey-light);
     color: var(--gails-text-primary);
-    border-bottom-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.25rem;
 }
 
-.chat-input-area {
-    padding: 1rem 1.5rem;
+/* Chat Input Area */
+.chat-modal-footer {
     border-top: 1px solid var(--gails-grey-light);
     background-color: var(--gails-bg);
-    flex-shrink: 0;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+.chat-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.chat-input {
+    width: 100%;
+    padding: 0.75rem 3.25rem 0.75rem 1rem;
+    border-radius: 1.5rem;
+    border: 1px solid var(--gails-grey-mid);
+    background-color: var(--gails-white);
+    resize: none;
+    max-height: 150px;
+    overflow-y: auto;
+    line-height: 1.5;
+}
+.chat-input:focus {
+    outline: none;
+    border-color: var(--gails-red);
+    box-shadow: var(--shadow-focus);
 }
 
-/* --- History Panel --- */
+.chat-send-btn {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+}
+.chat-send-btn .bi {
+    font-size: 1.25rem;
+    line-height: 1;
+    margin: 0;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    padding: 8px 0 0 5px;
+}
+.typing-indicator span {
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    background-color: var(--gails-text-secondary);
+    margin: 0 2px;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1.0); }
+}
+
+/* 55. Gemini Chat Modal (Fixed Side Panel)
+-------------------------------------------------- */
+#gemini-chat-modal {
+    /* Create a full-screen flex container, aligned to the right */
+    justify-content: flex-end;
+    align-items: stretch;
+
+    /* Overlay styles to dim the background */
+    background-color: rgba(17, 24, 39, 0.6);
+    backdrop-filter: blur(4px);
+    cursor: pointer; /* Allow clicks on the overlay to close the modal */
+}
+
+#gemini-chat-modal .chat-modal-box {
+    /* Sizing and positioning for the side panel */
+    max-width: 500px;
+    width: 100%;
+    height: 100vh;
+    max-height: 100vh; /* Override any previous max-height */
+    margin: 0;
+    border-radius: 0; /* No rounded corners for a clean side panel look */
+    border-left: 1px solid var(--gails-grey-mid);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    cursor: default; /* Reset cursor for the modal content */
+
+    /* Animation for sliding in from the right */
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+/* This class is added by JS to trigger the slide-in animation */
+#gemini-chat-modal:not(.hidden) .chat-modal-box {
+    transform: translateX(0);
+}
+
+/* On mobile, the panel should take up the full screen */
+@media (max-width: 640px) {
+    #gemini-chat-modal .chat-modal-box {
+        max-width: 100vw;
+    }
+}
+
+/* 56. Chat History Panel Styles
+-------------------------------------------------- */
+.chat-history-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    animation: fadeIn 0.3s ease;
+}
+
 .history-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
     padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--gails-grey-light);
+    flex-shrink: 0;
 }
 
 .history-list {
     flex-grow: 1;
     overflow-y: auto;
+    padding: 1rem;
 }
 
 .history-item {
-    padding: 1rem 1.5rem;
+    padding: 1rem;
     border-bottom: 1px solid var(--gails-grey-light);
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
 }
 
-/* --- Mobile Fullscreen View --- */
-@media (max-width: 767px) {
-    #gemini-chat-modal {
-        padding: 0;
-    }
-    .chat-modal-box {
-        height: 100vh;
-        max-height: 100vh;
-        border-radius: 0;
-    }
+.history-item:hover {
+    background-color: var(--gails-red-light);
+}
+
+.history-item-title {
+    font-weight: 600;
+    color: var(--gails-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 0.25rem;
+}
+
+.history-item-date {
+    font-size: 0.8rem;
+    color: var(--gails-text-secondary);
+}
+
+/* 57. Chat History Panel Enhancements */
+.history-item {
+    padding: 1rem;
+    border-bottom: 1px solid var(--gails-grey-light);
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.history-item:hover {
+    background-color: var(--gails-grey-light);
+}
+
+.history-item-title {
+    font-weight: 600;
+    color: var(--gails-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 0.25rem;
+}
+
+.history-item-date {
+    font-size: 0.8rem;
+    color: var(--gails-text-secondary);
+}
+
+/* Add these new/modified rules to the end of your stylesheet */
+
+/* 58. Polished Chat Modal UI
+-------------------------------------------------- */
+
+/* Welcome Screen Refinements */
+.chat-welcome-screen {
+    background-color: var(--gails-bg); /* Use the main app background for consistency */
+}
+
+.welcome-icon-container {
+    background-color: var(--gails-white);
+    border: 1px solid var(--gails-grey-light);
+}
+
+.prompt-starter-card {
+    background-color: var(--gails-white);
+    border-color: var(--gails-grey-light); /* Softer default border */
+}
+
+.prompt-starter-card:hover {
+    border-color: var(--gails-red);
+    background-color: var(--gails-white);
+    box-shadow: var(--shadow-md);
+}
+
+/* Chat Bubble Enhancements */
+.chat-conversation-area {
+    background-color: var(--gails-white);
+}
+
+.user-bubble {
+    /* Use the primary red for better brand consistency and visual weight */
+    background-color: var(--gails-red); 
+    color: var(--gails-white);
+}
+
+.ai-bubble {
+    background-color: var(--gails-grey-light);
+    color: var(--gails-text-primary);
+}
+
+/* Refined Chat Input Area */
+.chat-modal-footer {
+    background-color: var(--gails-bg);
+    border-top-color: var(--gails-grey-light);
+    padding: 1rem;
+}
+
+.chat-input {
+    background-color: var(--gails-white);
+    border-color: var(--gails-grey-mid);
+}
+
+/* Polished History Panel */
+.history-item:hover {
+    background-color: var(--gails-red-light);
 }
