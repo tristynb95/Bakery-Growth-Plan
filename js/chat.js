@@ -1,4 +1,4 @@
-// js/chat.js
+// js/chat.js AI MODAL
 
 import { getGeminiChatResponse } from './api.js';
 import { summarizePlanForAI } from './plan-view.js';
@@ -10,39 +10,46 @@ let currentConversationId = null;
 
 const DOMElements = {
     modal: document.getElementById('gemini-chat-modal'),
-    modalBox: document.querySelector('.chat-modal-box'),
+    modalBox: document.querySelector('#gemini-chat-modal .chat-modal-box'),
+    header: document.getElementById('chat-modal-header'),
     closeBtn: document.getElementById('chat-modal-close-btn'),
-    historyBtn: document.getElementById('chat-history-btn'),
+    optionsBtn: document.getElementById('chat-options-btn'),
     newChatBtn: document.getElementById('chat-new-btn'),
-    
-    conversationPanel: document.getElementById('chat-conversation-panel'),
     conversationView: document.getElementById('chat-conversation-area'),
     welcomeScreen: document.getElementById('chat-welcome-screen'),
     chatInput: document.getElementById('chat-input'),
     sendBtn: document.getElementById('chat-send-btn'),
-
     historyPanel: document.getElementById('chat-history-panel'),
     historyList: document.getElementById('history-list'),
     backToChatBtn: document.getElementById('back-to-chat-btn'),
 };
 
-function scrollToBottom() {
-    DOMElements.conversationView.scrollTop = DOMElements.conversationView.scrollHeight;
-}
-
-function openChatModal() {
-    DOMElements.modal.classList.remove('hidden');
-    DOMElements.chatInput.focus();
+function scrollToMessage() {
+    const container = DOMElements.conversationView;
+    container.scrollTop = container.scrollHeight;
 }
 
 function closeChatModal() {
-    DOMElements.modal.classList.add('hidden');
-    // Ensure the history panel is closed for the next time it opens
-    DOMElements.modalBox.classList.remove('history-is-open');
+    if (DOMElements.modal) {
+        // Start the slide-out animation
+        if (DOMElements.modalBox) {
+            DOMElements.modalBox.style.transform = 'translateX(100%)';
+        }
+
+        // Add the 'hidden' class after the animation completes
+        setTimeout(() => {
+            DOMElements.modal.classList.add('hidden');
+            // Clean up the inline style so it doesn't interfere with the opening animation
+            if (DOMElements.modalBox) {
+                DOMElements.modalBox.removeAttribute('style');
+            }
+        }, 400); // This duration should match the CSS transition time
+    }
 }
 
 function addMessageToUI(sender, text, isLoading = false) {
     DOMElements.welcomeScreen.classList.add('hidden');
+    DOMElements.historyPanel.classList.add('hidden');
     DOMElements.conversationView.classList.remove('hidden');
 
     const wrapper = document.createElement('div');
@@ -58,27 +65,25 @@ function addMessageToUI(sender, text, isLoading = false) {
     
     wrapper.appendChild(bubble);
     DOMElements.conversationView.appendChild(wrapper);
-    scrollToBottom();
+    scrollToMessage();
 }
 
 function updateLastAiMessageInUI(text) {
-    const lastBubble = DOMElements.conversationView.querySelector('.ai-bubble:last-child');
-    if (lastBubble && lastBubble.querySelector('.typing-indicator')) {
+    const allAiBubbles = DOMElements.conversationView.querySelectorAll('.ai-bubble');
+    if (allAiBubbles.length > 0) {
+        const lastBubble = allAiBubbles[allAiBubbles.length - 1];
         lastBubble.innerHTML = '';
         lastBubble.textContent = text;
-        scrollToBottom();
+        scrollToMessage();
     }
 }
 
 function startNewConversation() {
     currentConversationId = null;
     chatHistory = [];
-    sessionStorage.removeItem('gails_lastConversationId');
+    sessionStorage.removeItem('gails_lastConversationId'); // Forget the last chat
     DOMElements.conversationView.innerHTML = '';
-    DOMElements.conversationView.classList.add('hidden');
-    DOMElements.welcomeScreen.classList.remove('hidden');
-    // Make sure we are viewing the conversation panel
-    DOMElements.modalBox.classList.remove('history-is-open');
+    showConversationView();
 }
 
 async function saveMessage(messageObject) {
@@ -91,6 +96,7 @@ async function saveMessage(messageObject) {
     if (!currentConversationId) {
         const conversationDocRef = conversationsRef.doc();
         currentConversationId = conversationDocRef.id;
+        // Save the new ID to the session so it's remembered on refresh
         sessionStorage.setItem('gails_lastConversationId', currentConversationId);
         await conversationDocRef.set({
             firstMessage: messageObject.text,
@@ -99,10 +105,15 @@ async function saveMessage(messageObject) {
     }
 
     const messageRef = conversationsRef.doc(currentConversationId).collection('messages');
-    await messageRef.add({
-        ...messageObject,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    
+    try {
+        await messageRef.add({
+            ...messageObject,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (error) {
+        console.error("Error saving chat message:", error);
+    }
 }
 
 async function handleSendMessage() {
@@ -114,8 +125,9 @@ async function handleSendMessage() {
     addMessageToUI('user', messageText);
     saveMessage({ role: 'user', text: messageText });
 
+    const initialHeight = DOMElements.chatInput.scrollHeight;
     DOMElements.chatInput.value = '';
-    DOMElements.chatInput.style.height = 'auto';
+    DOMElements.chatInput.style.height = `${initialHeight}px`;
     addMessageToUI('model', '', true);
 
     try {
@@ -129,15 +141,18 @@ async function handleSendMessage() {
 
     } catch (error) {
         console.error("Chat error:", error);
-        updateLastAiMessageInUI(error.message || 'Sorry, I encountered an error. Please try again.');
+        const errorMessage = error.message || 'Sorry, I encountered an error. Please try again.';
+        updateLastAiMessageInUI(errorMessage);
     }
 }
 
 async function loadChatHistory(conversationId) {
     if (!appState.currentUser || !appState.currentPlanId || !db) return;
 
+    // --- Start of Fix ---
+
+    // 1. Immediately clear the UI to provide instant feedback.
     DOMElements.conversationView.innerHTML = '';
-    DOMElements.modalBox.classList.remove('history-is-open');
     
     currentConversationId = conversationId;
     sessionStorage.setItem('gails_lastConversationId', conversationId);
@@ -145,16 +160,21 @@ async function loadChatHistory(conversationId) {
     const messagesRef = db.collection('users').doc(appState.currentUser.uid)
                           .collection('plans').doc(appState.currentPlanId)
                           .collection('conversations').doc(conversationId)
-                          .collection('messages').orderBy('timestamp', 'asc');
+                          .collection('messages')
+                          .orderBy('timestamp', 'asc');
     try {
         const snapshot = await messagesRef.get();
+
+        // 2. Build the new history in a temporary local array first.
         const newHistory = [];
         const fragment = document.createDocumentFragment();
 
         snapshot.forEach(doc => {
             const data = doc.data();
+            // Add to the temporary history array
             newHistory.push({ role: data.role, parts: [{ text: data.text }] });
-            
+
+            // Build the UI in an efficient off-screen fragment
             const wrapper = document.createElement('div');
             wrapper.className = `chat-message-wrapper justify-${data.role === 'user' ? 'end' : 'start'}`;
             const bubble = document.createElement('div');
@@ -164,26 +184,33 @@ async function loadChatHistory(conversationId) {
             fragment.appendChild(wrapper);
         });
 
+        // 3. Once complete, atomically update the global state and the DOM.
         chatHistory = newHistory;
         DOMElements.conversationView.appendChild(fragment);
 
-        if (chatHistory.length > 0) {
-            DOMElements.conversationView.classList.remove('hidden');
-            DOMElements.welcomeScreen.classList.add('hidden');
-        } else {
-             DOMElements.conversationView.classList.add('hidden');
-            DOMElements.welcomeScreen.classList.remove('hidden');
-        }
-        
-        scrollToBottom();
+        // --- End of Fix ---
+
+        showConversationView();
+        scrollToMessage(); // Scroll to the bottom after rendering
     } catch (error) {
         console.error("Error loading chat history:", error);
         addMessageToUI('model', 'Could not load previous messages.');
     }
 }
 
+function showConversationView() {
+    DOMElements.historyPanel.classList.add('hidden');
+    DOMElements.conversationView.classList.remove('hidden');
+    if (chatHistory.length === 0) {
+        DOMElements.welcomeScreen.classList.remove('hidden');
+        DOMElements.conversationView.classList.add('hidden');
+    }
+}
+
 async function showHistoryView() {
-    DOMElements.modalBox.classList.add('history-is-open');
+    DOMElements.welcomeScreen.classList.add('hidden');
+    DOMElements.conversationView.classList.add('hidden');
+    DOMElements.historyPanel.classList.remove('hidden');
     DOMElements.historyList.innerHTML = '<div class="loading-spinner mx-auto mt-8"></div>';
 
     if (!appState.currentUser || !appState.currentPlanId || !db) {
@@ -193,7 +220,8 @@ async function showHistoryView() {
 
     const conversationsRef = db.collection('users').doc(appState.currentUser.uid)
                                .collection('plans').doc(appState.currentPlanId)
-                               .collection('conversations').orderBy('createdAt', 'desc');
+                               .collection('conversations')
+                               .orderBy('createdAt', 'desc');
     try {
         const snapshot = await conversationsRef.get();
         if (snapshot.empty) {
@@ -203,13 +231,14 @@ async function showHistoryView() {
 
         DOMElements.historyList.innerHTML = '';
         snapshot.forEach(doc => {
-            const { firstMessage, createdAt } = doc.data();
+            const conversation = doc.data();
             const historyItem = document.createElement('div');
             historyItem.className = 'history-item';
             historyItem.dataset.id = doc.id;
             historyItem.innerHTML = `
-                <p class="history-item-title">${firstMessage}</p>
-                <p class="history-item-date">${createdAt.toDate().toLocaleDateString()}</p>`;
+                <p class="history-item-title">${conversation.firstMessage}</p>
+                <p class="history-item-date">${conversation.createdAt.toDate().toLocaleDateString()}</p>
+            `;
             DOMElements.historyList.appendChild(historyItem);
         });
     } catch (error) {
@@ -219,25 +248,33 @@ async function showHistoryView() {
 }
 
 export async function openChat() {
-    openChatModal();
+    if (DOMElements.modal) {
+        DOMElements.modal.classList.remove('hidden');
+        DOMElements.chatInput.focus();
 
-    const lastConversationId = sessionStorage.getItem('gails_lastConversationId');
-    if (lastConversationId) {
-        await loadChatHistory(lastConversationId);
-    } else {
-        const conversationsRef = db.collection('users').doc(appState.currentUser.uid)
+        const lastConversationId = sessionStorage.getItem('gails_lastConversationId');
+
+        if (lastConversationId) {
+            await loadChatHistory(lastConversationId);
+        } else {
+            // Fallback to the most recent conversation in Firestore if no session is stored
+            const conversationsRef = db.collection('users').doc(appState.currentUser.uid)
                                    .collection('plans').doc(appState.currentPlanId)
-                                   .collection('conversations').orderBy('createdAt', 'desc').limit(1);
-        try {
-            const snapshot = await conversationsRef.get();
-            if (snapshot.empty) {
+                                   .collection('conversations')
+                                   .orderBy('createdAt', 'desc')
+                                   .limit(1);
+            try {
+                const snapshot = await conversationsRef.get();
+                if (snapshot.empty) {
+                    startNewConversation();
+                } else {
+                    const recentId = snapshot.docs[0].id;
+                    await loadChatHistory(recentId);
+                }
+            } catch (error) {
+                console.error("Error loading last conversation:", error);
                 startNewConversation();
-            } else {
-                await loadChatHistory(snapshot.docs[0].id);
             }
-        } catch (error) {
-            console.error("Error loading last conversation:", error);
-            startNewConversation();
         }
     }
 }
@@ -249,7 +286,9 @@ export function initializeChat(_appState, _db) {
     if (!DOMElements.modal) return;
 
     DOMElements.modal.addEventListener('click', (e) => {
-        if (e.target === DOMElements.modal) closeChatModal();
+        if (e.target === DOMElements.modal) {
+            closeChatModal();
+        }
     });
 
     DOMElements.closeBtn.addEventListener('click', closeChatModal);
@@ -266,29 +305,27 @@ export function initializeChat(_appState, _db) {
             handleSendMessage();
         }
     });
-     DOMElements.chatInput.addEventListener('input', () => {
-        DOMElements.chatInput.style.height = 'auto';
-        DOMElements.chatInput.style.height = `${DOMElements.chatInput.scrollHeight}px`;
-    });
 
     DOMElements.welcomeScreen.addEventListener('click', (e) => {
         const card = e.target.closest('.prompt-starter-card');
         if (card) {
-            DOMElements.chatInput.value = card.querySelector('p:last-child').textContent.replace(/"/g, '');
+            const promptText = card.querySelector('p:last-child').textContent.replace(/"/g, '');
+            DOMElements.chatInput.value = promptText;
+            DOMElements.chatInput.focus();
             handleSendMessage();
         }
     });
     
     DOMElements.newChatBtn.addEventListener('click', startNewConversation);
-    DOMElements.historyBtn.addEventListener('click', showHistoryView);
-    DOMElements.backToChatBtn.addEventListener('click', () => {
-        DOMElements.modalBox.classList.remove('history-is-open');
-    });
 
     DOMElements.historyList.addEventListener('click', (e) => {
         const item = e.target.closest('.history-item');
         if (item) {
-            loadChatHistory(item.dataset.id);
+            const conversationId = item.dataset.id;
+            loadChatHistory(conversationId);
         }
     });
+
+    DOMElements.optionsBtn.addEventListener('click', showHistoryView);
+    DOMElements.backToChatBtn.addEventListener('click', showConversationView);
 }
