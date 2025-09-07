@@ -1,4 +1,4 @@
-// js/chat.js
+// js/chat.js AI MODAL
 
 import { getGeminiChatResponse } from './api.js';
 import { summarizePlanForAI } from './plan-view.js';
