@@ -2537,6 +2537,8 @@ input[type="time"] {
 .chat-conversation-area {
     padding: 1.5rem;
     flex-grow: 1;
+    scroll-behavior: smooth; /* ADDED: This enables smooth scrolling */
+
 }
 
 /* Welcome Screen */
