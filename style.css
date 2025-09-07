@@ -2703,7 +2703,6 @@ input[type="time"] {
     overflow: hidden; 
     background-color: transparent;
     backdrop-filter: none;
-    /* MODIFICATION: Allow clicks to pass through the transparent overlay */
     pointer-events: none;
 }
 
@@ -2711,15 +2710,14 @@ input[type="time"] {
 #gemini-chat-modal .chat-modal-box {
     max-width: 420px;
     width: calc(100vw - 4rem);
-    margin: 0 2rem 8rem 2rem;
-    max-height: 600px;
-    height: 70vh;
-    box-shadow: var(--shadow-lg);
+    /* MODIFICATION: Adjust margin and height to fill the screen */
+    margin: 2rem;
+    height: calc(100vh - 4rem);
+    max-height: none; /* Remove previous constraint */
     
-    /* MODIFICATION: Re-enable clicks for the chat panel itself */
+    box-shadow: var(--shadow-lg);
     pointer-events: auto;
     
-    /* Animation for entry */
     opacity: 0;
     transform: translateY(24px);
     transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -2736,12 +2734,15 @@ input[type="time"] {
 @media (max-width: 640px) {
     #gemini-chat-modal {
         justify-content: center;
+        align-items: stretch;
     }
 
     #gemini-chat-modal .chat-modal-box {
-        margin: 0 1rem 7rem 1rem;
+        /* MODIFICATION: Adjust margin and height for mobile */
+        margin: 1rem;
         width: calc(100vw - 2rem);
-        max-height: 65vh;
+        height: calc(100vh - 2rem);
+        max-height: none;
     }
 }
 
@@ -2749,10 +2750,10 @@ input[type="time"] {
 /* 56. Draggable Modal Styles
 -------------------------------------------------- */
 
-/* The entire header is now the drag handle, excluding buttons */
+/* Style for the drag handle in the modal header */
 .chat-modal-header {
     cursor: grab;
-    touch-action: none; /* Improve touch device compatibility */
+    touch-action: none;
 }
 
 /* When the header is being actively dragged */
