@@ -50,7 +50,6 @@ function runApp(app) {
     initializeCalendar(db, appState, openModal);
     initializeDashboard(db, appState, openModal, handleSelectPlan);
     initializePlanView(db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare);
-    initializeChat(appState); // <-- INITIALIZE the new chat module
     initializeChat(appState, db);
 
     function handleSelectPlan(planId) {
