@@ -683,7 +683,13 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
     const geminiButton = document.getElementById('radial-action-gemini');
     if (geminiButton) {
         geminiButton.addEventListener('click', () => {
-            alert("Gemini AI feature coming soon!");
+            // NEW LOGIC TO OPEN THE CHAT MODAL
+            const chatModal = document.getElementById('gemini-chat-modal');
+            if (chatModal) {
+                chatModal.classList.remove('hidden');
+                // You would add more logic here to initialize the chat
+            }
+            
             document.getElementById('radial-menu-container').classList.remove('open');
         });
     }
