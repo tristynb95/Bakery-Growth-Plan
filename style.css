@@ -2700,21 +2700,24 @@ input[type="time"] {
 #gemini-chat-modal {
     align-items: flex-end;
     justify-content: flex-end;
-    /* This prevents the main content from scrolling when the modal is open */
     overflow: hidden; 
-    /* MODIFICATION: Make the backdrop transparent for the chat modal only */
     background-color: transparent;
     backdrop-filter: none;
+    /* MODIFICATION: Allow clicks to pass through the transparent overlay */
+    pointer-events: none;
 }
 
 /* Overrides for the chat modal box to create the side panel effect */
 #gemini-chat-modal .chat-modal-box {
-    max-width: 420px; /* A narrower, panel-like width */
-    width: calc(100vw - 4rem); /* Responsive width with horizontal padding */
-    margin: 0 2rem 8rem 2rem; /* Positions the panel above the radial menu */
-    max-height: 600px; /* Set a max height for the panel */
-    height: 70vh; /* A good default height */
-    box-shadow: var(--shadow-lg); /* MODIFICATION: Use a stronger shadow for separation */
+    max-width: 420px;
+    width: calc(100vw - 4rem);
+    margin: 0 2rem 8rem 2rem;
+    max-height: 600px;
+    height: 70vh;
+    box-shadow: var(--shadow-lg);
+    
+    /* MODIFICATION: Re-enable clicks for the chat panel itself */
+    pointer-events: auto;
     
     /* Animation for entry */
     opacity: 0;
@@ -2731,13 +2734,12 @@ input[type="time"] {
 
 /* Responsive adjustments for smaller screens */
 @media (max-width: 640px) {
-    /* On mobile, center it at the bottom for a more natural feel */
     #gemini-chat-modal {
         justify-content: center;
     }
 
     #gemini-chat-modal .chat-modal-box {
-        margin: 0 1rem 7rem 1rem; /* Adjust margins for mobile */
+        margin: 0 1rem 7rem 1rem;
         width: calc(100vw - 2rem);
         max-height: 65vh;
     }
@@ -2751,8 +2753,8 @@ input[type="time"] {
 .chat-drag-handle {
     cursor: grab;
     color: var(--gails-grey-mid);
-    padding: 0 0.5rem 0 0; /* Add some spacing */
-    touch-action: none; /* Improve touch device compatibility */
+    padding: 0 0.5rem 0 0;
+    touch-action: none;
 }
 
 /* When the header is being actively dragged */
