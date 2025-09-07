@@ -263,25 +263,6 @@
         </div>
     </div>
 
-    <div id="radial-menu-container" class="radial-menu-container hidden">
-        <div id="radial-menu-overlay" class="radial-menu-overlay"></div>
-        <nav class="radial-menu-items">
-            <button class="radial-menu-item" id="radial-action-gemini" data-tooltip="Gemini AI">
-                <i class="bi bi-stars"></i>
-            </button>
-            <button class="radial-menu-item" id="radial-action-plan" data-tooltip="Action Plan">
-                <i class="bi bi-list-check"></i>
-            </button>
-            <button class="radial-menu-item" id="radial-action-calendar" data-tooltip="Calendar">
-                <i class="bi bi-calendar-event-fill"></i>
-            </button>
-        </nav>
-        <button id="radial-menu-fab" class="radial-menu-fab btn btn-primary">
-            <i class="bi bi-plus-lg open-icon"></i>
-            <i class="bi bi-x-lg close-icon"></i>
-        </button>
-    </div>
-
     <div id="calendar-modal" class="calendar-modal hidden">
         <div class="calendar-modal-content">
             <div class="calendar-main-grid">
@@ -400,59 +381,61 @@
         </div>
     </div>
     
-    <div id="gemini-chat-modal" class="modal-overlay hidden">
-        <div class="modal-box chat-modal-box">
-            <div class="modal-header">
+    <div id="gemini-chat-popup-container" class="chat-popup-container">
+        <div id="gemini-chat-popup" class="chat-popup">
+            <div class="chat-popup-header">
                 <div class="flex items-center gap-3">
                     <i class="bi bi-stars gails-red-text text-xl"></i>
-                    <h3 id="chat-modal-title" class="text-lg font-bold">Your AI Planning Partner</h3>
+                    <h3 class="text-lg font-bold">Your AI Planning Partner</h3>
                 </div>
-                <button id="chat-modal-close-btn" class="btn btn-secondary !p-2"><i class="bi bi-x-lg"></i></button>
+                <button id="chat-popup-close-btn" class="btn btn-secondary !p-2"><i class="bi bi-x-lg"></i></button>
             </div>
-            <div id="chat-modal-content" class="modal-content chat-modal-content">
-                
+            <div id="chat-popup-content" class="chat-popup-content">
                 <div id="chat-welcome-screen" class="chat-welcome-screen">
                     <div class="welcome-icon-container">
                         <i class="bi bi-stars"></i>
                     </div>
-                    <h2 class="text-2xl font-bold font-poppins text-center">How can I help you today?</h2>
-                    <p class="text-gray-500 text-center -mt-1">I can see your plan. Ask me anything about it.</p>
+                    <h2 class="text-xl font-bold font-poppins text-center">How can I help you plan?</h2>
+                    <p class="text-gray-500 text-center text-sm -mt-1">I can see your current plan. Ask me anything.</p>
                     <div class="prompt-starters-grid">
-                        <button class="prompt-starter-card">
-                            <p class="font-semibold">Review a goal</p>
-                            <p class="text-xs text-gray-500">"Is my Month 1 'Must-Win Battle' specific enough?"</p>
-                        </button>
-                        <button class="prompt-starter-card">
-                            <p class="font-semibold">Suggest ideas</p>
-                            <p class="text-xs text-gray-500">"Suggest 3 team 'Power-Up Questions' based on my plan"</p>
-                        </button>
-                         <button class="prompt-starter-card">
-                            <p class="font-semibold">Help me reflect</p>
-                            <p class="text-xs text-gray-500">"Help me write a reflection for my toughest challenge"</p>
-                        </button>
-                         <button class="prompt-starter-card">
-                            <p class="font-semibold">Identify blind spots</p>
-                            <p class="text-xs text-gray-500">"What are potential blind spots in my Month 3 objectives?"</p>
-                        </button>
+                        <button class="prompt-starter-card">"Is my Month 1 goal specific enough?"</button>
+                        <button class="prompt-starter-card">"Suggest 3 team 'Power-Up Questions'"</button>
+                        <button class="prompt-starter-card">"Help me reflect on a challenge"</button>
+                        <button class="prompt-starter-card">"Identify blind spots in my plan"</button>
                     </div>
                 </div>
-
                 <div id="chat-conversation-area" class="chat-conversation-area">
                 </div>
-
             </div>
-            <div class="modal-footer chat-modal-footer">
+            <div class="chat-popup-footer">
                 <div class="chat-input-wrapper">
-                    <textarea id="chat-input" class="chat-input" placeholder="Ask about your plan..." rows="1"></textarea>
+                    <textarea id="chat-input" class="chat-input" placeholder="Ask your AI partner..." rows="1"></textarea>
                     <button id="chat-send-btn" class="btn btn-primary chat-send-btn" aria-label="Send message">
                         <i class="bi bi-arrow-up"></i>
                     </button>
                 </div>
-                <p class="text-xs text-center text-gray-400 mt-2">Gemini AI can make mistakes. Consider checking important information.</p>
             </div>
         </div>
     </div>
 
+    <div id="radial-menu-container" class="radial-menu-container">
+        <div id="radial-menu-overlay" class="radial-menu-overlay"></div>
+        <nav class="radial-menu-items">
+            <button class="radial-menu-item" id="radial-action-gemini" data-tooltip="Gemini AI">
+                <i class="bi bi-stars"></i>
+            </button>
+            <button class="radial-menu-item" id="radial-action-plan" data-tooltip="Action Plan">
+                <i class="bi bi-list-check"></i>
+            </button>
+            <button class="radial-menu-item" id="radial-action-calendar" data-tooltip="Calendar">
+                <i class="bi bi-calendar-event-fill"></i>
+            </button>
+        </nav>
+        <button id="radial-menu-fab" class="radial-menu-fab btn btn-primary">
+            <i class="bi bi-plus-lg open-icon"></i>
+            <i class="bi bi-x-lg close-icon"></i>
+        </button>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
