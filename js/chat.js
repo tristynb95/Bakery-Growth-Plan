@@ -31,15 +31,19 @@ function scrollToMessage() {
 
 function closeChatModal() {
     if (DOMElements.modal) {
+        // Start the slide-out animation
         if (DOMElements.modalBox) {
-             DOMElements.modalBox.style.transform = 'translateX(100%)';
+            DOMElements.modalBox.style.transform = 'translateX(100%)';
         }
+
+        // Add the 'hidden' class after the animation completes
         setTimeout(() => {
             DOMElements.modal.classList.add('hidden');
-             if (DOMElements.modalBox) {
+            // Clean up the inline style so it doesn't interfere with the opening animation
+            if (DOMElements.modalBox) {
                 DOMElements.modalBox.removeAttribute('style');
             }
-        }, 400);
+        }, 400); // This duration should match the CSS transition time
     }
 }
 
