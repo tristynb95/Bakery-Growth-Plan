@@ -2739,3 +2739,26 @@ input[type="time"] {
         max-height: 65vh;
     }
 }
+
+/* 56. Draggable Modal Styles
+-------------------------------------------------- */
+
+/* Style for the drag handle in the modal header */
+.chat-drag-handle {
+    cursor: grab;
+    color: var(--gails-grey-mid);
+    padding: 0 0.5rem 0 0; /* Add some spacing */
+    touch-action: none; /* Improve touch device compatibility */
+}
+
+/* When the header is being actively dragged */
+.chat-modal-box.is-dragging .modal-header {
+    cursor: grabbing;
+}
+
+/* Prevent text selection and pointer events on the content while dragging */
+.chat-modal-box.is-dragging .modal-content,
+.chat-modal-box.is-dragging .modal-footer {
+    user-select: none;
+    pointer-events: none;
+}
