@@ -2695,56 +2695,62 @@ input[type="time"] {
     }
 }
 
-/* 55. Gemini Chat Modal (Side Panel Variant)
--------------------------------------------------- */
+/* Add these new/modified rules to the end of your stylesheet */
 
-/* Repositions the modal overlay content to the bottom right */
+/* 55. Gemini Chat Modal (Side Panel - REVISED)
+-------------------------------------------------- */
 #gemini-chat-modal {
-    align-items: flex-end;
-    justify-content: flex-end;
-    overflow: hidden; 
-    background-color: transparent;
-    backdrop-filter: none;
-    pointer-events: none;
+    /* Restore the overlay to dim the background when the panel is open */
+    background-color: rgba(17, 24, 39, 0.6); 
+    backdrop-filter: blur(4px);
+    
+    /* Position the container to align the child (modal box) to the right */
+    justify-content: flex-end; 
+    align-items: stretch; 
+    pointer-events: auto; /* Allow clicks on the overlay to close */
 }
 
-/* Overrides for the chat modal box to create the side panel effect */
+/* Clicking the overlay now closes the modal */
+#gemini-chat-modal.modal-overlay {
+    cursor: pointer;
+}
 #gemini-chat-modal .chat-modal-box {
-    max-width: 420px;
-    width: calc(100vw - 4rem);
-    /* MODIFICATION: Adjust margin and height to fill the screen */
-    margin: 2rem;
-    height: calc(100vh - 4rem);
-    max-height: none; /* Remove previous constraint */
-    
+    cursor: default;
+}
+
+
+#gemini-chat-modal .chat-modal-box {
+    /* Sizing and positioning */
+    max-width: 500px; /* New, larger width */
+    width: 100%;
+    height: 100vh; /* Full height */
+    max-height: 100vh; /* Override previous max-height */
+    margin: 0;
+    border-radius: 0; /* No rounded corners for a clean side panel look */
+    border-left: 1px solid var(--gails-grey-mid); /* A subtle border for separation */
     box-shadow: var(--shadow-lg);
-    pointer-events: auto;
-    
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: transform, opacity;
+
+    /* Animation: Slide in from the right */
+    opacity: 1; 
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
 }
 
 /* The state when the modal is made visible (by removing the .hidden class) */
 #gemini-chat-modal:not(.hidden) .chat-modal-box {
-    opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
 }
 
-/* Responsive adjustments for smaller screens */
-@media (max-width: 640px) {
-    #gemini-chat-modal {
-        justify-content: center;
-        align-items: stretch;
-    }
+/* Remove the grab cursor since it's no longer draggable */
+.chat-modal-header {
+    cursor: default;
+}
 
+/* On mobile, the panel should take up the full screen */
+@media (max-width: 640px) {
     #gemini-chat-modal .chat-modal-box {
-        /* MODIFICATION: Adjust margin and height for mobile */
-        margin: 1rem;
-        width: calc(100vw - 2rem);
-        height: calc(100vh - 2rem);
-        max-height: none;
+        max-width: 100vw;
     }
 }
 
