@@ -2827,3 +2827,62 @@ input[type="time"] {
     font-size: 0.8rem;
     color: var(--gails-text-secondary);
 }
+
+/* Add these new/modified rules to the end of your stylesheet */
+
+/* 59. Polished Chat Modal UI
+-------------------------------------------------- */
+
+/* Welcome Screen Refinements */
+.chat-welcome-screen {
+    background-color: var(--gails-bg); /* Use the main app background for consistency */
+}
+
+.welcome-icon-container {
+    background-color: var(--gails-white);
+    border: 1px solid var(--gails-grey-light);
+}
+
+.prompt-starter-card {
+    background-color: var(--gails-white);
+    border-color: var(--gails-grey-light); /* Softer default border */
+}
+
+.prompt-starter-card:hover {
+    border-color: var(--gails-red);
+    background-color: var(--gails-white);
+    box-shadow: var(--shadow-md);
+}
+
+/* Chat Bubble Enhancements */
+.chat-conversation-area {
+    background-color: var(--gails-white);
+}
+
+.user-bubble {
+    /* Use the primary red for better brand consistency and visual weight */
+    background-color: var(--gails-red); 
+    color: var(--gails-white);
+}
+
+.ai-bubble {
+    background-color: var(--gails-grey-light);
+    color: var(--gails-text-primary);
+}
+
+/* Refined Chat Input Area */
+.chat-modal-footer {
+    background-color: var(--gails-bg);
+    border-top-color: var(--gails-grey-light);
+    padding: 1rem;
+}
+
+.chat-input {
+    background-color: var(--gails-white);
+    border-color: var(--gails-grey-mid);
+}
+
+/* Polished History Panel */
+.history-item:hover {
+    background-color: var(--gails-red-light);
+}
