@@ -22,6 +22,18 @@ const DOMElements = {
     backToChatBtn: document.getElementById('back-to-chat-btn'),
 };
 
+/**
+ * Scrolls the conversation area to bring the specified element into view.
+ * @param {HTMLElement} element The element to scroll to.
+ */
+function scrollToMessage(element) {
+    const container = DOMElements.conversationView;
+    // Calculate the ideal scroll position to place the message at the bottom of the view
+    const desiredScrollTop = element.offsetTop - container.clientHeight + element.clientHeight;
+    container.scrollTop = desiredScrollTop;
+}
+
+
 function makeDraggable(modal, handle) {
     let offsetX, offsetY, isDragging = false;
 
@@ -88,7 +100,8 @@ function addMessageToUI(sender, text, isLoading = false) {
     
     wrapper.appendChild(bubble);
     DOMElements.conversationView.appendChild(wrapper);
-    DOMElements.conversationView.scrollTop = DOMElements.conversationView.scrollHeight;
+    // MODIFICATION: Use the new scroll function
+    scrollToMessage(wrapper);
 }
 
 /**
@@ -99,6 +112,12 @@ function updateLastAiMessageInUI(text) {
     if (lastBubble) {
         lastBubble.innerHTML = ''; // Remove typing indicator
         lastBubble.textContent = text;
+
+        // MODIFICATION: Re-scroll after content is added to account for height changes
+        const messageWrapper = lastBubble.parentElement;
+        if (messageWrapper) {
+            scrollToMessage(messageWrapper);
+        }
     }
 }
 
@@ -120,7 +139,6 @@ async function saveMessage(messageObject) {
         });
     } catch (error) {
         console.error("Error saving chat message:", error);
-        // Optionally, add UI feedback that the message failed to save.
     }
 }
 
@@ -131,27 +149,24 @@ async function handleSendMessage() {
     const messageText = DOMElements.chatInput.value.trim();
     if (!messageText) return;
 
-    // 1. Optimistically update UI and local state
     const userMessage = { role: 'user', parts: [{ text: messageText }] };
     chatHistory.push(userMessage);
     addMessageToUI('user', messageText);
-    saveMessage({ role: 'user', text: messageText }); // Save user message in the background
+    saveMessage({ role: 'user', text: messageText });
 
-    // 2. Clear input and show loading indicator
+    const initialHeight = DOMElements.chatInput.scrollHeight;
     DOMElements.chatInput.value = '';
-    DOMElements.chatInput.style.height = 'auto';
+    DOMElements.chatInput.style.height = `${initialHeight}px`;
     addMessageToUI('model', '', true);
 
     try {
-        // 3. Get context and call API
         const planSummary = summarizePlanForAI(appState.planData);
         const responseText = await getGeminiChatResponse(planSummary, chatHistory, messageText);
         
-        // 4. Update UI and local state with response
         updateLastAiMessageInUI(responseText);
         const aiMessage = { role: 'model', parts: [{ text: responseText }] };
         chatHistory.push(aiMessage);
-        saveMessage({ role: 'model', text: responseText }); // Save AI message in the background
+        saveMessage({ role: 'model', text: responseText });
 
     } catch (error) {
         console.error("Chat error:", error);
@@ -165,19 +180,19 @@ async function handleSendMessage() {
  */
 async function loadChatHistory() {
     if (!appState.currentUser || !appState.currentPlanId || !db) {
-        showConversationView(); // Show welcome screen if no context
+        showConversationView();
         return;
     }
 
     const historyRef = db.collection('users').doc(appState.currentUser.uid)
                          .collection('plans').doc(appState.currentPlanId)
                          .collection('chatHistory')
-                         .orderBy('timestamp', 'asc'); // Fetch in chronological order
+                         .orderBy('timestamp', 'asc');
     
     try {
         const snapshot = await historyRef.get();
         if (snapshot.empty) {
-            showConversationView(); // No history, show welcome screen
+            showConversationView();
             return;
         }
 
@@ -210,7 +225,6 @@ function showHistoryView() {
     DOMElements.historyPanel.classList.remove('hidden');
     
     DOMElements.historyList.innerHTML = '<div class="loading-spinner mx-auto mt-8"></div>';
-    // Placeholder for actual history rendering from DB
     setTimeout(() => {
         DOMElements.historyList.innerHTML = `<div class="p-4 text-center text-gray-500">Feature to view and load past conversations is coming soon.</div>`;
     }, 500);
@@ -218,7 +232,6 @@ function showHistoryView() {
 
 export function openChat() {
     if (DOMElements.modal) {
-        // Reset local state and UI before loading new history
         chatHistory = [];
         DOMElements.conversationView.innerHTML = '';
         DOMElements.modal.classList.remove('hidden');
