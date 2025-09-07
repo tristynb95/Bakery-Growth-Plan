@@ -14,6 +14,8 @@ export function handleSignOut() {
     if (auth) {
         localStorage.removeItem('lastPlanId');
         localStorage.removeItem('lastViewId');
+        sessionStorage.removeItem('lastPlanId');
+        sessionStorage.removeItem('lastViewId');
         localStorage.removeItem('lastActivity');
         auth.signOut();
     } else {
