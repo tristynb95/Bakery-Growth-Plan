@@ -51,7 +51,7 @@ function managePlaceholder(editor) {
 }
 
 // ====================================================================
-// NEW: Draggable Modal Logic
+// Draggable Modal Logic
 // ====================================================================
 function makeDraggable(modal, handle) {
     let offsetX, offsetY, isDragging = false;
@@ -102,6 +102,7 @@ function makeDraggable(modal, handle) {
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
 }
+
 
 // --- AI Action Plan Logic (with Undo/Redo) ---
 function updateUndoRedoButtons() {
@@ -698,10 +699,35 @@ export function initializeUI(database, state) {
         });
     }
 
+    // --- Chat Modal Close Logic ---
+    const chatModal = document.getElementById('gemini-chat-modal');
+    const chatModalBox = chatModal.querySelector('.chat-modal-box');
+    const chatModalCloseBtn = document.getElementById('chat-modal-close-btn');
+
+    const closeChatModal = () => {
+        if (chatModal) {
+            chatModal.classList.add('hidden');
+            // Reset position and styles from dragging so it reopens in the default spot
+            if (chatModalBox) {
+                chatModalBox.removeAttribute('style');
+            }
+        }
+    };
+
+    if (chatModalCloseBtn) {
+        chatModalCloseBtn.addEventListener('click', closeChatModal);
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && chatModal && !chatModal.classList.contains('hidden')) {
+            closeChatModal();
+        }
+    });
+
+
     // --- Activate the draggable functionality for the chat modal ---
-    const chatModal = document.querySelector('#gemini-chat-modal .chat-modal-box');
     const chatModalHeader = document.getElementById('chat-modal-header');
-    if (chatModal && chatModalHeader) {
-        makeDraggable(chatModal, chatModalHeader);
+    if (chatModalBox && chatModalHeader) {
+        makeDraggable(chatModalBox, chatModalHeader);
     }
 }
