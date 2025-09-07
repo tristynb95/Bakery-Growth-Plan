@@ -6,6 +6,7 @@ import { summarizePlanForAI } from './plan-view.js';
 let appState;
 let db;
 let chatHistory = [];
+let currentConversationId = null;
 
 const DOMElements = {
     modal: document.getElementById('gemini-chat-modal'),
@@ -13,6 +14,7 @@ const DOMElements = {
     header: document.getElementById('chat-modal-header'),
     closeBtn: document.getElementById('chat-modal-close-btn'),
     optionsBtn: document.getElementById('chat-options-btn'),
+    newChatBtn: document.getElementById('chat-new-btn'), // New button
     conversationView: document.getElementById('chat-conversation-area'),
     welcomeScreen: document.getElementById('chat-welcome-screen'),
     chatInput: document.getElementById('chat-input'),
@@ -122,18 +124,37 @@ function updateLastAiMessageInUI(text) {
 }
 
 /**
- * Saves a single message object to the Firestore database.
+ * Starts a new, empty conversation.
+ */
+function startNewConversation() {
+    currentConversationId = null;
+    chatHistory = [];
+    DOMElements.conversationView.innerHTML = '';
+    showConversationView();
+}
+
+/**
+ * Saves a single message object to the Firestore database under a specific conversation.
  * @param {{role: string, text: string}} messageObject
  */
 async function saveMessage(messageObject) {
     if (!appState.currentUser || !appState.currentPlanId || !db) return;
 
+    // If it's a new conversation, create an ID first
+    if (!currentConversationId) {
+        const conversationRef = db.collection('users').doc(appState.currentUser.uid)
+                                   .collection('plans').doc(appState.currentPlanId)
+                                   .collection('conversations').doc();
+        currentConversationId = conversationRef.id;
+    }
+
+    const messageRef = db.collection('users').doc(appState.currentUser.uid)
+                         .collection('plans').doc(appState.currentPlanId)
+                         .collection('conversations').doc(currentConversationId)
+                         .collection('messages');
+
     try {
-        const historyRef = db.collection('users').doc(appState.currentUser.uid)
-                             .collection('plans').doc(appState.currentPlanId)
-                             .collection('chatHistory');
-        
-        await historyRef.add({
+        await messageRef.add({
             ...messageObject,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
@@ -176,23 +197,26 @@ async function handleSendMessage() {
 }
 
 /**
- * Loads previous messages from Firestore for the current plan.
+ * Loads a specific conversation from Firestore.
+ * @param {string} conversationId The ID of the conversation to load.
  */
-async function loadChatHistory() {
-    if (!appState.currentUser || !appState.currentPlanId || !db) {
-        showConversationView();
-        return;
-    }
+async function loadChatHistory(conversationId) {
+    if (!appState.currentUser || !appState.currentPlanId || !db) return;
 
-    const historyRef = db.collection('users').doc(appState.currentUser.uid)
-                         .collection('plans').doc(appState.currentPlanId)
-                         .collection('chatHistory')
-                         .orderBy('timestamp', 'asc');
-    
+    chatHistory = [];
+    DOMElements.conversationView.innerHTML = '';
+    currentConversationId = conversationId;
+
+    const messagesRef = db.collection('users').doc(appState.currentUser.uid)
+                          .collection('plans').doc(appState.currentPlanId)
+                          .collection('conversations').doc(conversationId)
+                          .collection('messages')
+                          .orderBy('timestamp', 'asc');
+
     try {
-        const snapshot = await historyRef.get();
+        const snapshot = await messagesRef.get();
         if (snapshot.empty) {
-            showConversationView();
+            console.warn("No messages found for this conversation.");
             return;
         }
 
@@ -201,6 +225,7 @@ async function loadChatHistory() {
             chatHistory.push({ role: data.role, parts: [{ text: data.text }] });
             addMessageToUI(data.role, data.text);
         });
+        showConversationView();
     } catch (error) {
         console.error("Error loading chat history:", error);
         addMessageToUI('model', 'Could not load previous messages.');
@@ -219,24 +244,56 @@ function showConversationView() {
     }
 }
 
-function showHistoryView() {
+/**
+ * Fetches and displays the list of past conversations.
+ */
+async function showHistoryView() {
     DOMElements.welcomeScreen.classList.add('hidden');
     DOMElements.conversationView.classList.add('hidden');
     DOMElements.historyPanel.classList.remove('hidden');
-    
     DOMElements.historyList.innerHTML = '<div class="loading-spinner mx-auto mt-8"></div>';
-    setTimeout(() => {
-        DOMElements.historyList.innerHTML = `<div class="p-4 text-center text-gray-500">Feature to view and load past conversations is coming soon.</div>`;
-    }, 500);
+
+    if (!appState.currentUser || !appState.currentPlanId || !db) {
+        DOMElements.historyList.innerHTML = '<p class="text-center text-gray-500 p-4">Could not load history.</p>';
+        return;
+    }
+
+    const conversationsRef = db.collection('users').doc(appState.currentUser.uid)
+                               .collection('plans').doc(appState.currentPlanId)
+                               .collection('conversations');
+    try {
+        const snapshot = await conversationsRef.get();
+        if (snapshot.empty) {
+            DOMElements.historyList.innerHTML = '<p class="text-center text-gray-500 p-4">No past conversations found.</p>';
+            return;
+        }
+
+        DOMElements.historyList.innerHTML = '';
+        for (const doc of snapshot.docs) {
+            const firstMessageSnapshot = await doc.ref.collection('messages').orderBy('timestamp', 'asc').limit(1).get();
+            if (!firstMessageSnapshot.empty) {
+                const firstMessage = firstMessageSnapshot.docs[0].data();
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.dataset.id = doc.id;
+                historyItem.innerHTML = `
+                    <p class="history-item-title">${firstMessage.text}</p>
+                    <p class="history-item-date">${firstMessage.timestamp.toDate().toLocaleDateString()}</p>
+                `;
+                DOMElements.historyList.appendChild(historyItem);
+            }
+        }
+    } catch (error) {
+        console.error("Error fetching conversation list:", error);
+        DOMElements.historyList.innerHTML = '<p class="text-center text-red-500 p-4">Failed to load conversation history.</p>';
+    }
 }
 
 export function openChat() {
     if (DOMElements.modal) {
-        chatHistory = [];
-        DOMElements.conversationView.innerHTML = '';
+        startNewConversation();
         DOMElements.modal.classList.remove('hidden');
         DOMElements.chatInput.focus();
-        loadChatHistory();
     }
 }
 
@@ -273,6 +330,16 @@ export function initializeChat(_appState, _db) {
         }
     });
     
+    DOMElements.newChatBtn.addEventListener('click', startNewConversation);
+
+    DOMElements.historyList.addEventListener('click', (e) => {
+        const item = e.target.closest('.history-item');
+        if (item) {
+            const conversationId = item.dataset.id;
+            loadChatHistory(conversationId);
+        }
+    });
+
     DOMElements.optionsBtn.addEventListener('click', showHistoryView);
     DOMElements.backToChatBtn.addEventListener('click', showConversationView);
 }
