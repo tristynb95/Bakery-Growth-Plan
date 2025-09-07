@@ -2749,17 +2749,14 @@ input[type="time"] {
 /* 56. Draggable Modal Styles
 -------------------------------------------------- */
 
-/* Style for the drag handle in the modal header */
-.chat-drag-handle {
+/* The entire header is now the drag handle, excluding buttons */
+.chat-modal-header {
     cursor: grab;
-    color: var(--gails-grey-mid);
-    padding: 0 0.5rem 0 0;
-    touch-action: none;
+    touch-action: none; /* Improve touch device compatibility */
 }
 
 /* When the header is being actively dragged */
-.chat-modal-box.is-dragging .modal-header,
-.chat-modal-box.is-dragging .chat-drag-handle {
+.chat-modal-box.is-dragging .modal-header {
     cursor: grabbing;
 }
 
@@ -2768,4 +2765,28 @@ input[type="time"] {
 .chat-modal-box.is-dragging .modal-footer {
     user-select: none;
     pointer-events: none;
+}
+
+/* 57. Chat History Panel Styles
+-------------------------------------------------- */
+.chat-history-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    animation: fadeIn 0.3s ease;
+}
+
+.history-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--gails-grey-light);
+    flex-shrink: 0;
+}
+
+.history-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1rem;
 }
