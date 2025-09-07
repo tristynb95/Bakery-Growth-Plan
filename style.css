@@ -2611,7 +2611,6 @@ input[type="time"] {
     border-bottom-left-radius: 0.25rem;
 }
 
-/* Chat Input Area */
 .chat-modal-footer {
     border-top: 1px solid #E5E7EB;
     background-color: var(--gails-white);
@@ -2626,7 +2625,7 @@ input[type="time"] {
 }
 .chat-input {
     width: 100%;
-    padding: 0.75rem 3rem 0.75rem 1rem;
+    padding: 0.75rem 3.25rem 0.75rem 1rem; /* Adjusted right padding */
     border-radius: 1.5rem;
     border: 1px solid var(--gails-grey-mid);
     background-color: var(--gails-grey-light);
@@ -2645,8 +2644,9 @@ input[type="time"] {
 .chat-send-btn {
     position: absolute;
     right: 6px;
-    top: 50%;
-    transform: translateY(-50%);
+    bottom: 6px; /* MODIFIED: Anchored to the bottom */
+    /* REMOVED: top: 50%; */
+    /* REMOVED: transform: translateY(-50%); */
     border-radius: 50%;
     width: 36px;
     height: 36px;
