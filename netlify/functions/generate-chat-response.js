@@ -2,26 +2,6 @@
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// This is a placeholder for your Pinecone/knowledge base search function
-async function searchKnowledgeBase(query) {
-    console.log(`Searching knowledge base for: ${query}`);
-    // In a real implementation, this would query your vector database.
-    // We'll return an empty array to simulate the knowledge base not having an answer for a general query.
-    return []; 
-}
-
-// This is a placeholder for a web search function
-async function searchWeb(query) {
-    console.log(`Searching the web for: ${query}`);
-    // In a real implementation, you would use a tool like the Google Search API.
-    // We'll return a placeholder result for demonstration.
-    if (query.toLowerCase().includes("customer service award")) {
-        return "The 'UK Customer Experience Awards' is a notable awards program in the UK, with entries typically opening in the spring and the awards ceremony in the autumn.";
-    }
-    return null;
-}
-
-
 exports.handler = async function(event, context) {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
@@ -30,50 +10,38 @@ exports.handler = async function(event, context) {
   try {
     const { planSummary, chatHistory, userMessage } = JSON.parse(event.body);
     
-    // --- RAG & Search Step ---
-    const knowledgeContext = await searchKnowledgeBase(userMessage);
-    const webContext = await searchWeb(userMessage);
-
-    let context = "";
-    if (knowledgeContext && knowledgeContext.length > 0) {
-        context += "Here is some information from the GAIL's knowledge base:\n" + knowledgeContext.map(item => item.pageContent).join('\n\n');
-    }
-    if (webContext) {
-        context += "\n\nHere is some information from a web search:\n" + webContext;
-    }
-    
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"});
 
-    // --- Final Augmented Prompt ---
-    const augmentedPrompt = \`
-        You are Gemini, an expert leadership coach for Tristen, a Bakery Manager at GAIL's.
-        Your tone is friendly, conversational, and supportive. Keep your responses concise and to the point.
-        
-        1.  First, review the provided CONTEXT to answer Tristen's question.
-        2.  If the context is empty or irrelevant, use the provided PLAN SUMMARY and CHAT HISTORY to answer.
-        3.  Always be helpful and conversational.
-        
-        CONTEXT:
-        ---
-        \${context || "No specific context found."}
-        ---
+    // Construct a rich history for the model
+    const history = [
+        {
+            role: "user",
+            parts: [{ text: `
+                You are an expert leadership coach and bakery operations manager for GAIL's Bakery in the UK.
+                Your name is Gemini.
+                Your user is a Bakery Manager who has created a 90-day growth plan.
+                You MUST use British English (e.g., 'organise', 'centre').
+                Your tone is friendly, conversational, and supportive. Keep your responses relatively brief and avoid providing too much information at once.
+                The manager's name is mentioned in the plan summary. Use their name when appropriate to build rapport (e.g., "That's a great question, Tristen.").
+                You have been given a summary of their current plan. Use this as your primary context.
+                Do not reference the summary directly unless asked; just use its information to inform your responses.
 
-        PLAN SUMMARY:
-        ---
-        \${planSummary}
-        ---
+                Here is the plan summary:
+                ---
+                ${planSummary}
+                ---
+            `}],
+        },
+        {
+            role: "model",
+            parts: [{ text: "Understood. I have the manager's plan details and I'm ready to assist." }],
+        },
+        // Add previous turns from the ongoing chat
+        ...chatHistory
+    ];
 
-        CHAT HISTORY:
-        ---
-        \${chatHistory.map(item => \`\${item.role}: \${item.parts[0].text}\`).join('\n')}
-        ---
-
-        Based on all of the above, provide a concise, conversational response to Tristen's latest message: "\${userMessage}"
-    \`;
-
-
-    const result = await model.generateContent(augmentedPrompt);
+    const result = await model.startChat({ history }).sendMessage(userMessage);
     const response = await result.response;
     const aiText = response.text();
 
