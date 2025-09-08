@@ -43,10 +43,10 @@ exports.handler = async function(event, context) {
     }
     
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"});
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
 
     // --- Final Augmented Prompt ---
-    const augmentedPrompt = `
+    const augmentedPrompt = \`
         You are Gemini, an expert leadership coach for Tristen, a Bakery Manager at GAIL's.
         Your tone is friendly, conversational, and supportive. Keep your responses concise and to the point.
         
@@ -56,21 +56,21 @@ exports.handler = async function(event, context) {
         
         CONTEXT:
         ---
-        ${context || "No specific context found."}
+        \${context || "No specific context found."}
         ---
 
         PLAN SUMMARY:
         ---
-        ${planSummary}
+        \${planSummary}
         ---
 
         CHAT HISTORY:
         ---
-        ${chatHistory.map(item => `${item.role}: ${item.parts[0].text}`).join('\n')}
+        \${chatHistory.map(item => \`\${item.role}: \${item.parts[0].text}\`).join('\n')}
         ---
 
-        Based on all of the above, provide a concise, conversational response to Tristen's latest message: "${userMessage}"
-    `;
+        Based on all of the above, provide a concise, conversational response to Tristen's latest message: "\${userMessage}"
+    \`;
 
 
     const result = await model.generateContent(augmentedPrompt);
