@@ -137,9 +137,6 @@ async function handleSendMessage() {
 async function loadChatHistory(conversationId) {
     if (!appState.currentUser || !appState.currentPlanId || !db) return;
 
-    // --- Start of Fix ---
-
-    // 1. Immediately clear the UI to provide instant feedback.
     DOMElements.conversationView.innerHTML = '';
     
     currentConversationId = conversationId;
@@ -153,16 +150,13 @@ async function loadChatHistory(conversationId) {
     try {
         const snapshot = await messagesRef.get();
 
-        // 2. Build the new history in a temporary local array first.
         const newHistory = [];
         const fragment = document.createDocumentFragment();
 
         snapshot.forEach(doc => {
             const data = doc.data();
-            // Add to the temporary history array
             newHistory.push({ role: data.role, parts: [{ text: data.text }] });
 
-            // Build the UI in an efficient off-screen fragment
             const wrapper = document.createElement('div');
             wrapper.className = `chat-message-wrapper justify-${data.role === 'user' ? 'end' : 'start'}`;
             const bubble = document.createElement('div');
@@ -172,14 +166,11 @@ async function loadChatHistory(conversationId) {
             fragment.appendChild(wrapper);
         });
 
-        // 3. Once complete, atomically update the global state and the DOM.
         chatHistory = newHistory;
         DOMElements.conversationView.appendChild(fragment);
 
-        // --- End of Fix ---
-
         showConversationView();
-        scrollToMessage(); // Scroll to the bottom after rendering
+        scrollToMessage();
     } catch (error) {
         console.error("Error loading chat history:", error);
         addMessageToUI('model', 'Could not load previous messages.');
@@ -245,7 +236,6 @@ export async function openChat() {
         if (lastConversationId) {
             await loadChatHistory(lastConversationId);
         } else {
-            // Fallback to the most recent conversation in Firestore if no session is stored
             const conversationsRef = db.collection('users').doc(appState.currentUser.uid)
                                    .collection('plans').doc(appState.currentPlanId)
                                    .collection('conversations')
@@ -316,4 +306,15 @@ export function initializeChat(_appState, _db) {
 
     DOMElements.optionsBtn.addEventListener('click', showHistoryView);
     DOMElements.backToChatBtn.addEventListener('click', showConversationView);
+
+    // --- NEW: Auto-resizing text area ---
+    const chatInput = DOMElements.chatInput;
+    if (chatInput) {
+        const initialHeight = chatInput.scrollHeight;
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = `${initialHeight}px`;
+            const scrollHeight = chatInput.scrollHeight;
+            chatInput.style.height = `${scrollHeight}px`;
+        });
+    }
 }
