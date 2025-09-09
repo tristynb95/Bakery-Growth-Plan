@@ -2703,6 +2703,37 @@ input[type="time"] {
     background-color: var(--gails-red-light);
 }
 
+/* 59. Chat History Deletion Styles */
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem; /* Add gap between text and button */
+}
+
+.history-item .history-item-text {
+    flex-grow: 1;
+    min-width: 0; /* Allows the text to truncate properly */
+}
+
+.history-item .delete-conversation-btn {
+    flex-shrink: 0;
+    /* Make the button subtle by default */
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+.history-item:hover .delete-conversation-btn {
+    /* Reveal the button more on hover */
+    opacity: 1;
+}
+
+.delete-conversation-btn:hover {
+    /* Add a distinct hover state for the button itself */
+    background-color: var(--gails-red-light);
+    color: var(--gails-red);
+}
+
 .history-item-title {
     font-weight: 600;
     color: var(--gails-text-primary);

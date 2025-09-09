@@ -301,6 +301,21 @@ async function handleModalAction() {
             document.dispatchEvent(new CustomEvent('event-deletion-confirmed'));
             closeModal();
             break;
+        case 'confirmDeleteConversation':
+            DOMElements.modalTitle.textContent = "Confirm Deletion";
+            DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete this conversation and all of its messages?</p><p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action cannot be undone.</p>`;
+            DOMElements.modalActionBtn.textContent = "Yes, Delete Conversation";
+            DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+            // The actual deletion logic will be handled by the listener for this event in chat.js
+            DOMElements.modalActionBtn.onclick = () => {
+                document.dispatchEvent(new CustomEvent('conversation-deletion-confirmed', {
+                    // We reuse the `planId` attribute on the modal to store the conversationId
+                    detail: { conversationId: DOMElements.modalBox.dataset.planId }
+                }));
+                closeModal();
+            };
+            DOMElements.modalCancelBtn.textContent = "Cancel";
+            break;
     }
 }
 
