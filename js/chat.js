@@ -235,35 +235,16 @@ async function showHistoryView() {
     }
 }
 
-export async function openChat() {
+export function openChat() {
     if (DOMElements.modal) {
         DOMElements.modal.classList.remove('hidden');
         DOMElements.chatInput.focus();
 
-        const lastConversationId = sessionStorage.getItem('gails_lastConversationId');
-
-        if (lastConversationId) {
-            await loadChatHistory(lastConversationId);
-        } else {
-            // Fallback to the most recent conversation in Firestore if no session is stored
-            const conversationsRef = db.collection('users').doc(appState.currentUser.uid)
-                                   .collection('plans').doc(appState.currentPlanId)
-                                   .collection('conversations')
-                                   .orderBy('createdAt', 'desc')
-                                   .limit(1);
-            try {
-                const snapshot = await conversationsRef.get();
-                if (snapshot.empty) {
-                    startNewConversation();
-                } else {
-                    const recentId = snapshot.docs[0].id;
-                    await loadChatHistory(recentId);
-                }
-            } catch (error) {
-                console.error("Error loading last conversation:", error);
-                startNewConversation();
-            }
-        }
+        // Always start a new conversation view when opening the modal
+        currentConversationId = null;
+        chatHistory = [];
+        DOMElements.conversationView.innerHTML = '';
+        showConversationView(); // This will correctly show the welcome screen
     }
 }
 
