@@ -2,6 +2,7 @@
 
 import { getGeminiChatResponse } from './api.js';
 import { summarizePlanForAI } from './plan-view.js';
+import { openModal } from './ui.js';
 
 let appState;
 let db;
@@ -195,6 +196,41 @@ function showConversationView() {
     }
 }
 
+async function deleteConversation(conversationId) {
+    if (!appState.currentUser || !appState.currentPlanId || !db) return;
+
+    console.log(`Requesting deletion for conversation: ${conversationId}`);
+
+    const conversationRef = db.collection('users').doc(appState.currentUser.uid)
+                              .collection('plans').doc(appState.currentPlanId)
+                              .collection('conversations').doc(conversationId);
+
+    try {
+        // NOTE: Firestore does not support recursive deletion from the client.
+        // Deleting this document will orphan the 'messages' subcollection.
+        // For a production app, a Cloud Function triggered on delete is the best practice.
+        // For this implementation, orphaning is an acceptable trade-off.
+        await conversationRef.delete();
+        console.log(`Successfully deleted conversation ${conversationId} from Firestore.`);
+
+        // Visually remove the item from the history list
+        const historyItem = DOMElements.historyList.querySelector(`.history-item[data-id="${conversationId}"]`);
+        if (historyItem) {
+            historyItem.remove();
+            console.log(`Removed conversation ${conversationId} from the UI.`);
+        }
+
+        // If the currently viewed chat is the one being deleted, reset the view
+        if (currentConversationId === conversationId) {
+            startNewConversation();
+        }
+    } catch (error) {
+        console.error("Error deleting conversation:", error);
+        // It might be good to show a more user-friendly error message here
+        alert("Failed to delete conversation. Please try again.");
+    }
+}
+
 async function showHistoryView() {
     DOMElements.welcomeScreen.classList.add('hidden');
     DOMElements.conversationView.classList.add('hidden');
@@ -223,9 +259,15 @@ async function showHistoryView() {
             const historyItem = document.createElement('div');
             historyItem.className = 'history-item';
             historyItem.dataset.id = doc.id;
+            // Add a container for the text and a new delete button
             historyItem.innerHTML = `
-                <p class="history-item-title">${conversation.firstMessage}</p>
-                <p class="history-item-date">${conversation.createdAt.toDate().toLocaleDateString()}</p>
+                <div class="history-item-text">
+                    <p class="history-item-title">${conversation.firstMessage}</p>
+                    <p class="history-item-date">${conversation.createdAt.toDate().toLocaleDateString()}</p>
+                </div>
+                <button class="btn btn-secondary btn-icon delete-conversation-btn" title="Delete conversation" data-id="${doc.id}">
+                    <i class="bi bi-trash3"></i>
+                </button>
             `;
             DOMElements.historyList.appendChild(historyItem);
         });
@@ -289,9 +331,25 @@ export function initializeChat(_appState, _db) {
 
     DOMElements.historyList.addEventListener('click', (e) => {
         const item = e.target.closest('.history-item');
-        if (item) {
+        const deleteBtn = e.target.closest('.delete-conversation-btn');
+
+        if (deleteBtn) {
+            // Handle delete button click
+            e.stopPropagation(); // Prevent the item click from firing
+            const conversationId = deleteBtn.dataset.id;
+            openModal('confirmDeleteConversation', { planId: conversationId }); // Re-use planId to pass the ID
+        } else if (item) {
+            // Handle history item click to load conversation
             const conversationId = item.dataset.id;
             loadChatHistory(conversationId);
+        }
+    });
+
+    // Add a listener for the global confirmation event
+    document.addEventListener('conversation-deletion-confirmed', (e) => {
+        const { conversationId } = e.detail;
+        if (conversationId) {
+            deleteConversation(conversationId);
         }
     });
 

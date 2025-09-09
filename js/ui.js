@@ -301,6 +301,12 @@ async function handleModalAction() {
             document.dispatchEvent(new CustomEvent('event-deletion-confirmed'));
             closeModal();
             break;
+        case 'confirmDeleteConversation':
+            document.dispatchEvent(new CustomEvent('conversation-deletion-confirmed', {
+                detail: { conversationId: planId }
+            }));
+            closeModal();
+            break;
     }
 }
 
@@ -458,6 +464,13 @@ export function openModal(type, context = {}) {
             DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete the plan: <strong class="font-bold">${planName}</strong>?</p><p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action is final and cannot be undone.</p>`;
             DOMElements.modalActionBtn.textContent = "Confirm Delete";
             DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+            break;
+        case 'confirmDeleteConversation':
+            DOMElements.modalTitle.textContent = "Confirm Deletion";
+            DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete this conversation and all of its messages?</p><p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action cannot be undone.</p>`;
+            DOMElements.modalActionBtn.textContent = "Yes, Delete Conversation";
+            DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+            DOMElements.modalCancelBtn.textContent = "Cancel";
             break;
         case 'timeout':
             DOMElements.modalTitle.textContent = "Session Ended";
