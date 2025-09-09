@@ -2703,6 +2703,12 @@ input[type="time"] {
     background-color: var(--gails-red-light);
 }
 
+/* 60. Z-index fix for nested modals */
+/* Ensure the generic modal can appear on top of other modals (like the chat modal) */
+#modal-overlay {
+    z-index: 1030;
+}
+
 /* 59. Chat History Deletion Styles */
 .history-item {
     display: flex;
