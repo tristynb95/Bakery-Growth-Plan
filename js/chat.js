@@ -370,4 +370,7 @@ export function initializeChat(_appState, _db) {
             showHistoryView();
         }
     });
+
+    // When a logout is triggered, ensure the chat modal is closed.
+    document.addEventListener('logout-request', closeChatModal);
 }
