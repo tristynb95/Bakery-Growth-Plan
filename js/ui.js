@@ -645,11 +645,9 @@ export function initializeUI(database, state) {
 
     const chatInput = document.getElementById('chat-input');
     if (chatInput) {
-        const initialHeight = chatInput.scrollHeight;
         chatInput.addEventListener('input', () => {
-            chatInput.style.height = `${initialHeight}px`;
-            const scrollHeight = chatInput.scrollHeight;
-            chatInput.style.height = `${scrollHeight}px`;
+            chatInput.style.height = 'auto';
+            chatInput.style.height = `${chatInput.scrollHeight}px`;
         });
     }
 }
