@@ -2566,14 +2566,13 @@ input[type="time"] {
 }
 .chat-input {
     width: 100%;
-    padding: 0.75rem 3.25rem 0.75rem 1rem;
+    padding: 0.5rem 3.25rem 0.5rem 1rem;
     border-radius: 1.5rem;
     border: 1px solid var(--gails-grey-mid);
     background-color: var(--gails-white);
     resize: none;
-    min-height: 70px;
-    max-height: 150px;
-    overflow-y: auto;
+    height: 44px;
+    overflow-y: hidden;
     line-height: 1.5;
 }
 .chat-input:focus {
