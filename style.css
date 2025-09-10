@@ -2562,7 +2562,7 @@ input[type="time"] {
 .chat-input-wrapper {
     position: relative;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
 }
 .chat-input {
     width: 100%;
@@ -2585,7 +2585,8 @@ input[type="time"] {
 .chat-send-btn {
     position: absolute;
     right: 6px;
-    bottom: 6px;
+    top: 50%;
+    transform: translateY(-50%);
     border-radius: 50%;
     width: 36px;
     height: 36px;
