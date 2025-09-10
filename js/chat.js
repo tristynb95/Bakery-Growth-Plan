@@ -22,7 +22,6 @@ const DOMElements = {
     sendBtn: document.getElementById('chat-send-btn'),
     historyPanel: document.getElementById('chat-history-panel'),
     historyList: document.getElementById('history-list'),
-    backToChatBtn: document.getElementById('back-to-chat-btn'),
 };
 
 function scrollToMessage() {
@@ -190,6 +189,11 @@ async function loadChatHistory(conversationId) {
 function showConversationView() {
     DOMElements.historyPanel.classList.add('hidden');
     DOMElements.conversationView.classList.remove('hidden');
+
+    const icon = DOMElements.optionsBtn.querySelector('i');
+    icon.className = 'bi bi-clock-history';
+    DOMElements.optionsBtn.title = 'View History';
+
     if (chatHistory.length === 0) {
         DOMElements.welcomeScreen.classList.remove('hidden');
         DOMElements.conversationView.classList.add('hidden');
@@ -235,6 +239,11 @@ async function showHistoryView() {
     DOMElements.welcomeScreen.classList.add('hidden');
     DOMElements.conversationView.classList.add('hidden');
     DOMElements.historyPanel.classList.remove('hidden');
+
+    const icon = DOMElements.optionsBtn.querySelector('i');
+    icon.className = 'bi bi-arrow-left';
+    DOMElements.optionsBtn.title = 'Back to Chat';
+
     DOMElements.historyList.innerHTML = '<div class="loading-spinner mx-auto mt-8"></div>';
 
     if (!appState.currentUser || !appState.currentPlanId || !db) {
@@ -353,6 +362,12 @@ export function initializeChat(_appState, _db) {
         }
     });
 
-    DOMElements.optionsBtn.addEventListener('click', showHistoryView);
-    DOMElements.backToChatBtn.addEventListener('click', showConversationView);
+    DOMElements.optionsBtn.addEventListener('click', () => {
+        const isHistoryVisible = !DOMElements.historyPanel.classList.contains('hidden');
+        if (isHistoryVisible) {
+            showConversationView();
+        } else {
+            showHistoryView();
+        }
+    });
 }
