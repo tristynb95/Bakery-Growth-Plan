@@ -27,6 +27,69 @@ export function parseUkDate(str) {
     return null;
 }
 
+async function migrateOldCalendars() {
+    if (!appState.currentUser) return;
+
+    console.log("Checking for old calendars to migrate...");
+
+    const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
+    let plans = [];
+    try {
+        const snapshot = await plansRef.get();
+        plans = snapshot.docs.map(doc => doc.id);
+    } catch (error) {
+        console.error("Could not fetch user plans for calendar migration:", error);
+        return; // Can't proceed without plan IDs
+    }
+
+    if (plans.length === 0) {
+        console.log("No old plans found. No migration needed.");
+        return;
+    }
+
+    const migratedData = {};
+    let migrationPerformed = false;
+
+    for (const planId of plans) {
+        try {
+            const oldCalendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(planId);
+            const doc = await oldCalendarRef.get();
+
+            if (doc.exists) {
+                const oldData = doc.data();
+                console.log(`Found old calendar for plan ${planId}`);
+                migrationPerformed = true;
+                // Merge events
+                for (const dateKey in oldData) {
+                    if (oldData.hasOwnProperty(dateKey)) {
+                        if (!migratedData[dateKey]) {
+                            migratedData[dateKey] = [];
+                        }
+                        // Simple concatenation, assuming no duplicate events across plans.
+                        // A more robust solution might check for event equality before pushing.
+                        migratedData[dateKey].push(...oldData[dateKey]);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error(`Error reading old calendar for plan ${planId}:`, error);
+        }
+    }
+
+    if (migrationPerformed) {
+        try {
+            const newCalendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc('user_calendar');
+            await newCalendarRef.set(migratedData, { merge: true }); // Use merge to be safe
+            console.log("Successfully migrated old calendars to the new shared calendar.", migratedData);
+            // We don't delete old calendars to be safe.
+        } catch (error) {
+            console.error("Error writing migrated data to new shared calendar:", error);
+        }
+    } else {
+        console.log("No old calendar data found to migrate.");
+    }
+}
+
 function renderCalendar() {
     const calendarGrid = document.getElementById('calendar-grid');
         if (!calendarGrid) return;
@@ -106,16 +169,24 @@ function renderCalendar() {
     }
 
 async function loadCalendarData() {
-    if (!appState.currentUser || !appState.currentPlanId) return;
-        const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
-        try {
-            const doc = await calendarRef.get();
-            appState.calendar.data = doc.exists ? doc.data() : {};
-        } catch (error) {
-            console.error("Error loading calendar data:", error);
-            appState.calendar.data = {};
+    if (!appState.currentUser) return;
+    const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc('user_calendar');
+    try {
+        const doc = await calendarRef.get();
+        if (!doc.exists) {
+            // If the new shared calendar doesn't exist, try to migrate from old ones.
+            await migrateOldCalendars();
+            // After migration, try to fetch the new calendar data again.
+            const migratedDoc = await calendarRef.get();
+            appState.calendar.data = migratedDoc.exists ? migratedDoc.data() : {};
+        } else {
+            appState.calendar.data = doc.data();
         }
+    } catch (error) {
+        console.error("Error loading calendar data:", error);
+        appState.calendar.data = {};
     }
+}
 
 function renderDayDetails(dateKey) {
     selectedDateKey = dateKey;
@@ -237,7 +308,7 @@ async function confirmEventDeletion() {
     
     dayEvents.splice(index, 1);
 
-    const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
+    const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc('user_calendar');
     const dataToUpdate = {};
     dataToUpdate[dateKey] = dayEvents.length > 0 ? dayEvents : firebase.firestore.FieldValue.delete();
 
@@ -484,7 +555,7 @@ function setupCalendarEventListeners() {
         } else {
             dayEvents.push(eventData);
         }
-        const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
+        const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc('user_calendar');
         const dataToUpdate = {};
         dataToUpdate[selectedDateKey] = dayEvents;
         try {
