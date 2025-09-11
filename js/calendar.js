@@ -106,8 +106,8 @@ function renderCalendar() {
     }
 
 async function loadCalendarData() {
-    if (!appState.currentUser || !appState.currentPlanId) return;
-        const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
+    if (!appState.currentUser) return;
+        const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc('user_calendar');
         try {
             const doc = await calendarRef.get();
             appState.calendar.data = doc.exists ? doc.data() : {};
@@ -237,7 +237,7 @@ async function confirmEventDeletion() {
     
     dayEvents.splice(index, 1);
 
-    const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
+    const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc('user_calendar');
     const dataToUpdate = {};
     dataToUpdate[dateKey] = dayEvents.length > 0 ? dayEvents : firebase.firestore.FieldValue.delete();
 
@@ -484,7 +484,7 @@ function setupCalendarEventListeners() {
         } else {
             dayEvents.push(eventData);
         }
-        const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(appState.currentPlanId);
+        const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc('user_calendar');
         const dataToUpdate = {};
         dataToUpdate[selectedDateKey] = dayEvents;
         try {
