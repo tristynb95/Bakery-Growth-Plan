@@ -47,6 +47,7 @@ function parseMarkdownToHTML(text) {
     return htmlBlocks.join('');
 }
 
+
 function closeChatModal() {
     if (DOMElements.modal) {
         DOMElements.modal.classList.add('hidden');
@@ -87,7 +88,7 @@ function updateLastAiMessageInUI(text) {
 function startNewConversation() {
     currentConversationId = null;
     chatHistory = [];
-    sessionStorage.removeItem('gails_lastConversationId'); // Clear the saved session
+    sessionStorage.removeItem('gails_lastConversationId');
     DOMElements.conversationView.innerHTML = '';
     showConversationView();
 }
@@ -100,7 +101,6 @@ async function saveMessage(messageObject) {
     if (!currentConversationId) {
         const conversationDocRef = conversationsRef.doc();
         currentConversationId = conversationDocRef.id;
-        // Save the new ID to the session so it's remembered on reopen
         sessionStorage.setItem('gails_lastConversationId', currentConversationId);
         await conversationDocRef.set({
             firstMessage: messageObject.text,
@@ -121,21 +121,27 @@ async function saveMessage(messageObject) {
 async function handleSendMessage() {
     const messageText = DOMElements.chatInput.value.trim();
     if (!messageText) return;
+
     const userMessage = { role: 'user', parts: [{ text: messageText }] };
     chatHistory.push(userMessage);
     addMessageToUI('user', messageText);
     saveMessage({ role: 'user', text: messageText });
+
     const initialHeight = DOMElements.chatInput.scrollHeight;
     DOMElements.chatInput.value = '';
     DOMElements.chatInput.style.height = `${initialHeight}px`;
     addMessageToUI('model', '', true);
+
     try {
         const planSummary = summarizePlanForAI(appState.planData);
-        const responseText = await getGeminiChatResponse(planSummary, chatHistory, messageText);
+        const calendarData = appState.calendar.data; // Get calendar data from app state
+        const responseText = await getGeminiChatResponse(planSummary, chatHistory, messageText, calendarData);
+        
         updateLastAiMessageInUI(responseText);
         const aiMessage = { role: 'model', parts: [{ text: responseText }] };
         chatHistory.push(aiMessage);
         saveMessage({ role: 'model', text: responseText });
+
     } catch (error) {
         console.error("Chat error:", error);
         const errorMessage = error.message || 'Sorry, I encountered an error. Please try again.';
@@ -266,19 +272,14 @@ export function openChat() {
     if (DOMElements.modal) {
         DOMElements.modal.classList.remove('hidden');
         DOMElements.chatInput.focus();
-
         const lastConversationId = sessionStorage.getItem('gails_lastConversationId');
-
         if (lastConversationId && lastConversationId !== 'null') {
-            // If we have a saved ID, load that history instead of starting fresh.
             if (currentConversationId !== lastConversationId) {
                 loadChatHistory(lastConversationId);
             } else {
-                // The chat is already loaded, just ensure it's visible.
                 showConversationView();
             }
         } else {
-            // No saved ID, so start a new conversation.
             startNewConversation();
         }
     }
