@@ -12,6 +12,7 @@ let currentConversationId = null;
 const DOMElements = {
     modal: document.getElementById('gemini-chat-modal'),
     modalBox: document.querySelector('#gemini-chat-modal .chat-modal-box'),
+    chatModalContent: document.querySelector('#gemini-chat-modal .chat-modal-content'), // Correct scroll container
     header: document.getElementById('chat-modal-header'),
     closeBtn: document.getElementById('chat-modal-close-btn'),
     optionsBtn: document.getElementById('chat-options-btn'),
@@ -25,41 +26,32 @@ const DOMElements = {
 };
 
 function parseMarkdownToHTML(text) {
-    // Split the text into blocks separated by double newlines
     const blocks = text.split(/\n\s*\n/);
-
     const htmlBlocks = blocks.map(block => {
-        // Trim whitespace from the block
         block = block.trim();
         if (!block) return '';
-
-        // Handle lists (both ordered and unordered)
         const isUnorderedList = /^\s*\*/.test(block);
         const isOrderedList = /^\s*\d+\./.test(block);
-
         if (isUnorderedList || isOrderedList) {
             const listTag = isUnorderedList ? 'ul' : 'ol';
             const items = block.split('\n').map(item => {
                 const content = item.replace(/^\s*(\*|\d+\.)\s*/, '');
-                // Process bolding inside the list item
                 const boldedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                 return `<li>${boldedContent}</li>`;
             }).join('');
             return `<${listTag}>${items}</${listTag}>`;
         }
-
-        // Handle paragraphs and bolding
         const boldedBlock = block.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        return `<p>${boldedBlock.replace(/\n/g, '<br>')}</p>`; // Convert single newlines within a paragraph to <br>
+        return `<p>${boldedBlock.replace(/\n/g, '<br>')}</p>`;
     });
-
     return htmlBlocks.join('');
 }
 
-
 function scrollToMessage() {
-    const container = DOMElements.conversationView;
-    container.scrollTop = container.scrollHeight;
+    const container = DOMElements.chatModalContent; // Target the parent container with the scrollbar
+    if (container) {
+        container.scrollTop = container.scrollHeight;
+    }
 }
 
 function closeChatModal() {
@@ -72,12 +64,10 @@ function addMessageToUI(sender, text, isLoading = false) {
     DOMElements.welcomeScreen.classList.add('hidden');
     DOMElements.historyPanel.classList.add('hidden');
     DOMElements.conversationView.classList.remove('hidden');
-
     const wrapper = document.createElement('div');
     wrapper.className = `chat-message-wrapper justify-${sender === 'user' ? 'end' : 'start'}`;
     const bubble = document.createElement('div');
     bubble.className = `chat-bubble ${sender === 'user' ? 'user-bubble' : 'ai-bubble'}`;
-    
     if (isLoading) {
         bubble.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
     } else {
@@ -87,7 +77,6 @@ function addMessageToUI(sender, text, isLoading = false) {
             bubble.innerHTML = parseMarkdownToHTML(text);
         }
     }
-    
     wrapper.appendChild(bubble);
     DOMElements.conversationView.appendChild(wrapper);
     scrollToMessage();
@@ -112,11 +101,9 @@ function startNewConversation() {
 
 async function saveMessage(messageObject) {
     if (!appState.currentUser || !appState.currentPlanId || !db) return;
-    
     const conversationsRef = db.collection('users').doc(appState.currentUser.uid)
                                .collection('plans').doc(appState.currentPlanId)
                                .collection('conversations');
-
     if (!currentConversationId) {
         const conversationDocRef = conversationsRef.doc();
         currentConversationId = conversationDocRef.id;
@@ -126,9 +113,7 @@ async function saveMessage(messageObject) {
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
     }
-
     const messageRef = conversationsRef.doc(currentConversationId).collection('messages');
-    
     try {
         await messageRef.add({
             ...messageObject,
@@ -142,26 +127,21 @@ async function saveMessage(messageObject) {
 async function handleSendMessage() {
     const messageText = DOMElements.chatInput.value.trim();
     if (!messageText) return;
-
     const userMessage = { role: 'user', parts: [{ text: messageText }] };
     chatHistory.push(userMessage);
     addMessageToUI('user', messageText);
     saveMessage({ role: 'user', text: messageText });
-
     const initialHeight = DOMElements.chatInput.scrollHeight;
     DOMElements.chatInput.value = '';
     DOMElements.chatInput.style.height = `${initialHeight}px`;
     addMessageToUI('model', '', true);
-
     try {
         const planSummary = summarizePlanForAI(appState.planData);
         const responseText = await getGeminiChatResponse(planSummary, chatHistory, messageText);
-        
         updateLastAiMessageInUI(responseText);
         const aiMessage = { role: 'model', parts: [{ text: responseText }] };
         chatHistory.push(aiMessage);
         saveMessage({ role: 'model', text: responseText });
-
     } catch (error) {
         console.error("Chat error:", error);
         const errorMessage = error.message || 'Sorry, I encountered an error. Please try again.';
@@ -171,12 +151,9 @@ async function handleSendMessage() {
 
 async function loadChatHistory(conversationId) {
     if (!appState.currentUser || !appState.currentPlanId || !db) return;
-
     DOMElements.conversationView.innerHTML = '';
-    
     currentConversationId = conversationId;
     sessionStorage.setItem('gails_lastConversationId', conversationId);
-
     const messagesRef = db.collection('users').doc(appState.currentUser.uid)
                           .collection('plans').doc(appState.currentPlanId)
                           .collection('conversations').doc(conversationId)
@@ -186,11 +163,9 @@ async function loadChatHistory(conversationId) {
         const snapshot = await messagesRef.get();
         const newHistory = [];
         const fragment = document.createDocumentFragment();
-
         snapshot.forEach(doc => {
             const data = doc.data();
             newHistory.push({ role: data.role, parts: [{ text: data.text }] });
-
             const wrapper = document.createElement('div');
             wrapper.className = `chat-message-wrapper justify-${data.role === 'user' ? 'end' : 'start'}`;
             const bubble = document.createElement('div');
@@ -203,10 +178,8 @@ async function loadChatHistory(conversationId) {
             wrapper.appendChild(bubble);
             fragment.appendChild(wrapper);
         });
-
         chatHistory = newHistory;
         DOMElements.conversationView.appendChild(fragment);
-
         showConversationView();
         scrollToMessage();
     } catch (error) {
@@ -218,11 +191,9 @@ async function loadChatHistory(conversationId) {
 function showConversationView() {
     DOMElements.historyPanel.classList.add('hidden');
     DOMElements.conversationView.classList.remove('hidden');
-
     const icon = DOMElements.optionsBtn.querySelector('i');
     icon.className = 'bi bi-clock-history';
     DOMElements.optionsBtn.title = 'View History';
-
     if (chatHistory.length === 0) {
         DOMElements.welcomeScreen.classList.remove('hidden');
         DOMElements.conversationView.classList.add('hidden');
@@ -231,18 +202,15 @@ function showConversationView() {
 
 async function deleteConversation(conversationId) {
     if (!appState.currentUser || !appState.currentPlanId || !db) return;
-
     const conversationRef = db.collection('users').doc(appState.currentUser.uid)
                               .collection('plans').doc(appState.currentPlanId)
                               .collection('conversations').doc(conversationId);
-
     try {
         await conversationRef.delete();
         const historyItem = DOMElements.historyList.querySelector(`.history-item[data-id="${conversationId}"]`);
         if (historyItem) {
             historyItem.remove();
         }
-
         if (currentConversationId === conversationId) {
             startNewConversation();
         }
@@ -256,18 +224,14 @@ async function showHistoryView() {
     DOMElements.welcomeScreen.classList.add('hidden');
     DOMElements.conversationView.classList.add('hidden');
     DOMElements.historyPanel.classList.remove('hidden');
-
     const icon = DOMElements.optionsBtn.querySelector('i');
     icon.className = 'bi bi-arrow-left';
     DOMElements.optionsBtn.title = 'Back to Chat';
-
     DOMElements.historyList.innerHTML = '<div class="loading-spinner mx-auto mt-8"></div>';
-
     if (!appState.currentUser || !appState.currentPlanId || !db) {
         DOMElements.historyList.innerHTML = '<p class="text-center text-gray-500 p-4">Could not load history.</p>';
         return;
     }
-
     const conversationsRef = db.collection('users').doc(appState.currentUser.uid)
                                .collection('plans').doc(appState.currentPlanId)
                                .collection('conversations')
@@ -278,7 +242,6 @@ async function showHistoryView() {
             DOMElements.historyList.innerHTML = '<p class="text-center text-gray-500 p-4">No past conversations found.</p>';
             return;
         }
-
         DOMElements.historyList.innerHTML = '';
         snapshot.forEach(doc => {
             const conversation = doc.data();
@@ -306,7 +269,6 @@ export function openChat() {
     if (DOMElements.modal) {
         DOMElements.modal.classList.remove('hidden');
         DOMElements.chatInput.focus();
-
         currentConversationId = null;
         chatHistory = [];
         DOMElements.conversationView.innerHTML = '';
@@ -317,22 +279,18 @@ export function openChat() {
 export function initializeChat(_appState, _db) {
     appState = _appState;
     db = _db;
-
     if (!DOMElements.modal) return;
-
     DOMElements.modal.addEventListener('click', (e) => {
         if (e.target === DOMElements.modal) {
             closeChatModal();
         }
     });
-
     DOMElements.closeBtn.addEventListener('click', closeChatModal);
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !DOMElements.modal.classList.contains('hidden')) {
             closeChatModal();
         }
     });
-
     DOMElements.sendBtn.addEventListener('click', handleSendMessage);
     DOMElements.chatInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -340,7 +298,6 @@ export function initializeChat(_appState, _db) {
             handleSendMessage();
         }
     });
-
     DOMElements.welcomeScreen.addEventListener('click', (e) => {
         const card = e.target.closest('.prompt-starter-card');
         if (card) {
@@ -350,13 +307,10 @@ export function initializeChat(_appState, _db) {
             handleSendMessage();
         }
     });
-    
     DOMElements.newChatBtn.addEventListener('click', startNewConversation);
-
     DOMElements.historyList.addEventListener('click', (e) => {
         const item = e.target.closest('.history-item');
         const deleteBtn = e.target.closest('.delete-conversation-btn');
-
         if (deleteBtn) {
             e.stopPropagation();
             const conversationId = deleteBtn.dataset.id;
@@ -366,14 +320,12 @@ export function initializeChat(_appState, _db) {
             loadChatHistory(conversationId);
         }
     });
-
     document.addEventListener('conversation-deletion-confirmed', (e) => {
         const { conversationId } = e.detail;
         if (conversationId) {
             deleteConversation(conversationId);
         }
     });
-
     DOMElements.optionsBtn.addEventListener('click', () => {
         const isHistoryVisible = !DOMElements.historyPanel.classList.contains('hidden');
         if (isHistoryVisible) {
@@ -382,6 +334,5 @@ export function initializeChat(_appState, _db) {
             showHistoryView();
         }
     });
-
     document.addEventListener('logout-request', closeChatModal);
 }
