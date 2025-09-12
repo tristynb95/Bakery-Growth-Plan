@@ -1,71 +1,124 @@
-// js/api.js
+// js/action.js
 
-/**
- * Fetches the Firebase configuration from the backend.
- * This is a secure way to get your secret keys to the browser.
- */
-export async function getFirebaseConfig() {
-    const response = await fetch('/.netlify/functions/config');
-    if (!response.ok) {
-        throw new Error('Could not fetch Firebase configuration.');
-    }
-    return response.json();
-}
-
-/**
- * Sends the plan summary to the backend to generate an AI Action Plan.
- * @param {string} planSummary - A text summary of the user's plan.
- * @param {AbortSignal} signal - Allows the request to be cancelled.
- * @returns {Promise<string>} The HTML for the action plan.
- */
-export async function generateAiActionPlan(planSummary, signal) {
-    const response = await fetch('/.netlify/functions/generate-plan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planSummary }),
-        signal: signal // This allows us to cancel the request if needed
-    });
-
-    if (!response.ok) {
-        let errorResult;
-        try {
-            errorResult = await response.json();
-        } catch (e) {
-            throw new Error(response.statusText || 'The AI assistant failed to respond.');
+async function initializeFirebase() {
+    try {
+        const response = await fetch('/.netlify/functions/config');
+        if (!response.ok) {
+            throw new Error('Could not fetch Firebase configuration.');
         }
-        throw new Error(errorResult.error || 'The AI assistant failed to generate a response.');
+        const firebaseConfig = await response.json();
+        const app = firebase.initializeApp(firebaseConfig);
+        runActionHandler(app);
+    } catch (error) {
+        console.error("Failed to initialize Firebase:", error);
+        showError('Could not connect to the authentication service. Please try again later.');
     }
-
-    const data = await response.json();
-    // Clean the response to remove any markdown backticks
-    return data.actionPlan.replace(/^```(html)?\s*/, '').replace(/```$/, '').trim();
 }
 
-/**
- * Sends the current chat context to the backend for an AI response.
- * @param {string} planSummary - A text summary of the user's plan.
- * @param {Array} chatHistory - An array of previous chat messages.
- * @param {string} userMessage - The new message from the user.
- * @param {object} calendarData - The user's calendar data.
- * @returns {Promise<string>} The AI's text response.
- */
-export async function getGeminiChatResponse(planSummary, chatHistory, userMessage, calendarData) {
-    const response = await fetch('/.netlify/functions/generate-chat-response', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planSummary, chatHistory, userMessage, calendarData }),
-    });
+function runActionHandler(app) {
+    const auth = firebase.auth();
 
-    if (!response.ok) {
-        let errorResult;
-        try {
-            errorResult = await response.json();
-        } catch (e) {
-            throw new Error(response.statusText || 'The AI assistant failed to respond.');
-        }
-        throw new Error(errorResult.error || 'The AI assistant failed to generate a response.');
+    const DOMElements = {
+        loadingView: document.getElementById('loading-view'),
+        resetPasswordView: document.getElementById('reset-password-view'),
+        successView: document.getElementById('success-view'),
+        errorView: document.getElementById('error-view'),
+        newPasswordInput: document.getElementById('new-password'),
+        confirmNewPasswordInput: document.getElementById('confirm-new-password'),
+        passwordToggles: document.querySelectorAll('.password-toggle'),
+        resetPasswordBtn: document.getElementById('reset-password-btn'),
+        resetError: document.getElementById('reset-error'),
+        errorMessage: document.getElementById('error-message'),
+    };
+
+    function getUrlParameter(name) {
+        const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+        const results = regex.exec(window.location.href);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
     }
 
-    const data = await response.json();
-    return data.response;
+    function showError(message) {
+        DOMElements.loadingView.classList.add('hidden');
+        DOMElements.resetPasswordView.classList.add('hidden');
+        DOMElements.successView.classList.add('hidden');
+        DOMElements.errorMessage.textContent = message;
+        DOMElements.errorView.classList.remove('hidden');
+    }
+
+    const mode = getUrlParameter('mode');
+    const actionCode = getUrlParameter('oobCode');
+
+    if (mode === 'resetPassword' && actionCode) {
+        auth.verifyPasswordResetCode(actionCode)
+            .then(email => {
+                DOMElements.loadingView.classList.add('hidden');
+                DOMElements.resetPasswordView.classList.remove('hidden');
+
+                const handleReset = () => {
+                    const newPassword = DOMElements.newPasswordInput.value;
+                    const confirmPassword = DOMElements.confirmNewPasswordInput.value;
+                    DOMElements.resetError.style.display = 'none';
+
+                    if (newPassword.length < 6) {
+                        DOMElements.resetError.textContent = 'Password must be at least 6 characters long.';
+                        DOMElements.resetError.style.display = 'block';
+                        return;
+                    }
+                    
+                    if (newPassword !== confirmPassword) {
+                        DOMElements.resetError.textContent = 'Passwords do not match.';
+                        DOMElements.resetError.style.display = 'block';
+                        return;
+                    }
+
+                    auth.confirmPasswordReset(actionCode, newPassword)
+                        .then(() => {
+                            DOMElements.resetPasswordView.classList.add('hidden');
+                            DOMElements.successView.classList.remove('hidden');
+                        })
+                        .catch(error => {
+                            let message = 'An unexpected error occurred. Please try again.';
+                            if (error.code === 'auth/weak-password') {
+                                message = 'The new password is too weak.';
+                            }
+                            DOMElements.resetError.textContent = message;
+                            DOMElements.resetError.style.display = 'block';
+                        });
+                };
+                
+                DOMElements.resetPasswordBtn.addEventListener('click', handleReset);
+                DOMElements.newPasswordInput.addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter') handleReset();
+                });
+                DOMElements.confirmNewPasswordInput.addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter') handleReset();
+                });
+
+                DOMElements.passwordToggles.forEach(toggle => {
+                    toggle.addEventListener('click', () => {
+                        const input = toggle.previousElementSibling;
+                        const icon = toggle.querySelector('i');
+                        if (input.type === 'password') {
+                            input.type = 'text';
+                            icon.classList.remove('bi-eye-slash-fill');
+                            icon.classList.add('bi-eye-fill');
+                        } else {
+                            input.type = 'password';
+                            icon.classList.remove('bi-eye-fill');
+                            icon.classList.add('bi-eye-slash-fill');
+                        }
+                    });
+                });
+
+            })
+            .catch(error => {
+                showError('This password reset link is invalid or has expired. Please request a new one from the login page.');
+            });
+    } else {
+        showError('The requested action is not valid.');
+    }
 }
+
+document.addEventListener('DOMContentLoaded', initializeFirebase);
