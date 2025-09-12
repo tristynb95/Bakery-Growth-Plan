@@ -504,7 +504,8 @@ function switchView(viewId) {
          'month-1': { title: 'Month 1 Plan', subtitle: appState.planData.planName || 'Lay the foundations for success.' },
          'month-2': { title: 'Month 2 Plan', subtitle: appState.planData.planName || 'Build momentum and embed processes.' },
          'month-3': { title: 'Month 3 Plan', subtitle: appState.planData.planName || 'Refine execution and review the quarter.' },
-         summary: { title: `Plan Summary - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'A complete overview of your quarterly plan.' }
+         summary: { title: `Plan Summary - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'A complete overview of your quarterly plan.' },
+         files: { title: 'My Files', subtitle: `Manage documents for ${appState.planData.planName || 'your plan'}.` }
     
 };
     
@@ -517,6 +518,8 @@ function switchView(viewId) {
 
     if (isSummaryView) {
         renderSummary();
+    } else if (viewId === 'files') {
+        DOMElements.contentArea.innerHTML = templates.files.html;
     } else {
         const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
         DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
