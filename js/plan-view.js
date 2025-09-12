@@ -471,10 +471,11 @@ function switchView(viewId) {
 
     const titles = {
         vision: { title: `${appState.planData.quarter || 'Quarterly'} Plan`, subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.' },
-         'month-1': { title: `${appState.planData.quarter || ''} Month 1 Plan`, subtitle: 'Lay the foundations for success.' },
-         'month-2': { title: `${appState.planData.quarter || ''} Month 2 Plan`, subtitle: 'Build momentum and embed processes.' },
-         'month-3': { title: `${appState.planData.quarter || ''} Month 3 Plan`, subtitle: 'Refine execution and review the quarter.' },
+         'month-1': { title: 'Month 1 Plan', subtitle: 'Lay the foundations for success.' },
+         'month-2': { title: 'Month 2 Plan', subtitle: 'Build momentum and embed processes.' },
+         'month-3': { title: 'Month 3 Plan', subtitle: 'Refine execution and review the quarter.' },
          summary: { title: `${appState.planData.quarter || ''} Summary`, subtitle: 'A complete overview of your quarterly plan.' }
+    
     };
     DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
     DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
