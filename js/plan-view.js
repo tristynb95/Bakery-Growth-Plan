@@ -21,6 +21,7 @@ const DOMElements = {
     sidebarInitials: document.getElementById('sidebar-initials'),
     progressBarFill: document.getElementById('progress-bar-fill'),
     progressPercentage: document.getElementById('progress-percentage'),
+    backToDashboardBtn: document.getElementById('back-to-dashboard-btn'),
     sidebarLogoutBtn: document.getElementById('sidebar-logout-btn'),
     printBtn: document.getElementById('print-btn'),
     shareBtn: document.getElementById('share-btn'),
@@ -547,23 +548,6 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
     if (!DOMElements.mainNav) {
         return;
     }
-    
-    const appViewLogoLink = document.getElementById('app-view-logo-link');
-    const appViewBackBtn = document.getElementById('app-view-back-btn');
-    const appViewLogoutBtn = document.getElementById('app-view-logout-btn');
-
-    const goBackToDashboard = (e) => {
-        if (e) e.preventDefault();
-        document.dispatchEvent(new CustomEvent('back-to-dashboard'));
-    };
-
-    const requestLogout = () => {
-        document.dispatchEvent(new CustomEvent('logout-request'));
-    };
-    
-    if (appViewLogoLink) appViewLogoLink.addEventListener('click', goBackToDashboard);
-    if (appViewBackBtn) appViewBackBtn.addEventListener('click', goBackToDashboard);
-    if (appViewLogoutBtn) appViewLogoutBtn.addEventListener('click', requestLogout);
 
     DOMElements.mainNav.addEventListener('click', (e) => {
         e.preventDefault();
@@ -671,6 +655,14 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
                 label.textContent = `Week ${labelWeek} Progress:`;
             });
         }
+    });
+
+    DOMElements.backToDashboardBtn.addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent('back-to-dashboard'));
+    });
+
+    DOMElements.sidebarLogoutBtn.addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent('logout-request'));
     });
 
     DOMElements.printBtn.addEventListener('click', () => window.print());
