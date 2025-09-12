@@ -1289,6 +1289,16 @@ tr:hover .btn-remove-row {
 .event-type-badge.reminder { background-color: #9CA3AF; }
 .event-type-badge.requested-off { background-color: #6B7280; }
 
+/* --- NEW EVENT TYPES --- */
+/* --- My Shifts (Neutral/Slate) --- */
+.event-type-badge.my-shifts { background-color: #64748B; } /* slate-500 */
+.option-dot.my-shifts, .selected-dot.my-shifts, .event-dot.my-shifts, .stack-dot.my-shifts { background-color: #64748B; }
+
+/* --- Trade Review (Business/Teal) --- */
+.event-type-badge.trade-review { background-color: #0D9488; } /* teal-600 */
+.option-dot.trade-review, .selected-dot.trade-review, .event-dot.trade-review, .stack-dot.trade-review { background-color: #0D9488; }
+
+
 .day-detail-footer {
     padding: 1.5rem;
     border-top: 1px solid var(--gails-grey-mid);
