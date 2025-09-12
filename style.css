@@ -1298,6 +1298,14 @@ tr:hover .btn-remove-row {
 .event-type-badge.trade-review { background-color: #0D9488; } /* teal-600 */
 .option-dot.trade-review, .selected-dot.trade-review, .event-dot.trade-review, .stack-dot.trade-review { background-color: #0D9488; }
 
+/* --- Scheduling Request (Purple) --- */
+.event-type-badge.scheduling-request { background-color: #7C3AED; } /* violet-500 */
+.option-dot.scheduling-request, .selected-dot.scheduling-request, .event-dot.scheduling-request, .stack-dot.scheduling-request { background-color: #7C3AED; }
+
+/* --- Non-Coverage Time (Light Blue) --- */
+.event-type-badge.non-coverage-time { background-color: #38BDF8; } /* lightBlue-400 */
+.option-dot.non-coverage-time, .selected-dot.non-coverage-time, .event-dot.non-coverage-time, .stack-dot.non-coverage-time { background-color: #38BDF8; }
+
 
 .day-detail-footer {
     padding: 1.5rem;
