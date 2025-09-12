@@ -200,6 +200,12 @@ main { grid-area: main; }
 .sidebar-nav a.completed { color: var(--gails-green); }
 .sidebar-nav a.completed:not(.active) { background-color: #F0FDF4; }
 
+#sidebar-logo-container {
+    padding-left: 1rem;      /* Adds 16px to the parent's 24px padding to make 40px (2.5rem) */
+    margin-top: -0.25rem;    /* Removes 4px from the parent's 24px padding to make 20px (1.25rem) */
+    margin-bottom: 2rem;     /* Replicates the original mb-8 spacing */
+}
+
 /* 5. Core Components
 -------------------------------------------------- */
 .btn {
