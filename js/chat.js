@@ -25,33 +25,35 @@ const DOMElements = {
 };
 
 function parseMarkdownToHTML(text) {
-    // Convert bold text **text** to <strong>text</strong>
-    let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Split the text into blocks separated by double newlines
+    const blocks = text.split(/\n\s*\n/);
 
-    // Convert bullet points * item to <li>item</li>
-    html = html.replace(/^\s*\*\s*(.*)/gm, '<li>$1</li>');
+    const htmlBlocks = blocks.map(block => {
+        // Trim whitespace from the block
+        block = block.trim();
+        if (!block) return '';
 
-    // Wrap list items in <ul>
-    if (html.includes('<li>')) {
-        html = '<ul>' + html.replace(/<\/li>\n/g, '</li>') + '</ul>';
-        html = html.replace(/<\/li><ul>/g, '</li></ul><ul>').replace(/<\/ul>\s*<ul>/g, '');
-    }
-    
-    // Convert numbered lists 1. item to <li>item</li> and wrap in <ol>
-    html = html.replace(/^\s*\d+\.\s*(.*)/gm, '<li>$1</li>');
-    if (html.match(/^\s*<li>/m) && !html.startsWith('<ul>') && !html.startsWith('<ol>')) {
-         // Check if it looks like an ordered list
-        if (/^\s*<li>/.test(text.replace(/^\s*\d+\.\s*/, '<li>'))) {
-            html = '<ol>' + html.replace(/<\/li>\n/g, '</li>') + '</ol>';
+        // Handle lists (both ordered and unordered)
+        const isUnorderedList = /^\s*\*/.test(block);
+        const isOrderedList = /^\s*\d+\./.test(block);
+
+        if (isUnorderedList || isOrderedList) {
+            const listTag = isUnorderedList ? 'ul' : 'ol';
+            const items = block.split('\n').map(item => {
+                const content = item.replace(/^\s*(\*|\d+\.)\s*/, '');
+                // Process bolding inside the list item
+                const boldedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                return `<li>${boldedContent}</li>`;
+            }).join('');
+            return `<${listTag}>${items}</${listTag}>`;
         }
-    }
 
-    // Convert newlines to <br> for non-list content
-    if (!html.includes('<ul>') && !html.includes('<ol>')) {
-        html = html.replace(/\n/g, '<br>');
-    }
+        // Handle paragraphs and bolding
+        const boldedBlock = block.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        return `<p>${boldedBlock.replace(/\n/g, '<br>')}</p>`; // Convert single newlines within a paragraph to <br>
+    });
 
-    return html;
+    return htmlBlocks.join('');
 }
 
 
