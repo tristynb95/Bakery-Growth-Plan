@@ -3,6 +3,7 @@
 import { getGeminiChatResponse } from './api.js';
 import { summarizePlanForAI } from './plan-view.js';
 import { openModal } from './ui.js';
+import { loadCalendarData } from './calendar.js';
 
 let appState;
 let db;
@@ -209,6 +210,8 @@ async function deleteConversation(conversationId) {
                               .collection('plans').doc(appState.currentPlanId)
                               .collection('conversations').doc(conversationId);
     try {
+        // Deleting a document does not automatically delete its subcollections.
+        // This would require a more complex cloud function. For now, this is a soft delete.
         await conversationRef.delete();
         const historyItem = DOMElements.historyList.querySelector(`.history-item[data-id="${conversationId}"]`);
         if (historyItem) {
@@ -268,8 +271,11 @@ async function showHistoryView() {
     }
 }
 
-export function openChat() {
+export async function openChat() {
     if (DOMElements.modal) {
+        // FIX: Ensure calendar data is loaded before opening the chat.
+        await loadCalendarData(db, appState);
+
         DOMElements.modal.classList.remove('hidden');
         DOMElements.chatInput.focus();
         const lastConversationId = sessionStorage.getItem('gails_lastConversationId');
