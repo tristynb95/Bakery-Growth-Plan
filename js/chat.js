@@ -121,27 +121,22 @@ async function saveMessage(messageObject) {
 async function handleSendMessage() {
     const messageText = DOMElements.chatInput.value.trim();
     if (!messageText) return;
-
     const userMessage = { role: 'user', parts: [{ text: messageText }] };
     chatHistory.push(userMessage);
     addMessageToUI('user', messageText);
     saveMessage({ role: 'user', text: messageText });
-
     const initialHeight = DOMElements.chatInput.scrollHeight;
     DOMElements.chatInput.value = '';
     DOMElements.chatInput.style.height = `${initialHeight}px`;
     addMessageToUI('model', '', true);
-
     try {
         const planSummary = summarizePlanForAI(appState.planData);
-        const calendarData = appState.calendar.data; // Get calendar data from app state
+        const calendarData = appState.calendar.data;
         const responseText = await getGeminiChatResponse(planSummary, chatHistory, messageText, calendarData);
-        
         updateLastAiMessageInUI(responseText);
         const aiMessage = { role: 'model', parts: [{ text: responseText }] };
         chatHistory.push(aiMessage);
         saveMessage({ role: 'model', text: responseText });
-
     } catch (error) {
         console.error("Chat error:", error);
         const errorMessage = error.message || 'Sorry, I encountered an error. Please try again.';
@@ -193,13 +188,18 @@ async function loadChatHistory(conversationId) {
 
 function showConversationView() {
     DOMElements.historyPanel.classList.add('hidden');
-    DOMElements.conversationView.classList.remove('hidden');
     const icon = DOMElements.optionsBtn.querySelector('i');
     icon.className = 'bi bi-clock-history';
     DOMElements.optionsBtn.title = 'View History';
+
     if (chatHistory.length === 0) {
+        // Show welcome screen for a new or empty chat
         DOMElements.welcomeScreen.classList.remove('hidden');
         DOMElements.conversationView.classList.add('hidden');
+    } else {
+        // Hide welcome screen when there is a conversation
+        DOMElements.welcomeScreen.classList.add('hidden');
+        DOMElements.conversationView.classList.remove('hidden');
     }
 }
 
