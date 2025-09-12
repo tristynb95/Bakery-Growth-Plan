@@ -94,6 +94,19 @@ exports.handler = async function(event, context) {
     const response = await result.response;
     const aiText = response.text();
 
+       // --- TOKEN COUNTER IMPLEMENTATION ---
+     if (response.usageMetadata) {
+       const { promptTokenCount, candidatesTokenCount } = response.usageMetadata;
+       const totalTokenCount = promptTokenCount + candidatesTokenCount;
+ 
+       console.log('--- AI Token Usage ---');
+       console.log(`Input Tokens: ${promptTokenCount}`);
+       console.log(`Output Tokens: ${candidatesTokenCount}`);
+       console.log(`Total Tokens: ${totalTokenCount}`);
+       console.log('----------------------');
+     }
+     // --- END TOKEN COUNTER ---
+
     return {
       statusCode: 200,
       body: JSON.stringify({ response: aiText }),
