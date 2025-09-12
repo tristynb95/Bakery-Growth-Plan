@@ -549,6 +549,23 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
         return;
     }
 
+    const appViewLogoLink = document.getElementById('app-view-logo-link');
+    const appViewBackBtn = document.getElementById('app-view-back-btn');
+    const appViewLogoutBtn = document.getElementById('app-view-logout-btn');
+
+    const goBackToDashboard = (e) => {
+        if (e) e.preventDefault();
+        document.dispatchEvent(new CustomEvent('back-to-dashboard'));
+    };
+
+    const requestLogout = () => {
+        document.dispatchEvent(new CustomEvent('logout-request'));
+    };
+    
+    if (appViewLogoLink) appViewLogoLink.addEventListener('click', goBackToDashboard);
+    if (appViewBackBtn) appViewBackBtn.addEventListener('click', goBackToDashboard);
+    if (appViewLogoutBtn) appViewLogoutBtn.addEventListener('click', requestLogout);
+
     DOMElements.mainNav.addEventListener('click', (e) => {
         e.preventDefault();
         const navLink = e.target.closest('a');
