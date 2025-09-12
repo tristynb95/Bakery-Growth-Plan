@@ -174,7 +174,12 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 
 /* 4. Main App Layout & Sidebar
 -------------------------------------------------- */
-.main-layout { display: grid; grid-template-columns: 280px 1fr; height: 100vh; grid-template-areas: "sidebar main"; }
+.main-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    height: 100%; /* MODIFIED: Changed from 100vh to 100% to fill its parent */
+    grid-template-areas: "sidebar main";
+}
 #sidebar { grid-area: sidebar; }
 main { grid-area: main; }
 .sidebar-nav a {
