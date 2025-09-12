@@ -1,4 +1,4 @@
-// js/main.js - Provide the entire file content below
+// js/main.js
 
 import { initializeAuth, setupActivityListeners, clearActivityListeners, handleSignOut } from './auth.js';
 import { getFirebaseConfig } from './api.js';
@@ -6,11 +6,8 @@ import { initializeCalendar } from './calendar.js';
 import { initializeDashboard, renderDashboard } from './dashboard.js';
 import { initializeUI, openModal, handleAIActionPlan, handleShare, initializeCharCounters } from './ui.js';
 import { initializePlanView, showPlanView } from './plan-view.js';
-import { initializeChat } from './chat.js'; // <-- IMPORT the new chat module
+import { initializeChat } from './chat.js';
 
-/**
- * Fetches the Firebase config and initializes the Firebase app.
- */
 async function initializeFirebase() {
     try {
         const firebaseConfig = await getFirebaseConfig();
@@ -22,10 +19,6 @@ async function initializeFirebase() {
     }
 }
 
-/**
- * Runs the main application logic after Firebase has been initialized.
- * @param {object} app The initialized Firebase app instance.
- */
 function runApp(app) {
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -42,7 +35,7 @@ function runApp(app) {
             data: {},
             editingEventIndex: null
         },
-        aiPlanGenerationController: null 
+        aiPlanGenerationController: null
     };
 
     initializeAuth(auth);
@@ -136,7 +129,7 @@ function runApp(app) {
 
             if (window.location.pathname !== '/index.html' && window.location.pathname !== '/' && window.location.pathname !== '/action.html') {
                 window.location.href = '/index.html';
-                return; 
+                return;
             }
             
             if (dashboardView) dashboardView.classList.add('hidden');
