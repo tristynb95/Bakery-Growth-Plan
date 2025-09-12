@@ -25,27 +25,45 @@ const DOMElements = {
     historyList: document.getElementById('history-list'),
 };
 
+/**
+ * A robust function to parse markdown-like text to HTML.
+ * Handles paragraphs, bolding, and both ordered and unordered lists.
+ */
 function parseMarkdownToHTML(text) {
-    const blocks = text.split(/\n\s*\n/);
+    // First, handle bolding globally, as it can appear anywhere.
+    let processedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // Split the text into blocks based on one or more empty lines.
+    const blocks = processedText.split(/\n\s*\n/);
+
     const htmlBlocks = blocks.map(block => {
         block = block.trim();
         if (!block) return '';
-        const isUnorderedList = /^\s*\*/.test(block);
-        const isOrderedList = /^\s*\d+\./.test(block);
+
+        const lines = block.split('\n');
+        
+        // Check if the block looks like a list
+        const isUnorderedList = lines.every(line => /^\s*\*/.test(line));
+        const isOrderedList = lines.every(line => /^\s*\d+\./.test(line));
+
         if (isUnorderedList || isOrderedList) {
             const listTag = isUnorderedList ? 'ul' : 'ol';
-            const items = block.split('\n').map(item => {
-                const content = item.replace(/^\s*(\*|\d+\.)\s*/, '');
-                const boldedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                return `<li>${boldedContent}</li>`;
+            const items = lines.map(line => {
+                // Strip the list marker (* or 1.) from the start of the line
+                const content = line.replace(/^\s*(\*|\d+\.)\s*/, '');
+                return `<li>${content}</li>`;
             }).join('');
             return `<${listTag}>${items}</${listTag}>`;
         }
-        const boldedBlock = block.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        return `<p>${boldedBlock.replace(/\n/g, '<br>')}</p>`;
+        
+        // If it's not a list, treat it as a paragraph.
+        // Convert single newlines within the block to <br> for line breaks.
+        return `<p>${block.replace(/\n/g, '<br>')}</p>`;
     });
+
     return htmlBlocks.join('');
 }
+
 
 function closeChatModal() {
     if (DOMElements.modal) {
@@ -72,7 +90,6 @@ function addMessageToUI(sender, text, isLoading = false) {
     }
     wrapper.appendChild(bubble);
     DOMElements.conversationView.appendChild(wrapper);
-    // New scrolling logic: scroll the new element into view
     wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -81,7 +98,6 @@ function updateLastAiMessageInUI(text) {
     if (allAiBubbles.length > 0) {
         const lastBubble = allAiBubbles[allAiBubbles.length - 1];
         lastBubble.innerHTML = parseMarkdownToHTML(text);
-        // New scrolling logic: scroll the updated element's wrapper into view
         lastBubble.parentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
@@ -176,11 +192,9 @@ async function loadChatHistory(conversationId) {
         chatHistory = newHistory;
         DOMElements.conversationView.appendChild(fragment);
         showConversationView();
-        
-        // New scrolling logic: scroll to the last message in the loaded history
         const lastMessage = DOMElements.conversationView.lastElementChild;
         if (lastMessage) {
-            lastMessage.scrollIntoView({ behavior: 'auto', block: 'start' }); // 'auto' for instant jump
+            lastMessage.scrollIntoView({ behavior: 'auto', block: 'start' });
         }
     } catch (error) {
         console.error("Error loading chat history:", error);
