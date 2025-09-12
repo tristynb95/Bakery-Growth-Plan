@@ -1,4 +1,4 @@
-// js/chat.js AI MODAL
+// js/chat.js
 
 import { getGeminiChatResponse } from './api.js';
 import { summarizePlanForAI } from './plan-view.js';
@@ -24,6 +24,37 @@ const DOMElements = {
     historyList: document.getElementById('history-list'),
 };
 
+function parseMarkdownToHTML(text) {
+    // Convert bold text **text** to <strong>text</strong>
+    let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // Convert bullet points * item to <li>item</li>
+    html = html.replace(/^\s*\*\s*(.*)/gm, '<li>$1</li>');
+
+    // Wrap list items in <ul>
+    if (html.includes('<li>')) {
+        html = '<ul>' + html.replace(/<\/li>\n/g, '</li>') + '</ul>';
+        html = html.replace(/<\/li><ul>/g, '</li></ul><ul>').replace(/<\/ul>\s*<ul>/g, '');
+    }
+    
+    // Convert numbered lists 1. item to <li>item</li> and wrap in <ol>
+    html = html.replace(/^\s*\d+\.\s*(.*)/gm, '<li>$1</li>');
+    if (html.match(/^\s*<li>/m) && !html.startsWith('<ul>') && !html.startsWith('<ol>')) {
+         // Check if it looks like an ordered list
+        if (/^\s*<li>/.test(text.replace(/^\s*\d+\.\s*/, '<li>'))) {
+            html = '<ol>' + html.replace(/<\/li>\n/g, '</li>') + '</ol>';
+        }
+    }
+
+    // Convert newlines to <br> for non-list content
+    if (!html.includes('<ul>') && !html.includes('<ol>')) {
+        html = html.replace(/\n/g, '<br>');
+    }
+
+    return html;
+}
+
+
 function scrollToMessage() {
     const container = DOMElements.conversationView;
     container.scrollTop = container.scrollHeight;
@@ -48,7 +79,11 @@ function addMessageToUI(sender, text, isLoading = false) {
     if (isLoading) {
         bubble.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
     } else {
-        bubble.textContent = text;
+        if (sender === 'user') {
+            bubble.textContent = text;
+        } else {
+            bubble.innerHTML = parseMarkdownToHTML(text);
+        }
     }
     
     wrapper.appendChild(bubble);
@@ -60,8 +95,7 @@ function updateLastAiMessageInUI(text) {
     const allAiBubbles = DOMElements.conversationView.querySelectorAll('.ai-bubble');
     if (allAiBubbles.length > 0) {
         const lastBubble = allAiBubbles[allAiBubbles.length - 1];
-        lastBubble.innerHTML = '';
-        lastBubble.textContent = text;
+        lastBubble.innerHTML = parseMarkdownToHTML(text);
         scrollToMessage();
     }
 }
@@ -69,7 +103,7 @@ function updateLastAiMessageInUI(text) {
 function startNewConversation() {
     currentConversationId = null;
     chatHistory = [];
-    sessionStorage.removeItem('gails_lastConversationId'); // Forget the last chat
+    sessionStorage.removeItem('gails_lastConversationId');
     DOMElements.conversationView.innerHTML = '';
     showConversationView();
 }
@@ -84,7 +118,6 @@ async function saveMessage(messageObject) {
     if (!currentConversationId) {
         const conversationDocRef = conversationsRef.doc();
         currentConversationId = conversationDocRef.id;
-        // Save the new ID to the session so it's remembered on refresh
         sessionStorage.setItem('gails_lastConversationId', currentConversationId);
         await conversationDocRef.set({
             firstMessage: messageObject.text,
@@ -137,9 +170,6 @@ async function handleSendMessage() {
 async function loadChatHistory(conversationId) {
     if (!appState.currentUser || !appState.currentPlanId || !db) return;
 
-    // --- Start of Fix ---
-
-    // 1. Immediately clear the UI to provide instant feedback.
     DOMElements.conversationView.innerHTML = '';
     
     currentConversationId = conversationId;
@@ -152,34 +182,31 @@ async function loadChatHistory(conversationId) {
                           .orderBy('timestamp', 'asc');
     try {
         const snapshot = await messagesRef.get();
-
-        // 2. Build the new history in a temporary local array first.
         const newHistory = [];
         const fragment = document.createDocumentFragment();
 
         snapshot.forEach(doc => {
             const data = doc.data();
-            // Add to the temporary history array
             newHistory.push({ role: data.role, parts: [{ text: data.text }] });
 
-            // Build the UI in an efficient off-screen fragment
             const wrapper = document.createElement('div');
             wrapper.className = `chat-message-wrapper justify-${data.role === 'user' ? 'end' : 'start'}`;
             const bubble = document.createElement('div');
             bubble.className = `chat-bubble ${data.role === 'user' ? 'user-bubble' : 'ai-bubble'}`;
-            bubble.textContent = data.text;
+            if (data.role === 'user') {
+                bubble.textContent = data.text;
+            } else {
+                bubble.innerHTML = parseMarkdownToHTML(data.text);
+            }
             wrapper.appendChild(bubble);
             fragment.appendChild(wrapper);
         });
 
-        // 3. Once complete, atomically update the global state and the DOM.
         chatHistory = newHistory;
         DOMElements.conversationView.appendChild(fragment);
 
-        // --- End of Fix ---
-
         showConversationView();
-        scrollToMessage(); // Scroll to the bottom after rendering
+        scrollToMessage();
     } catch (error) {
         console.error("Error loading chat history:", error);
         addMessageToUI('model', 'Could not load previous messages.');
@@ -203,34 +230,22 @@ function showConversationView() {
 async function deleteConversation(conversationId) {
     if (!appState.currentUser || !appState.currentPlanId || !db) return;
 
-    console.log(`Requesting deletion for conversation: ${conversationId}`);
-
     const conversationRef = db.collection('users').doc(appState.currentUser.uid)
                               .collection('plans').doc(appState.currentPlanId)
                               .collection('conversations').doc(conversationId);
 
     try {
-        // NOTE: Firestore does not support recursive deletion from the client.
-        // Deleting this document will orphan the 'messages' subcollection.
-        // For a production app, a Cloud Function triggered on delete is the best practice.
-        // For this implementation, orphaning is an acceptable trade-off.
         await conversationRef.delete();
-        console.log(`Successfully deleted conversation ${conversationId} from Firestore.`);
-
-        // Visually remove the item from the history list
         const historyItem = DOMElements.historyList.querySelector(`.history-item[data-id="${conversationId}"]`);
         if (historyItem) {
             historyItem.remove();
-            console.log(`Removed conversation ${conversationId} from the UI.`);
         }
 
-        // If the currently viewed chat is the one being deleted, reset the view
         if (currentConversationId === conversationId) {
             startNewConversation();
         }
     } catch (error) {
         console.error("Error deleting conversation:", error);
-        // It might be good to show a more user-friendly error message here
         alert("Failed to delete conversation. Please try again.");
     }
 }
@@ -268,7 +283,6 @@ async function showHistoryView() {
             const historyItem = document.createElement('div');
             historyItem.className = 'history-item';
             historyItem.dataset.id = doc.id;
-            // Add a container for the text and a new delete button
             historyItem.innerHTML = `
                 <div class="history-item-text">
                     <p class="history-item-title">${conversation.firstMessage}</p>
@@ -291,11 +305,10 @@ export function openChat() {
         DOMElements.modal.classList.remove('hidden');
         DOMElements.chatInput.focus();
 
-        // Always start a new conversation view when opening the modal
         currentConversationId = null;
         chatHistory = [];
         DOMElements.conversationView.innerHTML = '';
-        showConversationView(); // This will correctly show the welcome screen
+        showConversationView();
     }
 }
 
@@ -343,18 +356,15 @@ export function initializeChat(_appState, _db) {
         const deleteBtn = e.target.closest('.delete-conversation-btn');
 
         if (deleteBtn) {
-            // Handle delete button click
-            e.stopPropagation(); // Prevent the item click from firing
+            e.stopPropagation();
             const conversationId = deleteBtn.dataset.id;
-            openModal('confirmDeleteConversation', { planId: conversationId }); // Re-use planId to pass the ID
+            openModal('confirmDeleteConversation', { planId: conversationId });
         } else if (item) {
-            // Handle history item click to load conversation
             const conversationId = item.dataset.id;
             loadChatHistory(conversationId);
         }
     });
 
-    // Add a listener for the global confirmation event
     document.addEventListener('conversation-deletion-confirmed', (e) => {
         const { conversationId } = e.detail;
         if (conversationId) {
@@ -371,6 +381,5 @@ export function initializeChat(_appState, _db) {
         }
     });
 
-    // When a logout is triggered, ensure the chat modal is closed.
     document.addEventListener('logout-request', closeChatModal);
 }
