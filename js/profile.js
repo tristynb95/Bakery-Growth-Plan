@@ -156,42 +156,52 @@ function runProfileScript(app) {
         DOMElements.profileEmail.value = user.email;
         const userRef = db.collection('users').doc(user.uid);
 
-        if (isSetupMode) {
-            // If setup=true is in the URL, always show the setup UI.
-            DOMElements.headerTitle.textContent = 'Welcome! Let\'s Set Up Your Profile.';
-            DOMElements.headerSubtitle.textContent = 'Please provide your details to get started.';
-            DOMElements.headerSaveBtn.textContent = 'Save and Continue';
-            checkFormValidity();
-        } else {
-            // Otherwise, check the user's profile status.
-            userRef.get().then((doc) => {
-                if (doc.exists && doc.data().name && doc.data().bakery) {
-                    // Profile exists and is complete.
-                    const data = doc.data();
-                    DOMElements.profileName.value = data.name;
-                    DOMElements.bakerySearchInput.value = data.bakery;
-                    DOMElements.bakeryHiddenInput.value = data.bakery;
-                    originalProfileData = { name: data.name, bakery: data.bakery };
+        userRef.get().then((doc) => {
+            const data = doc.exists ? doc.data() : {};
+            const isProfileComplete = data.name && data.bakery;
+            const isExplicitSetup = params.get('setup') === 'true';
 
-                    if (data.photoURL) {
-                        DOMElements.photoPreview.src = data.photoURL;
-                        DOMElements.removePhotoBtn.classList.remove('hidden');
-                    }
-                    DOMElements.headerBackBtn.classList.remove('hidden');
-                    checkFormValidity();
+            if (isExplicitSetup || !isProfileComplete) {
+                // ENTERING SETUP MODE
+                isSetupMode = true;
+                DOMElements.headerTitle.textContent = 'Welcome! Let\'s Set Up Your Profile.';
+                DOMElements.headerSubtitle.textContent = 'Please provide your details to get started.';
+                DOMElements.headerSaveBtn.textContent = 'Save and Continue';
+
+                DOMElements.profileName.value = data.name || '';
+                DOMElements.bakerySearchInput.value = data.bakery || '';
+                DOMElements.bakeryHiddenInput.value = data.bakery || '';
+                originalProfileData = { name: data.name || '', bakery: data.bakery || '' };
+
+                DOMElements.headerBackBtn.classList.add('hidden');
+
+            } else {
+                // ENTERING PROFILE VIEW/EDIT MODE
+                isSetupMode = false;
+                DOMElements.headerTitle.textContent = 'Your Profile';
+                DOMElements.headerSubtitle.textContent = 'Manage your account details and bakery information.';
+                DOMElements.headerSaveBtn.innerHTML = '<i class="bi bi-check-lg"></i> Save Changes';
+
+                DOMElements.profileName.value = data.name;
+                DOMElements.bakerySearchInput.value = data.bakery;
+                DOMElements.bakeryHiddenInput.value = data.bakery;
+                originalProfileData = { name: data.name, bakery: data.bakery };
+
+                if (data.photoURL) {
+                    DOMElements.photoPreview.src = data.photoURL;
+                    DOMElements.removePhotoBtn.classList.remove('hidden');
                 } else {
-                    // Profile is incomplete or doesn't exist, redirect to setup.
-                    const currentUrl = new URL(window.location.href);
-                    if (currentUrl.searchParams.get('setup') !== 'true') {
-                        currentUrl.searchParams.set('setup', 'true');
-                        window.location.href = currentUrl.href;
-                    }
+                    DOMElements.photoPreview.src = defaultPhotoURL;
+                    DOMElements.removePhotoBtn.classList.add('hidden');
                 }
-            }).catch(error => {
-                console.error("Error fetching user profile:", error);
-                openModal('warning', 'Load Error', 'Could not load your profile. Please try again.');
-            });
-        }
+                DOMElements.headerBackBtn.classList.remove('hidden');
+            }
+            checkFormValidity();
+
+        }).catch(error => {
+            console.error("Error fetching user profile:", error);
+            openModal('warning', 'Load Error', 'Could not load your profile. Please try again.');
+        });
     }
 
     function setupBakeryDropdown() {
