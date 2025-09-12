@@ -178,7 +178,7 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 #sidebar { grid-area: sidebar; }
 main { grid-area: main; }
 .sidebar-nav a {
-    display: flex; align-items: center; padding: 0.85rem 1rem; border-radius: 0.75rem;
+    display: flex; align-items: center; padding: 0.75rem 1rem; border-radius: 0.75rem;
     font-weight: 600; /* Bolder font */
     color: var(--gails-text-secondary);
     transition: all 0.25s ease; border-left: 4px solid transparent;
