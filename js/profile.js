@@ -122,7 +122,7 @@ function runProfileScript(app) {
             checkFormValidity();
         }
     }
-    
+
     function compressImage(file, maxSize = 512) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -332,4 +332,3 @@ function runProfileScript(app) {
 }
 
 document.addEventListener('DOMContentLoaded', initializeFirebase);
-
