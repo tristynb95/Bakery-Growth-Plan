@@ -1,4 +1,4 @@
-
+[
   {
     "origin": [
       "https://gails-growth-plan.app",
@@ -11,4 +11,4 @@
     "responseHeader": ["Content-Type", "Authorization"],
     "maxAgeSeconds": 3600
   }
-
+]
