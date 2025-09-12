@@ -12,7 +12,7 @@ let currentConversationId = null;
 const DOMElements = {
     modal: document.getElementById('gemini-chat-modal'),
     modalBox: document.querySelector('#gemini-chat-modal .chat-modal-box'),
-    chatModalContent: document.querySelector('#gemini-chat-modal .chat-modal-content'), // Correct scroll container
+    chatModalContent: document.querySelector('#gemini-chat-modal .chat-modal-content'),
     header: document.getElementById('chat-modal-header'),
     closeBtn: document.getElementById('chat-modal-close-btn'),
     optionsBtn: document.getElementById('chat-options-btn'),
@@ -47,13 +47,6 @@ function parseMarkdownToHTML(text) {
     return htmlBlocks.join('');
 }
 
-function scrollToMessage() {
-    const container = DOMElements.chatModalContent; // Target the parent container with the scrollbar
-    if (container) {
-        container.scrollTop = container.scrollHeight;
-    }
-}
-
 function closeChatModal() {
     if (DOMElements.modal) {
         DOMElements.modal.classList.add('hidden');
@@ -79,7 +72,8 @@ function addMessageToUI(sender, text, isLoading = false) {
     }
     wrapper.appendChild(bubble);
     DOMElements.conversationView.appendChild(wrapper);
-    scrollToMessage();
+    // New scrolling logic: scroll the new element into view
+    wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function updateLastAiMessageInUI(text) {
@@ -87,7 +81,8 @@ function updateLastAiMessageInUI(text) {
     if (allAiBubbles.length > 0) {
         const lastBubble = allAiBubbles[allAiBubbles.length - 1];
         lastBubble.innerHTML = parseMarkdownToHTML(text);
-        scrollToMessage();
+        // New scrolling logic: scroll the updated element's wrapper into view
+        lastBubble.parentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
 
@@ -181,7 +176,12 @@ async function loadChatHistory(conversationId) {
         chatHistory = newHistory;
         DOMElements.conversationView.appendChild(fragment);
         showConversationView();
-        scrollToMessage();
+        
+        // New scrolling logic: scroll to the last message in the loaded history
+        const lastMessage = DOMElements.conversationView.lastElementChild;
+        if (lastMessage) {
+            lastMessage.scrollIntoView({ behavior: 'auto', block: 'start' }); // 'auto' for instant jump
+        }
     } catch (error) {
         console.error("Error loading chat history:", error);
         addMessageToUI('model', 'Could not load previous messages.');
