@@ -2587,7 +2587,7 @@ input[type="time"] {
     border: 1px solid var(--gails-grey-mid);
     background-color: var(--gails-white);
     resize: none;
-    height: 64px;
+    height: 58px;
     overflow-y: hidden;
     line-height: 1.5;
 }
