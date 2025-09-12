@@ -1,6 +1,21 @@
 // netlify/functions/generate-chat-response.js
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const admin = require('firebase-admin');
+
+// --- NEW: Initialize Firebase Admin ---
+// You'll need to set these as environment variables in Netlify
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    }),
+  });
+}
+// --- END NEW ---
+
 
 function formatCalendarDataForAI(calendarData) {
     if (!calendarData || Object.keys(calendarData).length === 0) {
@@ -39,11 +54,26 @@ exports.handler = async function(event, context) {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
 
+  // --- NEW: Authentication Check ---
+  const token = event.headers.authorization?.split('Bearer ')[1];
+  if (!token) {
+    return { statusCode: 401, body: 'Unauthorized' };
+  }
+  let uid;
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    uid = decodedToken.uid; // You now have the user's ID
+  } catch (error) {
+    console.error('Auth error:', error);
+    return { statusCode: 403, body: 'Forbidden' };
+  }
+  // --- END NEW ---
+
   try {
     const { planSummary, chatHistory, userMessage, calendarData } = JSON.parse(event.body);
     
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite"});
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest"});
     
     const calendarContext = formatCalendarDataForAI(calendarData);
 
@@ -82,7 +112,7 @@ exports.handler = async function(event, context) {
     const generationConfig = {
       temperature: 0.7,
       topP: 0.95,
-      maxOutputTokens: 700,
+      maxOutputTokens: 8192,
     };
 
     const chat = model.startChat({
@@ -94,18 +124,18 @@ exports.handler = async function(event, context) {
     const response = await result.response;
     const aiText = response.text();
 
-       // --- TOKEN COUNTER IMPLEMENTATION ---
-     if (response.usageMetadata) {
-       const { promptTokenCount, candidatesTokenCount } = response.usageMetadata;
-       const totalTokenCount = promptTokenCount + candidatesTokenCount;
- 
-       console.log('--- AI Token Usage ---');
-       console.log(`Input Tokens: ${promptTokenCount}`);
-       console.log(`Output Tokens: ${candidatesTokenCount}`);
-       console.log(`Total Tokens: ${totalTokenCount}`);
-       console.log('----------------------');
-     }
-     // --- END TOKEN COUNTER ---
+    // --- TOKEN COUNTER IMPLEMENTATION ---
+    if (response.usageMetadata) {
+      const { promptTokenCount, candidatesTokenCount } = response.usageMetadata;
+      const totalTokenCount = promptTokenCount + candidatesTokenCount;
+
+      console.log('--- AI Token Usage ---');
+      console.log(`Input Tokens: ${promptTokenCount}`);
+      console.log(`Output Tokens: ${candidatesTokenCount}`);
+      console.log(`Total Tokens: ${totalTokenCount}`);
+      console.log('----------------------');
+    }
+    // --- END TOKEN COUNTER ---
 
     return {
       statusCode: 200,
