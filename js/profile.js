@@ -155,29 +155,43 @@ function runProfileScript(app) {
     function loadUserProfile(user) {
         DOMElements.profileEmail.value = user.email;
         const userRef = db.collection('users').doc(user.uid);
-        userRef.get().then((doc) => {
-            if (doc.exists && !isSetupMode) {
-                const data = doc.data();
-                DOMElements.profileName.value = data.name || '';
-                DOMElements.bakerySearchInput.value = data.bakery || '';
-                DOMElements.bakeryHiddenInput.value = data.bakery || '';
-                
-                originalProfileData = { name: data.name || '', bakery: data.bakery || '' };
 
-                if (data.photoURL) {
-                    DOMElements.photoPreview.src = data.photoURL;
-                    DOMElements.removePhotoBtn.classList.remove('hidden');
+        if (isSetupMode) {
+            // If setup=true is in the URL, always show the setup UI.
+            DOMElements.headerTitle.textContent = 'Welcome! Let\'s Set Up Your Profile.';
+            DOMElements.headerSubtitle.textContent = 'Please provide your details to get started.';
+            DOMElements.headerSaveBtn.textContent = 'Save and Continue';
+            checkFormValidity();
+        } else {
+            // Otherwise, check the user's profile status.
+            userRef.get().then((doc) => {
+                if (doc.exists && doc.data().name && doc.data().bakery) {
+                    // Profile exists and is complete.
+                    const data = doc.data();
+                    DOMElements.profileName.value = data.name;
+                    DOMElements.bakerySearchInput.value = data.bakery;
+                    DOMElements.bakeryHiddenInput.value = data.bakery;
+                    originalProfileData = { name: data.name, bakery: data.bakery };
+
+                    if (data.photoURL) {
+                        DOMElements.photoPreview.src = data.photoURL;
+                        DOMElements.removePhotoBtn.classList.remove('hidden');
+                    }
+                    DOMElements.headerBackBtn.classList.remove('hidden');
+                    checkFormValidity();
+                } else {
+                    // Profile is incomplete or doesn't exist, redirect to setup.
+                    const currentUrl = new URL(window.location.href);
+                    if (currentUrl.searchParams.get('setup') !== 'true') {
+                        currentUrl.searchParams.set('setup', 'true');
+                        window.location.href = currentUrl.href;
+                    }
                 }
-                DOMElements.headerBackBtn.classList.remove('hidden');
-                checkFormValidity();
-            } else {
-                DOMElements.headerTitle.textContent = 'Welcome! Let\'s Set Up Your Profile.';
-                DOMElements.headerSubtitle.textContent = 'Please provide your details to get started.';
-                DOMElements.headerSaveBtn.textContent = 'Save and Continue';
-                isSetupMode = true;
-                checkFormValidity();
-            }
-        });
+            }).catch(error => {
+                console.error("Error fetching user profile:", error);
+                openModal('warning', 'Load Error', 'Could not load your profile. Please try again.');
+            });
+        }
     }
 
     function setupBakeryDropdown() {
