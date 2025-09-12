@@ -2566,12 +2566,12 @@ input[type="time"] {
 }
 .chat-input {
     width: 100%;
-    padding: 0.5rem 3.25rem 0.5rem 1rem;
+    padding: 0.8rem 3.25rem 0.8rem 1.2rem;
     border-radius: 1.5rem;
     border: 1px solid var(--gails-grey-mid);
     background-color: var(--gails-white);
     resize: none;
-    height: 44px;
+    height: 52px;
     overflow-y: hidden;
     line-height: 1.5;
 }
