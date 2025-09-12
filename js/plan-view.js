@@ -464,11 +464,11 @@ function switchView(viewId) {
     sessionStorage.setItem('lastViewId', viewId);
 
     const titles = {
-        vision: { title: 'Bakery Growth Plan', subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.' },
-        'month-1': { title: '30 Day Plan', subtitle: 'Lay the foundations for success.' },
-        'month-2': { title: '60 Day Plan', subtitle: 'Build momentum and embed processes.' },
-        'month-3': { title: '90 Day Plan', subtitle: 'Refine execution and review the quarter.' },
-        summary: { title: '90-Day Plan Summary', subtitle: 'A complete overview of your quarterly plan.' }
+        vision: { title: `${appState.planData.quarter || 'Quarterly'} Plan`, subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.' },
+         'month-1': { title: `${appState.planData.quarter || ''} Month 1 Plan`, subtitle: 'Lay the foundations for success.' },
+         'month-2': { title: `${appState.planData.quarter || ''} Month 2 Plan`, subtitle: 'Build momentum and embed processes.' },
+         'month-3': { title: `${appState.planData.quarter || ''} Month 3 Plan`, subtitle: 'Refine execution and review the quarter.' },
+         summary: { title: `${appState.planData.quarter || ''} Summary`, subtitle: 'A complete overview of your quarterly plan.' }
     };
     DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
     DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
