@@ -689,6 +689,14 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
         });
     }
 
+    const sidebarLogoLink = document.getElementById('sidebar-logo-link');
+     if (sidebarLogoLink) {
+         sidebarLogoLink.addEventListener('click', (e) => {
+             e.preventDefault();
+             document.dispatchEvent(new CustomEvent('back-to-dashboard'));
+         });
+     }
+
     const geminiButton = document.getElementById('radial-action-gemini');
     if (geminiButton) {
         geminiButton.addEventListener('click', () => {
