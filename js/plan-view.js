@@ -1,6 +1,7 @@
 // js/plan-view.js
 import { calculatePlanCompletion, getVisionProgress, getMonthProgress, isWeekComplete, isContentEmpty } from './utils.js';
 import { openChat } from './chat.js';
+import { showFilesView } from './files.js'; // Import the new function
 
 // Dependencies passed from main.js
 let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare;
@@ -520,6 +521,7 @@ function switchView(viewId) {
         renderSummary();
     } else if (viewId === 'files') {
         DOMElements.contentArea.innerHTML = templates.files.html;
+        showFilesView()
     } else {
         const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
         DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
