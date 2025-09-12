@@ -174,12 +174,7 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 
 /* 4. Main App Layout & Sidebar
 -------------------------------------------------- */
-.main-layout {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    height: 100%; /* MODIFIED: Changed from 100vh to 100% to fill its parent */
-    grid-template-areas: "sidebar main";
-}
+.main-layout { display: grid; grid-template-columns: 280px 1fr; height: 100vh; grid-template-areas: "sidebar main"; }
 #sidebar { grid-area: sidebar; }
 main { grid-area: main; }
 .sidebar-nav a {
@@ -2571,12 +2566,12 @@ input[type="time"] {
 }
 .chat-input {
     width: 100%;
-    padding: 0.8rem 3.25rem 0.8rem 1.2rem;
+    padding: 0.5rem 3.25rem 0.5rem 1rem;
     border-radius: 1.5rem;
     border: 1px solid var(--gails-grey-mid);
     background-color: var(--gails-white);
     resize: none;
-    height: 52px;
+    height: 44px;
     overflow-y: hidden;
     line-height: 1.5;
 }
