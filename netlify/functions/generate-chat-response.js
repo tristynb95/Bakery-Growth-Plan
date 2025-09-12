@@ -22,8 +22,14 @@ function formatCalendarDataForAI(calendarData) {
                 calendarString += `\n**${eventDate.toDateString()}:**\n`;
                 events.forEach(event => {
                     calendarString += `* ${event.title} (${event.type})`;
-                    if (!event.allDay && event.timeFrom) {
-                        calendarString += ` at ${event.timeFrom}`;
+                    if (!event.allDay) {
+                        if (event.timeFrom && event.timeTo) {
+                            // If both start and end times exist, show the full range.
+                            calendarString += ` from ${event.timeFrom} to ${event.timeTo}`;
+                        } else if (event.timeFrom) {
+                            // Fallback for events with only a start time.
+                            calendarString += ` at ${event.timeFrom}`;
+                        }
                     }
                     calendarString += '\n';
                 });
