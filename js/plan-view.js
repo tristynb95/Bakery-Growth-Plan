@@ -387,6 +387,12 @@ function updateUI() {
     updateSidebarInfo();
     updateOverallProgress();
     updateSidebarNavStatus();
+         // Add this line to update the sidebar context
+     const sidebarContext = document.getElementById('sidebar-plan-context');
+     if (sidebarContext) {
+         sidebarContext.textContent = `${appState.planData.quarter || 'Your'} Plan`;
+     }
+ 
 }
 
 function renderSummary() {
