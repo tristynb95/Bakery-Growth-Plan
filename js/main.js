@@ -2,7 +2,7 @@
 
 import { initializeAuth, setupActivityListeners, clearActivityListeners, handleSignOut } from './auth.js';
 import { getFirebaseConfig } from './api.js';
-import { initializeCalendar } from './calendar.js';
+import { initializeCalendar, loadCalendarData } from './calendar.js';
 import { initializeDashboard, renderDashboard } from './dashboard.js';
 import { initializeUI, openModal, handleAIActionPlan, handleShare, initializeCharCounters } from './ui.js';
 import { initializePlanView, showPlanView } from './plan-view.js';
@@ -103,6 +103,7 @@ function runApp(app) {
             if (loginView) loginView.classList.add('hidden');
 
             appState.currentUser = user;
+            await loadCalendarData(db, appState); // Pre-load calendar data for chat AI
             const userDocRef = db.collection('users').doc(user.uid);
             const userDoc = await userDocRef.get();
 

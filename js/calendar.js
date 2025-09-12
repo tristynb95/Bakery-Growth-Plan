@@ -27,12 +27,12 @@ export function parseUkDate(str) {
     return null;
 }
 
-async function migrateOldCalendars() {
-    if (!appState.currentUser) return;
+async function migrateOldCalendars(_db, _appState) {
+    if (!_appState.currentUser) return;
 
     console.log("Checking for old calendars to migrate...");
 
-    const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
+    const plansRef = _db.collection('users').doc(_appState.currentUser.uid).collection('plans');
     let plans = [];
     try {
         const snapshot = await plansRef.get();
@@ -52,7 +52,7 @@ async function migrateOldCalendars() {
 
     for (const planId of plans) {
         try {
-            const oldCalendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc(planId);
+            const oldCalendarRef = _db.collection('users').doc(_appState.currentUser.uid).collection('calendar').doc(planId);
             const doc = await oldCalendarRef.get();
 
             if (doc.exists) {
@@ -78,7 +78,7 @@ async function migrateOldCalendars() {
 
     if (migrationPerformed) {
         try {
-            const newCalendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc('user_calendar');
+            const newCalendarRef = _db.collection('users').doc(_appState.currentUser.uid).collection('calendar').doc('user_calendar');
             await newCalendarRef.set(migratedData, { merge: true }); // Use merge to be safe
             console.log("Successfully migrated old calendars to the new shared calendar.", migratedData);
             // We don't delete old calendars to be safe.
@@ -168,23 +168,23 @@ function renderCalendar() {
         }
     }
 
-async function loadCalendarData() {
-    if (!appState.currentUser) return;
-    const calendarRef = db.collection('users').doc(appState.currentUser.uid).collection('calendar').doc('user_calendar');
+export async function loadCalendarData(_db, _appState) {
+    if (!_appState.currentUser) return;
+    const calendarRef = _db.collection('users').doc(_appState.currentUser.uid).collection('calendar').doc('user_calendar');
     try {
         const doc = await calendarRef.get();
         if (!doc.exists) {
             // If the new shared calendar doesn't exist, try to migrate from old ones.
-            await migrateOldCalendars();
+            await migrateOldCalendars(_db, _appState);
             // After migration, try to fetch the new calendar data again.
             const migratedDoc = await calendarRef.get();
-            appState.calendar.data = migratedDoc.exists ? migratedDoc.data() : {};
+            _appState.calendar.data = migratedDoc.exists ? migratedDoc.data() : {};
         } else {
-            appState.calendar.data = doc.data();
+            _appState.calendar.data = doc.data();
         }
     } catch (error) {
         console.error("Error loading calendar data:", error);
-        appState.calendar.data = {};
+        _appState.calendar.data = {};
     }
 }
 
@@ -582,7 +582,7 @@ export function initializeCalendar(database, state, modalOpener) {
             appState.calendar.currentDate = new Date();
             const today = new Date();
             selectedDateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-            loadCalendarData().then(() => {
+            loadCalendarData(db, appState).then(() => {
                 renderCalendar();
                 renderDayDetails(selectedDateKey);
                 document.getElementById('calendar-modal').classList.remove('hidden');
