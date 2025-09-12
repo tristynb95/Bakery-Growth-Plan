@@ -202,7 +202,7 @@ main { grid-area: main; }
 
 #sidebar-logo-container {
     padding-left: 1rem;      /* Adds 16px to the parent's 24px padding to make 40px (2.5rem) */
-    margin-top: 0.25rem;    /* Removes 4px from the parent's 24px padding to make 20px (1.25rem) */
+    margin-top: 0.20rem;    /* Removes 4px from the parent's 24px padding to make 20px (1.25rem) */
     margin-bottom: 2rem;     /* Replicates the original mb-8 spacing */
 }
 
