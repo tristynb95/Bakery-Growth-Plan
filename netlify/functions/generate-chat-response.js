@@ -9,16 +9,14 @@ function formatCalendarDataForAI(calendarData) {
 
     let calendarString = "Here is a summary of the user's upcoming calendar events:\n";
     
-    // Get today's date to filter out past events, ensuring relevance
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Sort the calendar dates chronologically
     const sortedDates = Object.keys(calendarData).sort();
 
     for (const dateKey of sortedDates) {
         const eventDate = new Date(dateKey);
-        if (eventDate >= today) { // Only include today and future dates
+        if (eventDate >= today) {
             const events = calendarData[dateKey];
             if (events && events.length > 0) {
                 calendarString += `\n**${eventDate.toDateString()}:**\n`;
@@ -56,12 +54,12 @@ exports.handler = async function(event, context) {
                 You are an expert leadership coach and bakery operations manager for GAIL's Bakery in the UK. Your name is Gemini. Your user is a Bakery Manager.
 
                 **Your Core Directives:**
-                1.  **Concise & Clear:** Your responses MUST be concise and to the point.
+                1.  **Language Style:** You MUST use simple, direct, and clear language. Be straight to the point. Avoid extravagant, complex, or overly-flowery vocabulary.
                 2.  **Use British English:** You MUST use British English (e.g., 'organise', 'centre').
                 3.  **Format with Markdown:** Use **bold text** for emphasis, and bullet points (* List item) or numbered lists for readability. Use double line breaks between points for spacing.
-                4.  **Be a Coach:** Always end your responses with an open-ended, reflective question.
-                5.  **Personalise:** Use the manager's name from the plan summary to build rapport.
-                6.  **Context is Key:** You have been given a summary of their current plan and their calendar. Use this as your primary context. If you don't have the information in the calendar or plan, state that clearly.
+                4.  **Be a Coach:** When it is appropriate and adds value, end your response with an open-ended, reflective question. Do not do this after every response.
+                5.  **Personalise Naturally:** Use the manager's name from the plan summary **occasionally and only where it feels natural** to build rapport. Do not use it in every response.
+                6.  **Context is Key:** You have been given a summary of their current plan and their calendar. Use this as your primary context. If you don't have the information, state that clearly.
 
                 **Plan Summary:**
                 ---
@@ -76,12 +74,23 @@ exports.handler = async function(event, context) {
         },
         {
             role: "model",
-            parts: [{ text: "Understood. I have the manager's plan and calendar. I will provide concise, coach-like responses in British English, using markdown, and I will always end with a reflective question. If I don't know an answer, I will say so." }],
+            parts: [{ text: "Understood. I will provide simple, direct, and coach-like responses in British English, using markdown and natural personalisation. I will only ask a reflective question when appropriate. If I don't know an answer, I will say so." }],
         },
         ...chatHistory
     ];
+    
+    const generationConfig = {
+      temperature: 0.7,
+      topP: 0.95,
+      maxOutputTokens: 700,
+    };
 
-    const result = await model.startChat({ history }).sendMessage(userMessage);
+    const chat = model.startChat({
+        history,
+        generationConfig,
+    });
+
+    const result = await chat.sendMessage(userMessage);
     const response = await result.response;
     const aiText = response.text();
 
