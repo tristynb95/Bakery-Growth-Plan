@@ -12,15 +12,6 @@ export async function getFirebaseConfig() {
     return response.json();
 }
 
-// --- NEW HELPER FUNCTION ---
-async function getAuthHeaders() {
-    const user = firebase.auth().currentUser;
-    if (!user) return {};
-    const token = await user.getIdToken();
-    return { 'Authorization': `Bearer ${token}` };
-}
-// --- END NEW HELPER ---
-
 /**
  * Sends the plan summary to the backend to generate an AI Action Plan.
  * @param {string} planSummary - A text summary of the user's plan.
@@ -28,10 +19,9 @@ async function getAuthHeaders() {
  * @returns {Promise<string>} The HTML for the action plan.
  */
 export async function generateAiActionPlan(planSummary, signal) {
-    const headers = await getAuthHeaders(); // Get auth headers
     const response = await fetch('/.netlify/functions/generate-plan', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...headers }, // Add headers to request
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ planSummary }),
         signal: signal // This allows us to cancel the request if needed
     });
@@ -60,10 +50,9 @@ export async function generateAiActionPlan(planSummary, signal) {
  * @returns {Promise<string>} The AI's text response.
  */
 export async function getGeminiChatResponse(planSummary, chatHistory, userMessage, calendarData) {
-    const headers = await getAuthHeaders(); // Get auth headers
     const response = await fetch('/.netlify/functions/generate-chat-response', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...headers }, // Add headers to request
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ planSummary, chatHistory, userMessage, calendarData }),
     });
 
