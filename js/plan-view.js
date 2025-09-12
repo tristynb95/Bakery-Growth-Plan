@@ -139,6 +139,36 @@ const templates = {
                 </div>` : ''}
             </div>
         `,
+    files: {
+        html: `
+            <div class="space-y-8">
+                <div class="flex flex-wrap justify-between items-center gap-4">
+                    <div class="search-wrapper flex-grow max-w-lg">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" id="file-search-input" class="form-input" placeholder="Search files by name...">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="file-filter-btn" class="btn btn-secondary"><i class="bi bi-funnel-fill"></i> Filter</button>
+                        <label for="file-upload-input" class="btn btn-primary cursor-pointer">
+                            <i class="bi bi-upload"></i>
+                            <span>Upload File</span>
+                        </label>
+                        <input type="file" id="file-upload-input" class="hidden" multiple>
+                    </div>
+                </div>
+
+                <div id="file-drop-zone" class="file-drop-zone">
+                    <div id="file-grid-container" class="file-grid">
+                        <div class="file-item-placeholder">
+                            <i class="bi bi-cloud-arrow-up"></i>
+                            <p class="font-semibold mt-2">Drag & drop files here</p>
+                            <p class="text-sm text-gray-500">or use the upload button</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `
+    },
 };
 
 // --- Helper Functions ---
