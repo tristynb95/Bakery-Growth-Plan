@@ -25,45 +25,27 @@ const DOMElements = {
     historyList: document.getElementById('history-list'),
 };
 
-/**
- * A robust function to parse markdown-like text to HTML.
- * Handles paragraphs, bolding, and both ordered and unordered lists.
- */
 function parseMarkdownToHTML(text) {
-    // First, handle bolding globally, as it can appear anywhere.
     let processedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-    // Split the text into blocks based on one or more empty lines.
     const blocks = processedText.split(/\n\s*\n/);
-
     const htmlBlocks = blocks.map(block => {
         block = block.trim();
         if (!block) return '';
-
         const lines = block.split('\n');
-        
-        // Check if the block looks like a list
         const isUnorderedList = lines.every(line => /^\s*\*/.test(line));
         const isOrderedList = lines.every(line => /^\s*\d+\./.test(line));
-
         if (isUnorderedList || isOrderedList) {
             const listTag = isUnorderedList ? 'ul' : 'ol';
             const items = lines.map(line => {
-                // Strip the list marker (* or 1.) from the start of the line
                 const content = line.replace(/^\s*(\*|\d+\.)\s*/, '');
                 return `<li>${content}</li>`;
             }).join('');
             return `<${listTag}>${items}</${listTag}>`;
         }
-        
-        // If it's not a list, treat it as a paragraph.
-        // Convert single newlines within the block to <br> for line breaks.
         return `<p>${block.replace(/\n/g, '<br>')}</p>`;
     });
-
     return htmlBlocks.join('');
 }
-
 
 function closeChatModal() {
     if (DOMElements.modal) {
@@ -105,7 +87,7 @@ function updateLastAiMessageInUI(text) {
 function startNewConversation() {
     currentConversationId = null;
     chatHistory = [];
-    sessionStorage.removeItem('gails_lastConversationId');
+    sessionStorage.removeItem('gails_lastConversationId'); // Clear the saved session
     DOMElements.conversationView.innerHTML = '';
     showConversationView();
 }
@@ -118,6 +100,7 @@ async function saveMessage(messageObject) {
     if (!currentConversationId) {
         const conversationDocRef = conversationsRef.doc();
         currentConversationId = conversationDocRef.id;
+        // Save the new ID to the session so it's remembered on reopen
         sessionStorage.setItem('gails_lastConversationId', currentConversationId);
         await conversationDocRef.set({
             firstMessage: messageObject.text,
@@ -283,10 +266,21 @@ export function openChat() {
     if (DOMElements.modal) {
         DOMElements.modal.classList.remove('hidden');
         DOMElements.chatInput.focus();
-        currentConversationId = null;
-        chatHistory = [];
-        DOMElements.conversationView.innerHTML = '';
-        showConversationView();
+
+        const lastConversationId = sessionStorage.getItem('gails_lastConversationId');
+
+        if (lastConversationId && lastConversationId !== 'null') {
+            // If we have a saved ID, load that history instead of starting fresh.
+            if (currentConversationId !== lastConversationId) {
+                loadChatHistory(lastConversationId);
+            } else {
+                // The chat is already loaded, just ensure it's visible.
+                showConversationView();
+            }
+        } else {
+            // No saved ID, so start a new conversation.
+            startNewConversation();
+        }
     }
 }
 
