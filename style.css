@@ -2863,3 +2863,109 @@ input[type="time"] {
 .history-item:hover {
     background-color: var(--gails-red-light);
 }
+
+/* ... existing CSS ... */
+
+/* 61. My Files / File Cabinet View Styles
+-------------------------------------------------- */
+.search-wrapper {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gails-text-secondary);
+    pointer-events: none;
+}
+
+.search-wrapper .form-input {
+    padding-left: 2.75rem;
+}
+
+.file-drop-zone {
+    border: 2px dashed var(--gails-grey-mid);
+    border-radius: 1.25rem;
+    padding: 2rem;
+    background-color: var(--gails-bg);
+    transition: all 0.2s ease-in-out;
+}
+
+.file-drop-zone.is-active {
+    border-color: var(--gails-red);
+    background-color: var(--gails-red-light);
+    transform: scale(1.01);
+}
+
+.file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
+}
+
+.file-item, .file-item-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.file-item-placeholder {
+    grid-column: 1 / -1; /* Span full width */
+    padding: 4rem 2rem;
+    color: var(--gails-text-secondary);
+    pointer-events: none; /* Make it non-interactive */
+}
+
+.file-item-placeholder .bi {
+    font-size: 3rem;
+}
+
+.file-thumbnail {
+    width: 120px;
+    height: 160px;
+    border-radius: 0.5rem;
+    background-color: var(--gails-white);
+    border: 1px solid #E5E7EB;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--gails-red);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden; /* To contain thumbnail images */
+}
+
+.file-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Cover the area without distortion */
+}
+
+
+.file-thumbnail:hover {
+    border-color: var(--gails-red);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: var(--shadow-lg);
+}
+
+.file-info {
+    margin-top: 0.75rem;
+}
+
+.file-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--gails-text-primary);
+    /* Prevent long names from breaking layout */
+    word-break: break-all;
+}
+
+.file-metadata {
+    font-size: 0.75rem;
+    color: var(--gails-text-secondary);
+}
