@@ -1,6 +1,6 @@
 // js/plan-view.js
 import { calculatePlanCompletion, getVisionProgress, getMonthProgress, isWeekComplete, isContentEmpty } from './utils.js';
-import { openChat } from './chat.js'; // <-- IMPORT the openChat function
+import { openChat } from './chat.js';
 
 // Dependencies passed from main.js
 let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare;
@@ -661,6 +661,14 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
         document.dispatchEvent(new CustomEvent('back-to-dashboard'));
     });
 
+    const sidebarLogoLink = document.getElementById('sidebar-logo-link');
+    if (sidebarLogoLink) {
+        sidebarLogoLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.dispatchEvent(new CustomEvent('back-to-dashboard'));
+        });
+    }
+
     DOMElements.sidebarLogoutBtn.addEventListener('click', () => {
         document.dispatchEvent(new CustomEvent('logout-request'));
     });
@@ -684,7 +692,7 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
     const geminiButton = document.getElementById('radial-action-gemini');
     if (geminiButton) {
         geminiButton.addEventListener('click', () => {
-            openChat(); // <-- UPDATE this to call the new function
+            openChat();
             document.getElementById('radial-menu-container').classList.remove('open');
         });
     }
