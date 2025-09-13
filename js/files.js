@@ -79,7 +79,7 @@ function renderFiles() {
 
 
 /**
- * Handles the file upload process to Firebase Storage and creates the metadata in Firestore.
+ * Handles the file upload process by sending files to a Netlify function.
  * @param {FileList} files - The files to upload.
  */
 function uploadFiles(files) {
@@ -91,12 +91,7 @@ function uploadFiles(files) {
 
     placeholder.classList.add('hidden');
 
-    Array.from(files).forEach(file => {
-        const fileId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-        const storagePath = `users/${appState.currentUser.uid}/plans/${appState.currentPlanId}/${fileId}-${file.name}`;
-        const storageRef = storage.ref(storagePath);
-        const uploadTask = storageRef.put(file);
-
+    Array.from(files).forEach(async (file) => {
         // --- Create a temporary placeholder while uploading ---
         const tempFileItem = document.createElement('div');
         tempFileItem.className = 'file-item';
@@ -112,34 +107,29 @@ function uploadFiles(files) {
         fileGrid.prepend(tempFileItem);
         // --------------------------------------------------
 
-        uploadTask.on('state_changed',
-            (snapshot) => {
-                // We could show progress here if needed
-            },
-            (error) => {
-                console.error("Upload failed:", error);
-                tempFileItem.remove(); // Remove placeholder on failure
-                alert(`Error uploading ${file.name}. Please try again.`);
-            },
-            async () => {
-                // Upload complete, now create the record in Firestore
-                const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
-                const filesCollectionRef = db.collection('users').doc(appState.currentUser.uid)
-                                             .collection('plans').doc(appState.currentPlanId)
-                                             .collection('files');
-                
-                await filesCollectionRef.add({
-                    name: file.name,
-                    size: file.size,
-                    type: file.type,
-                    storagePath: storagePath,
-                    downloadURL: downloadURL,
-                    uploadedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('planId', appState.currentPlanId);
+        formData.append('userId', appState.currentUser.uid);
 
-                tempFileItem.remove(); // Remove the placeholder, the real-time listener will add the final item
+        try {
+            const response = await fetch('/.netlify/functions/upload-file', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error(`Upload failed with status: ${response.status}`);
             }
-        );
+
+            // The real-time listener will automatically add the new file to the UI.
+            // We just need to remove the placeholder.
+            tempFileItem.remove();
+        } catch (error) {
+            console.error("Upload failed:", error);
+            tempFileItem.remove(); // Remove placeholder on failure
+            alert(`Error uploading ${file.name}. Please try again.`);
+        }
     });
 }
 
