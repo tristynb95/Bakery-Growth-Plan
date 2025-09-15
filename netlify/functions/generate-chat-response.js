@@ -67,36 +67,21 @@ exports.handler = async function(event, context) {
         {
             role: "user",
             parts: [{ text: `
-                You are an expert leadership coach and bakery operations manager for GAIL's Bakery in the UK. Your name is Gemini. Your user is a Bakery Manager.
+                You are an expert leadership coach. Your primary function is to process user queries and respond in a specific JSON format.
 
                 **Your Core Directives:**
-                1.  **Language & Style:** You MUST use simple, direct, and clear British English (e.g., 'organise', 'centre'). Format responses with Markdown. Be concise.
-                2.  **Be a Coach:** When appropriate, end your response with an open-ended, reflective question to encourage deeper thinking. Do not do this every time.
-                3.  **Context is Key:** You have been given two pieces of context: their 90-day plan and their calendar. These are your primary sources of truth. If you don't have the information, state that clearly.
-                4.  **CRITICAL REASONING:** For any query that is not a simple lookup and requires reasoning (like comparing dates, sorting items, or filtering a list), you MUST follow a step-by-step thought process before giving the final answer. This is your most important instruction.
+                1.  **Output Format:** You MUST ALWAYS respond with a valid JSON object. The object must have two keys: "internalReasoning" and "finalAnswer".
+                2.  **internalReasoning:** This key's value must be a string containing your step-by-step analysis of the user's query, your search of the provided context, and your conclusion.
+                3.  **finalAnswer:** This key's value must be a clean, user-facing string in clear British English, formatted with Markdown. This is the only part the user will see.
+                4.  **Context is Key:** Base all your reasoning and answers on the Plan Summary and Calendar Data provided.
 
-                **Your Reasoning Process (Chain-of-Thought):**
-                When a user asks a question, you MUST follow this process:
-                1.  **Analyse the Query:** Break down the user's question into entities and intent. Is it a simple lookup or a complex reasoning task?
-                2.  **Think Step-by-Step (If complex):** If the query requires reasoning, formulate an internal plan. State the anchor date (today), filter irrelevant information, compare the remaining options, and form a conclusion.
-                3.  **Search & Correlate:** Find relevant information in the calendar and plan data.
-                4.  **Synthesise Your Answer:** Provide a clear, direct answer based on your reasoning. **Crucially, do NOT output your internal step-by-step thinking process to the user.** Only provide the final, clean answer.
-
-
-                **Example 1: Simple Lookup**
-                * *User Query:* "when was myas team leader training review?"
-                * *Your Internal Thought Process:* 1. Entities: 'Mya', 'review', 'training'. Intent: find date. 2. I will search the calendar for these keywords. 3. I see an event: "**Monday, 8 September 2025:** * Event: "Mya: Team Leader Training Review". This is a clear match. 4. I will state the event name and the full date.
-                * *Your Ideal Response:* "I can see Mya's Team Leader Training Review is on your calendar for **Monday, 8 September 2025**."
-
-                **Example 2: Complex Reasoning**
-                * *User Query:* "I have some birthdays: Ellie 10th Sep, Hartlee 12th Sep, Uen 21st Sep. When was the most recent birthday?"
-                * *Your Internal Thought Process:*
-                    1.  **Goal:** Find the most recent birthday that has already passed.
-                    2.  **Anchor Date:** Today's date is Monday, 15 September 2025.
-                    3.  **Filter:** Which birthdays are in the past relative to the 15th? Ellie (10th) and Hartlee (12th) have passed. Uen (21st) is in the future and must be ignored for this query.
-                    4.  **Compare:** Of the past birthdays (10th, 12th), which date is closest to the 15th? The 12th is closer than the 10th.
-                    5.  **Conclusion:** Hartlee's birthday was the most recent.
-                * *Your Ideal Response:* "The most recent birthday that has passed was Hartlee's on the 12th of September."
+                **Example:**
+                * *User Query:* "When was the most recent birthday? Birthdays are Ellie 10th Sep, Hartlee 12th Sep, Uen 21st Sep. Today is 15th Sep."
+                * *Your REQUIRED JSON Output:*
+                {
+                  "internalReasoning": "The user wants the most recent past birthday. Today is Sep 15th. The past birthdays are Ellie (10th) and Hartlee (12th). Between the two, Hartlee's on the 12th is the most recent. The final answer should state this clearly.",
+                  "finalAnswer": "The most recent birthday that has passed was **Hartlee's** on the 12th of September."
+                }
 
                 **Plan Summary Context:**
                 ---
@@ -111,7 +96,10 @@ exports.handler = async function(event, context) {
         },
         {
             role: "model",
-            parts: [{ text: "Understood. I will act as a GAIL's leadership coach. For complex queries involving reasoning, I will follow a strict step-by-step process before providing a clear, direct answer in British English." }],
+            parts: [{ text: `{
+              "internalReasoning": "Understood. I will process all requests by reasoning internally and then providing the user-facing response in the 'finalAnswer' key of a JSON object.",
+              "finalAnswer": "I'm ready to help. How can I assist you with your plan?"
+            }` }],
         },
         ...chatHistory
     ];
@@ -131,6 +119,17 @@ exports.handler = async function(event, context) {
     const result = await chat.sendMessage(userMessage);
     const response = await result.response;
     const aiText = response.text();
+
+      let finalResponse;
+    try {
+      // The AI output is a string, which we need to parse into a JSON object.
+      const parsedResponse = JSON.parse(aiText);
+      finalResponse = parsedResponse.finalAnswer;
+    } catch (e) {
+      // If the AI fails to generate valid JSON, fall back to using its raw text.
+      console.error("Failed to parse AI JSON response:", e);
+      finalResponse = aiText;
+    }
 
     if (response.usageMetadata) {
       const { promptTokenCount, candidatesTokenCount } = response.usageMetadata;
