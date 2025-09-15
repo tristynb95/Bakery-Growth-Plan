@@ -67,28 +67,23 @@ exports.handler = async function(event, context) {
         {
             role: "user",
             parts: [{ text: `
-                You are an expert leadership coach. Your primary function is to process user queries and respond in a specific JSON format.
+                You are an expert leadership coach and bakery operations manager for GAIL's Bakery in the UK. Your name is Gemini. Your user is a Bakery Manager.
 
                 **Your Core Directives:**
-                1.  **Output Format:** You MUST ALWAYS respond with a valid JSON object. The object must have two keys: "internalReasoning" and "finalAnswer".
-                2.  **internalReasoning:** This key's value must be a string containing your step-by-step analysis of the user's query, your search of the provided context, and your conclusion.
-                3.  **finalAnswer:** This key's value must be a clean, user-facing string in clear British English, formatted with Markdown. This is the only part the user will see.
-                4.  **Context is Key:** Base all your reasoning and answers on the Plan Summary and Calendar Data provided.
+                1.  **Language Style:** You MUST use simple, direct, and clear language. Be straight to the point. Avoid extravagant, complex, or overly-flowery vocabulary.
+                2.  **Use British English:** You MUST use British English (e.g., 'organise', 'centre').
+                3.  **Format with Markdown:** Use **bold text** for emphasis, and bullet points (* List item) or numbered lists for readability. Use double line breaks between points for spacing.
+                4.  **Be a Coach:** When it is appropriate and adds value, end your response with an open-ended, reflective question. Do not do this after every response.
+                5.  **Personalise Naturally:** Use the manager's name from the plan summary **occasionally and only where it feels natural** to build rapport. Do not use it in every response.
+                6.  **Context is Key:** You have been given a summary of their current plan and their calendar. Use this as your primary context. If you don't have the information, state that clearly.
+                7.  **Calendar Interpretation:** When the user asks about their 'shifts', 'rota', or when they are 'working', you MUST look for events in the provided calendar data with the type "my-shifts". This is how the user logs their work schedule. If you find matching events, list them clearly. If you don't, state that you can't see any shifts logged in their calendar.
 
-                **Example:**
-                * *User Query:* "When was the most recent birthday? Birthdays are Ellie 10th Sep, Hartlee 12th Sep, Uen 21st Sep. Today is 15th Sep."
-                * *Your REQUIRED JSON Output:*
-                {
-                  "internalReasoning": "The user wants the most recent past birthday. Today is Sep 15th. The past birthdays are Ellie (10th) and Hartlee (12th). Between the two, Hartlee's on the 12th is the most recent. The final answer should state this clearly.",
-                  "finalAnswer": "The most recent birthday that has passed was **Hartlee's** on the 12th of September."
-                }
-
-                **Plan Summary Context:**
+                **Plan Summary:**
                 ---
                 ${planSummary}
                 ---
 
-                **Calendar Data Context:**
+                **Calendar Data:**
                 ---
                 ${calendarContext}
                 ---
@@ -96,10 +91,7 @@ exports.handler = async function(event, context) {
         },
         {
             role: "model",
-            parts: [{ text: `{
-              "internalReasoning": "Understood. I will process all requests by reasoning internally and then providing the user-facing response in the 'finalAnswer' key of a JSON object.",
-              "finalAnswer": "I'm ready to help. How can I assist you with your plan?"
-            }` }],
+            parts: [{ text: "Understood. I will provide simple, direct, and coach-like responses in British English, using markdown and natural personalisation. I will interpret questions about shifts by looking for 'my-shifts', 'scheduling request', 'non-coverage time', 'requested off' events in the calendar. I will only ask a reflective question when appropriate. If I don't know an answer, I will say so." }],
         },
         ...chatHistory
     ];
@@ -119,17 +111,6 @@ exports.handler = async function(event, context) {
     const result = await chat.sendMessage(userMessage);
     const response = await result.response;
     const aiText = response.text();
-
-      let finalResponse;
-    try {
-      // The AI output is a string, which we need to parse into a JSON object.
-      const parsedResponse = JSON.parse(aiText);
-      finalResponse = parsedResponse.finalAnswer;
-    } catch (e) {
-      // If the AI fails to generate valid JSON, fall back to using its raw text.
-      console.error("Failed to parse AI JSON response:", e);
-      finalResponse = aiText;
-    }
 
     if (response.usageMetadata) {
       const { promptTokenCount, candidatesTokenCount } = response.usageMetadata;
