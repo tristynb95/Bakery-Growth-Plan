@@ -1,30 +1,54 @@
 // netlify/functions/generate-chat-response.js
 
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-function formatCalendarDataForAI(calendarData) {
+/**
+ * Formats calendar data for the AI, with a flexible look-back period.
+ * @param {object} calendarData - The calendar data object.
+ * @param {number} [daysToLookBack=0] - How many days into the past to include. Default is 0 (today onwards).
+ * @returns {string} A formatted string of calendar events.
+ */
+function formatCalendarDataForAI(calendarData, daysToLookBack = 0) {
     if (!calendarData || Object.keys(calendarData).length === 0) {
         return "The user's calendar is currently empty.";
     }
+
+    // --- MODIFICATION START ---
+    // Calculate the start date for the look-back window
+    const startDate = new Date();
+    startDate.setHours(0, 0, 0, 0); // Start of today
+    startDate.setDate(startDate.getDate() - daysToLookBack); // Subtract the look-back days
+    // --- MODIFICATION END ---
+    
     let calendarString = "Here is a summary of the user's upcoming calendar events:\n";
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    if (daysToLookBack > 0) {
+        calendarString = `Here is a summary of the user's calendar events from the last ${daysToLookBack} days and onwards:\n`
+    }
+
     const sortedDates = Object.keys(calendarData).sort();
+    
     for (const dateKey of sortedDates) {
         const eventDate = new Date(dateKey);
-        if (eventDate >= today) {
+        
+        // --- MODIFICATION START ---
+        // Check if the event is within our new time window
+        if (eventDate >= startDate) {
+        // --- MODIFICATION END ---
             const events = calendarData[dateKey];
             if (events && events.length > 0) {
-                // Format date to be more explicit and human-readable for the AI
-                const formattedDate = eventDate.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                const formattedDate = eventDate.toLocaleDateString('en-GB', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
                 calendarString += `\n**${formattedDate}:**\n`;
+
                 events.forEach(event => {
-                    calendarString += `* **Event:** "${event.title}"\n    **Type:** ${event.type}\n`;
+                    calendarString += `* **Event:** "${event.title}"\n  **Type:** ${event.type}\n`;
                     if (!event.allDay) {
                         if (event.timeFrom && event.timeTo) {
-                            calendarString += `    **Time:** ${event.timeFrom} - ${event.timeTo}\n`;
+                            calendarString += `  **Time:** ${event.timeFrom} - ${event.timeTo}\n`;
                         } else if (event.timeFrom) {
-                            calendarString += `    **Time:** ${event.timeFrom}\n`;
+                            calendarString += `  **Time:** ${event.timeFrom}\n`;
                         }
                     }
                 });
@@ -45,7 +69,7 @@ exports.handler = async function(event, context) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite"});
     
-    const calendarContext = formatCalendarDataForAI(calendarData);
+    const calendarContext = formatCalendarDataForAI(calendarData, 30);
 
     // --- ENHANCED PROMPT ---
     const history = [
