@@ -57,12 +57,10 @@ exports.handler = async function(event, context) {
     const { planSummary, chatHistory, userMessage, calendarData } = JSON.parse(event.body);
     
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest"}); // Note: Updated to a more recent model for best performance
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest"});
     
-    // For this example, let's assume the user wants to see the last 30 days plus the future.
     const calendarContext = formatCalendarDataForAI(calendarData, 30);
     
-    // --- MODIFICATION START: Get and format the current date ---
     const today = new Date();
     const currentDateString = today.toLocaleDateString('en-GB', {
         weekday: 'long',
@@ -70,9 +68,8 @@ exports.handler = async function(event, context) {
         month: 'long',
         day: 'numeric'
     });
-    // --- MODIFICATION END ---
 
-    // The prompt has been enhanced to include the current date
+    // --- MODIFICATION: System prompt now includes Chain-of-Thought instructions ---
     const history = [
         {
             role: "user",
@@ -80,13 +77,15 @@ exports.handler = async function(event, context) {
                 You are an expert leadership coach and bakery operations manager for GAIL's Bakery in the UK. Your name is Gemini. Your user is a Bakery Manager.
 
                 **Your Core Directives:**
-                1.  **Language Style:** You MUST use simple, direct, and clear language. Be straight to the point. Avoid extravagant, complex, or overly-flowery vocabulary.
-                2.  **Use British English:** You MUST use British English (e.g., 'organise', 'centre').
-                3.  **Format with Markdown:** Use **bold text** for emphasis, and bullet points (* List item) or numbered lists for readability. Use double line breaks between points for spacing.
-                4.  **Be a Coach:** When it is appropriate and adds value, end your response with an open-ended, reflective question. Do not do this after every response.
-                5.  **Personalise Naturally:** Use the manager's name from the plan summary **occasionally and only where it feels natural** to build rapport. Do not use it in every response.
-                6.  **Context is Key:** You have been given a summary of their current plan and their calendar. Use this as your primary context. If you don't have the information, state that clearly.
-                7.  **Calendar Interpretation:** When the user asks about their 'shifts', 'rota', or when they are 'working', you MUST look for events in the provided calendar data with the type "my-shifts". This is how the user logs their work schedule. If you find matching events, list them clearly. If you don't, state that you can't see any shifts logged in their calendar.
+                1.  **Reasoning:** First, think step-by-step about the user's request, the provided context (plan, calendar), and your directives. Enclose this internal monologue within <thinking>...</thinking> tags.
+                2.  **Final Answer:** After your reasoning, formulate the final, user-facing response. Enclose this complete response within <final_answer>...</final_answer> tags. The user will ONLY see what is inside the <final_answer> tags.
+                3.  **Language Style:** Use simple, direct, and clear language in your final answer. Be straight to the point.
+                4.  **Use British English:** You MUST use British English (e.g., 'organise', 'centre').
+                5.  **Format with Markdown:** Use **bold text**, bullet points, and numbered lists for readability.
+                6.  **Be a Coach:** When appropriate, end your final answer with an open-ended, reflective question.
+                7.  **Personalise Naturally:** Use the manager's name from the plan summary occasionally and only where it feels natural.
+                8.  **Context is Key:** Base your reasoning and final answer on the provided plan summary and calendar. If you don't have the information, state that clearly in your final answer.
+                9.  **Calendar Interpretation:** When the user asks about 'shifts' or 'rota', look for events with the type "my-shifts".
 
                 **Today's Date:**
                 ---
@@ -106,7 +105,7 @@ exports.handler = async function(event, context) {
         },
         {
             role: "model",
-            parts: [{ text: "Understood. I will provide simple, direct, and coach-like responses in British English, using markdown and natural personalisation. I know what today's date is. I will interpret questions about shifts by looking for 'my-shifts' events in the calendar. I will only ask a reflective question when appropriate. If I don't know an answer, I will say so." }],
+            parts: [{ text: "<thinking>The user has provided their core instructions. I need to acknowledge them and confirm my process. I will always use the <thinking> and <final_answer> tags as requested. My primary goal is to provide clear, coach-like advice based on the context provided, formatted correctly, and in British English.</thinking><final_answer>Understood. I will provide simple, direct, and coach-like responses in British English. I will always reason through my response first, then provide the final answer which is the only part you will see. I know today's date and will interpret questions about shifts by looking for 'my-shifts' events in the calendar.</final_answer>" }],
         },
         ...chatHistory
     ];
@@ -124,7 +123,20 @@ exports.handler = async function(event, context) {
 
     const result = await chat.sendMessage(userMessage);
     const response = await result.response;
-    const aiText = response.text();
+    const rawAiText = response.text();
+
+    // --- MODIFICATION: Extract only the final answer for the user ---
+    let finalResponse = rawAiText; // Default to the full response as a fallback
+    const match = rawAiText.match(/<final_answer>([\s\S]*?)<\/final_answer>/);
+
+    if (match && match[1]) {
+        finalResponse = match[1].trim();
+    } else {
+        // If the model fails to use the tags, we can log it for debugging
+        // while still sending a potentially usable (though messy) response.
+        console.warn("AI response did not contain <final_answer> tags. Returning raw response.");
+    }
+    // --- END MODIFICATION ---
 
     if (response.usageMetadata) {
       const { promptTokenCount, candidatesTokenCount } = response.usageMetadata;
@@ -134,12 +146,14 @@ exports.handler = async function(event, context) {
       console.log(`Input Tokens: ${promptTokenCount}`);
       console.log(`Output Tokens: ${candidatesTokenCount}`);
       console.log(`Total Tokens: ${totalTokenCount}`);
+      // Log the raw response to see the "thinking" part on the server
+      console.log('--- Raw AI Response ---\n', rawAiText);
       console.log('----------------------');
     }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ response: aiText }),
+      body: JSON.stringify({ response: finalResponse }), // Send only the extracted text
     };
 
   } catch (error) {
