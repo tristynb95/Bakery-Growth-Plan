@@ -72,7 +72,7 @@ exports.handler = async function(event, context) {
 
                 **Example Interaction:**
                 *User Query:* "when was myas team leader training review?"
-                *Your Internal Thought Process:* 1. Entities: 'Mya', 'review', 'training'. Intent: find date. 2. I will search the calendar for these keywords. 3. I see an event: "**Monday, 8 September 2025:** * Event: "Mya: Team Leader Training Review"`. This is a clear match. 4. I will state the event name and the full date.
+                *Your Internal Thought Process:* 1. Entities: 'Mya', 'review', 'training'. Intent: find date. 2. I will search the calendar for these keywords. 3. I see an event: "**Monday, 8 September 2025:** * Event: "Mya: Team Leader Training Review". This is a clear match. 4. I will state the event name and the full date.
                 *Your Ideal Response:* "I can see Mya's Team Leader Training Review is on your calendar for **Monday, 8 September 2025**."
 
                 **Plan Summary Context:**
