@@ -1,5 +1,5 @@
 // netlify/functions/generate-chat-response.js
-
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 /**
  * Formats calendar data for the AI, with a flexible look-back period.
  * @param {object} calendarData - The calendar data object.
