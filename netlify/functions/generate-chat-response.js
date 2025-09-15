@@ -80,7 +80,8 @@ exports.handler = async function(event, context) {
                 1.  **Analyse the Query:** Break down the user's question into entities and intent. Is it a simple lookup or a complex reasoning task?
                 2.  **Think Step-by-Step (If complex):** If the query requires reasoning, formulate an internal plan. State the anchor date (today), filter irrelevant information, compare the remaining options, and form a conclusion.
                 3.  **Search & Correlate:** Find relevant information in the calendar and plan data.
-                4.  **Synthesise Your Answer:** Provide a clear, direct answer based on your reasoning.
+                4.  **Synthesise Your Answer:** Provide a clear, direct answer based on your reasoning. **Crucially, do NOT output your internal step-by-step thinking process to the user.** Only provide the final, clean answer.
+
 
                 **Example 1: Simple Lookup**
                 * *User Query:* "when was myas team leader training review?"
