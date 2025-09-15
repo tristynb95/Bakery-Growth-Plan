@@ -3,7 +3,6 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 function formatCalendarDataForAI(calendarData) {
-    // ... (This function remains the same as the previous update)
     if (!calendarData || Object.keys(calendarData).length === 0) {
         return "The user's calendar is currently empty.";
     }
@@ -16,24 +15,24 @@ function formatCalendarDataForAI(calendarData) {
         if (eventDate >= today) {
             const events = calendarData[dateKey];
             if (events && events.length > 0) {
-                calendarString += `\n**${eventDate.toDateString()}:**\n`;
+                // Format date to be more explicit and human-readable for the AI
+                const formattedDate = eventDate.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                calendarString += `\n**${formattedDate}:**\n`;
                 events.forEach(event => {
-                    calendarString += `* ${event.title} (${event.type})`;
+                    calendarString += `* **Event:** "${event.title}"\n    **Type:** ${event.type}\n`;
                     if (!event.allDay) {
                         if (event.timeFrom && event.timeTo) {
-                            calendarString += ` from ${event.timeFrom} to ${event.timeTo}`;
+                            calendarString += `    **Time:** ${event.timeFrom} - ${event.timeTo}\n`;
                         } else if (event.timeFrom) {
-                            calendarString += ` at ${event.timeFrom}`;
+                            calendarString += `    **Time:** ${event.timeFrom}\n`;
                         }
                     }
-                    calendarString += '\n';
                 });
             }
         }
     }
     return calendarString;
 }
-
 
 exports.handler = async function(event, context) {
   if (event.httpMethod !== "POST") {
@@ -48,6 +47,7 @@ exports.handler = async function(event, context) {
     
     const calendarContext = formatCalendarDataForAI(calendarData);
 
+    // --- ENHANCED PROMPT ---
     const history = [
         {
             role: "user",
@@ -55,20 +55,32 @@ exports.handler = async function(event, context) {
                 You are an expert leadership coach and bakery operations manager for GAIL's Bakery in the UK. Your name is Gemini. Your user is a Bakery Manager.
 
                 **Your Core Directives:**
-                1.  **Language Style:** You MUST use simple, direct, and clear language. Be straight to the point. Avoid extravagant, complex, or overly-flowery vocabulary.
-                2.  **Use British English:** You MUST use British English (e.g., 'organise', 'centre').
-                3.  **Format with Markdown:** Use **bold text** for emphasis, and bullet points (* List item) or numbered lists for readability. Use double line breaks between points for spacing.
-                4.  **Be a Coach:** When it is appropriate and adds value, end your response with an open-ended, reflective question. Do not do this after every response.
-                5.  **Personalise Naturally:** Use the manager's name from the plan summary **occasionally and only where it feels natural** to build rapport. Do not use it in every response.
-                6.  **Context is Key:** You have been given a summary of their current plan and their calendar. Use this as your primary context. If you don't have the information, state that clearly.
-                7.  **Calendar Interpretation:** When the user asks about their 'shifts', 'rota', or when they are 'working', you MUST look for events in the provided calendar data with the type "my-shifts". This is how the user logs their work schedule. If you find matching events, list them clearly. If you don't, state that you can't see any shifts logged in their calendar.
+                1.  **Language & Style:** You MUST use simple, direct, and clear British English (e.g., 'organise', 'centre'). Format responses with Markdown (**bold**, *italics*, bullet points). Be concise.
+                2.  **Be a Coach:** When appropriate, end your response with an open-ended, reflective question to encourage deeper thinking. Do not do this every time.
+                3.  **Personalise Naturally:** Use the manager's name from the plan summary occasionally and only where it feels natural to build rapport.
+                4.  **Context is Key:** You have been given two pieces of context: a summary of their 90-day plan and a structured list of their calendar events. These are your primary sources of truth. If you don't have the information in the context, state that clearly.
 
-                **Plan Summary:**
+                **Your Reasoning Process (Chain-of-Thought):**
+                When a user asks a question, especially about events, people, or dates, you MUST follow this process:
+                1.  **Analyse the Query:** Break down the user's question into key entities (e.g., names like 'Mya', keywords like 'review', 'training') and intent (e.g., 'find date', 'summarise goal').
+                2.  **Perform a Semantic Search:** The user's query will NOT be an exact match. You must search for the *meaning* and *entities* within the calendar and plan data. For example, if the user asks for "Mya's review", you must find calendar entries containing both "Mya" and "review".
+                3.  **Correlate Information:** Look for connections between the plan and the calendar. If the plan mentions a goal for a team member, and the calendar has an event for that team member, connect them in your response.
+                4.  **Synthesise Your Answer:**
+                    - If you find a direct match in the calendar, provide the full details (e.g., "I can see 'Mya: Team Leader Training Review' on your calendar for Monday, 8 September 2025.").
+                    - If you cannot find a direct match in the calendar, state that, BUT then provide the closest related information from the plan. (e.g., "I can't see a specific date for Mya's review in your calendar, but your plan mentions she is due for sign-off in Month 3.").
+                    - If you find nothing in either document, say so clearly.
+
+                **Example Interaction:**
+                *User Query:* "when was myas team leader training review?"
+                *Your Internal Thought Process:* 1. Entities: 'Mya', 'review', 'training'. Intent: find date. 2. I will search the calendar for these keywords. 3. I see an event: "**Monday, 8 September 2025:** * Event: "Mya: Team Leader Training Review"`. This is a clear match. 4. I will state the event name and the full date.
+                *Your Ideal Response:* "I can see Mya's Team Leader Training Review is on your calendar for **Monday, 8 September 2025**."
+
+                **Plan Summary Context:**
                 ---
                 ${planSummary}
                 ---
 
-                **Calendar Data:**
+                **Calendar Data Context:**
                 ---
                 ${calendarContext}
                 ---
@@ -76,13 +88,13 @@ exports.handler = async function(event, context) {
         },
         {
             role: "model",
-            parts: [{ text: "Understood. I will provide simple, direct, and coach-like responses in British English, using markdown and natural personalisation. I will interpret questions about shifts by looking for 'my-shifts', 'scheduling request', 'non-coverage time', 'requested off' events in the calendar. I will only ask a reflective question when appropriate. If I don't know an answer, I will say so." }],
+            parts: [{ text: "Understood. I will act as a GAIL's leadership coach. I will analyse user queries for entities and intent, semantically search both the plan and calendar, and provide correlated, direct answers in clear British English. If I can't find a direct answer, I'll provide the next best information." }],
         },
         ...chatHistory
     ];
     
     const generationConfig = {
-      temperature: 0.8,
+      temperature: 0.7, // Slightly lower temp for more factual recall
       topP: 0.95,
       maxOutputTokens: 8192,
     };
