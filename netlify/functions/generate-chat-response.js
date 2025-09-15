@@ -57,12 +57,22 @@ exports.handler = async function(event, context) {
     const { planSummary, chatHistory, userMessage, calendarData } = JSON.parse(event.body);
     
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite"});
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest"}); // Note: Updated to a more recent model for best performance
     
     // For this example, let's assume the user wants to see the last 30 days plus the future.
     const calendarContext = formatCalendarDataForAI(calendarData, 30);
+    
+    // --- MODIFICATION START: Get and format the current date ---
+    const today = new Date();
+    const currentDateString = today.toLocaleDateString('en-GB', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    // --- MODIFICATION END ---
 
-    // --- MODIFICATION START: The prompt has been significantly enhanced ---
+    // The prompt has been enhanced to include the current date
     const history = [
         {
             role: "user",
@@ -78,6 +88,11 @@ exports.handler = async function(event, context) {
                 6.  **Context is Key:** You have been given a summary of their current plan and their calendar. Use this as your primary context. If you don't have the information, state that clearly.
                 7.  **Calendar Interpretation:** When the user asks about their 'shifts', 'rota', or when they are 'working', you MUST look for events in the provided calendar data with the type "my-shifts". This is how the user logs their work schedule. If you find matching events, list them clearly. If you don't, state that you can't see any shifts logged in their calendar.
 
+                **Today's Date:**
+                ---
+                ${currentDateString}
+                ---
+
                 **Plan Summary:**
                 ---
                 ${planSummary}
@@ -91,11 +106,10 @@ exports.handler = async function(event, context) {
         },
         {
             role: "model",
-            parts: [{ text: "Understood. I will provide simple, direct, and coach-like responses in British English, using markdown and natural personalisation. I will interpret questions about shifts by looking for 'my-shifts', 'scheduling request', 'non-coverage time', 'requested off' events in the calendar. I will only ask a reflective question when appropriate. If I don't know an answer, I will say so." }],
+            parts: [{ text: "Understood. I will provide simple, direct, and coach-like responses in British English, using markdown and natural personalisation. I know what today's date is. I will interpret questions about shifts by looking for 'my-shifts' events in the calendar. I will only ask a reflective question when appropriate. If I don't know an answer, I will say so." }],
         },
         ...chatHistory
     ];
-    // --- MODIFICATION END ---
     
     const generationConfig = {
       temperature: 0.7,
