@@ -86,6 +86,7 @@ function uploadFiles(files) {
     if (!files || files.length === 0) return;
     if (!appState.currentUser || !appState.currentPlanId) {
         console.error("User or plan not identified. Cannot upload file.");
+        alert("Could not upload file. Please ensure you have selected a plan.");
         return;
     }
 
@@ -119,7 +120,16 @@ function uploadFiles(files) {
             });
 
             if (!response.ok) {
-                throw new Error(`Upload failed with status: ${response.status}`);
+                // Try to parse the error message from the server for more detail
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch (e) {
+                    // If the response isn't JSON, use the status text
+                    throw new Error(response.statusText || `Upload failed with status: ${response.status}`);
+                }
+                // Use the specific error from the server function
+                throw new Error(errorData.error || `Upload failed with status: ${response.status}`);
             }
 
             // The real-time listener will automatically add the new file to the UI.
@@ -128,7 +138,8 @@ function uploadFiles(files) {
         } catch (error) {
             console.error("Upload failed:", error);
             tempFileItem.remove(); // Remove placeholder on failure
-            alert(`Error uploading ${file.name}. Please try again.`);
+            // Display the more specific error message to the user
+            alert(`Error uploading ${file.name}: ${error.message}`);
         }
     });
 }
