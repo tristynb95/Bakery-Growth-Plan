@@ -17,15 +17,14 @@ export const handler = async (event, context) => {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  // Make headers case-insensitive for busboy
-  const headers = Object.fromEntries(
-    Object.entries(event.headers).map(([key, value]) => [key.toLowerCase(), value])
-  );
-
-
   return new Promise((resolve, reject) => {
-    // Pass the lowercase headers to busboy
-    const bb = busboy({ headers: headers });
+    // Busboy needs the content-type header from the event.
+    // The event headers are case-insensitive, so we can access it directly.
+    const bb = busboy({
+      headers: {
+        'content-type': event.headers['content-type'] || event.headers['Content-Type']
+      }
+    });
     const fields = {};
     const files = [];
 
