@@ -1,5 +1,5 @@
-const admin = require('firebase-admin');
-const busboy = require('busboy');
+import admin from 'firebase-admin';
+import busboy from 'busboy';
 
 // Initialize Firebase Admin SDK
 // Check if the app is already initialized to prevent errors during hot-reloads
@@ -12,25 +12,25 @@ if (!admin.apps.length) {
 }
 
 
-exports.handler = async (event, context) => {
+export const handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  // FIX: Make headers case-insensitive for busboy
+  // Make headers case-insensitive for busboy
   const headers = Object.fromEntries(
     Object.entries(event.headers).map(([key, value]) => [key.toLowerCase(), value])
   );
 
 
   return new Promise((resolve, reject) => {
-    // FIX: Pass the lowercase headers to busboy
+    // Pass the lowercase headers to busboy
     const bb = busboy({ headers: headers });
     const fields = {};
     const files = [];
 
     bb.on('file', (fieldname, file, filenameInfo) => {
-      // FIX: Use the 'filenameInfo' object which contains filename, encoding, mimetype
+      // Use the 'filenameInfo' object which contains filename, encoding, mimetype
       const { filename, encoding, mimeType } = filenameInfo;
       const chunks = [];
       file.on('data', (chunk) => {
@@ -40,7 +40,7 @@ exports.handler = async (event, context) => {
         files.push({
           fieldname,
           filename,
-          mimeType, // FIX: Correct property name
+          mimeType,
           content: Buffer.concat(chunks),
         });
       });
@@ -64,17 +64,16 @@ exports.handler = async (event, context) => {
         }
 
         const bucket = admin.storage().bucket();
-        // FIX: Sanitize filename to prevent security issues and errors
+        // Sanitize filename to prevent security issues and errors
         const sanitizedFilename = fileToUpload.filename.replace(/[^a-zA-Z0-9._-]/g, '');
         const fileId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
         const storagePath = `users/${userId}/plans/${planId}/${fileId}-${sanitizedFilename}`;
 
         const file = bucket.file(storagePath);
         await file.save(fileToUpload.content, {
-          metadata: { contentType: fileToUpload.mimeType }, // FIX: Correct property name
+          metadata: { contentType: fileToUpload.mimeType },
         });
 
-        // This long expiry is okay for internal tools, but for public apps, consider shorter-lived URLs.
         const downloadURL = await file.getSignedUrl({
             action: 'read',
             expires: '03-09-2491'
@@ -90,7 +89,7 @@ exports.handler = async (event, context) => {
         const docRef = await filesCollectionRef.add({
             name: fileToUpload.filename,
             size: fileToUpload.content.length,
-            type: fileToUpload.mimeType, // FIX: Correct property name
+            type: fileToUpload.mimeType,
             storagePath: storagePath,
             downloadURL: downloadURL,
             uploadedAt: admin.firestore.FieldValue.serverTimestamp()
@@ -125,7 +124,7 @@ exports.handler = async (event, context) => {
         });
     });
 
-    // FIX: Check if body is base64 encoded before decoding
+    // Check if body is base64 encoded before decoding
     const bodyBuffer = event.isBase64Encoded ? Buffer.from(event.body, 'base64') : event.body;
     bb.end(bodyBuffer);
   });
