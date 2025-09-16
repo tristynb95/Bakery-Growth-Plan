@@ -1,6 +1,7 @@
 // js/plan-view.js
 import { calculatePlanCompletion, getVisionProgress, getMonthProgress, isWeekComplete, isContentEmpty } from './utils.js';
 import { openChat } from './chat.js';
+import { showFilesView } from './files.js'; // Import the new function
 
 // Dependencies passed from main.js
 let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare;
@@ -139,6 +140,36 @@ const templates = {
                 </div>` : ''}
             </div>
         `,
+    files: {
+        html: `
+            <div class="space-y-8">
+                <div class="flex flex-wrap justify-between items-center gap-4">
+                    <div class="search-wrapper flex-grow max-w-lg">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" id="file-search-input" class="form-input" placeholder="Search files by name...">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="file-filter-btn" class="btn btn-secondary"><i class="bi bi-funnel-fill"></i> Filter</button>
+                        <label for="file-upload-input" class="btn btn-primary cursor-pointer">
+                            <i class="bi bi-upload"></i>
+                            <span>Upload File</span>
+                        </label>
+                        <input type="file" id="file-upload-input" class="hidden" multiple>
+                    </div>
+                </div>
+
+                <div id="file-drop-zone" class="file-drop-zone">
+                    <div id="file-grid-container" class="file-grid">
+                        <div class="file-item-placeholder">
+                            <i class="bi bi-cloud-arrow-up"></i>
+                            <p class="font-semibold mt-2">Drag & drop files here</p>
+                            <p class="text-sm text-gray-500">or use the upload button</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `
+    },
 };
 
 // --- Helper Functions ---
@@ -474,7 +505,8 @@ function switchView(viewId) {
          'month-1': { title: 'Month 1 Plan', subtitle: appState.planData.planName || 'Lay the foundations for success.' },
          'month-2': { title: 'Month 2 Plan', subtitle: appState.planData.planName || 'Build momentum and embed processes.' },
          'month-3': { title: 'Month 3 Plan', subtitle: appState.planData.planName || 'Refine execution and review the quarter.' },
-         summary: { title: `Plan Summary - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'A complete overview of your quarterly plan.' }
+         summary: { title: `Plan Summary - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'A complete overview of your quarterly plan.' },
+         files: { title: 'My Files', subtitle: `Manage documents for ${appState.planData.planName || 'your plan'}.` }
     
 };
     
@@ -487,6 +519,9 @@ function switchView(viewId) {
 
     if (isSummaryView) {
         renderSummary();
+    } else if (viewId === 'files') {
+        DOMElements.contentArea.innerHTML = templates.files.html;
+        showFilesView()
     } else {
         const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
         DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;

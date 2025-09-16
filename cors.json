@@ -1,0 +1,14 @@
+[
+  {
+    "origin": [
+      "https://gails-growth-plan.app",
+      "https://*.gails-growth-plan.app",
+      "https://*.netlify.app",
+      "http://localhost:8888",
+      "http://127.0.0.1:8888"
+    ],
+    "method": ["GET", "POST", "PUT"],
+    "responseHeader": ["Content-Type", "Authorization"],
+    "maxAgeSeconds": 3600
+  }
+]

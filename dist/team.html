@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAIL's | Team Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script type="module" crossorigin src="/assets/team_hub-Ccw9DbwX.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/main-D-LsbIPU.js">
+  <link rel="stylesheet" crossorigin href="/assets/style-B_E9K7Gg.css">
+</head>
+<body id="team-page" class="antialiased bg-gray-50">
+
+    <div id="team-view">
+        <header class="dashboard-header">
+            <a href="/index.html"><img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/92/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo" class="h-9"></a>
+            <div>
+                <button id="back-to-dashboard-btn" class="btn btn-secondary"><i class="bi bi-grid-1x2-fill"></i> Dashboard</button>
+                <button id="manage-team-btn" class="btn btn-secondary"><i class="bi bi-people-fill"></i> Manage Team</button>
+                <button id="dashboard-logout-btn" class="btn btn-secondary"><i class="bi bi-box-arrow-right"></i> Logout</button>
+            </div>
+        </header>
+
+        <main class="p-6 sm:p-8 lg:p-12">
+            <div class="max-w-7xl mx-auto">
+
+                <div class="page-header mb-12">
+                    <div>
+                        <h1 class="text-4xl font-black text-gray-900 font-poppins">Team Hub</h1>
+                        <p class="subtitle">Your command centre for developing and celebrating your Breadheads.</p>
+                    </div>
+                </div>
+
+                <div class="hub-grid">
+
+                    <div class="bento-tile-large hub-snapshot">
+                        <div class="snapshot-header">
+                            <h3 class="tile-title-large">This Week's Snapshot</h3>
+                            <span class="snapshot-date">Monday 01 Sep - Sunday 07 Sep</span>
+                        </div>
+                        <div class="snapshot-body">
+                            <div class="stat-large">
+                                <span class="stat-large-value">12</span>
+                                <span class="stat-large-label">Active Team Members</span>
+                            </div>
+                            <div class="stat-large">
+                                <span class="stat-large-value">3</span>
+                                <span class="stat-large-label">RISE Plans Active</span>
+                            </div>
+                             <div class="stat-large">
+                                <span class="stat-large-value">92%</span>
+                                <span class="stat-large-label">Team Pulse Score</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bento-tile hub-card">
+                         <i class="bi bi-person-check-fill tile-icon-large"></i>
+                         <h3 class="tile-title">Development Focus</h3>
+                         <p class="tile-description">Manage individual development and training plans.</p>
+                         <a href="#" class="tile-link">Go to RISE Profiles <i class="bi bi-arrow-right"></i></a>
+                    </div>
+
+                    <div class="bento-tile hub-card">
+                         <i class="bi bi-book-half tile-icon-large"></i>
+                         <h3 class="tile-title">The Playbook</h3>
+                         <p class="tile-description">Access and manage all standard operating procedures.</p>
+                         <a href="#" class="tile-link">Open The Playbook <i class="bi bi-arrow-right"></i></a>
+                    </div>
+
+                     <div class="bento-tile-large hub-shoutouts">
+                        <div class="shoutout-content">
+                            <i class="bi bi-megaphone-fill"></i>
+                            <p class="shoutout-text">"Huge well done to Maria for her amazing latte art during the morning rush!"</p>
+                            <span class="shoutout-author">- Tristen B, 03/09/25</span>
+                        </div>
+                         <a href="#" class="btn btn-secondary w-full mt-4">See All & Add Shoutout</a>
+                    </div>
+
+                    <div class="bento-tile hub-card">
+                         <i class="bi bi-chat-heart-fill tile-icon-large"></i>
+                         <h3 class="tile-title">Coffee & Cake</h3>
+                         <p class="tile-description">Schedule and log notes from your informal 1:1s.</p>
+                         <a href="#" class="tile-link">Schedule a 1:1 <i class="bi bi-arrow-right"></i></a>
+                    </div>
+
+                    <div class="bento-tile hub-card">
+                         <i class="bi bi-grid-3x3-gap-fill tile-icon-large"></i>
+                         <h3 class="tile-title">Skill Mapper</h3>
+                         <p class="tile-description">Track team skills and identify training gaps.</p>
+                         <a href="#" class="tile-link">View Skill Map <i class="bi bi-arrow-right"></i></a>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center text-sm text-gray-500 py-6">
+            <p>&copy; 2025 GAIL's Bakery Growth Planner | <a href="/privacy-policy.html" class="text-red-600 hover:underline">Privacy Policy</a></p>
+        </footer>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
+
+</body>
+</html>

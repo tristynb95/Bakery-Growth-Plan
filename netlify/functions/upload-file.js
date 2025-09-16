@@ -125,4 +125,3 @@ exports.handler = async function(event, context) {
             body: JSON.stringify({ error: `An unexpected error occurred: ${error.message}` }),
         };
     }
-};

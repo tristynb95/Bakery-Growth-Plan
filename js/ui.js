@@ -420,8 +420,10 @@ export function initializeCharCounters() {
     });
 }
 
-export function openModal(type, context = {}) {
-    const { planId, currentName, planName, eventTitle, currentQuarter } = context;
+export function openModal(type, title, messageOrContext) {
+    const { planId, currentName, planName, eventTitle, currentQuarter } = typeof messageOrContext === 'object' ? messageOrContext : {};
+    
+    DOMElements.modalBox.classList.remove('file-viewer-modal');
     DOMElements.modalBox.dataset.type = type;
     DOMElements.modalBox.dataset.planId = planId;
     const footer = DOMElements.modalActionBtn.parentNode;
@@ -440,6 +442,25 @@ export function openModal(type, context = {}) {
     footer.style.justifyContent = 'flex-end';
 
     switch (type) {
+        case 'fileView':
+            DOMElements.modalBox.classList.add('file-viewer-modal');
+            DOMElements.modalTitle.textContent = title;
+            DOMElements.modalContent.innerHTML = messageOrContext;
+            DOMElements.modalActionBtn.style.display = 'none';
+            DOMElements.modalCancelBtn.textContent = 'Close';
+            break;
+        case 'loading':
+            DOMElements.modalTitle.textContent = title;
+            DOMElements.modalContent.innerHTML = `<div class="flex items-center justify-center p-8"><div class="loading-spinner"></div></div>`;
+            DOMElements.modalActionBtn.style.display = 'none';
+            DOMElements.modalCancelBtn.style.display = 'none';
+            break;
+        case 'error':
+            DOMElements.modalTitle.textContent = title;
+            DOMElements.modalContent.innerHTML = `<p class="text-red-600">${messageOrContext}</p>`;
+            DOMElements.modalActionBtn.style.display = 'none';
+            DOMElements.modalCancelBtn.textContent = 'Close';
+            break;
         case 'create':
             DOMElements.modalTitle.textContent = "Create New Plan";
             DOMElements.modalContent.innerHTML = `<label for="newPlanName" class="font-semibold block mb-2">Plan Name:</label>
@@ -651,3 +672,4 @@ export function initializeUI(database, state) {
         });
     }
 }
+
