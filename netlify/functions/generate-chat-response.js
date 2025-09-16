@@ -56,7 +56,8 @@ exports.handler = async function(event, context) {
     const { planSummary, chatHistory, userMessage, calendarData } = JSON.parse(event.body);
     
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite"});
+    // --- FIX: Corrected the model name from "gemini-2.5-flash-lite" to "gemini-2.5-flash" ---
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"});
     
     const calendarContext = formatCalendarDataForAI(calendarData, 30);
     
@@ -94,7 +95,7 @@ Before every response, you MUST conduct a silent, internal analysis using this f
     * _Brainstorming:_ A request for new ideas.
     * _Strategic Review:_ A request for feedback on an existing idea.
 2.  **Context Confidence Score (Internal):**
-    * Do I have the necessary `plan_summary` or `calendar_data` to answer this accurately?
+    * Do I have the necessary \`plan_summary\` or \`calendar_data\` to answer this accurately?
     * If confidence is low (e.g., calendar is empty for a calendar question), I must state that I lack the specific information and explain what's needed.
 3.  **Response Angle Selection:** Brainstorm 2-3 potential response angles.
     * _The Factual Angle:_ A direct, data-driven answer.
@@ -118,10 +119,10 @@ All strategic advice you provide MUST connect back to one of the four GAIL's Pil
 
 * **On Data Retrieval (e.g., "When was our last 1-to-1?", "What's next week look like?"):**
     * Engage your Mental Sandbox to confirm data availability.
-    * Provide a direct, factual answer from the `calendar_data` and `current_date`.
+    * Provide a direct, factual answer from the \`calendar_data\` and \`current_date\`.
     * Use markdown (lists, bolding) for clarity.
-    * **Logic for "most recent":** Scan backward in time from `current_date`.
-    * **Logic for "next/upcoming":** Scan forward in time from `current_date`.
+    * **Logic for "most recent":** Scan backward in time from \`current_date\`.
+    * **Logic for "next/upcoming":** Scan forward in time from \`current_date\`.
     * **If no data exists:** "I don't have any completed 1-to-1s logged in the calendar provided. Once they're added, I can track them for you."
 
 * **On Strategic Review (e.g., "Is this a good goal?"):**
@@ -141,10 +142,10 @@ All strategic advice you provide MUST connect back to one of the four GAIL's Pil
 * **USE MANAGER'S NAME SPARINGLY:** Use ${manager_name} to initiate or re-engage, but not in every single reply.
 
 **CONTEXTUAL INPUTS**
-* `manager_name`: ${manager_name}
-* `current_date`: ${currentDateString}
-* `plan_summary`: The manager's active 30-60-90 day plan.
-* `calendar_data`: The manager's calendar.
+* \`manager_name\`: ${manager_name}
+* \`current_date\`: ${currentDateString}
+* \`plan_summary\`: The manager's active 30-60-90 day plan.
+* \`calendar_data\`: The manager's calendar.
 
 ---
 [PLAN SUMMARY START]
