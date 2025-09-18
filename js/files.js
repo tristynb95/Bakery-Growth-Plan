@@ -1,20 +1,14 @@
-import {
-    getAuth,
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import {
-    getFirestore,
-    collection,
-    query,
-    onSnapshot
-} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
-import {
-    getApp
-} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+let db;
+let storage;
+let auth;
+let appState;
 
-const app = getApp();
-const db = getFirestore(app);
-const auth = getAuth();
+export function initializeFiles(database, storageInstance, state, authInstance) {
+    db = database;
+    storage = storageInstance;
+    appState = state;
+    auth = authInstance;
+}
 
 let currentUserId = null;
 let currentPlanId = null;
