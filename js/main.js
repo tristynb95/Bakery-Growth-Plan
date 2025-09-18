@@ -46,7 +46,7 @@ function runApp(app) {
     initializeDashboard(db, appState, openModal, handleSelectPlan);
     initializePlanView(db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare);
     initializeChat(appState, db);
-    initializeFiles(db, storage, appState, openModal);
+    initializeFiles(db, storage, appState, auth);
 
     function handleSelectPlan(planId) {
         document.getElementById('dashboard-view').classList.add('hidden');
