@@ -1,197 +1,171 @@
-// js/files.js
+import {
+    getAuth,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+import {
+    getFirestore,
+    collection,
+    query,
+    where,
+    onSnapshot
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+import {
+    getApp
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
 
-// Dependencies to be passed from main.js
-let db, storage, appState;
+const app = getApp();
+const db = getFirestore(app);
+const auth = getAuth();
 
-// --- DOM Element References ---
-let dropZone, fileGrid, fileInput, placeholder;
-let fileUnsubscribe = null; // To listen for real-time file updates
+let currentUserId = null;
+let currentPlanId = null;
 
-/**
- * Creates an HTML element for a single file item.
- * @param {object} fileData - The metadata for the file from Firestore.
- * @returns {HTMLElement} The file item element.
- */
-function createFileElement(fileData) {
-    const fileItem = document.createElement('div');
-    fileItem.className = 'file-item';
-    fileItem.dataset.fileId = fileData.id;
+// --- Main Initialization ---
+document.addEventListener('DOMContentLoaded', () => {
+    const fileUploadForm = document.getElementById('file-upload-form');
 
-    const fileTypeIcons = {
-        'pdf': 'bi-file-earmark-pdf-fill',
-        'doc': 'bi-file-earmark-word-fill',
-        'docx': 'bi-file-earmark-word-fill',
-        'xls': 'bi-file-earmark-excel-fill',
-        'xlsx': 'bi-file-earmark-excel-fill',
-        'default': 'bi-file-earmark-text-fill'
-    };
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUserId = user.uid;
+            // Extract planId from the URL, assuming it's a query parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            currentPlanId = urlParams.get('planId');
 
-    const extension = fileData.name.split('.').pop().toLowerCase();
-    const iconClass = fileTypeIcons[extension] || fileTypeIcons['default'];
-
-    const uploadedDate = fileData.uploadedAt?.toDate ? fileData.uploadedAt.toDate().toLocaleDateString('en-GB') : 'Just now';
-
-    fileItem.innerHTML = `
-        <div class="file-thumbnail">
-            <i class="bi ${iconClass}"></i>
-        </div>
-        <div class="file-info">
-            <p class="file-name">${fileData.name}</p>
-            <p class="file-metadata">${uploadedDate}</p>
-        </div>
-    `;
-    return fileItem;
-}
-
-
-/**
- * Renders the files from Firestore metadata into the grid.
- */
-function renderFiles() {
-    if (fileUnsubscribe) {
-        fileUnsubscribe(); // Stop listening to previous plan's files
-    }
-
-    const filesRef = db.collection('users').doc(appState.currentUser.uid)
-                       .collection('plans').doc(appState.currentPlanId)
-                       .collection('files')
-                       .orderBy('uploadedAt', 'desc');
-
-    fileUnsubscribe = filesRef.onSnapshot(snapshot => {
-        if (snapshot.empty) {
-            placeholder.classList.remove('hidden');
-            fileGrid.innerHTML = ''; // Clear old files
-            fileGrid.appendChild(placeholder);
+            if (currentPlanId) {
+                if (fileUploadForm) {
+                    fileUploadForm.addEventListener('submit', handleFileUpload);
+                }
+                listenForFiles(currentUserId, currentPlanId);
+            } else {
+                console.error("Plan ID is missing from the URL.");
+                // Optionally, disable the form or show a message
+            }
         } else {
-            placeholder.classList.add('hidden');
-            fileGrid.innerHTML = ''; // Clear grid before re-rendering
-            snapshot.forEach(doc => {
-                const fileEl = createFileElement({ id: doc.id, ...doc.data() });
-                fileGrid.appendChild(fileEl);
-            });
+            console.log("User is not signed in.");
+            // Handle signed-out state, maybe redirect to login
         }
-    }, error => {
-        console.error("Error fetching files:", error);
-        placeholder.classList.remove('hidden');
-        placeholder.querySelector('p').textContent = 'Could not load files.';
     });
-}
+});
 
+// --- File Upload Handler ---
+async function handleFileUpload(event) {
+    event.preventDefault();
+    const fileInput = document.getElementById('file-input');
+    const uploadStatus = document.getElementById('upload-status');
 
-/**
- * Handles the file upload process by sending files to a Netlify function.
- * @param {FileList} files - The files to upload.
- */
-function uploadFiles(files) {
-    if (!files || files.length === 0) return;
-    if (!appState.currentUser || !appState.currentPlanId) {
-        console.error("User or plan not identified. Cannot upload file.");
-        alert("Could not upload file. Please ensure you have selected a plan.");
+    if (!fileInput.files || fileInput.files.length === 0) {
+        uploadStatus.textContent = 'Please select a file to upload.';
+        uploadStatus.className = 'text-red-500';
         return;
     }
 
-    placeholder.classList.add('hidden');
+    const file = fileInput.files[0];
+    const user = auth.currentUser;
 
-    Array.from(files).forEach(async (file) => {
-        // --- Create a temporary placeholder while uploading ---
-        const tempFileItem = document.createElement('div');
-        tempFileItem.className = 'file-item';
-        tempFileItem.innerHTML = `
-            <div class="file-thumbnail">
-                <div class="loading-spinner"></div>
-            </div>
-            <div class="file-info">
-                <p class="file-name">${file.name}</p>
-                <p class="file-metadata">Uploading...</p>
-            </div>
-        `;
-        fileGrid.prepend(tempFileItem);
-        // --------------------------------------------------
+    if (!user || !currentPlanId) {
+        uploadStatus.textContent = 'Authentication error. Please sign in again.';
+        uploadStatus.className = 'text-red-500';
+        return;
+    }
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('planId', appState.currentPlanId);
-        formData.append('userId', appState.currentUser.uid);
+    uploadStatus.textContent = 'Preparing upload...';
+    uploadStatus.className = 'text-blue-500';
 
-        try {
-            const response = await fetch('/.netlify/functions/upload-file', {
-                method: 'POST',
-                body: formData,
-            });
+    try {
+        // --- Step 1: Get the secure, signed URL from our Netlify function ---
+        const generateUrlResponse = await fetch('/.netlify/functions/generate-upload-url', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                fileName: file.name,
+                fileType: file.type,
+                userId: user.uid,
+                planId: currentPlanId,
+            }),
+        });
 
-            if (!response.ok) {
-                // Try to parse the error message from the server for more detail
-                let errorData;
-                try {
-                    errorData = await response.json();
-                } catch (e) {
-                    // If the response isn't JSON, use the status text
-                    throw new Error(response.statusText || `Upload failed with status: ${response.status}`);
-                }
-                // Use the specific error from the server function
-                throw new Error(errorData.error || `Upload failed with status: ${response.status}`);
-            }
-
-            // The real-time listener will automatically add the new file to the UI.
-            // We just need to remove the placeholder.
-            tempFileItem.remove();
-        } catch (error) {
-            console.error("Upload failed:", error);
-            tempFileItem.remove(); // Remove placeholder on failure
-            // Display the more specific error message to the user
-            alert(`Error uploading ${file.name}: ${error.message}`);
+        if (!generateUrlResponse.ok) {
+            throw new Error('Could not get a secure upload link.');
         }
-    });
+
+        const {
+            uploadUrl,
+            storagePath
+        } = await generateUrlResponse.json();
+
+        // --- Step 2: Upload the file directly to Firebase Storage using the signed URL ---
+        uploadStatus.textContent = 'Uploading file...';
+        const uploadResponse = await fetch(uploadUrl, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': file.type,
+            },
+            body: file,
+        });
+
+        if (!uploadResponse.ok) {
+            throw new Error('File upload failed.');
+        }
+
+        // --- Step 3: Save the file's metadata to Firestore via our second function ---
+        uploadStatus.textContent = 'Finalizing...';
+        const saveMetaResponse = await fetch('/.netlify/functions/save-file-metadata', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                fileName: file.name,
+                fileType: file.type,
+                storagePath: storagePath,
+                userId: user.uid,
+                planId: currentPlanId,
+            }),
+        });
+
+        if (!saveMetaResponse.ok) {
+            throw new Error('Could not save file details.');
+        }
+
+        uploadStatus.textContent = 'Upload successful!';
+        uploadStatus.className = 'text-green-500';
+        fileInput.value = ''; // Clear the input field
+
+    } catch (error) {
+        console.error('File upload process failed:', error);
+        uploadStatus.textContent = `Error: ${error.message}`;
+        uploadStatus.className = 'text-red-500';
+    }
 }
 
+// --- Real-time File Listener ---
+function listenForFiles(userId, planId) {
+    const filesList = document.getElementById('files-list');
+    if (!filesList) return;
 
-/**
- * Initializes all event listeners for the "My Files" view.
- */
-function initializeFileViewListeners() {
-    dropZone = document.getElementById('file-drop-zone');
-    fileGrid = document.getElementById('file-grid-container');
-    fileInput = document.getElementById('file-upload-input');
-    placeholder = document.querySelector('.file-item-placeholder'); // Find the original placeholder
+    const filesRef = collection(db, 'users', userId, 'plans', planId, 'files');
+    const q = query(filesRef); // Can add orderBy here later if needed
 
-    if (!dropZone) return; // Exit if the view isn't active
-
-    // Drag and Drop Listeners
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('is-active');
+    onSnapshot(q, (snapshot) => {
+        filesList.innerHTML = ''; // Clear the list
+        if (snapshot.empty) {
+            filesList.innerHTML = '<p class="text-gray-500">No files uploaded yet.</p>';
+            return;
+        }
+        snapshot.docs.forEach(doc => {
+            const file = doc.data();
+            const fileElement = document.createElement('div');
+            fileElement.className = 'p-3 mb-2 bg-gray-100 rounded-lg flex justify-between items-center';
+            fileElement.innerHTML = `
+                <a href="${file.url}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline">${file.name}</a>
+                <span class="text-sm text-gray-500">${new Date(file.uploadedAt?.toDate()).toLocaleDateString()}</span>
+            `;
+            filesList.appendChild(fileElement);
+        });
+    }, (error) => {
+        console.error("Error listening for file updates:", error);
+        filesList.innerHTML = '<p class="text-red-500">Could not load files.</p>';
     });
-
-    dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('is-active');
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('is-active');
-        uploadFiles(e.dataTransfer.files);
-    });
-
-    // Traditional File Input Listener
-    fileInput.addEventListener('change', (e) => {
-        uploadFiles(e.target.files);
-        e.target.value = ''; // Reset input to allow uploading the same file again
-    });
-}
-
-/**
- * Main entry point for the files module. Called when the user switches to the "My Files" view.
- */
-export function showFilesView() {
-    initializeFileViewListeners();
-    renderFiles(); // Fetch and display files in real-time
-}
-
-/**
- * Initializes the module with necessary dependencies from main.js.
- */
-export function initializeFiles(database, storageService, state) {
-    db = database;
-    storage = storageService;
-    appState = state;
 }
