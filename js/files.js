@@ -6,7 +6,6 @@ import {
     getFirestore,
     collection,
     query,
-    where,
     onSnapshot
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 import {
@@ -19,43 +18,45 @@ const auth = getAuth();
 
 let currentUserId = null;
 let currentPlanId = null;
+let fileUnsubscribe = null; // To stop listening to old file lists
 
-// --- Main Initialization ---
-document.addEventListener('DOMContentLoaded', () => {
+// This is the function that plan-view.js is looking for. We now export it.
+export function showFilesView() {
     const fileUploadForm = document.getElementById('file-upload-form');
 
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            currentUserId = user.uid;
-            // Extract planId from the URL, assuming it's a query parameter
-            const urlParams = new URLSearchParams(window.location.search);
-            currentPlanId = urlParams.get('planId');
+    // We only need to run this setup once when the view is shown.
+    const user = auth.currentUser;
+    if (user) {
+        currentUserId = user.uid;
+        const urlParams = new URLSearchParams(window.location.search);
+        currentPlanId = urlParams.get('planId');
 
-            if (currentPlanId) {
-                if (fileUploadForm) {
+        if (currentPlanId) {
+            if (fileUploadForm) {
+                // A simple way to prevent adding the same listener multiple times
+                if (!fileUploadForm.hasAttribute('data-submit-listener')) {
                     fileUploadForm.addEventListener('submit', handleFileUpload);
+                    fileUploadForm.setAttribute('data-submit-listener', 'true');
                 }
-                listenForFiles(currentUserId, currentPlanId);
-            } else {
-                console.error("Plan ID is missing from the URL.");
-                // Optionally, disable the form or show a message
             }
+            listenForFiles(currentUserId, currentPlanId);
         } else {
-            console.log("User is not signed in.");
-            // Handle signed-out state, maybe redirect to login
+            console.error("Plan ID is missing from the URL.");
+            document.getElementById('files-list').innerHTML = '<p class="text-red-500">Could not load files: Plan ID is missing.</p>';
         }
-    });
-});
+    } else {
+        console.log("User is not signed in.");
+        document.getElementById('files-list').innerHTML = '<p class="text-red-500">Please sign in to view files.</p>';
+    }
+}
 
-// --- File Upload Handler ---
 async function handleFileUpload(event) {
     event.preventDefault();
     const fileInput = document.getElementById('file-input');
-    const uploadStatus = document.getElementById('upload-status');
+    const uploadStatus = document.getElementById('upload-status'); // Let's add a status element
 
     if (!fileInput.files || fileInput.files.length === 0) {
-        uploadStatus.textContent = 'Please select a file to upload.';
-        uploadStatus.className = 'text-red-500';
+        if(uploadStatus) uploadStatus.textContent = 'Please select a file to upload.';
         return;
     }
 
@@ -63,21 +64,17 @@ async function handleFileUpload(event) {
     const user = auth.currentUser;
 
     if (!user || !currentPlanId) {
-        uploadStatus.textContent = 'Authentication error. Please sign in again.';
-        uploadStatus.className = 'text-red-500';
+        if(uploadStatus) uploadStatus.textContent = 'Authentication error. Please sign in again.';
         return;
     }
 
-    uploadStatus.textContent = 'Preparing upload...';
-    uploadStatus.className = 'text-blue-500';
+    if(uploadStatus) uploadStatus.textContent = 'Preparing upload...';
 
     try {
-        // --- Step 1: Get the secure, signed URL from our Netlify function ---
+        // Step 1: Get the secure, signed URL
         const generateUrlResponse = await fetch('/.netlify/functions/generate-upload-url', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 fileName: file.name,
                 fileType: file.type,
@@ -87,35 +84,29 @@ async function handleFileUpload(event) {
         });
 
         if (!generateUrlResponse.ok) {
-            throw new Error('Could not get a secure upload link.');
+            const errorData = await generateUrlResponse.json();
+            throw new Error(errorData.error || 'Could not get a secure upload link.');
         }
 
-        const {
-            uploadUrl,
-            storagePath
-        } = await generateUrlResponse.json();
+        const { uploadUrl, storagePath } = await generateUrlResponse.json();
 
-        // --- Step 2: Upload the file directly to Firebase Storage using the signed URL ---
-        uploadStatus.textContent = 'Uploading file...';
+        // Step 2: Upload the file directly to Firebase Storage
+        if(uploadStatus) uploadStatus.textContent = 'Uploading file...';
         const uploadResponse = await fetch(uploadUrl, {
             method: 'PUT',
-            headers: {
-                'Content-Type': file.type,
-            },
+            headers: { 'Content-Type': file.type },
             body: file,
         });
 
         if (!uploadResponse.ok) {
-            throw new Error('File upload failed.');
+            throw new Error('File upload to storage failed.');
         }
 
-        // --- Step 3: Save the file's metadata to Firestore via our second function ---
-        uploadStatus.textContent = 'Finalizing...';
+        // Step 3: Save the file's metadata to Firestore
+        if(uploadStatus) uploadStatus.textContent = 'Finalizing...';
         const saveMetaResponse = await fetch('/.netlify/functions/save-file-metadata', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 fileName: file.name,
                 fileType: file.type,
@@ -126,29 +117,33 @@ async function handleFileUpload(event) {
         });
 
         if (!saveMetaResponse.ok) {
-            throw new Error('Could not save file details.');
+            const errorData = await saveMetaResponse.json();
+            throw new Error(errorData.error || 'Could not save file details.');
         }
 
-        uploadStatus.textContent = 'Upload successful!';
-        uploadStatus.className = 'text-green-500';
+        if(uploadStatus) uploadStatus.textContent = 'Upload successful!';
         fileInput.value = ''; // Clear the input field
+        setTimeout(() => { if(uploadStatus) uploadStatus.textContent = ''; }, 3000);
 
     } catch (error) {
         console.error('File upload process failed:', error);
-        uploadStatus.textContent = `Error: ${error.message}`;
-        uploadStatus.className = 'text-red-500';
+        if(uploadStatus) uploadStatus.textContent = `Error: ${error.message}`;
     }
 }
 
-// --- Real-time File Listener ---
 function listenForFiles(userId, planId) {
     const filesList = document.getElementById('files-list');
     if (!filesList) return;
 
-    const filesRef = collection(db, 'users', userId, 'plans', planId, 'files');
-    const q = query(filesRef); // Can add orderBy here later if needed
+    // Unsubscribe from any previous listener to prevent memory leaks
+    if (fileUnsubscribe) {
+        fileUnsubscribe();
+    }
 
-    onSnapshot(q, (snapshot) => {
+    const filesRef = collection(db, 'users', userId, 'plans', planId, 'files');
+    const q = query(filesRef);
+
+    fileUnsubscribe = onSnapshot(q, (snapshot) => {
         filesList.innerHTML = ''; // Clear the list
         if (snapshot.empty) {
             filesList.innerHTML = '<p class="text-gray-500">No files uploaded yet.</p>';
@@ -169,3 +164,4 @@ function listenForFiles(userId, planId) {
         filesList.innerHTML = '<p class="text-red-500">Could not load files.</p>';
     });
 }
+
