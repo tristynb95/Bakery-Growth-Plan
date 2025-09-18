@@ -19,7 +19,7 @@ export async function getFirebaseConfig() {
  * @returns {Promise<string>} The HTML for the action plan.
  */
 export async function generateAiActionPlan(planSummary, signal) {
-    const response = await fetch('/.netlify/functions/generate-plan.js', {
+    const response = await fetch('/.netlify/functions/generate-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ planSummary }),
