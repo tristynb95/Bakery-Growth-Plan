@@ -55,11 +55,6 @@ exports.handler = async function(event, context) {
   try {
     const { planSummary, chatHistory, userMessage, calendarData } = JSON.parse(event.body);
     
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
-    
-    const calendarContext = formatCalendarDataForAI(calendarData, 30);
-    
     const today = new Date();
     const currentDateString = today.toLocaleDateString('en-GB', {
         weekday: 'long',
@@ -70,11 +65,8 @@ exports.handler = async function(event, context) {
     
     const managerNameMatch = planSummary.match(/MANAGER: (.*)/);
     const manager_name = managerNameMatch ? managerNameMatch[1] : "Manager";
-
-    const history = [
-        {
-            role: "user",
-            parts: [{ text: `
+    
+    const systemInstruction = `
 ## SYSTEM PROMPT: GAIL's Bakery - AI Strategic Partner (Gemini)
 
 **1. CORE PERSONA**
@@ -151,13 +143,16 @@ ${planSummary}
 [PLAN SUMMARY END]
 ---
 [CALENDAR DATA START]
-${calendarContext}
+${formatCalendarDataForAI(calendarData, 30)}
 [CALENDAR DATA END]
 ---
-            `}],
-        },
-        ...chatHistory
-    ];
+`;
+    
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ 
+        model: "gemini-2.5-flash-lite",
+        systemInstruction: systemInstruction
+    });
     
     const generationConfig = {
       temperature: 0.7,
@@ -165,8 +160,10 @@ ${calendarContext}
       maxOutputTokens: 8192,
     };
 
+    const chatHistoryWithCurrentMessage = [...chatHistory, { role: "user", parts: [{ text: userMessage }] }];
+
     const result = await model.generateContentStream({
-        contents: [...history, { role: "user", parts: [{ text: userMessage }] }],
+        contents: chatHistoryWithCurrentMessage,
         generationConfig,
     });
 
@@ -175,7 +172,9 @@ ${calendarContext}
         async start(controller) {
             for await (const chunk of result.stream) {
                 const chunkText = chunk.text();
-                controller.enqueue(encoder.encode(chunkText));
+                if (chunkText) {
+                    controller.enqueue(encoder.encode(chunkText));
+                }
             }
             controller.close();
         },
