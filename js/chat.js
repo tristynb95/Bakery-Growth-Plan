@@ -77,15 +77,11 @@ function addMessageToUI(sender, text, isLoading = false) {
     wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function updateLastAiMessageInUI(text, isStreaming = false) {
+function updateLastAiMessageInUI(text) {
     const allAiBubbles = DOMElements.conversationView.querySelectorAll('.ai-bubble');
     if (allAiBubbles.length > 0) {
         const lastBubble = allAiBubbles[allAiBubbles.length - 1];
-        if (isStreaming) {
-            lastBubble.innerHTML += text;
-        } else {
-            lastBubble.innerHTML = parseMarkdownToHTML(text);
-        }
+        lastBubble.innerHTML = parseMarkdownToHTML(text);
         lastBubble.parentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
@@ -142,14 +138,14 @@ async function handleSendMessage() {
         
         const decoder = new TextDecoder();
         let responseText = '';
-        updateLastAiMessageInUI('', false); 
+        updateLastAiMessageInUI(''); 
 
         while (true) {
             const { value, done } = await reader.read();
             if (done) break;
             const chunk = decoder.decode(value, { stream: true });
             responseText += chunk;
-            updateLastAiMessageInUI(chunk, true);
+            updateLastAiMessageInUI(responseText);
         }
 
         const aiMessage = { role: 'model', parts: [{ text: responseText }] };
@@ -229,8 +225,6 @@ async function deleteConversation(conversationId) {
                               .collection('plans').doc(appState.currentPlanId)
                               .collection('conversations').doc(conversationId);
     try {
-        // Deleting a document does not automatically delete its subcollections.
-        // This would require a more complex cloud function. For now, this is a soft delete.
         await conversationRef.delete();
         const historyItem = DOMElements.historyList.querySelector(`.history-item[data-id="${conversationId}"]`);
         if (historyItem) {
