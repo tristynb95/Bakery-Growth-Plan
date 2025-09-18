@@ -1,4 +1,5 @@
 // js/plan-view.js
+
 import { calculatePlanCompletion, getVisionProgress, getMonthProgress, isWeekComplete, isContentEmpty } from './utils.js';
 import { openChat } from './chat.js';
 
@@ -173,7 +174,21 @@ export function summarizePlanForAI(planData) {
         summary += `UPHOLDING PILLARS (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
         summary += `UPHOLDING PILLARS (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
         summary += `UPHOLDING PILLARS (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
-        summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
+        summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${m}s4_place`])}\n`;
+
+        // Add Weekly Momentum Check-ins
+        summary += `\n--- WEEKLY MOMENTUM (MONTH ${m}) ---\n`;
+        for (let w = 1; w <= 4; w++) {
+            const status = e(planData[`m${m}s5_w${w}_status`]);
+            if (status) {
+                summary += `WEEK ${w}:\n`;
+                summary += `  - Status: ${status}\n`;
+                summary += `  - Win or Learning: ${e(planData[`m${m}s5_w${w}_win`])}\n`;
+                summary += `  - Breadhead Spotlight: ${e(planData[`m${m}s5_w${w}_spotlight`])}\n`;
+                summary += `  - SHINE Focus: ${e(planData[`m${m}s5_w${w}_shine`])}\n`;
+            }
+        }
+        summary += `\n`;
     }
     return summary;
 }
