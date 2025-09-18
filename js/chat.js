@@ -1,6 +1,6 @@
 // js/chat.js
 
-import { getGeminiChatResponseReader } from './api.js';
+import { getGeminiChatResponse } from './api.js';
 import { summarizePlanForAI } from './plan-view.js';
 import { openModal } from './ui.js';
 import { loadCalendarData } from './calendar.js';
@@ -130,35 +130,20 @@ async function handleSendMessage() {
     DOMElements.chatInput.value = '';
     DOMElements.chatInput.style.height = `${initialHeight}px`;
     addMessageToUI('model', '', true);
-
     try {
         const planSummary = summarizePlanForAI(appState.planData);
         const calendarData = appState.calendar.data;
-        const reader = await getGeminiChatResponseReader(planSummary, chatHistory, messageText, calendarData);
-        
-        const decoder = new TextDecoder();
-        let responseText = '';
-        updateLastAiMessageInUI(''); 
-
-        while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            responseText += chunk;
-            updateLastAiMessageInUI(responseText);
-        }
-
+        const responseText = await getGeminiChatResponse(planSummary, chatHistory, messageText, calendarData);
+        updateLastAiMessageInUI(responseText);
         const aiMessage = { role: 'model', parts: [{ text: responseText }] };
         chatHistory.push(aiMessage);
         saveMessage({ role: 'model', text: responseText });
-
     } catch (error) {
         console.error("Chat error:", error);
         const errorMessage = error.message || 'Sorry, I encountered an error. Please try again.';
         updateLastAiMessageInUI(errorMessage);
     }
 }
-
 
 async function loadChatHistory(conversationId) {
     if (!appState.currentUser || !appState.currentPlanId || !db) return;
@@ -225,6 +210,8 @@ async function deleteConversation(conversationId) {
                               .collection('plans').doc(appState.currentPlanId)
                               .collection('conversations').doc(conversationId);
     try {
+        // Deleting a document does not automatically delete its subcollections.
+        // This would require a more complex cloud function. For now, this is a soft delete.
         await conversationRef.delete();
         const historyItem = DOMElements.historyList.querySelector(`.history-item[data-id="${conversationId}"]`);
         if (historyItem) {
@@ -286,6 +273,7 @@ async function showHistoryView() {
 
 export async function openChat() {
     if (DOMElements.modal) {
+        // FIX: Ensure calendar data is loaded before opening the chat.
         await loadCalendarData(db, appState);
 
         DOMElements.modal.classList.remove('hidden');
