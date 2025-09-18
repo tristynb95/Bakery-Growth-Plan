@@ -56,8 +56,7 @@ exports.handler = async function(event, context) {
     const { planSummary, chatHistory, userMessage, calendarData } = JSON.parse(event.body);
     
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // --- FIX: Corrected the model name from "gemini-2.5-flash-lite" to "gemini-2.5-flash" ---
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"});
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
     
     const calendarContext = formatCalendarDataForAI(calendarData, 30);
     
@@ -69,7 +68,6 @@ exports.handler = async function(event, context) {
         day: 'numeric'
     });
     
-    // Extract manager's name from the plan summary
     const managerNameMatch = planSummary.match(/MANAGER: (.*)/);
     const manager_name = managerNameMatch ? managerNameMatch[1] : "Manager";
 
@@ -167,30 +165,26 @@ ${calendarContext}
       maxOutputTokens: 8192,
     };
 
-    const chat = model.startChat({
-        history,
+    const result = await model.generateContentStream({
+        contents: [...history, { role: "user", parts: [{ text: userMessage }] }],
         generationConfig,
     });
 
-    const result = await chat.sendMessage(userMessage);
-    const response = await result.response;
-    const aiText = response.text();
-
-    if (response.usageMetadata) {
-      const { promptTokenCount, candidatesTokenCount } = response.usageMetadata;
-      const totalTokenCount = promptTokenCount + candidatesTokenCount;
-
-      console.log('--- AI Token Usage ---');
-      console.log(`Input Tokens: ${promptTokenCount}`);
-      console.log(`Output Tokens: ${candidatesTokenCount}`);
-      console.log(`Total Tokens: ${totalTokenCount}`);
-      console.log('--- Raw AI Response ---\\n', aiText);
-      console.log('----------------------');
-    }
+    const encoder = new TextEncoder();
+    const readableStream = new ReadableStream({
+        async start(controller) {
+            for await (const chunk of result.stream) {
+                const chunkText = chunk.text();
+                controller.enqueue(encoder.encode(chunkText));
+            }
+            controller.close();
+        },
+    });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ response: aiText }),
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+      body: readableStream,
     };
 
   } catch (error) {
