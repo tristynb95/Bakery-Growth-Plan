@@ -108,17 +108,17 @@ function runViewScript(app) {
                                 <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div>
                             </div>
                             <div class="summary-section">
-                                <h3 class="summary-heading">Key Levers</h3>
+                                <h3 class="summary-heading">Key Actions</h3>
                                 <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div>
                             </div>
                             <div class="summary-section">
-                                <h3 class="summary-heading">People Growth</h3>
+                                <h3 class="summary-heading">Developing Our Breadheads</h3>
                                 <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div>
                             </div>
                         </div>
                         <div class="p-6 bg-gray-50/70 border-l">
                             <div class="summary-section">
-                                <h3 class="summary-heading">Upholding Our Pillars</h3>
+                                <h3 class="summary-heading">Upholding Pillars</h3>
                                 <ul class="space-y-3 mt-2">
                                     <li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li>
                                     <li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li>
@@ -127,7 +127,7 @@ function runViewScript(app) {
                                 </ul>
                             </div>
                             <div class="summary-section">
-                                <h3 class="summary-heading">Weekly Momentum Wins & Learnings</h3>
+                                <h3 class="summary-heading">Weekly Momentum</h3>
                                 ${weeklyCheckinHTML}
                             </div>
                             <div class="summary-section">
