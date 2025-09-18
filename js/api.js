@@ -47,9 +47,9 @@ export async function generateAiActionPlan(planSummary, signal) {
  * @param {Array} chatHistory - An array of previous chat messages.
  * @param {string} userMessage - The new message from the user.
  * @param {object} calendarData - The user's calendar data.
- * @returns {Promise<string>} The AI's text response.
+ * @returns {Promise<ReadableStreamDefaultReader>} The reader for the streaming response.
  */
-export async function getGeminiChatResponse(planSummary, chatHistory, userMessage, calendarData) {
+export async function getGeminiChatResponseReader(planSummary, chatHistory, userMessage, calendarData) {
     const response = await fetch('/.netlify/functions/generate-chat-response', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -66,6 +66,5 @@ export async function getGeminiChatResponse(planSummary, chatHistory, userMessag
         throw new Error(errorResult.error || 'The AI assistant failed to generate a response.');
     }
 
-    const data = await response.json();
-    return data.response;
+    return response.body.getReader();
 }
