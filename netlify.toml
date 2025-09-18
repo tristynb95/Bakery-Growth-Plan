@@ -1,3 +1,6 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+
+[functions."generate-chat-response"]
+  timeout = 25
