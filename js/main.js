@@ -31,6 +31,7 @@ function runApp(app) {
         currentView: 'vision',
         planUnsubscribe: null,
         calendarUnsubscribe: null,
+        filesUnsubscribe: null, // Add this line
         calendar: {
             currentDate: new Date(),
             data: {},
@@ -56,6 +57,7 @@ function runApp(app) {
     function handleBackToDashboard() {
         if (appState.planUnsubscribe) appState.planUnsubscribe();
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
+        if (appState.filesUnsubscribe) appState.filesUnsubscribe(); // Add this line
         sessionStorage.removeItem('lastPlanId');
         sessionStorage.removeItem('lastViewId');
         document.getElementById('app-view').classList.add('hidden');
@@ -90,6 +92,7 @@ function runApp(app) {
         
         if (appState.planUnsubscribe) appState.planUnsubscribe();
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
+        if (appState.filesUnsubscribe) appState.filesUnsubscribe(); // Add this line
         
         if (user) {
             const lastActivity = localStorage.getItem('lastActivity');
