@@ -83,6 +83,36 @@ async function handleFileUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
+     // --- START: FILE VALIDATION ---
+    const allowedTypes = [
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'image/png',
+        'image/jpeg'
+    ];
+    const maxSizeInMB = 10;
+    const maxSizeBytes = maxSizeInMB * 1024 * 1024;
+
+    if (!allowedTypes.includes(file.type)) {
+        openModal('warning', { 
+            title: 'Invalid File Type', 
+            message: `Please upload a supported file type: PDF, DOCX, XLSX, PNG, or JPG.` 
+        });
+        e.target.value = ''; // Clear the file input
+        return;
+    }
+
+    if (file.size > maxSizeBytes) {
+        openModal('warning', { 
+            title: 'File Too Large', 
+            message: `Please select a file smaller than ${maxSizeInMB}MB.` 
+        });
+        e.target.value = ''; // Clear the file input
+        return;
+    }
+    // --- END: FILE VALIDATION ---
+
     const progressContainer = document.getElementById('file-upload-progress-container');
     const filenameSpan = document.getElementById('upload-filename');
     const progressBar = document.getElementById('upload-progress-bar');
