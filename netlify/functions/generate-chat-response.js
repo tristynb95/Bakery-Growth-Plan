@@ -3,6 +3,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const admin = require('firebase-admin');
 const jszip = require('jszip');
+const pdf = require('pdf-parse'); // <-- ADD THIS LINE
 
 // Initialize Firebase Admin SDK - place your service account key in Netlify environment variables
 try {
@@ -47,6 +48,9 @@ async function extractFileContents(files) {
                 content = await extractTextFromDocx(buffer);
             } else if (file.name.endsWith('.txt')) {
                 content = buffer.toString('utf8');
+            } else if (file.name.endsWith('.pdf')) { // <-- ADD THIS BLOCK
+                const data = await pdf(buffer);
+                content = data.text;
             }
 
         } catch (downloadError) {
@@ -219,7 +223,7 @@ All strategic advice you provide MUST connect back to one of the four GAIL's Pil
 * \`current_date\`: ${currentDateString}
 * \`plan_summary\`: The manager's active 30-60-90 day plan.
 * \`calendar_data\`: The manager's calendar.
-* \`file_content\`: Content of user-uploaded files. This is a primary source of truth. Note: The AI can currently only read the text content of .docx and .txt files. For other formats like PDF or images, it will state that the content is inaccessible.
+* \`file_content\`: Content of user-uploaded files. This is a primary source of truth. Note: The AI can currently only read the text content of .pdf, .docx and .txt files. For other formats like images, it will state that the content is inaccessible.
 
 ---
 [PLAN SUMMARY START]
