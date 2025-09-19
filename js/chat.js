@@ -133,7 +133,8 @@ async function handleSendMessage() {
     try {
         const planSummary = summarizePlanForAI(appState.planData);
         const calendarData = appState.calendar.data;
-        const responseText = await getGeminiChatResponse(planSummary, chatHistory, messageText, calendarData);
+        const availableFiles = appState.files.map(f => ({ id: f.id, name: f.name, type: f.type }));
+        const responseText = await getGeminiChatResponse(planSummary, chatHistory, messageText, calendarData, availableFiles);
         updateLastAiMessageInUI(responseText);
         const aiMessage = { role: 'model', parts: [{ text: responseText }] };
         chatHistory.push(aiMessage);
