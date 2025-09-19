@@ -33,6 +33,7 @@ const filesTemplate = `
             </div>
     </div>
 </div>
+`;
 
 // This function will be called when the user clicks on the "My Files" nav link
 export function renderFilesView(containerElement) {
