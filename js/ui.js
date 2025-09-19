@@ -315,6 +315,12 @@ async function handleModalAction() {
             }));
             closeModal();
             break;
+        case 'confirmDeleteFile':
+            document.dispatchEvent(new CustomEvent('file-deletion-confirmed', {
+                detail: { fileId: planId }
+            }));
+            closeModal();
+            break;
     }
 }
 
@@ -429,7 +435,7 @@ export function initializeCharCounters() {
 }
 
 export function openModal(type, context = {}) {
-    const { planId, currentName, planName, eventTitle, currentQuarter } = context;
+    const { planId, currentName, planName, eventTitle, currentQuarter, fileName } = context;
     DOMElements.modalBox.dataset.type = type;
     DOMElements.modalBox.dataset.planId = planId;
     const footer = DOMElements.modalActionBtn.parentNode;
@@ -471,13 +477,19 @@ export function openModal(type, context = {}) {
             DOMElements.modalTitle.textContent = "Confirm Deletion";
             DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete the plan: <strong class="font-bold">${planName}</strong>?</p><p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action is final and cannot be undone.</p>`;
             DOMElements.modalActionBtn.textContent = "Confirm Delete";
-            DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+            DOMElements.modalActionBtn.className = 'btn btn-danger';
+            break;
+        case 'confirmDeleteFile':
+            DOMElements.modalTitle.textContent = "Confirm Deletion";
+            DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete the file: <strong class="font-bold">${fileName}</strong>?</p><p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action cannot be undone.</p>`;
+            DOMElements.modalActionBtn.textContent = "Confirm Delete";
+            DOMElements.modalActionBtn.className = 'btn btn-danger';
             break;
         case 'confirmDeleteConversation':
             DOMElements.modalTitle.textContent = "Confirm Deletion";
             DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete this conversation and all of its messages?</p><p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action cannot be undone.</p>`;
             DOMElements.modalActionBtn.textContent = "Yes, Delete Conversation";
-            DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+            DOMElements.modalActionBtn.className = 'btn btn-danger';
             DOMElements.modalCancelBtn.textContent = "Cancel";
             break;
         case 'timeout':
@@ -541,7 +553,7 @@ export function openModal(type, context = {}) {
             DOMElements.modalTitle.textContent = "Are you sure?";
             DOMElements.modalContent.innerHTML = `<p>Generating a new plan will overwrite your existing action plan and any edits. This cannot be undone.</p>`;
             DOMElements.modalActionBtn.textContent = "Yes, Generate New";
-            DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+            DOMElements.modalActionBtn.className = 'btn btn-danger';
             DOMElements.modalActionBtn.onclick = () => {
                 delete appState.planData.aiActionPlan;
                 if (activeSaveDataFunction) {
@@ -564,7 +576,7 @@ export function openModal(type, context = {}) {
             DOMElements.modalTitle.textContent = "Discard Changes?";
             DOMElements.modalContent.innerHTML = `<p>You have unsaved changes. Are you sure you want to close without saving?</p>`;
             DOMElements.modalActionBtn.textContent = "Discard";
-            DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+            DOMElements.modalActionBtn.className = 'btn btn-danger';
             DOMElements.modalActionBtn.onclick = () => closeModal();
             DOMElements.modalCancelBtn.textContent = "Cancel";
             DOMElements.modalCancelBtn.onclick = () => {
@@ -579,7 +591,7 @@ export function openModal(type, context = {}) {
             DOMElements.modalTitle.textContent = "Confirm Deletion";
             DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete the event: <strong class="font-bold">${eventTitle}</strong>?</p><p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action cannot be undone.</p>`;
             DOMElements.modalActionBtn.textContent = "Confirm Delete";
-            DOMElements.modalActionBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700';
+            DOMElements.modalActionBtn.className = 'btn btn-danger';
             break;
     }
     DOMElements.modalOverlay.classList.remove('hidden');
