@@ -1,5 +1,6 @@
 // js/files.js
 
+import { renderAsync } from "docx-preview";
 // Dependencies that will be passed from main.js
 let db, appState, openModal, storage;
 
