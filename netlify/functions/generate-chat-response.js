@@ -3,12 +3,17 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const admin = require('firebase-admin');
 const jszip = require('jszip');
-const pdf = require('pdf-parse'); // <-- ADD THIS LINE
+const pdf = require('pdf-parse');
 
-// Initialize Firebase Admin SDK - place your service account key in Netlify environment variables
+// Initialize Firebase Admin SDK using individual environment variables
 try {
     if (!admin.apps.length) {
-        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+        const serviceAccount = {
+          type: "service_account",
+          project_id: process.env.FIREBASE_PROJECT_ID,
+          private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'), // Replaces escaped newlines
+          client_email: process.env.FIREBASE_CLIENT_EMAIL,
+        };
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount),
             storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET
@@ -48,7 +53,7 @@ async function extractFileContents(files) {
                 content = await extractTextFromDocx(buffer);
             } else if (file.name.endsWith('.txt')) {
                 content = buffer.toString('utf8');
-            } else if (file.name.endsWith('.pdf')) { // <-- ADD THIS BLOCK
+            } else if (file.name.endsWith('.pdf')) {
                 const data = await pdf(buffer);
                 content = data.text;
             }
