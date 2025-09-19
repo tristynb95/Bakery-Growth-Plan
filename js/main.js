@@ -7,6 +7,7 @@ import { initializeDashboard, renderDashboard } from './dashboard.js';
 import { initializeUI, openModal, handleAIActionPlan, handleShare, initializeCharCounters } from './ui.js';
 import { initializePlanView, showPlanView } from './plan-view.js';
 import { initializeChat } from './chat.js';
+import { initializeFiles } from './files.js';
 
 async function initializeFirebase() {
     try {
@@ -30,6 +31,7 @@ function runApp(app) {
         currentView: 'vision',
         planUnsubscribe: null,
         calendarUnsubscribe: null,
+        filesUnsubscribe: null, // Ensure this is part of the initial state
         calendar: {
             currentDate: new Date(),
             data: {},
@@ -44,6 +46,7 @@ function runApp(app) {
     initializeDashboard(db, appState, openModal, handleSelectPlan);
     initializePlanView(db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare);
     initializeChat(appState, db);
+    initializeFiles(db, appState, openModal);
 
     function handleSelectPlan(planId) {
         document.getElementById('dashboard-view').classList.add('hidden');
@@ -54,6 +57,7 @@ function runApp(app) {
     function handleBackToDashboard() {
         if (appState.planUnsubscribe) appState.planUnsubscribe();
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
+        if (appState.filesUnsubscribe) appState.filesUnsubscribe(); // Add this line
         sessionStorage.removeItem('lastPlanId');
         sessionStorage.removeItem('lastViewId');
         document.getElementById('app-view').classList.add('hidden');
@@ -88,6 +92,7 @@ function runApp(app) {
         
         if (appState.planUnsubscribe) appState.planUnsubscribe();
         if (appState.calendarUnsubscribe) appState.calendarUnsubscribe();
+        if (appState.filesUnsubscribe) appState.filesUnsubscribe(); // Add this line
         
         if (user) {
             const lastActivity = localStorage.getItem('lastActivity');

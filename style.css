@@ -1723,15 +1723,15 @@ tr:hover .btn-remove-row {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     font-size: 0.875rem;
-       height: 40px; /* Enforce a consistent height */
+       height: 49.6px; /* Enforce a consistent height */
 }
 
 #calendar-close-btn {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
-      width: 40px; 
+      width: 42px; 
+      height: 49.5px;
     font-size: 1rem; /* Slightly increase icon size for better presence */
-}
 }
 
 
@@ -2862,4 +2862,97 @@ input[type="time"] {
 /* Polished History Panel */
 .history-item:hover {
     background-color: var(--gails-red-light);
+}
+
+/* 61. Compact Sidebar Navigation
+-------------------------------------------------- */
+.sidebar-nav a {
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+}
+
+/* 62. File Viewer Modal Styles (Enhanced)
+-------------------------------------------------- */
+.file-modal-box {
+    max-width: 90vw;
+    width: 100%;
+    height: 95vh;
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column; /* Stack header and content vertically */
+}
+
+#file-modal-content {
+    padding: 0;
+    background-color: var(--gails-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: grab;
+    flex-grow: 1; /* Allows this element to fill all available space */
+    min-height: 0; /* Prevents flexbox overflow issues */
+}
+
+.file-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid #E5E7EB;
+    flex-shrink: 0; /* Prevents the header from shrinking */
+}
+
+#file-modal-title.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#file-modal-content.is-panning {
+    cursor: grabbing;
+}
+
+#file-modal-content .zoomable-content {
+    transition: transform 0.2s ease-out;
+    transform-origin: center;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+#file-modal-content img,
+#file-modal-content iframe {
+    max-width: initial; /* Allow content to exceed container for zooming */
+    max-height: initial;
+}
+
+#file-modal-content .file-placeholder {
+    text-align: center;
+    color: var(--gails-text-secondary);
+}
+
+#file-modal-content .file-placeholder i {
+    font-size: 4rem;
+}
+
+#file-modal-content pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    padding: 2rem;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.modal-footer.justify-between {
+    justify-content: space-between;
+}
+
+.btn-danger {
+    background-color: #DC2626;
+    color: var(--gails-white);
+}
+
+.btn-danger:hover {
+    background-color: #B91C1C;
 }
