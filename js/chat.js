@@ -141,8 +141,7 @@ async function handleSendMessage() {
         if (!snapshot.empty) {
             fileContents = snapshot.docs.map(doc => {
                 const data = doc.data();
-                // For now, we are passing metadata. A future step could involve fetching full content.
-                return { name: data.name, size: data.size, type: data.type };
+                return { name: data.name, path: data.path }; // Send name and path
             });
         }
     } catch (error) {

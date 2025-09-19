@@ -1,6 +1,68 @@
 // netlify/functions/generate-chat-response.js
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const admin = require('firebase-admin');
+const jszip = require('jszip');
+
+// Initialize Firebase Admin SDK - place your service account key in Netlify environment variables
+try {
+    if (!admin.apps.length) {
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET
+        });
+    }
+} catch (e) {
+    console.error('Firebase Admin initialization error:', e.message);
+}
+
+
+async function extractTextFromDocx(buffer) {
+    try {
+        const zip = await jszip.loadAsync(buffer);
+        const contentXml = await zip.file("word/document.xml").async("string");
+        const textNodes = contentXml.match(/<w:t>.*?<\/w:t>/g) || [];
+        return textNodes.map(node => node.replace(/<.*?>/g, '')).join(' ');
+    } catch (error) {
+        console.error("Error parsing DOCX:", error);
+        return "[Error reading DOCX content]";
+    }
+}
+
+async function extractFileContents(files) {
+    if (!files || files.length === 0 || !admin.apps.length) {
+        return [];
+    }
+    const storage = admin.storage().bucket();
+    const processedFiles = await Promise.all(files.map(async (file) => {
+        let content = `[Content of ${file.name} is not readable by the AI.]`;
+        const maxContentLength = 5000;
+
+        try {
+            const fileRef = storage.file(file.path);
+            const [buffer] = await fileRef.download();
+            
+            if (file.name.endsWith('.docx')) {
+                content = await extractTextFromDocx(buffer);
+            } else if (file.name.endsWith('.txt')) {
+                content = buffer.toString('utf8');
+            }
+
+        } catch (downloadError) {
+            console.error(`Failed to download or process file ${file.path}:`, downloadError);
+            content = `[Error accessing file: ${file.name}]`;
+        }
+
+        return {
+            name: file.name,
+            content: content.substring(0, maxContentLength) + (content.length > maxContentLength ? '... [truncated]' : '')
+        };
+    }));
+
+    return processedFiles;
+}
+
 
 function formatCalendarDataForAI(calendarData, daysToLookBack = 0) {
     if (!calendarData || Object.keys(calendarData).length === 0) {
@@ -69,12 +131,13 @@ exports.handler = async function(event, context) {
   try {
     const { planSummary, chatHistory, userMessage, calendarData, fileContents } = JSON.parse(event.body);
     
+    const processedFileContents = await extractFileContents(fileContents);
+    
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // --- FIX: Corrected the model name from "gemini-2.5-flash-lite" to "gemini-2.5-flash" ---
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"});
     
     const calendarContext = formatCalendarDataForAI(calendarData, 30);
-    const fileContext = formatFileContentForAI(fileContents);
+    const fileContext = formatFileContentForAI(processedFileContents);
     
     const today = new Date();
     const currentDateString = today.toLocaleDateString('en-GB', {
@@ -84,7 +147,6 @@ exports.handler = async function(event, context) {
         day: 'numeric'
     });
     
-    // Extract manager's name from the plan summary
     const managerNameMatch = planSummary.match(/MANAGER: (.*)/);
     const manager_name = managerNameMatch ? managerNameMatch[1] : "Manager";
 
@@ -157,7 +219,7 @@ All strategic advice you provide MUST connect back to one of the four GAIL's Pil
 * \`current_date\`: ${currentDateString}
 * \`plan_summary\`: The manager's active 30-60-90 day plan.
 * \`calendar_data\`: The manager's calendar.
-* \`file_content\`: Content of user-uploaded files. This is a primary source of truth.
+* \`file_content\`: Content of user-uploaded files. This is a primary source of truth. Note: The AI can currently only read the text content of .docx and .txt files. For other formats like PDF or images, it will state that the content is inaccessible.
 
 ---
 [PLAN SUMMARY START]
