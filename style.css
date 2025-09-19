@@ -2015,7 +2015,7 @@ input[type="time"] {
     flex-direction: column;
     justify-content: center;
     /* This ensures the container doesn't shrink when the subtitle is hidden */
-    min-height: 42px;
+    min-height: 49.6px;
 }
 
 #day-detail-subtitle {
