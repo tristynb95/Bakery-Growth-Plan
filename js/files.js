@@ -6,18 +6,12 @@ let db, appState, openModal;
 // --- HTML Template for the 'My Files' view ---
 const filesTemplate = `
 <div class="space-y-8">
-    <div class="page-header">
-        <div>
-            <h1 class="text-4xl font-black text-gray-900 font-poppins">My Files</h1>
-            <p class="mt-1 text-lg text-gray-500">Manage documents for your plan, like P&L statements and KPIs.</p>
-        </div>
-        <div class="header-actions">
-            <label for="file-upload-input" class="btn btn-primary cursor-pointer">
-                <i class="bi bi-upload"></i>
-                <span>Upload New File</span>
-            </label>
-            <input type="file" id="file-upload-input" class="hidden">
-        </div>
+    <div class="flex justify-end">
+        <label for="file-upload-input" class="btn btn-primary cursor-pointer">
+            <i class="bi bi-upload"></i>
+            <span>Upload New File</span>
+        </label>
+        <input type="file" id="file-upload-input" class="hidden">
     </div>
 
     <div id="file-upload-progress-container" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-4">
@@ -39,7 +33,6 @@ const filesTemplate = `
             </div>
     </div>
 </div>
-`;
 
 // This function will be called when the user clicks on the "My Files" nav link
 export function renderFilesView(containerElement) {
