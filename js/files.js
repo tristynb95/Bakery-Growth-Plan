@@ -69,7 +69,7 @@ function renderFileList(files = []) {
                     <p class="text-sm text-gray-500">${formatFileSize(file.size)}</p>
                 </div>
             </div>
-            <button class="btn btn-secondary !p-2 delete-file-btn" data-file-id="${file.id}" title="Delete File">
+            <button class="btn btn-secondary !p-2 delete-file-btn" data-file-id="${file.id}" data-file-name="${file.name}" title="Delete File">
                 <i class="bi bi-trash3"></i>
             </button>
         `;
@@ -118,7 +118,6 @@ async function handleFileUpload(e) {
             await planRef.collection('files').add(fileData);
             
             progressContainer.classList.add('hidden');
-            // No need to manually refresh, the listener will do it.
         }
     );
 }
@@ -137,10 +136,7 @@ async function deleteFile(fileId) {
         const filePath = fileDoc.data().path;
         const storageRef = storage.ref(filePath);
 
-        // Delete from Firebase Storage
         await storageRef.delete();
-
-        // Delete from Firestore
         await fileRef.delete();
 
     } catch (error) {
@@ -158,25 +154,21 @@ export function renderFilesView(containerElement) {
                            .collection('files')
                            .orderBy('uploadedAt', 'desc');
     
-    // Listen for real-time updates to the files
+    if (appState.filesUnsubscribe) appState.filesUnsubscribe(); // Unsubscribe from any previous listener
+    
     appState.filesUnsubscribe = planFilesRef.onSnapshot(snapshot => {
         const files = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderFileList(files);
     });
 
-    // Add event listener for the file input
-    const fileUploadInput = document.getElementById('file-upload-input');
-    fileUploadInput.addEventListener('change', handleFileUpload);
+    document.getElementById('file-upload-input').addEventListener('change', handleFileUpload);
 
-    // Add event listener for delete buttons (using event delegation)
-    const fileListContainer = document.getElementById('file-list-container');
-    fileListContainer.addEventListener('click', (e) => {
+    document.getElementById('file-list-container').addEventListener('click', (e) => {
         const deleteBtn = e.target.closest('.delete-file-btn');
         if (deleteBtn) {
             const fileId = deleteBtn.dataset.fileId;
-            if (confirm('Are you sure you want to permanently delete this file?')) {
-                deleteFile(fileId);
-            }
+            const fileName = deleteBtn.dataset.fileName;
+            openModal('confirmDeleteFile', { planId: fileId, fileName: fileName });
         }
     });
 }
@@ -185,5 +177,13 @@ export function initializeFiles(database, state, modalOpener) {
     db = database;
     appState = state;
     openModal = modalOpener;
-    storage = firebase.storage(); // Initialize Firebase Storage
+    storage = firebase.storage();
+    
+    // Listen for the custom event dispatched by the modal
+    document.addEventListener('file-deletion-confirmed', (e) => {
+        const { fileId } = e.detail;
+        if (fileId && appState.currentView === 'files') {
+            deleteFile(fileId);
+        }
+    });
 }

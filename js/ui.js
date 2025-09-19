@@ -307,6 +307,13 @@ async function handleModalAction() {
             }));
             closeModal();
             break;
+
+        case 'confirmDeleteFile': // <-- ADD THIS NEW CASE
+            document.dispatchEvent(new CustomEvent('file-deletion-confirmed', {
+                detail: { fileId: planId } // We re-use the planId variable for the fileId
+            }));
+            closeModal();
+            break;
     }
 }
 
