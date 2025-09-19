@@ -1718,19 +1718,20 @@ tr:hover .btn-remove-row {
     gap: 0.5rem;
 }
 
+/* Style for the smaller action buttons in the event panel */
 .day-detail-header .btn {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     font-size: 0.875rem;
-    height: 49.6px; /* <-- Add this line for consistent height */
+       height: 49.6px; /* Enforce a consistent height */
 }
 
 #calendar-close-btn {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
+      width: 49.6px; 
     font-size: 1rem; /* Slightly increase icon size for better presence */
 }
-
 
 
 /* 41. Compact Notes Text Area
