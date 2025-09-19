@@ -1,6 +1,6 @@
 <h2>GAIL's Bakery Growth Planner</h2><br>
 
-An all-in-one digital hub for the planning and execution of bakery operations, built for Bakery Managers at GAIL's.
+Growth Planner is all-in-one digital hub for the planning and execution of bakery operations, built for Bakery Managers at GAIL's.
 
 The Bakery Growth Planner is a modern web application designed to empower GAIL's Bakery Managers by streamlining the 30-60-90 day planning process. It replaces static documents with a dynamic, interactive, and intelligent platform, integrating AI to provide personalised support and reduce administrative overhead.
 
