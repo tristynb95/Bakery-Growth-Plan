@@ -233,12 +233,41 @@ function openFileViewerModal(file) {
         viewerElement = document.createElement('img');
         viewerElement.src = file.url;
         viewerElement.alt = file.name;
+        viewerElement.className = 'zoomable-content';
+        content.appendChild(viewerElement);
     } else if (file.type === 'application/pdf') {
         viewerElement = document.createElement('iframe');
         viewerElement.src = file.url;
         viewerElement.width = "100%";
         viewerElement.height = "100%";
         viewerElement.frameborder = "0";
+        viewerElement.className = 'zoomable-content'; // PDF can also be zoomed
+        content.appendChild(viewerElement);
+    } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        content.innerHTML = `<div class="flex items-center justify-center h-full"><div class="loading-spinner"></div><p class="ml-4 text-gray-600">Rendering document...</p></div>`;
+        
+        fetch(file.url)
+            .then(response => response.arrayBuffer())
+            .then(buffer => {
+                const docxContainer = document.createElement('div');
+                docxContainer.className = 'docx-preview-container'; // For styling
+                
+                docx.renderAsync(buffer, docxContainer)
+                    .then(() => {
+                        content.innerHTML = ''; // Clear loading indicator
+                        content.appendChild(docxContainer);
+                        viewerElement = docxContainer;
+                        setupZoomAndPan(); // Setup zoom after rendering
+                    })
+                    .catch(error => {
+                        console.error('Error rendering .docx file:', error);
+                        content.innerHTML = `<div class="file-placeholder"><i class="bi bi-exclamation-circle"></i><p class="mt-4 font-semibold">Could not render this document.</p></div>`;
+                    });
+            })
+            .catch(error => {
+                 console.error('Error fetching .docx file:', error);
+                 content.innerHTML = `<div class="file-placeholder"><i class="bi bi-exclamation-circle"></i><p class="mt-4 font-semibold">Could not load this document.</p></div>`;
+            });
     } else {
         content.innerHTML = `
             <div class="file-placeholder">
@@ -249,11 +278,9 @@ function openFileViewerModal(file) {
         `;
     }
 
-    if (viewerElement) {
-        viewerElement.className = 'zoomable-content';
-        content.appendChild(viewerElement);
+    function setupZoomAndPan() {
+        if (!viewerElement) return;
 
-        // --- Zoom & Pan Logic ---
         let zoomLevel = 1;
         let isPanning = false;
         let startPos = { x: 0, y: 0, scrollLeft: 0, scrollTop: 0 };
@@ -298,6 +325,11 @@ function openFileViewerModal(file) {
 
         applyZoom(); // Set initial state
     }
+
+    if (viewerElement) {
+        setupZoomAndPan();
+    }
+    
 
     downloadBtn.onclick = () => { window.open(file.url, '_blank'); };
     deleteBtn.onclick = () => {
