@@ -1,26 +1,39 @@
 // netlify/functions/generate-chat-response.js
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
 const admin = require('firebase-admin');
 const jszip = require('jszip');
 const pdf = require('pdf-parse');
 
-// Initialize Firebase Admin SDK using individual environment variables
-try {
-    if (!admin.apps.length) {
-        const serviceAccount = {
-          type: "service_account",
-          project_id: process.env.FIREBASE_PROJECT_ID,
-          private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'), // Replaces escaped newlines
-          client_email: process.env.FIREBASE_CLIENT_EMAIL,
-        };
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-            storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET
-        });
+const secretManagerClient = new SecretManagerServiceClient();
+
+// Function to fetch the service account key from Google Secret Manager
+async function getFirebaseCredentials() {
+    const secretName = `projects/${process.env.FIREBASE_PROJECT_ID}/secrets/firebase-service-account-key/versions/latest`;
+    try {
+        const [version] = await secretManagerClient.accessSecretVersion({ name: secretName });
+        const payload = version.payload.data.toString('utf8');
+        return JSON.parse(payload);
+    } catch (error) {
+        console.error("Could not access secret from Google Secret Manager:", error);
+        throw new Error("Failed to load Firebase credentials from Secret Manager.");
     }
-} catch (e) {
-    console.error('Firebase Admin initialization error:', e.message);
+}
+
+// Initialize Firebase Admin SDK using credentials from Secret Manager
+async function initializeFirebaseAdmin() {
+    if (admin.apps.length === 0) {
+        try {
+            const serviceAccount = await getFirebaseCredentials();
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+                storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET
+            });
+        } catch (e) {
+            console.error('Firebase Admin initialization error:', e.message);
+        }
+    }
 }
 
 
@@ -138,6 +151,7 @@ exports.handler = async function(event, context) {
   }
 
   try {
+    await initializeFirebaseAdmin();
     const { planSummary, chatHistory, userMessage, calendarData, fileContents } = JSON.parse(event.body);
     
     const processedFileContents = await extractFileContents(fileContents);
