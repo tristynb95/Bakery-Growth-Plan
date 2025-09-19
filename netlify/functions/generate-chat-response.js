@@ -10,6 +10,7 @@ const secretManagerClient = new SecretManagerServiceClient();
 
 // Function to fetch the service account key from Google Secret Manager
 async function getFirebaseCredentials() {
+    // NOTE: The secret name MUST match the name you gave it in Google Cloud Secret Manager.
     const secretName = `projects/${process.env.FIREBASE_PROJECT_ID}/secrets/firebase-service-account-key/versions/latest`;
     try {
         const [version] = await secretManagerClient.accessSecretVersion({ name: secretName });
@@ -17,7 +18,7 @@ async function getFirebaseCredentials() {
         return JSON.parse(payload);
     } catch (error) {
         console.error("Could not access secret from Google Secret Manager:", error);
-        throw new Error("Failed to load Firebase credentials from Secret Manager.");
+        throw new Error("Failed to load Firebase credentials from Secret Manager. Check function logs and GCP permissions.");
     }
 }
 
@@ -32,6 +33,8 @@ async function initializeFirebaseAdmin() {
             });
         } catch (e) {
             console.error('Firebase Admin initialization error:', e.message);
+            // Re-throw the error to be caught by the main handler
+            throw e;
         }
     }
 }
@@ -295,10 +298,10 @@ ${fileContext}
     };
 
   } catch (error) {
-    console.error("Error calling Gemini API:", error);
+    console.error("Error in generate-chat-response handler:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "The AI assistant is currently unavailable. Please try again later." }),
+      body: JSON.stringify({ error: "The AI assistant is currently unavailable. Please check the function logs for more details." }),
     };
   }
 };
