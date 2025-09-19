@@ -67,7 +67,7 @@ function renderFileList(files = []) {
             <div class="flex items-center gap-4">
                 <i class="bi bi-file-earmark-text text-2xl text-gray-400"></i>
                 <div>
-                    <a href="${file.url}" target="_blank" rel="noopener noreferrer" class="font-semibold text-gray-800 hover:underline">${file.name}</a>
+                    <a href="#" class="font-semibold text-gray-800 hover:underline view-file-link" data-file='${JSON.stringify(file)}'>${file.name}</a>
                     <p class="text-sm text-gray-500">${formatFileSize(file.size)}</p>
                 </div>
             </div>
@@ -78,6 +78,7 @@ function renderFileList(files = []) {
         container.appendChild(fileElement);
     });
 }
+
 
 async function handleFileUpload(e) {
     const file = e.target.files[0];
@@ -170,22 +171,6 @@ async function deleteFile(fileId) {
 
         await storageRef.delete();
         await fileRef.delete();
-
-        // FIX: Manually refresh the file list after deletion.
-        // The onSnapshot listener in renderFilesView should handle this automatically,
-        // but it is not being triggered upon deletion for an unknown reason.
-        // This workaround ensures the UI updates immediately by manually re-fetching
-        // and re-rendering the file list. While this is less efficient than a
-        // functioning real-time listener, it is a reliable fix for the user-facing bug.
-        const planFilesRef = db.collection('users').doc(appState.currentUser.uid)
-                           .collection('plans').doc(appState.currentPlanId)
-                           .collection('files')
-                           .orderBy('uploadedAt', 'desc');
-
-        const snapshot = await planFilesRef.get();
-        const files = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderFileList(files);
-
     } catch (error) {
         console.error("Error deleting file:", error);
         openModal('warning', { title: 'Deletion Failed', message: 'Could not delete the file. It may have already been removed.' });
@@ -219,7 +204,49 @@ export function renderFilesView(containerElement) {
             const fileName = deleteBtn.dataset.fileName;
             openModal('confirmDeleteFile', { planId: fileId, fileName: fileName });
         }
+        
+        const viewLink = e.target.closest('.view-file-link');
+        if (viewLink) {
+            e.preventDefault();
+            const fileData = JSON.parse(viewLink.dataset.file);
+            openFileViewerModal(fileData);
+        }
     });
+}
+function openFileViewerModal(file) {
+    const modal = document.getElementById('file-view-modal');
+    const title = document.getElementById('file-modal-title');
+    const content = document.getElementById('file-modal-content');
+    const downloadBtn = document.getElementById('file-modal-download-btn');
+    const deleteBtn = document.getElementById('file-modal-delete-btn');
+
+    title.textContent = file.name;
+    content.innerHTML = ''; // Clear previous content
+
+    if (file.type.startsWith('image/')) {
+        content.innerHTML = `<img src="${file.url}" alt="${file.name}">`;
+    } else if (file.type === 'application/pdf') {
+        content.innerHTML = `<iframe src="${file.url}" width="100%" height="100%" frameborder="0"></iframe>`;
+    } else {
+        content.innerHTML = `
+            <div class="file-placeholder">
+                <i class="bi bi-file-earmark-arrow-down"></i>
+                <p class="mt-4 font-semibold">Preview not available</p>
+                <p class="text-sm">Download the file to view its contents.</p>
+            </div>
+        `;
+    }
+
+    downloadBtn.onclick = () => {
+        window.open(file.url, '_blank');
+    };
+
+    deleteBtn.onclick = () => {
+        modal.classList.add('hidden'); // Close the viewer first
+        openModal('confirmDeleteFile', { planId: file.id, fileName: file.name });
+    };
+
+    modal.classList.remove('hidden');
 }
 
 export function initializeFiles(database, state, modalOpener) {
