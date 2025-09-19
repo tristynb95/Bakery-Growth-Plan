@@ -211,6 +211,7 @@ export function renderFilesView(containerElement) {
         }
     });
 }
+
 function openFileViewerModal(file) {
     const modal = document.getElementById('file-view-modal');
     const title = document.getElementById('file-modal-title');
@@ -252,7 +253,9 @@ function openFileViewerModal(file) {
                 const docxContainer = document.createElement('div');
                 docxContainer.className = 'docx-preview-container'; // For styling
                 
-                docx.renderAsync(buffer, docxContainer)
+                // ================== THE FIX ==================
+                window.docx.renderAsync(buffer, docxContainer)
+                // =============================================
                     .then(() => {
                         content.innerHTML = ''; // Clear loading indicator
                         content.appendChild(docxContainer);
