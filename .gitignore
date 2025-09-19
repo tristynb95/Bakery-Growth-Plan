@@ -1,2 +1,5 @@
 node_modules/
 cors.json
+
+# Local Netlify folder
+.netlify
