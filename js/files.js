@@ -141,6 +141,21 @@ async function deleteFile(fileId) {
         await storageRef.delete();
         await fileRef.delete();
 
+        // FIX: Manually refresh the file list after deletion.
+        // The onSnapshot listener in renderFilesView should handle this automatically,
+        // but it is not being triggered upon deletion for an unknown reason.
+        // This workaround ensures the UI updates immediately by manually re-fetching
+        // and re-rendering the file list. While this is less efficient than a
+        // functioning real-time listener, it is a reliable fix for the user-facing bug.
+        const planFilesRef = db.collection('users').doc(appState.currentUser.uid)
+                           .collection('plans').doc(appState.currentPlanId)
+                           .collection('files')
+                           .orderBy('uploadedAt', 'desc');
+
+        const snapshot = await planFilesRef.get();
+        const files = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderFileList(files);
+
     } catch (error) {
         console.error("Error deleting file:", error);
         openModal('warning', { title: 'Deletion Failed', message: 'Could not delete the file. It may have already been removed.' });
