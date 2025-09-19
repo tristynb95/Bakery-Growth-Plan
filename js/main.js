@@ -7,6 +7,7 @@ import { initializeDashboard, renderDashboard } from './dashboard.js';
 import { initializeUI, openModal, handleAIActionPlan, handleShare, initializeCharCounters } from './ui.js';
 import { initializePlanView, showPlanView } from './plan-view.js';
 import { initializeChat } from './chat.js';
+import { initializeFiles } from './files.js';
 
 async function initializeFirebase() {
     try {
@@ -44,6 +45,7 @@ function runApp(app) {
     initializeDashboard(db, appState, openModal, handleSelectPlan);
     initializePlanView(db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare);
     initializeChat(appState, db);
+    initializeFiles(db, appState, openModal);
 
     function handleSelectPlan(planId) {
         document.getElementById('dashboard-view').classList.add('hidden');
