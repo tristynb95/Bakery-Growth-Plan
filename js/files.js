@@ -48,6 +48,8 @@ function renderFileList(files = []) {
     const container = document.getElementById('file-list-container');
     const noFilesMessage = document.getElementById('no-files-message');
 
+    if (!container || !noFilesMessage) return;
+
     if (files.length === 0) {
         noFilesMessage.classList.remove('hidden');
         container.innerHTML = ''; // Clear any existing files
@@ -100,7 +102,7 @@ async function handleFileUpload(e) {
         },
         (error) => {
             console.error("Upload failed:", error);
-            openModal('warning', 'Upload Failed', 'There was an error uploading your file. Please try again.');
+            openModal('warning', { title: 'Upload Failed', message: 'There was an error uploading your file. Please try again.' });
             progressContainer.classList.add('hidden');
         },
         async () => {
@@ -141,7 +143,7 @@ async function deleteFile(fileId) {
 
     } catch (error) {
         console.error("Error deleting file:", error);
-        openModal('warning', 'Deletion Failed', 'Could not delete the file. It may have already been removed.');
+        openModal('warning', { title: 'Deletion Failed', message: 'Could not delete the file. It may have already been removed.' });
     }
 }
 
@@ -154,11 +156,13 @@ export function renderFilesView(containerElement) {
                            .collection('files')
                            .orderBy('uploadedAt', 'desc');
     
-    if (appState.filesUnsubscribe) appState.filesUnsubscribe(); // Unsubscribe from any previous listener
+    if (appState.filesUnsubscribe) appState.filesUnsubscribe();
     
     appState.filesUnsubscribe = planFilesRef.onSnapshot(snapshot => {
         const files = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderFileList(files);
+    }, error => {
+        console.error("Error listening to file changes:", error);
     });
 
     document.getElementById('file-upload-input').addEventListener('change', handleFileUpload);
@@ -179,7 +183,6 @@ export function initializeFiles(database, state, modalOpener) {
     openModal = modalOpener;
     storage = firebase.storage();
     
-    // Listen for the custom event dispatched by the modal
     document.addEventListener('file-deletion-confirmed', (e) => {
         const { fileId } = e.detail;
         if (fileId && appState.currentView === 'files') {

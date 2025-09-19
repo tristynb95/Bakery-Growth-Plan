@@ -31,7 +31,7 @@ function runApp(app) {
         currentView: 'vision',
         planUnsubscribe: null,
         calendarUnsubscribe: null,
-        filesUnsubscribe: null, // Add this line
+        filesUnsubscribe: null, // Ensure this is part of the initial state
         calendar: {
             currentDate: new Date(),
             data: {},
