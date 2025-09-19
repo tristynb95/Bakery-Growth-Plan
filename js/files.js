@@ -29,8 +29,10 @@ const filesTemplate = `
     <div class="content-card p-6">
         <h3 class="profile-card-title">Uploaded Documents</h3>
         <div id="file-list-container" class="mt-4">
-            <p id="no-files-message" class="text-gray-500">You haven't uploaded any files for this plan yet.</p>
-            {/* File items will be dynamically inserted here */}
+            <div id="files-loading-state" class="flex items-center justify-center p-8 text-gray-500">
+                <div class="loading-spinner !w-8 !h-8 mr-4"></div>
+                <span>Loading files...</span>
+            </div>
         </div>
     </div>
 </div>
@@ -46,19 +48,15 @@ function formatFileSize(bytes) {
 
 function renderFileList(files = []) {
     const container = document.getElementById('file-list-container');
-    const noFilesMessage = document.getElementById('no-files-message');
+    if (!container) return;
 
-    if (!container || !noFilesMessage) return;
+    // Always clear the container first to remove the loading state
+    container.innerHTML = '';
 
     if (files.length === 0) {
-        noFilesMessage.classList.remove('hidden');
-        container.innerHTML = ''; // Clear any existing files
-        container.appendChild(noFilesMessage);
+        container.innerHTML = `<p id="no-files-message" class="text-gray-500">You haven't uploaded any files for this plan yet.</p>`;
         return;
     }
-
-    noFilesMessage.classList.add('hidden');
-    container.innerHTML = ''; // Clear the container before rendering
 
     files.forEach(file => {
         const fileElement = document.createElement('div');

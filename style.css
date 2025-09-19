@@ -2877,6 +2877,8 @@ input[type="time"] {
     max-width: 90vw;
     width: 100%;
     height: 95vh;
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column; /* Stack header and content vertically */
 }
 
 #file-modal-content {
@@ -2885,8 +2887,25 @@ input[type="time"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden; /* Hide scrollbars, we will pan manually */
+    overflow: hidden;
     cursor: grab;
+    flex-grow: 1; /* Allows this element to fill all available space */
+    min-height: 0; /* Prevents flexbox overflow issues */
+}
+
+.file-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid #E5E7EB;
+    flex-shrink: 0; /* Prevents the header from shrinking */
+}
+
+#file-modal-title.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #file-modal-content.is-panning {
@@ -2937,3 +2956,4 @@ input[type="time"] {
 .btn-danger:hover {
     background-color: #B91C1C;
 }
+
