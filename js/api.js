@@ -47,13 +47,14 @@ export async function generateAiActionPlan(planSummary, signal) {
  * @param {Array} chatHistory - An array of previous chat messages.
  * @param {string} userMessage - The new message from the user.
  * @param {object} calendarData - The user's calendar data.
+ * @param {Array} fileContents - An array of objects with file names and content.
  * @returns {Promise<string>} The AI's text response.
  */
-export async function getGeminiChatResponse(planSummary, chatHistory, userMessage, calendarData) {
+export async function getGeminiChatResponse(planSummary, chatHistory, userMessage, calendarData, fileContents) {
     const response = await fetch('/.netlify/functions/generate-chat-response', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planSummary, chatHistory, userMessage, calendarData }),
+        body: JSON.stringify({ planSummary, chatHistory, userMessage, calendarData, fileContents }),
     });
 
     if (!response.ok) {

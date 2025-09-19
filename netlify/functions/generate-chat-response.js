@@ -1,6 +1,93 @@
 // netlify/functions/generate-chat-response.js
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
+const admin = require('firebase-admin');
+const jszip = require('jszip');
+const pdf = require('pdf-parse');
+
+const secretManagerClient = new SecretManagerServiceClient();
+
+// Function to fetch the service account key from Google Secret Manager
+async function getFirebaseCredentials() {
+    // NOTE: The secret name MUST match the name you gave it in Google Cloud Secret Manager.
+    const secretName = `projects/${process.env.FIREBASE_PROJECT_ID}/secrets/firebase-service-account-key/versions/latest`;
+    try {
+        const [version] = await secretManagerClient.accessSecretVersion({ name: secretName });
+        const payload = version.payload.data.toString('utf8');
+        return JSON.parse(payload);
+    } catch (error) {
+        console.error("Could not access secret from Google Secret Manager:", error);
+        throw new Error("Failed to load Firebase credentials from Secret Manager. Check function logs and GCP permissions.");
+    }
+}
+
+// Initialize Firebase Admin SDK using credentials from Secret Manager
+async function initializeFirebaseAdmin() {
+    if (admin.apps.length === 0) {
+        try {
+            const serviceAccount = await getFirebaseCredentials();
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+                storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET
+            });
+        } catch (e) {
+            console.error('Firebase Admin initialization error:', e.message);
+            // Re-throw the error to be caught by the main handler
+            throw e;
+        }
+    }
+}
+
+
+async function extractTextFromDocx(buffer) {
+    try {
+        const zip = await jszip.loadAsync(buffer);
+        const contentXml = await zip.file("word/document.xml").async("string");
+        const textNodes = contentXml.match(/<w:t>.*?<\/w:t>/g) || [];
+        return textNodes.map(node => node.replace(/<.*?>/g, '')).join(' ');
+    } catch (error) {
+        console.error("Error parsing DOCX:", error);
+        return "[Error reading DOCX content]";
+    }
+}
+
+async function extractFileContents(files) {
+    if (!files || files.length === 0 || !admin.apps.length) {
+        return [];
+    }
+    const storage = admin.storage().bucket();
+    const processedFiles = await Promise.all(files.map(async (file) => {
+        let content = `[Content of ${file.name} is not readable by the AI.]`;
+        const maxContentLength = 5000;
+
+        try {
+            const fileRef = storage.file(file.path);
+            const [buffer] = await fileRef.download();
+            
+            if (file.name.endsWith('.docx')) {
+                content = await extractTextFromDocx(buffer);
+            } else if (file.name.endsWith('.txt')) {
+                content = buffer.toString('utf8');
+            } else if (file.name.endsWith('.pdf')) {
+                const data = await pdf(buffer);
+                content = data.text;
+            }
+
+        } catch (downloadError) {
+            console.error(`Failed to download or process file ${file.path}:`, downloadError);
+            content = `[Error accessing file: ${file.name}]`;
+        }
+
+        return {
+            name: file.name,
+            content: content.substring(0, maxContentLength) + (content.length > maxContentLength ? '... [truncated]' : '')
+        };
+    }));
+
+    return processedFiles;
+}
+
 
 function formatCalendarDataForAI(calendarData, daysToLookBack = 0) {
     if (!calendarData || Object.keys(calendarData).length === 0) {
@@ -46,6 +133,20 @@ function formatCalendarDataForAI(calendarData, daysToLookBack = 0) {
     return parts.join('');
 }
 
+function formatFileContentForAI(fileContents) {
+    if (!fileContents || fileContents.length === 0) {
+        return "No files have been uploaded for this plan.";
+    }
+
+    let fileString = "Here is the content of the files the user has uploaded for this plan:\n\n";
+    fileContents.forEach(file => {
+        fileString += `--- START OF FILE: ${file.name} ---\n`;
+        fileString += `${file.content}\n`;
+        fileString += `--- END OF FILE: ${file.name} ---\n\n`;
+    });
+    return fileString;
+}
+
 
 exports.handler = async function(event, context) {
   if (event.httpMethod !== "POST") {
@@ -53,13 +154,16 @@ exports.handler = async function(event, context) {
   }
 
   try {
-    const { planSummary, chatHistory, userMessage, calendarData } = JSON.parse(event.body);
+    await initializeFirebaseAdmin();
+    const { planSummary, chatHistory, userMessage, calendarData, fileContents } = JSON.parse(event.body);
+    
+    const processedFileContents = await extractFileContents(fileContents);
     
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // --- FIX: Corrected the model name from "gemini-2.5-flash-lite" to "gemini-2.5-flash" ---
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"});
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite"});
     
     const calendarContext = formatCalendarDataForAI(calendarData, 30);
+    const fileContext = formatFileContentForAI(processedFileContents);
     
     const today = new Date();
     const currentDateString = today.toLocaleDateString('en-GB', {
@@ -69,7 +173,6 @@ exports.handler = async function(event, context) {
         day: 'numeric'
     });
     
-    // Extract manager's name from the plan summary
     const managerNameMatch = planSummary.match(/MANAGER: (.*)/);
     const manager_name = managerNameMatch ? managerNameMatch[1] : "Manager";
 
@@ -92,6 +195,7 @@ Before every response, you MUST conduct a silent, internal analysis using this f
 1.  **Intent Analysis:** What is the user's core need?
     * _Social Greeting:_ A simple "hello."
     * _Data Retrieval:_ A factual question about their plan or calendar.
+    * _File Analysis:_ A question about the content of an uploaded file.
     * _Brainstorming:_ A request for new ideas.
     * _Strategic Review:_ A request for feedback on an existing idea.
 2.  **Context Confidence Score (Internal):**
@@ -141,6 +245,7 @@ All strategic advice you provide MUST connect back to one of the four GAIL's Pil
 * \`current_date\`: ${currentDateString}
 * \`plan_summary\`: The manager's active 30-60-90 day plan.
 * \`calendar_data\`: The manager's calendar.
+* \`file_content\`: Content of user-uploaded files. This is a primary source of truth. Note: The AI can currently only read the text content of .pdf, .docx and .txt files. For other formats like images, it will state that the content is inaccessible.
 
 ---
 [PLAN SUMMARY START]
@@ -150,6 +255,10 @@ ${planSummary}
 [CALENDAR DATA START]
 ${calendarContext}
 [CALENDAR DATA END]
+---
+[FILE CONTENT START]
+${fileContext}
+[FILE CONTENT END]
 ---
             `}],
         },
@@ -189,10 +298,10 @@ ${calendarContext}
     };
 
   } catch (error) {
-    console.error("Error calling Gemini API:", error);
+    console.error("Error in generate-chat-response handler:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "The AI assistant is currently unavailable. Please try again later." }),
+      body: JSON.stringify({ error: "The AI assistant is currently unavailable. Please check the function logs for more details." }),
     };
   }
 };

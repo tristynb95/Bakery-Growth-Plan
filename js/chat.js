@@ -130,10 +130,29 @@ async function handleSendMessage() {
     DOMElements.chatInput.value = '';
     DOMElements.chatInput.style.height = `${initialHeight}px`;
     addMessageToUI('model', '', true);
+
+    // --- NEW: Fetch file content to send with the message ---
+    let fileContents = [];
+    try {
+        const filesRef = db.collection('users').doc(appState.currentUser.uid)
+                           .collection('plans').doc(appState.currentPlanId)
+                           .collection('files');
+        const snapshot = await filesRef.get();
+        if (!snapshot.empty) {
+            fileContents = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return { name: data.name, path: data.path }; // Send name and path
+            });
+        }
+    } catch (error) {
+        console.error("Error fetching file list for AI context:", error);
+    }
+    // --- END: New file fetching logic ---
+
     try {
         const planSummary = summarizePlanForAI(appState.planData);
         const calendarData = appState.calendar.data;
-        const responseText = await getGeminiChatResponse(planSummary, chatHistory, messageText, calendarData);
+        const responseText = await getGeminiChatResponse(planSummary, chatHistory, messageText, calendarData, fileContents);
         updateLastAiMessageInUI(responseText);
         const aiMessage = { role: 'model', parts: [{ text: responseText }] };
         chatHistory.push(aiMessage);
