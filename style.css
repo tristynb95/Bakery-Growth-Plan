@@ -2874,9 +2874,9 @@ input[type="time"] {
 /* 62. File Viewer Modal Styles (Enhanced)
 -------------------------------------------------- */
 .file-modal-box {
-    max-width: 90vw;
+    max-width: 100vw;
     width: 100%;
-    height: 98vh;
+    height: 100vh;
     display: flex; /* Use flexbox for layout */
     flex-direction: column; /* Stack header and content vertically */
 }
