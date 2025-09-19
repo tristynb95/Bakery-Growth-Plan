@@ -1,6 +1,5 @@
 // js/files.js
 
-import { renderAsync } from "docx-preview";
 // Dependencies that will be passed from main.js
 let db, appState, openModal, storage;
 
@@ -248,14 +247,13 @@ function openFileViewerModal(file) {
         content.appendChild(viewerElement);
         setupZoomAndPan();
     } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-        // ================== THE FIX (PART 2) ==================
+        // FIX: Check if the library is loaded on the window object
         if (typeof window.docx === 'undefined') {
             console.error('DOCX preview library is not loaded.');
             content.innerHTML = `<div class="file-placeholder"><i class="bi bi-exclamation-circle"></i><p class="mt-4 font-semibold">Could not initialize document previewer.</p><p class="text-sm">Please check your connection and refresh the page.</p></div>`;
             modal.classList.remove('hidden');
             return; 
         }
-        // ======================================================
 
         content.innerHTML = `<div class="flex items-center justify-center h-full"><div class="loading-spinner"></div><p class="ml-4 text-gray-600">Rendering document...</p></div>`;
         
@@ -265,6 +263,7 @@ function openFileViewerModal(file) {
                 const docxContainer = document.createElement('div');
                 docxContainer.className = 'docx-preview-container';
                 
+                // FIX: Call the library from the global window object
                 window.docx.renderAsync(buffer, docxContainer)
                     .then(() => {
                         content.innerHTML = '';
