@@ -2956,36 +2956,3 @@ input[type="time"] {
 .btn-danger:hover {
     background-color: #B91C1C;
 }
-
-/* style.css */
-
-/* ... (previous styles) */
-
-/* NEW RULE for the .docx preview container */
-.docx-preview-container {
-    padding: 2rem;
-    background-color: white;
-    height: 100%;
-    overflow-y: auto;
-}
-
-/* Basic styling for rendered Word document elements */
-.docx-preview-container .docx-wrapper {
-    background: white !important;
-    padding: 2rem !important;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-}
-
-.docx-preview-container p.docx-style-Normal {
-    font-family: 'DM Sans', sans-serif;
-    line-height: 1.6;
-    margin-bottom: 1rem;
-}
-
-.docx-preview-container h1.docx-style-Heading1,
-.docx-preview-container h2.docx-style-Heading2,
-.docx-preview-container h3.docx-style-Heading3 {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}

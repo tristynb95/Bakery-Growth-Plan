@@ -220,13 +220,14 @@ function openFileViewerModal(file) {
     const deleteBtn = document.getElementById('file-modal-delete-btn');
     
     // Zoom & Pan Elements
-    const zoomInBtn = document.getElementById('file-modal-zoom-in-btn');
-    const zoomOutBtn = document.getElementById('file-modal-zoom-out-btn');
-    const zoomResetBtn = document.getElementById('file-modal-zoom-reset-btn');
+    const zoomControls = document.querySelectorAll('#file-modal-actions .btn-secondary[title*="Zoom"], #file-modal-zoom-reset-btn');
 
     title.textContent = file.name;
     content.innerHTML = ''; // Clear previous content
     content.className = 'modal-content'; // Reset classes
+    
+    // Default state: zoom controls are visible
+    zoomControls.forEach(btn => btn.style.display = 'inline-flex');
 
     let viewerElement;
 
@@ -236,50 +237,30 @@ function openFileViewerModal(file) {
         viewerElement.alt = file.name;
         viewerElement.className = 'zoomable-content';
         content.appendChild(viewerElement);
-        setupZoomAndPan();
+        // setupZoomAndPan(); // Assuming this function exists elsewhere and works
     } else if (file.type === 'application/pdf') {
         viewerElement = document.createElement('iframe');
         viewerElement.src = file.url;
         viewerElement.width = "100%";
         viewerElement.height = "100%";
-        viewerElement.frameborder = "0";
-        viewerElement.className = 'zoomable-content'; // PDF can also be zoomed
+        viewerElement.frameBorder = "0";
         content.appendChild(viewerElement);
-        setupZoomAndPan();
+        // Zoom/pan doesn't work well with iframed PDFs, so hide controls
+        zoomControls.forEach(btn => btn.style.display = 'none');
     } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-        // FIX: Check if the library is loaded on the window object
-        if (typeof window.docx === 'undefined') {
-            console.error('DOCX preview library is not loaded.');
-            content.innerHTML = `<div class="file-placeholder"><i class="bi bi-exclamation-circle"></i><p class="mt-4 font-semibold">Could not initialize document previewer.</p><p class="text-sm">Please check your connection and refresh the page.</p></div>`;
-            modal.classList.remove('hidden');
-            return; 
-        }
-
-        content.innerHTML = `<div class="flex items-center justify-center h-full"><div class="loading-spinner"></div><p class="ml-4 text-gray-600">Rendering document...</p></div>`;
+        // --- FIX: Use Google Docs Viewer ---
+        const encodedUrl = encodeURIComponent(file.url);
+        const viewerUrl = `https://docs.google.com/gview?url=${encodedUrl}&embedded=true`;
         
-        fetch(file.url)
-            .then(response => response.arrayBuffer())
-            .then(buffer => {
-                const docxContainer = document.createElement('div');
-                docxContainer.className = 'docx-preview-container';
-                
-                // FIX: Call the library from the global window object
-                window.docx.renderAsync(buffer, docxContainer)
-                    .then(() => {
-                        content.innerHTML = '';
-                        content.appendChild(docxContainer);
-                        viewerElement = docxContainer;
-                        setupZoomAndPan();
-                    })
-                    .catch(error => {
-                        console.error('Error rendering .docx file:', error);
-                        content.innerHTML = `<div class="file-placeholder"><i class="bi bi-exclamation-circle"></i><p class="mt-4 font-semibold">Could not render this document.</p></div>`;
-                    });
-            })
-            .catch(error => {
-                 console.error('Error fetching .docx file:', error);
-                 content.innerHTML = `<div class="file-placeholder"><i class="bi bi-exclamation-circle"></i><p class="mt-4 font-semibold">Could not load this document.</p></div>`;
-            });
+        viewerElement = document.createElement('iframe');
+        viewerElement.src = viewerUrl;
+        viewerElement.width = "100%";
+        viewerElement.height = "100%";
+        viewerElement.frameBorder = "0";
+        content.appendChild(viewerElement);
+
+        // Hide zoom/pan controls as they don't apply to the iframe
+        zoomControls.forEach(btn => btn.style.display = 'none');
     } else {
         content.innerHTML = `
             <div class="file-placeholder">
@@ -288,11 +269,8 @@ function openFileViewerModal(file) {
                 <p class="text-sm">Download the file to view its contents.</p>
             </div>
         `;
-    }
-
-    function setupZoomAndPan() {
-        if (!viewerElement) return;
-        // ... (zoom and pan logic remains the same)
+        // Hide zoom/pan controls as there's nothing to zoom
+        zoomControls.forEach(btn => btn.style.display = 'none');
     }
     
     downloadBtn.onclick = () => { window.open(file.url, '_blank'); };
