@@ -2,6 +2,8 @@
 
 import { calculatePlanCompletion, getVisionProgress, getMonthProgress, isWeekComplete, isContentEmpty } from './utils.js';
 import { openChat } from './chat.js';
+import { renderFilesView } from './files.js'; // <-- ADD THIS LINE
+
 
 // Dependencies passed from main.js
 let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare;
