@@ -46,6 +46,20 @@ function formatCalendarDataForAI(calendarData, daysToLookBack = 0) {
     return parts.join('');
 }
 
+function formatFileContentForAI(fileContents) {
+    if (!fileContents || fileContents.length === 0) {
+        return "No files have been uploaded for this plan.";
+    }
+
+    let fileString = "Here is the content of the files the user has uploaded for this plan:\n\n";
+    fileContents.forEach(file => {
+        fileString += `--- START OF FILE: ${file.name} ---\n`;
+        fileString += `${file.content}\n`;
+        fileString += `--- END OF FILE: ${file.name} ---\n\n`;
+    });
+    return fileString;
+}
+
 
 exports.handler = async function(event, context) {
   if (event.httpMethod !== "POST") {
@@ -53,13 +67,14 @@ exports.handler = async function(event, context) {
   }
 
   try {
-    const { planSummary, chatHistory, userMessage, calendarData } = JSON.parse(event.body);
+    const { planSummary, chatHistory, userMessage, calendarData, fileContents } = JSON.parse(event.body);
     
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     // --- FIX: Corrected the model name from "gemini-2.5-flash-lite" to "gemini-2.5-flash" ---
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"});
     
     const calendarContext = formatCalendarDataForAI(calendarData, 30);
+    const fileContext = formatFileContentForAI(fileContents);
     
     const today = new Date();
     const currentDateString = today.toLocaleDateString('en-GB', {
@@ -92,6 +107,7 @@ Before every response, you MUST conduct a silent, internal analysis using this f
 1.  **Intent Analysis:** What is the user's core need?
     * _Social Greeting:_ A simple "hello."
     * _Data Retrieval:_ A factual question about their plan or calendar.
+    * _File Analysis:_ A question about the content of an uploaded file.
     * _Brainstorming:_ A request for new ideas.
     * _Strategic Review:_ A request for feedback on an existing idea.
 2.  **Context Confidence Score (Internal):**
@@ -141,6 +157,7 @@ All strategic advice you provide MUST connect back to one of the four GAIL's Pil
 * \`current_date\`: ${currentDateString}
 * \`plan_summary\`: The manager's active 30-60-90 day plan.
 * \`calendar_data\`: The manager's calendar.
+* \`file_content\`: Content of user-uploaded files. This is a primary source of truth.
 
 ---
 [PLAN SUMMARY START]
@@ -150,6 +167,10 @@ ${planSummary}
 [CALENDAR DATA START]
 ${calendarContext}
 [CALENDAR DATA END]
+---
+[FILE CONTENT START]
+${fileContext}
+[FILE CONTENT END]
 ---
             `}],
         },
