@@ -2863,3 +2863,10 @@ input[type="time"] {
 .history-item:hover {
     background-color: var(--gails-red-light);
 }
+
+/* 61. Compact Sidebar Navigation
+-------------------------------------------------- */
+.sidebar-nav a {
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+}
