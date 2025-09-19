@@ -2876,7 +2876,7 @@ input[type="time"] {
 .file-modal-box {
     max-width: 100vw;
     width: 100%;
-    height: 105vh;
+    height: 120vh;
     display: flex; /* Use flexbox for layout */
     flex-direction: column; /* Stack header and content vertically */
 }
