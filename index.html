@@ -483,9 +483,16 @@
         </div>
         <div id="file-modal-content" class="modal-content">
             </div>
-        <div class="modal-footer">
-            <button id="file-modal-download-btn" class="btn btn-secondary"><i class="bi bi-download"></i> Download</button>
-            <button id="file-modal-delete-btn" class="btn btn-danger"><i class="bi bi-trash"></i> Delete</button>
+        <div class="modal-footer justify-between items-center">
+             <div class="flex items-center gap-2">
+                <button id="file-modal-zoom-out-btn" class="btn btn-secondary btn-icon" title="Zoom Out"><i class="bi bi-zoom-out"></i></button>
+                <button id="file-modal-zoom-reset-btn" class="btn btn-secondary">Reset</button>
+                <button id="file-modal-zoom-in-btn" class="btn btn-secondary btn-icon" title="Zoom In"><i class="bi bi-zoom-in"></i></button>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="file-modal-download-btn" class="btn btn-secondary"><i class="bi bi-download"></i> Download</button>
+                <button id="file-modal-delete-btn" class="btn btn-danger"><i class="bi bi-trash"></i> Delete</button>
+            </div>
         </div>
     </div>
 </div>

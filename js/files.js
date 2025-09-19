@@ -219,14 +219,28 @@ function openFileViewerModal(file) {
     const content = document.getElementById('file-modal-content');
     const downloadBtn = document.getElementById('file-modal-download-btn');
     const deleteBtn = document.getElementById('file-modal-delete-btn');
+    
+    // Zoom & Pan Elements
+    const zoomInBtn = document.getElementById('file-modal-zoom-in-btn');
+    const zoomOutBtn = document.getElementById('file-modal-zoom-out-btn');
+    const zoomResetBtn = document.getElementById('file-modal-zoom-reset-btn');
 
     title.textContent = file.name;
     content.innerHTML = ''; // Clear previous content
+    content.className = 'modal-content'; // Reset classes
+
+    let viewerElement;
 
     if (file.type.startsWith('image/')) {
-        content.innerHTML = `<img src="${file.url}" alt="${file.name}">`;
+        viewerElement = document.createElement('img');
+        viewerElement.src = file.url;
+        viewerElement.alt = file.name;
     } else if (file.type === 'application/pdf') {
-        content.innerHTML = `<iframe src="${file.url}" width="100%" height="100%" frameborder="0"></iframe>`;
+        viewerElement = document.createElement('iframe');
+        viewerElement.src = file.url;
+        viewerElement.width = "100%";
+        viewerElement.height = "100%";
+        viewerElement.frameborder = "0";
     } else {
         content.innerHTML = `
             <div class="file-placeholder">
@@ -237,12 +251,59 @@ function openFileViewerModal(file) {
         `;
     }
 
-    downloadBtn.onclick = () => {
-        window.open(file.url, '_blank');
-    };
+    if (viewerElement) {
+        viewerElement.className = 'zoomable-content';
+        content.appendChild(viewerElement);
 
+        // --- Zoom & Pan Logic ---
+        let zoomLevel = 1;
+        let isPanning = false;
+        let startPos = { x: 0, y: 0, scrollLeft: 0, scrollTop: 0 };
+        
+        const applyZoom = () => {
+            viewerElement.style.transform = `scale(${zoomLevel})`;
+            content.style.cursor = zoomLevel > 1 ? 'grab' : 'default';
+        };
+
+        zoomInBtn.onclick = () => { zoomLevel = Math.min(3, zoomLevel + 0.2); applyZoom(); };
+        zoomOutBtn.onclick = () => { zoomLevel = Math.max(0.5, zoomLevel - 0.2); applyZoom(); };
+        zoomResetBtn.onclick = () => { zoomLevel = 1; applyZoom(); };
+
+        content.onmousedown = (e) => {
+            if (zoomLevel <= 1) return;
+            isPanning = true;
+            content.style.cursor = 'grabbing';
+            startPos = {
+                x: e.clientX,
+                y: e.clientY,
+                scrollLeft: content.scrollLeft,
+                scrollTop: content.scrollTop
+            };
+        };
+
+        content.onmousemove = (e) => {
+            if (!isPanning) return;
+            e.preventDefault();
+            const dx = e.clientX - startPos.x;
+            const dy = e.clientY - startPos.y;
+            content.scrollTop = startPos.scrollTop - dy;
+            content.scrollLeft = startPos.scrollLeft - dx;
+        };
+        
+        const stopPanning = () => {
+            isPanning = false;
+            content.style.cursor = zoomLevel > 1 ? 'grab' : 'default';
+        };
+
+        content.onmouseup = stopPanning;
+        content.onmouseleave = stopPanning;
+
+        applyZoom(); // Set initial state
+    }
+
+    downloadBtn.onclick = () => { window.open(file.url, '_blank'); };
     deleteBtn.onclick = () => {
-        modal.classList.add('hidden'); // Close the viewer first
+        modal.classList.add('hidden');
         openModal('confirmDeleteFile', { planId: file.id, fileName: file.name });
     };
 

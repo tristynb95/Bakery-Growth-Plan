@@ -2871,30 +2871,40 @@ input[type="time"] {
     padding-bottom: 0.65rem;
 }
 
-/* 62. File Viewer Modal Styles
+/* 62. File Viewer Modal Styles (Enhanced)
 -------------------------------------------------- */
-
 .file-modal-box {
-    max-width: min(1200px, 80vw); /* Allow the modal to be wider for better viewing */
+    max-width: 90vw;
     width: 100%;
-    height: 85vh; /* Use a large portion of the viewport height */
-    max-height: 800px; /* But cap it at a reasonable maximum */
+    height: 95vh;
 }
 
 #file-modal-content {
-    padding: 0; /* Remove padding to allow content to fill the space */
-    background-color: var(--gails-bg); /* Use a light background for the content area */
-    display: flex; /* Use flexbox to center the content */
+    padding: 0;
+    background-color: var(--gails-bg);
+    display: flex;
     align-items: center;
     justify-content: center;
-    overflow: auto; /* Allow scrolling for large content */
+    overflow: hidden; /* Hide scrollbars, we will pan manually */
+    cursor: grab;
+}
+
+#file-modal-content.is-panning {
+    cursor: grabbing;
+}
+
+#file-modal-content .zoomable-content {
+    transition: transform 0.2s ease-out;
+    transform-origin: center;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 #file-modal-content img,
 #file-modal-content iframe {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain; /* Ensure images and PDFs are scaled correctly */
+    max-width: initial; /* Allow content to exceed container for zooming */
+    max-height: initial;
 }
 
 #file-modal-content .file-placeholder {
@@ -2915,11 +2925,15 @@ input[type="time"] {
     overflow-y: auto;
 }
 
+.modal-footer.justify-between {
+    justify-content: space-between;
+}
+
 .btn-danger {
-    background-color: #DC2626; /* A suitable red for delete actions */
+    background-color: #DC2626;
     color: var(--gails-white);
 }
 
 .btn-danger:hover {
-    background-color: #B91C1C; /* A darker red for hover */
+    background-color: #B91C1C;
 }
