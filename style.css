@@ -701,8 +701,8 @@ textarea.form-input {
 
 /* 29. Taller Key Levers Text Box
 -------------------------------------------------- */
-.key-levers-input {
-    min-height: 360px; /* Adjust this value as needed */
+[contenteditable="true"].key-levers-input {
+    min-height: 450px; /* Increased from 360px for better balance */
 }
 
 /* 30. Sidebar Navigation Progress Counter
