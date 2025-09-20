@@ -27,20 +27,23 @@ function runViewScript(app) {
     };
 
     const renderSummary = (formData) => {
-        // FIX: Upgraded the 'e' helper to correctly handle empty HTML
         const e = (html) => {
-            if (!html) return '...'; // Handles null, undefined, ""
+            if (!html) return '...';
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
             if (tempDiv.innerText.trim() === '') {
-                return '...'; // Handles '<p></p>', '<br>', etc.
+                return '...';
             }
             
-            // This sanitizes the HTML, converting block tags to line breaks
-            // while preserving your inline formatting like bold.
-            let sanitizedHtml = html.replace(/<p(.*?)>/gi, '').replace(/<\/p>/gi, '<br>');
-            sanitizedHtml = sanitizedHtml.replace(/<div(.*?)>/gi, '').replace(/<\/div>/gi, '<br>');
-            return sanitizedHtml.trim().replace(/(<br\s*\/?>)+$/gi, '');
+            // This removes unwanted style attributes from every element
+            tempDiv.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
+
+            // This removes useless span tags but keeps the text inside them
+            tempDiv.querySelectorAll('span').forEach(el => {
+                el.replaceWith(...el.childNodes);
+            });
+            
+            return tempDiv.innerHTML;
         };
 
         const isContentEmpty = (htmlContent) => {
@@ -49,6 +52,7 @@ function runViewScript(app) {
             tempDiv.innerHTML = htmlContent;
             return tempDiv.innerText.trim() === '';
         };
+
 
         const renderMonthSummary = (monthNum) => {
             let weeklyCheckinHTML = '<ul>';
