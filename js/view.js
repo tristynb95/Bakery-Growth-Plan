@@ -158,6 +158,7 @@ function runViewScript(app) {
                     </div>
                 </div>`;
         };
+        
 
         DOMElements.headerTitle.textContent = formData.planName || 'Growth Plan Summary';
         DOMElements.headerSubtitle.textContent = `A read-only summary for ${formData.bakeryLocation || 'the bakery'}.`;
