@@ -2976,3 +2976,20 @@ input[type="time"] {
 .btn-danger:hover {
     background-color: #B91C1C;
 }
+
+/* 63. Sticky Footer & Full-Height Content Fix
+-------------------------------------------------- */
+main.w-full {
+    display: flex;
+    flex-direction: column;
+}
+
+div.printable-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#content-area {
+    flex-grow: 1;
+}
