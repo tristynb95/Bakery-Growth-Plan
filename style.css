@@ -1,6 +1,12 @@
 /* Gail's Bakery 30-60-90 Plan Stylesheet */
 /* v10.5 - Calendar Modal Overflow Fix */
 
+html, body {
+    height: 100%;
+    overflow: hidden; /* This is key to preventing the whole page from scrolling */
+}
+
+
 /* 1. Root Variables & Base Styles
 -------------------------------------------------- */
 :root {
@@ -174,7 +180,12 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 
 /* 4. Main App Layout & Sidebar
 -------------------------------------------------- */
-.main-layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; grid-template-areas: "sidebar main"; }
+.main-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    height: 100%; /* Changed from min-height: 100vh */
+    grid-template-areas: "sidebar main";
+}
 #sidebar { grid-area: sidebar; }
 /* START BUG FIX: Ensure main content area and footer fill vertical space */
 main { 
