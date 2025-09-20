@@ -121,15 +121,15 @@ function runViewScript(app) {
                             ${pillarHTML}
                             <div class="summary-section">
                                 <h3 class="summary-heading">Must-Win Battle</h3>
-                                <div class="summary-content">${e(formData[`m${monthNum}s1_battle`])}</div>
+                                <div class="summary-content text-sm">${e(formData[`m${monthNum}s1_battle`])}</div>
                             </div>
                             <div class="summary-section">
                                 <h3 class="summary-heading">Key Actions</h3>
-                                <div class="summary-content">${e(formData[`m${monthNum}s2_levers`])}</div>
+                                <div class="summary-content text-sm">${e(formData[`m${monthNum}s2_levers`])}</div>
                             </div>
                             <div class="summary-section">
                                 <h3 class="summary-heading">Developing Our Breadheads</h3>
-                                <div class="summary-content">${e(formData[`m${monthNum}s3_people`])}</div>
+                                <div class="summary-content text-sm">${e(formData[`m${monthNum}s3_people`])}</div>
                             </div>
                             <div class="summary-section">
                                 <h3 class="summary-heading">Upholding Pillars</h3>
@@ -153,7 +153,7 @@ function runViewScript(app) {
                         <ul class="space-y-3 mt-2">
                             <li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Biggest Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li>
                             <li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Toughest Challenge & Learning:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li>
-                            <li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Focus for Next Month:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li>
+                            <li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Focus for Next Month:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li>
                         </ul>
                     </div>
                 </div>`;
