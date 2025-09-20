@@ -130,17 +130,18 @@ function runViewScript(app) {
                                 <h3 class="summary-heading">Weekly Momentum</h3>
                                 ${weeklyCheckinHTML}
                             </div>
-                            <div class="summary-section">
-                                <h3 class="summary-heading">End of Month Review</h3>
-                                 <ul class="space-y-3 mt-2">
-                                    <li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li>
-                                    <li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Challenge:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li>
-                                    <li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Next:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li>
-                                </ul>
-                            </div>
                         </div>
                     </div>
-                </div>`;
+                </div>
+                <div class="content-card p-6 mt-4 bg-red-50 border border-red-200">
+                    <h3 class="summary-heading !text-red-800">End of Month Review</h3>
+                    <ul class="space-y-3 mt-2">
+                        <li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Biggest Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li>
+                        <li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Toughest Challenge & Learning:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li>
+                        <li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Focus for Next Month:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li>
+                    </ul>
+                </div>
+                `;
         };
 
         DOMElements.headerTitle.textContent = formData.planName || 'Growth Plan Summary';
