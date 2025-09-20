@@ -423,8 +423,38 @@ function renderSummary() {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         if (tempDiv.innerText.trim() === '') { return '...'; }
-        return html;
+
+        // 1. Sanitize the content to remove unwanted inline styles and junk tags
+        tempDiv.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
+        tempDiv.querySelectorAll('span, font').forEach(el => {
+            if (el.childNodes.length > 0) {
+                el.replaceWith(...el.childNodes);
+            } else {
+                el.remove();
+            }
+        });
+        
+        // 2. Intelligently convert block elements to line breaks
+        let finalHtml = tempDiv.innerHTML
+            .replace(/<p(.*?)>/gi, '') // Remove opening <p> tags
+            .replace(/<\/p>/gi, '<br>') // Replace closing </p> with a line break
+            .replace(/<div(.*?)>/gi, '') // Remove opening <div> tags
+            .replace(/<\/div>/gi, '<br>'); // Replace closing </div> with a line break
+        
+        // 3. Clean up multiple, leading, and trailing line breaks for a neat finish
+        finalHtml = finalHtml.replace(/(<br\s*\/?>\s*){2,}/gi, '<br><br>'); // Collapse multiple breaks into a double break
+        finalHtml = finalHtml.trim().replace(/^(<br\s*\/?>\s*)+|(<br\s*\/?>\s*)+$/gi, ''); // Remove leading/trailing breaks
+
+        return finalHtml;
     };
+    
+    const isContentEmpty = (htmlContent) => {
+        if (!htmlContent) return true;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        return tempDiv.innerText.trim() === '';
+    };
+
     const renderMonthSummary = (monthNum) => {
         let weeklyCheckinHTML = '<ul>';
         let hasLoggedWeeks = false;
@@ -463,18 +493,27 @@ function renderSummary() {
             <div class="summary-grid">
                 <div class="p-6">
                     ${pillarHTML}
-                    <div class="summary-section"><h3 class="summary-heading">Must-Win Battle</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div></div>
-                    <div class="summary-section"><h3 class="summary-heading">Key Actions</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div>
-                    <div class="summary-section"><h3 class="summary-heading">Developing Our Breadheads</h3><div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div></div>
-                    <div class="summary-section"><h3 class="summary-heading">End of Month Review</h3><ul class="space-y-3 mt-2"><li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong>Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong>Challenge:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong>Next:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li></ul></div>
+                    <div class="summary-section"><h3 class="summary-heading">Must-Win Battle</h3><div class="summary-content text-sm">${e(formData[`m${monthNum}s1_battle`])}</div></div>
+                    <div class="summary-section"><h3 class="summary-heading">Key Actions</h3><div class="summary-content text-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div>
+                    <div class="summary-section"><h3 class="summary-heading">Developing Our Breadheads</h3><div class="summary-content text-sm">${e(formData[`m${monthNum}s3_people`])}</div></div>
+                    <div class="summary-section"><h3 class="summary-heading">Upholding Pillars</h3><ul class="space-y-3 mt-2"><li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-heart-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_customer`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-shop w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_place`])}</span></li></ul></div>
                 </div>
                 <div class="p-6 bg-gray-50/70 border-l">
-                    <div class="summary-section"><h3 class="summary-heading">Upholding Pillars</h3><ul class="space-y-3 mt-2"><li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-heart-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_customer`])}</span></li><li class="flex items-start text-sm"><i class="bi bi-shop w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_place`])}</span></li></ul></div>
                     <div class="summary-section"><h3 class="summary-heading">Weekly Momentum</h3>${weeklyCheckinHTML}</div>
                 </div>
             </div>
+            <div class="p-6 bg-red-50 border-t border-gray-200">
+                 <h3 class="summary-heading !text-red-800">End of Month Review</h3>
+                 <ul class="space-y-3 mt-2">
+                    <li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Biggest Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li>
+                    <li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Toughest Challenge & Learning:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li>
+                    <li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Focus for Next Month:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li>
+                </ul>
+            </div>
         </div>`;
     };
+    
+
     DOMElements.contentArea.innerHTML = `<div class="space-y-8 summary-content">
         <div class="content-card p-6"><h2 class="text-2xl font-bold font-poppins mb-4">Quarter Overview</h2><div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4"><div><h4 class="font-semibold text-sm text-gray-500">Manager</h4><p class="text-gray-800 font-medium">${formData.managerName || '...'}</p></div><div><h4 class="font-semibold text-sm text-gray-500">Bakery</h4><p class="text-gray-800 font-medium">${formData.bakeryLocation || '...'}</p></div><div><h4 class="font-semibold text-sm text-gray-500">Quarter</h4><p class="text-gray-800 font-medium">${formData.quarter || '...'}</p></div></div><div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Vision</h4><div class="text-gray-800 prose prose-sm">${e(formData.quarterlyTheme)}</div></div><div><h3 class="text-lg font-bold border-b pb-2 mb-3">Key Monthly Objectives</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm"><div><strong class="font-semibold text-gray-600 block">Month 1:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month1Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 2:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month2Goal)}</div></div><div><strong class="font-semibold text-gray-600 block">Month 3:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month3Goal)}</div></div></div></div></div>
         ${renderMonthSummary(1)}

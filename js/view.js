@@ -27,15 +27,38 @@ function runViewScript(app) {
     };
 
     const renderSummary = (formData) => {
-        // FIX: Upgraded the 'e' helper to correctly handle empty HTML
         const e = (html) => {
-            if (!html) return '...'; // Handles null, undefined, ""
+            if (!html) return '...';
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
             if (tempDiv.innerText.trim() === '') {
-                return '...'; // Handles '<p></p>', '<br>', etc.
+                return '...';
             }
-            return html; // Return the original html if it has content
+            
+            // This removes unwanted style attributes from every element
+            tempDiv.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
+
+            // This removes useless span tags but keeps the text inside them
+            tempDiv.querySelectorAll('span, font').forEach(el => {
+                if (el.childNodes.length > 0) {
+                    el.replaceWith(...el.childNodes);
+                } else {
+                    el.remove();
+                }
+            });
+
+            // Intelligently convert block elements to line breaks
+            let finalHtml = tempDiv.innerHTML
+                .replace(/<p(.*?)>/gi, '') // Remove opening <p> tags
+                .replace(/<\/p>/gi, '<br>') // Replace closing </p> with a line break
+                .replace(/<div(.*?)>/gi, '') // Remove opening <div> tags
+                .replace(/<\/div>/gi, '<br>'); // Replace closing </div> with a line break
+            
+            // Clean up multiple, leading, and trailing line breaks for a neat finish
+            finalHtml = finalHtml.replace(/(<br\s*\/?>\s*){2,}/gi, '<br><br>');
+            finalHtml = finalHtml.trim().replace(/^(<br\s*\/?>\s*)+|(<br\s*\/?>\s*)+$/gi, '');
+
+            return finalHtml;
         };
 
         const isContentEmpty = (htmlContent) => {
@@ -45,26 +68,45 @@ function runViewScript(app) {
             return tempDiv.innerText.trim() === '';
         };
 
+
+
         const renderMonthSummary = (monthNum) => {
             let weeklyCheckinHTML = '<ul>';
             let hasLoggedWeeks = false;
 
             for (let w = 1; w <= 4; w++) {
+                // ... (weekly check-in logic is unchanged)
                 const status = formData[`m${monthNum}s5_w${w}_status`];
                 const win = formData[`m${monthNum}s5_w${w}_win`];
+                const spotlight = formData[`m${monthNum}s5_w${w}_spotlight`];
+                const shine = formData[`m${monthNum}s5_w${w}_shine`];
 
                 if (status) {
                     hasLoggedWeeks = true;
                     const statusText = status.replace('-', ' ').toUpperCase();
                     const statusBadgeHTML = `<span class="summary-status-badge status-${status}">${statusText}</span>`;
-                    const winText = !isContentEmpty(win) ? e(win) : '<em>No win/learning logged.</em>';
+                    
+                    let checkinContent = '';
+                    if (!isContentEmpty(win)) {
+                        checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Win/Learning:</strong> ${e(win)}</p>`;
+                    }
+                    if (!isContentEmpty(spotlight)) {
+                        checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Breadhead Spotlight:</strong> ${e(spotlight)}</p>`;
+                    }
+                    if (!isContentEmpty(shine)) {
+                        checkinContent += `<p class="text-sm text-gray-600"><strong>SHINE Focus:</strong> ${e(shine)}</p>`;
+                    }
+                     if (checkinContent === '') {
+                        checkinContent = '<p class="text-sm text-gray-500 italic">No details logged for this week.</p>';
+                    }
 
-                    weeklyCheckinHTML += `<li>
-                                            <div class="flex justify-between items-center mb-1">
+
+                    weeklyCheckinHTML += `<li class="mb-3 pb-3 border-b last:border-b-0">
+                                            <div class="flex justify-between items-center mb-2">
                                                 <strong class="font-semibold text-gray-700">Week ${w}</strong>
                                                 ${statusBadgeHTML}
                                             </div>
-                                            <p class="text-sm text-gray-600">${winText}</p>
+                                            ${checkinContent}
                                           </li>`;
                 }
             }
@@ -96,7 +138,6 @@ function runViewScript(app) {
                 pillarHTML = `<div class="flex items-center gap-2 mb-4 flex-wrap"><span class="font-semibold text-sm text-gray-500">Pillar Focus:</span>${pillarBadgesHTML}</div>`;
             }
 
-
             return `
                 <div class="content-card p-0 overflow-hidden mt-8">
                     <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">Month ${monthNum} Plan</h2>
@@ -105,18 +146,16 @@ function runViewScript(app) {
                             ${pillarHTML}
                             <div class="summary-section">
                                 <h3 class="summary-heading">Must-Win Battle</h3>
-                                <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div>
+                                <div class="summary-content text-sm">${e(formData[`m${monthNum}s1_battle`])}</div>
                             </div>
                             <div class="summary-section">
                                 <h3 class="summary-heading">Key Actions</h3>
-                                <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div>
+                                <div class="summary-content text-sm">${e(formData[`m${monthNum}s2_levers`])}</div>
                             </div>
                             <div class="summary-section">
                                 <h3 class="summary-heading">Developing Our Breadheads</h3>
-                                <div class="summary-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div>
+                                <div class="summary-content text-sm">${e(formData[`m${monthNum}s3_people`])}</div>
                             </div>
-                        </div>
-                        <div class="p-6 bg-gray-50/70 border-l">
                             <div class="summary-section">
                                 <h3 class="summary-heading">Upholding Pillars</h3>
                                 <ul class="space-y-3 mt-2">
@@ -126,22 +165,25 @@ function runViewScript(app) {
                                     <li class="flex items-start text-sm"><i class="bi bi-shop w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_place`])}</span></li>
                                 </ul>
                             </div>
+                        </div>
+                        <div class="p-6 bg-gray-50/70 border-l">
                             <div class="summary-section">
                                 <h3 class="summary-heading">Weekly Momentum</h3>
                                 ${weeklyCheckinHTML}
                             </div>
-                            <div class="summary-section">
-                                <h3 class="summary-heading">End of Month Review</h3>
-                                 <ul class="space-y-3 mt-2">
-                                    <li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li>
-                                    <li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Challenge:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li>
-                                    <li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Next:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li>
-                                </ul>
-                            </div>
                         </div>
+                    </div>
+                    <div class="p-6 bg-red-50 border-t border-gray-200">
+                        <h3 class="summary-heading !text-red-800">End of Month Review</h3>
+                        <ul class="space-y-3 mt-2">
+                            <li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Biggest Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li>
+                            <li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Toughest Challenge & Learning:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li>
+                            <li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Focus for Next Month:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li>
+                        </ul>
                     </div>
                 </div>`;
         };
+        
 
         DOMElements.headerTitle.textContent = formData.planName || 'Growth Plan Summary';
         DOMElements.headerSubtitle.textContent = `A read-only summary for ${formData.bakeryLocation || 'the bakery'}.`;
