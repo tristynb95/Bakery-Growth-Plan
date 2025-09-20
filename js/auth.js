@@ -17,6 +17,17 @@ export function handleSignOut() {
         sessionStorage.removeItem('lastPlanId');
         sessionStorage.removeItem('lastViewId');
         localStorage.removeItem('lastActivity');
+
+        // FIX: Clear the login form fields upon logout to prevent pre-filling.
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        if (emailInput) {
+            emailInput.value = '';
+        }
+        if (passwordInput) {
+            passwordInput.value = '';
+        }
+        
         auth.signOut();
     } else {
         console.error("Auth module not initialized. Cannot sign out.");
