@@ -424,18 +424,26 @@ function renderSummary() {
         tempDiv.innerHTML = html;
         if (tempDiv.innerText.trim() === '') { return '...'; }
 
-        // Sanitize the content to preserve formatting but ensure consistency
+        // 1. Sanitize the content to remove unwanted inline styles and junk tags
         tempDiv.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
         tempDiv.querySelectorAll('span, font').forEach(el => {
-            el.replaceWith(...el.childNodes);
+            if (el.childNodes.length > 0) {
+                el.replaceWith(...el.childNodes);
+            } else {
+                el.remove();
+            }
         });
         
-        // Convert block elements like <p> and <div> into line breaks
-        let finalHtml = tempDiv.innerHTML.replace(/<(p|div)(.*?)>/gi, '').replace(/<\/(p|div)>/gi, '<br>');
+        // 2. Intelligently convert block elements to line breaks
+        let finalHtml = tempDiv.innerHTML
+            .replace(/<p(.*?)>/gi, '') // Remove opening <p> tags
+            .replace(/<\/p>/gi, '<br>') // Replace closing </p> with a line break
+            .replace(/<div(.*?)>/gi, '') // Remove opening <div> tags
+            .replace(/<\/div>/gi, '<br>'); // Replace closing </div> with a line break
         
-        // Clean up multiple and trailing line breaks
-        finalHtml = finalHtml.replace(/(<br\s*\/?>\s*){2,}/gi, '<br><br>');
-        finalHtml = finalHtml.trim().replace(/(<br\s*\/?>\s*)+$/gi, '');
+        // 3. Clean up multiple, leading, and trailing line breaks for a neat finish
+        finalHtml = finalHtml.replace(/(<br\s*\/?>\s*){2,}/gi, '<br><br>'); // Collapse multiple breaks into a double break
+        finalHtml = finalHtml.trim().replace(/^(<br\s*\/?>\s*)+|(<br\s*\/?>\s*)+$/gi, ''); // Remove leading/trailing breaks
 
         return finalHtml;
     };

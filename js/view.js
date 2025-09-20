@@ -35,14 +35,28 @@ function runViewScript(app) {
                 return '...';
             }
             
-            // This sanitizes the HTML, converting block tags to line breaks
-            // while preserving your inline formatting like bold.
-            let sanitizedHtml = html.replace(/<p(.*?)>/gi, '').replace(/<\/p>/gi, '<br>');
-            sanitizedHtml = sanitizedHtml.replace(/<div(.*?)>/gi, '').replace(/<\/div>/gi, '<br>');
+            // This removes unwanted style attributes from every element
+            tempDiv.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
 
-            // Clean up multiple and trailing line breaks
-            let finalHtml = sanitizedHtml.replace(/(<br\s*\/?>\s*){2,}/gi, '<br><br>');
-            finalHtml = finalHtml.trim().replace(/(<br\s*\/?>\s*)+$/gi, '');
+            // This removes useless span tags but keeps the text inside them
+            tempDiv.querySelectorAll('span, font').forEach(el => {
+                if (el.childNodes.length > 0) {
+                    el.replaceWith(...el.childNodes);
+                } else {
+                    el.remove();
+                }
+            });
+
+            // Intelligently convert block elements to line breaks
+            let finalHtml = tempDiv.innerHTML
+                .replace(/<p(.*?)>/gi, '') // Remove opening <p> tags
+                .replace(/<\/p>/gi, '<br>') // Replace closing </p> with a line break
+                .replace(/<div(.*?)>/gi, '') // Remove opening <div> tags
+                .replace(/<\/div>/gi, '<br>'); // Replace closing </div> with a line break
+            
+            // Clean up multiple, leading, and trailing line breaks for a neat finish
+            finalHtml = finalHtml.replace(/(<br\s*\/?>\s*){2,}/gi, '<br><br>');
+            finalHtml = finalHtml.trim().replace(/^(<br\s*\/?>\s*)+|(<br\s*\/?>\s*)+$/gi, '');
 
             return finalHtml;
         };
@@ -53,6 +67,7 @@ function runViewScript(app) {
             tempDiv.innerHTML = htmlContent;
             return tempDiv.innerText.trim() === '';
         };
+
 
 
         const renderMonthSummary = (monthNum) => {
