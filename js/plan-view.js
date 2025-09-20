@@ -423,14 +423,21 @@ function renderSummary() {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         if (tempDiv.innerText.trim() === '') { return '...'; }
-        return html;
+        
+        // This sanitizes the HTML, converting block tags to line breaks
+        // while preserving your inline formatting like bold.
+        let sanitizedHtml = html.replace(/<p(.*?)>/gi, '').replace(/<\/p>/gi, '<br>');
+        sanitizedHtml = sanitizedHtml.replace(/<div(.*?)>/gi, '').replace(/<\/div>/gi, '<br>');
+        return sanitizedHtml.trim().replace(/(<br\s*\/?>)+$/gi, '');
     };
+
     const isContentEmpty = (htmlContent) => {
         if (!htmlContent) return true;
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlContent;
         return tempDiv.innerText.trim() === '';
     };
+
     const renderMonthSummary = (monthNum) => {
         let weeklyCheckinHTML = '<ul>';
         let hasLoggedWeeks = false;

@@ -35,7 +35,12 @@ function runViewScript(app) {
             if (tempDiv.innerText.trim() === '') {
                 return '...'; // Handles '<p></p>', '<br>', etc.
             }
-            return html; // Return the original html if it has content
+            
+            // This sanitizes the HTML, converting block tags to line breaks
+            // while preserving your inline formatting like bold.
+            let sanitizedHtml = html.replace(/<p(.*?)>/gi, '').replace(/<\/p>/gi, '<br>');
+            sanitizedHtml = sanitizedHtml.replace(/<div(.*?)>/gi, '').replace(/<\/div>/gi, '<br>');
+            return sanitizedHtml.trim().replace(/(<br\s*\/?>)+$/gi, '');
         };
 
         const isContentEmpty = (htmlContent) => {
