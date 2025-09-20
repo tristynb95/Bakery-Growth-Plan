@@ -434,18 +434,7 @@ function renderSummary() {
             }
         });
         
-        // 2. Intelligently convert block elements to line breaks
-        let finalHtml = tempDiv.innerHTML
-            .replace(/<p(.*?)>/gi, '') // Remove opening <p> tags
-            .replace(/<\/p>/gi, '<br>') // Replace closing </p> with a line break
-            .replace(/<div(.*?)>/gi, '') // Remove opening <div> tags
-            .replace(/<\/div>/gi, '<br>'); // Replace closing </div> with a line break
-        
-        // 3. Clean up multiple, leading, and trailing line breaks for a neat finish
-        finalHtml = finalHtml.replace(/(<br\s*\/?>\s*){2,}/gi, '<br><br>'); // Collapse multiple breaks into a double break
-        finalHtml = finalHtml.trim().replace(/^(<br\s*\/?>\s*)+|(<br\s*\/?>\s*)+$/gi, ''); // Remove leading/trailing breaks
-
-        return finalHtml;
+        return tempDiv.innerHTML;
     };
     
     const isContentEmpty = (htmlContent) => {
@@ -469,9 +458,9 @@ function renderSummary() {
                 const statusText = status.replace('-', ' ').toUpperCase();
                 const statusBadgeHTML = `<span class="summary-status-badge status-${status}">${statusText}</span>`;
                 let checkinContent = '';
-                if (!isContentEmpty(win)) checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Win/Learning:</strong><br>${e(win)}</p>`;
-                if (!isContentEmpty(spotlight)) checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Breadhead Spotlight:</strong><br>${e(spotlight)}</p>`;
-                if (!isContentEmpty(shine)) checkinContent += `<p class="text-sm text-gray-600"><strong>SHINE Focus:</strong><br>${e(shine)}</p>`;
+                if (!isContentEmpty(win)) checkinContent += `<div class="text-sm text-gray-600 mb-2"><strong>Win/Learning:</strong><br>${e(win)}</div>`;
+                if (!isContentEmpty(spotlight)) checkinContent += `<div class="text-sm text-gray-600 mb-2"><strong>Breadhead Spotlight:</strong><br>${e(spotlight)}</div>`;
+                if (!isContentEmpty(shine)) checkinContent += `<div class="text-sm text-gray-600"><strong>SHINE Focus:</strong><br>${e(shine)}</div>`;
                 if (checkinContent === '') checkinContent = '<p class="text-sm text-gray-500 italic">No details logged.</p>';
 
                 weeklyCheckinHTML += `<li class="mb-3 pb-3 border-b last:border-b-0"><div class="flex justify-between items-center mb-2"><strong class="font-semibold text-gray-700">Week ${w}</strong>${statusBadgeHTML}</div>${checkinContent}</li>`;

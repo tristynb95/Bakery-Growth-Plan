@@ -31,14 +31,10 @@ function runViewScript(app) {
             if (!html) return '...';
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
-            if (tempDiv.innerText.trim() === '') {
-                return '...';
-            }
-            
-            // This removes unwanted style attributes from every element
-            tempDiv.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
+            if (tempDiv.innerText.trim() === '') { return '...'; }
 
-            // This removes useless span tags but keeps the text inside them
+            // 1. Sanitize the content to remove unwanted inline styles and junk tags
+            tempDiv.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
             tempDiv.querySelectorAll('span, font').forEach(el => {
                 if (el.childNodes.length > 0) {
                     el.replaceWith(...el.childNodes);
@@ -46,21 +42,10 @@ function runViewScript(app) {
                     el.remove();
                 }
             });
-
-            // Intelligently convert block elements to line breaks
-            let finalHtml = tempDiv.innerHTML
-                .replace(/<p(.*?)>/gi, '') // Remove opening <p> tags
-                .replace(/<\/p>/gi, '<br>') // Replace closing </p> with a line break
-                .replace(/<div(.*?)>/gi, '') // Remove opening <div> tags
-                .replace(/<\/div>/gi, '<br>'); // Replace closing </div> with a line break
             
-            // Clean up multiple, leading, and trailing line breaks for a neat finish
-            finalHtml = finalHtml.replace(/(<br\s*\/?>\s*){2,}/gi, '<br><br>');
-            finalHtml = finalHtml.trim().replace(/^(<br\s*\/?>\s*)+|(<br\s*\/?>\s*)+$/gi, '');
-
-            return finalHtml;
+            return tempDiv.innerHTML;
         };
-
+        
         const isContentEmpty = (htmlContent) => {
             if (!htmlContent) return true;
             const tempDiv = document.createElement('div');
@@ -68,14 +53,10 @@ function runViewScript(app) {
             return tempDiv.innerText.trim() === '';
         };
 
-
-
         const renderMonthSummary = (monthNum) => {
             let weeklyCheckinHTML = '<ul>';
             let hasLoggedWeeks = false;
-
             for (let w = 1; w <= 4; w++) {
-                // ... (logic to get status, win, etc.)
                 const status = formData[`m${monthNum}s5_w${w}_status`];
                 const win = formData[`m${monthNum}s5_w${w}_win`];
                 const spotlight = formData[`m${monthNum}s5_w${w}_spotlight`];
@@ -88,18 +69,17 @@ function runViewScript(app) {
                     
                     let checkinContent = '';
                     if (!isContentEmpty(win)) {
-                        checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Win/Learning:</strong><br>${e(win)}</p>`;
+                        checkinContent += `<div class="text-sm text-gray-600 mb-2"><strong>Win/Learning:</strong><br>${e(win)}</div>`;
                     }
                     if (!isContentEmpty(spotlight)) {
-                        checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Breadhead Spotlight:</strong><br>${e(spotlight)}</p>`;
+                        checkinContent += `<div class="text-sm text-gray-600 mb-2"><strong>Breadhead Spotlight:</strong><br>${e(spotlight)}</div>`;
                     }
                     if (!isContentEmpty(shine)) {
-                        checkinContent += `<p class="text-sm text-gray-600"><strong>SHINE Focus:</strong><br>${e(shine)}</p>`;
+                        checkinContent += `<div class="text-sm text-gray-600"><strong>SHINE Focus:</strong><br>${e(shine)}</div>`;
                     }
                      if (checkinContent === '') {
                         checkinContent = '<p class="text-sm text-gray-500 italic">No details logged for this week.</p>';
                     }
-
 
                     weeklyCheckinHTML += `<li class="mb-3 pb-3 border-b last:border-b-0">
                                             <div class="flex justify-between items-center mb-2">
