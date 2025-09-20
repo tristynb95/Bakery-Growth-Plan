@@ -35,15 +35,16 @@ function runViewScript(app) {
                 return '...';
             }
             
-            // This removes unwanted style attributes from every element
-            tempDiv.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
+            // This sanitizes the HTML, converting block tags to line breaks
+            // while preserving your inline formatting like bold.
+            let sanitizedHtml = html.replace(/<p(.*?)>/gi, '').replace(/<\/p>/gi, '<br>');
+            sanitizedHtml = sanitizedHtml.replace(/<div(.*?)>/gi, '').replace(/<\/div>/gi, '<br>');
 
-            // This removes useless span tags but keeps the text inside them
-            tempDiv.querySelectorAll('span').forEach(el => {
-                el.replaceWith(...el.childNodes);
-            });
-            
-            return tempDiv.innerHTML;
+            // Clean up multiple and trailing line breaks
+            let finalHtml = sanitizedHtml.replace(/(<br\s*\/?>\s*){2,}/gi, '<br><br>');
+            finalHtml = finalHtml.trim().replace(/(<br\s*\/?>\s*)+$/gi, '');
+
+            return finalHtml;
         };
 
         const isContentEmpty = (htmlContent) => {

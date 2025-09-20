@@ -424,15 +424,20 @@ function renderSummary() {
         tempDiv.innerHTML = html;
         if (tempDiv.innerText.trim() === '') { return '...'; }
 
-        // This removes unwanted style attributes from every element
+        // Sanitize the content to preserve formatting but ensure consistency
         tempDiv.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
-
-        // This removes useless span tags but keeps the text inside them
-        tempDiv.querySelectorAll('span').forEach(el => {
+        tempDiv.querySelectorAll('span, font').forEach(el => {
             el.replaceWith(...el.childNodes);
         });
         
-        return tempDiv.innerHTML;
+        // Convert block elements like <p> and <div> into line breaks
+        let finalHtml = tempDiv.innerHTML.replace(/<(p|div)(.*?)>/gi, '').replace(/<\/(p|div)>/gi, '<br>');
+        
+        // Clean up multiple and trailing line breaks
+        finalHtml = finalHtml.replace(/(<br\s*\/?>\s*){2,}/gi, '<br><br>');
+        finalHtml = finalHtml.trim().replace(/(<br\s*\/?>\s*)+$/gi, '');
+
+        return finalHtml;
     };
     
     const isContentEmpty = (htmlContent) => {
