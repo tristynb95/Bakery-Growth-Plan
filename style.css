@@ -1,12 +1,6 @@
 /* Gail's Bakery 30-60-90 Plan Stylesheet */
 /* v10.5 - Calendar Modal Overflow Fix */
 
-html, body {
-    height: 100%;
-    overflow: hidden; /* This is key to preventing the whole page from scrolling */
-}
-
-
 /* 1. Root Variables & Base Styles
 -------------------------------------------------- */
 :root {
@@ -2975,4 +2969,16 @@ input[type="time"] {
 
 .btn-danger:hover {
     background-color: #B91C1C;
+}
+
+/* 63. Main App Viewport & Scrolling Control
+-------------------------------------------------- */
+/* This ensures the main app and dashboard fill the screen */
+#app-view, #dashboard-view {
+    height: 100vh;
+}
+
+/* This targets the main app to prevent the whole page from scrolling */
+body:has(#app-view) {
+    overflow: hidden;
 }
