@@ -469,9 +469,9 @@ function renderSummary() {
                 const statusText = status.replace('-', ' ').toUpperCase();
                 const statusBadgeHTML = `<span class="summary-status-badge status-${status}">${statusText}</span>`;
                 let checkinContent = '';
-                if (!isContentEmpty(win)) checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Win/Learning:</strong> ${e(win)}</p>`;
-                if (!isContentEmpty(spotlight)) checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Breadhead Spotlight:</strong> ${e(spotlight)}</p>`;
-                if (!isContentEmpty(shine)) checkinContent += `<p class="text-sm text-gray-600"><strong>SHINE Focus:</strong> ${e(shine)}</p>`;
+                if (!isContentEmpty(win)) checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Win/Learning:</strong><br>${e(win)}</p>`;
+                if (!isContentEmpty(spotlight)) checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Breadhead Spotlight:</strong><br>${e(spotlight)}</p>`;
+                if (!isContentEmpty(shine)) checkinContent += `<p class="text-sm text-gray-600"><strong>SHINE Focus:</strong><br>${e(shine)}</p>`;
                 if (checkinContent === '') checkinContent = '<p class="text-sm text-gray-500 italic">No details logged.</p>';
 
                 weeklyCheckinHTML += `<li class="mb-3 pb-3 border-b last:border-b-0"><div class="flex justify-between items-center mb-2"><strong class="font-semibold text-gray-700">Week ${w}</strong>${statusBadgeHTML}</div>${checkinContent}</li>`;

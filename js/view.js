@@ -75,7 +75,7 @@ function runViewScript(app) {
             let hasLoggedWeeks = false;
 
             for (let w = 1; w <= 4; w++) {
-                // ... (weekly check-in logic is unchanged)
+                // ... (logic to get status, win, etc.)
                 const status = formData[`m${monthNum}s5_w${w}_status`];
                 const win = formData[`m${monthNum}s5_w${w}_win`];
                 const spotlight = formData[`m${monthNum}s5_w${w}_spotlight`];
@@ -88,13 +88,13 @@ function runViewScript(app) {
                     
                     let checkinContent = '';
                     if (!isContentEmpty(win)) {
-                        checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Win/Learning:</strong> ${e(win)}</p>`;
+                        checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Win/Learning:</strong><br>${e(win)}</p>`;
                     }
                     if (!isContentEmpty(spotlight)) {
-                        checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Breadhead Spotlight:</strong> ${e(spotlight)}</p>`;
+                        checkinContent += `<p class="text-sm text-gray-600 mb-2"><strong>Breadhead Spotlight:</strong><br>${e(spotlight)}</p>`;
                     }
                     if (!isContentEmpty(shine)) {
-                        checkinContent += `<p class="text-sm text-gray-600"><strong>SHINE Focus:</strong> ${e(shine)}</p>`;
+                        checkinContent += `<p class="text-sm text-gray-600"><strong>SHINE Focus:</strong><br>${e(shine)}</p>`;
                     }
                      if (checkinContent === '') {
                         checkinContent = '<p class="text-sm text-gray-500 italic">No details logged for this week.</p>';
