@@ -96,7 +96,6 @@ function runViewScript(app) {
                 pillarHTML = `<div class="flex items-center gap-2 mb-4 flex-wrap"><span class="font-semibold text-sm text-gray-500">Pillar Focus:</span>${pillarBadgesHTML}</div>`;
             }
 
-
             return `
                 <div class="content-card p-0 overflow-hidden mt-8">
                     <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">Month ${monthNum} Plan</h2>
@@ -132,16 +131,15 @@ function runViewScript(app) {
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="content-card p-6 mt-4 bg-red-50 border border-red-200">
-                    <h3 class="summary-heading !text-red-800">End of Month Review</h3>
-                    <ul class="space-y-3 mt-2">
-                        <li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Biggest Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li>
-                        <li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Toughest Challenge & Learning:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li>
-                        <li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Focus for Next Month:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li>
-                    </ul>
-                </div>
-                `;
+                    <div class="p-6 bg-red-50 border-t border-gray-200">
+                        <h3 class="summary-heading !text-red-800">End of Month Review</h3>
+                        <ul class="space-y-3 mt-2">
+                            <li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Biggest Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li>
+                            <li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Toughest Challenge & Learning:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li>
+                            <li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Focus for Next Month:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li>
+                        </ul>
+                    </div>
+                </div>`;
         };
 
         DOMElements.headerTitle.textContent = formData.planName || 'Growth Plan Summary';
