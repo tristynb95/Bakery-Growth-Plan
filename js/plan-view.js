@@ -2,8 +2,7 @@
 
 import { calculatePlanCompletion, getVisionProgress, getMonthProgress, isWeekComplete, isContentEmpty } from './utils.js';
 import { openChat } from './chat.js';
-import { renderFilesView } from './files.js'; // <-- ADD THIS LINE
-
+import { renderFilesView } from './files.js';
 
 // Dependencies passed from main.js
 let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare;
@@ -28,9 +27,9 @@ const DOMElements = {
     sidebarLogoutBtn: document.getElementById('sidebar-logout-btn'),
     printBtn: document.getElementById('print-btn'),
     shareBtn: document.getElementById('share-btn'),
+    aiActionBtn: document.getElementById('ai-action-btn'), // This is the button we'll reuse
     desktopHeaderButtons: document.getElementById('desktop-header-buttons'),
     saveIndicator: document.getElementById('save-indicator'),
-    monthlyAIActionBtn: document.getElementById('monthly-ai-action-btn'),
 };
 
 // --- HTML Templates for Views ---
@@ -502,45 +501,36 @@ function switchView(viewId) {
 
     const titles = {
         vision: { title: `Bakery Growth Plan - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.' },
-         'month-1': { title: 'Month 1 Plan', subtitle: appState.planData.planName || 'Lay the foundations for success.' },
-         'month-2': { title: 'Month 2 Plan', subtitle: appState.planData.planName || 'Build momentum and embed processes.' },
-         'month-3': { title: 'Month 3 Plan', subtitle: appState.planData.planName || 'Refine execution and review the quarter.' },
-         summary: { title: `Plan Summary - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'A complete overview of your quarterly plan.' },
-         files: { title: 'My Files', subtitle: "Manage documents for your plan, like P&L statements and KPIs." }
+        'month-1': { title: 'Month 1 Plan', subtitle: appState.planData.planName || 'Lay the foundations for success.' },
+        'month-2': { title: 'Month 2 Plan', subtitle: appState.planData.planName || 'Build momentum and embed processes.' },
+        'month-3': { title: 'Month 3 Plan', subtitle: appState.planData.planName || 'Refine execution and review the quarter.' },
+        summary: { title: `Plan Summary - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'A complete overview of your quarterly plan.' },
+        files: { title: 'My Files', subtitle: "Manage documents for your plan, like P&L statements and KPIs." }
     };
-    
+
     DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
     DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
 
     const isSummaryView = viewId === 'summary';
     const isFilesView = viewId === 'files';
-    const isMonthView = viewId.startsWith('month-');
 
-    // Hide all header buttons by default
-    DOMElements.printBtn.classList.add('hidden');
-    DOMElements.shareBtn.classList.add('hidden');
-    DOMElements.monthlyAIActionBtn.classList.add('hidden');
+    // Show the whole button container ONLY on the summary view
+    DOMElements.desktopHeaderButtons.classList.toggle('hidden', !isSummaryView);
+    DOMElements.aiActionBtn.classList.toggle('hidden', !isSummaryView); // Also toggle the specific AI button
 
     if (isSummaryView) {
-        DOMElements.printBtn.classList.remove('hidden');
-        DOMElements.shareBtn.classList.remove('hidden');
         renderSummary();
     } else if (isFilesView) {
         renderFilesView(DOMElements.contentArea);
     } else {
-        const monthNum = isMonthView ? viewId.split('-')[1] : null;
+        const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
         DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
-        
+
         cacheFormElements();
         populateViewWithData();
 
         if (monthNum) {
             updateWeeklyTabCompletion(monthNum, appState.planData);
-            
-            // Show and configure the monthly AI button
-            const aiButton = DOMElements.monthlyAIActionBtn;
-            aiButton.classList.remove('hidden');
-            aiButton.dataset.monthNum = monthNum; // Store the month context
         }
     }
 
@@ -722,16 +712,16 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
     DOMElements.printBtn.addEventListener('click', () => window.print());
     DOMElements.shareBtn.addEventListener('click', () => handleShare(db, appState));
     
-    // This is the single listener for the header button
-    DOMElements.monthlyAIActionBtn.addEventListener('click', (e) => {
-        const monthNum = e.currentTarget.dataset.monthNum;
-        if (monthNum) {
-            const planSummary = summarizePlanForActionPlan(appState.planData, monthNum);
-            handleAIActionPlan(appState, saveData, planSummary, monthNum);
-        } else {
-            console.error("AI Action Plan button clicked without month context.");
-        }
+    // REPURPOSED: This now opens the summary AI modal
+    DOMElements.aiActionBtn.addEventListener('click', () => {
+        openModal('aiActionPlan_summary');
     });
+
+    // Remove the radial menu AI button listener
+    const actionPlanButton = document.getElementById('radial-action-plan');
+    if (actionPlanButton) {
+        actionPlanButton.style.display = 'none'; // Hide the button
+    }
 
 
     const sidebarLogoLink = document.getElementById('sidebar-logo-link');
