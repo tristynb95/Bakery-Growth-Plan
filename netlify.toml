@@ -2,5 +2,10 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
+# This entry already exists
 [functions."generate-chat-response"]
+  timeout = 25
+
+# Add this new entry for the plan generator
+[functions."generate-plan"]
   timeout = 25
