@@ -11,7 +11,7 @@ exports.handler = async function(event, context) {
     
     // Securely get the API key from the environment variables you set in Netlify
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest"});
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro"});
 
     // --- ENHANCED PROMPT FOR CONSISTENCY ---
     const prompt = `
@@ -30,7 +30,6 @@ exports.handler = async function(event, context) {
       4.  **Strict HTML Structure**: The final output MUST be ONLY the HTML code block. Do not include markdown formatting like \`\`\`html.
       5. **Managers Name**: When referring to the manager in the action plan, you will use the manager name found at the top of the tab titled 'Vision & Sprints'
       6. **Responses**: My responses will be clear, concise and actionable. 
-      7. **NEW INSTRUCTION**: You must only use the information given to you in the plan summary. Do not add any extra information or make up any new actions.
 
       **Step-by-Step Thought Process (Chain-of-Thought):**
       1.  First, I will read the entire plan summary to understand the key objectives for each month.

@@ -150,7 +150,7 @@ const templates = {
 
 // --- Helper Functions ---
 
-export function summarizePlanForAI(planData) {
+export function summarizePlanForActionPlan(planData) {
     const e = (text) => {
         if (!text) return '';
         const tempDiv = document.createElement('div');
@@ -712,14 +712,14 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
     DOMElements.printBtn.addEventListener('click', () => window.print());
     DOMElements.shareBtn.addEventListener('click', () => handleShare(db, appState));
     DOMElements.aiActionBtn.addEventListener('click', () => {
-        const planSummary = summarizePlanForAI(appState.planData);
+        const planSummary = summarizePlanForActionPlan(appState.planData);
         handleAIActionPlan(appState, saveData, planSummary);
     });
 
     const actionPlanButton = document.getElementById('radial-action-plan');
     if (actionPlanButton) {
         actionPlanButton.addEventListener('click', () => {
-            const planSummary = summarizePlanForAI(appState.planData);
+            const planSummary = summarizePlanForActionPlan(appState.planData);
             handleAIActionPlan(appState, saveData, planSummary);
             document.getElementById('radial-menu-container').classList.remove('open');
         });

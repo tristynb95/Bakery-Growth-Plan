@@ -1,7 +1,6 @@
 // js/chat.js
 
 import { getGeminiChatResponse } from './api.js';
-import { summarizePlanForAI } from './plan-view.js';
 import { openModal } from './ui.js';
 import { loadCalendarData } from './calendar.js';
 
@@ -25,6 +24,41 @@ const DOMElements = {
     historyPanel: document.getElementById('chat-history-panel'),
     historyList: document.getElementById('history-list'),
 };
+
+function summarizePlanForChat(planData) {
+    const e = (text) => {
+        if (!text) return '';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = text;
+        return tempDiv.innerText.trim();
+    };
+
+    let summary = `MANAGER: ${e(planData.managerName)}\n`;
+    summary += `BAKERY: ${e(planData.bakeryLocation)}\n`;
+    summary += `QUARTER: ${e(planData.quarter)}\n`;
+    summary += `QUARTERLY VISION: ${e(planData.quarterlyTheme)}\n\n`;
+
+    for (let m = 1; m <= 3; m++) {
+        summary += `--- MONTH ${m} ---\n`;
+        summary += `GOAL: ${e(planData[`month${m}Goal`])}\n`;
+
+        const pillars = planData[`m${m}s1_pillar`];
+        if (Array.isArray(pillars) && pillars.length > 0) {
+            summary += `PILLAR FOCUS: ${pillars.join(', ')}\n`;
+        }
+
+        summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
+        summary += `KEY ACTIONS: ${e(planData[`m${m}s2_levers`])}\n`;
+        summary += `TEAM POWER-UP QUESTION: ${e(planData[`m${m}s2_powerup_q`])}\n`;
+        summary += `TEAM'S WINNING IDEA: ${e(planData[`m${m}s2_powerup_a`])}\n`;
+        summary += `DEVELOPING OUR BREADHEADS: ${e(planData[`m${m}s3_people`])}\n`;
+        summary += `UPHOLDING PILLARS (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
+        summary += `UPHOLDING PILLARS (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
+        summary += `UPHOLDING PILLARS (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
+        summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
+    }
+    return summary;
+}
 
 function parseMarkdownToHTML(text) {
     let processedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -131,7 +165,7 @@ async function handleSendMessage() {
     DOMElements.chatInput.style.height = `${initialHeight}px`;
     addMessageToUI('model', '', true);
     try {
-        const planSummary = summarizePlanForAI(appState.planData);
+        const planSummary = summarizePlanForChat(appState.planData);
         const calendarData = appState.calendar.data;
         const responseText = await getGeminiChatResponse(planSummary, chatHistory, messageText, calendarData);
         updateLastAiMessageInUI(responseText);
