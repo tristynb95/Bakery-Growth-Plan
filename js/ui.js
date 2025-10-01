@@ -219,7 +219,16 @@ function setupAiModalInteractivity(container) {
 
                 panel.innerHTML = monthTableHTML;
                 makeTablesSortable(panel); // Ensure the new table is sortable
-                saveState(); // Save the new state with the generated table
+                
+                // Instantly save the newly generated plan
+                await saveActionPlan(); 
+
+                // Now that it's saved, show the "Generate New" button
+                const regenButton = document.querySelector('.modal-footer .dynamic-btn:not(#modal-print-btn)');
+                if (regenButton) {
+                    regenButton.style.display = 'inline-flex';
+                }
+
             } catch (error) {
                 if (error.name === 'AbortError') {
                     console.log(`Month ${month} plan generation cancelled.`);
