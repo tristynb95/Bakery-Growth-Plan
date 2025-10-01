@@ -158,10 +158,8 @@ export function summarizePlanForAI(planData) {
         return tempDiv.innerText.trim();
     };
 
-    let summary = `MANAGER: ${e(planData.managerName)}\n`;
-    summary += `BAKERY: ${e(planData.bakeryLocation)}\n`;
-    summary += `QUARTER: ${e(planData.quarter)}\n`;
-    summary += `QUARTERLY VISION: ${e(planData.quarterlyTheme)}\n\n`;
+    // This summary is now highly focused on only the most critical strategic inputs.
+    let summary = `QUARTERLY VISION: ${e(planData.quarterlyTheme)}\n\n`;
 
     for (let m = 1; m <= 3; m++) {
         summary += `--- MONTH ${m} ---\n`;
@@ -173,31 +171,7 @@ export function summarizePlanForAI(planData) {
         }
 
         summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
-        summary += `KEY ACTIONS: ${e(planData[`m${m}s2_levers`])}\n`;
-        summary += `TEAM POWER-UP QUESTION: ${e(planData[`m${m}s2_powerup_q`])}\n`;
-        summary += `TEAM'S WINNING IDEA: ${e(planData[`m${m}s2_powerup_a`])}\n`;
-        summary += `DEVELOPING OUR BREADHEADS: ${e(planData[`m${m}s3_people`])}\n`;
-        summary += `UPHOLDING PILLARS (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
-        summary += `UPHOLDING PILLARS (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
-        summary += `UPHOLDING PILLARS (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
-        summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`; // Add a line break for separation
-
-        // --- FIX: REMOVE THE ENTIRE WEEKLY MOMENTUM SECTION ---
-        // By removing this block, we significantly reduce the input size and processing time.
-        /*
-        summary += `\n--- WEEKLY MOMENTUM (MONTH ${m}) ---\n`;
-        for (let w = 1; w <= 4; w++) {
-            const status = e(planData[`m${m}s5_w${w}_status`]);
-            if (status) {
-                summary += `WEEK ${w}:\n`;
-                summary += `  - Status: ${status}\n`;
-                summary += `  - Win or Learning: ${e(planData[`m${m}s5_w${w}_win`])}\n`;
-                summary += `  - Breadhead Spotlight: ${e(planData[`m${m}s5_w${w}_spotlight`])}\n`;
-                summary += `  - SHINE Focus: ${e(planData[`m${m}s5_w${w}_shine`])}\n`;
-            }
-        }
-        summary += `\n`;
-        */
+        summary += `KEY ACTIONS: ${e(planData[`m${m}s2_levers`])}\n\n`; // End with a double line break for clarity
     }
     return summary;
 }
