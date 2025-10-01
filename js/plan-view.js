@@ -158,7 +158,6 @@ export function summarizePlanForAI(planData) {
         return tempDiv.innerText.trim();
     };
 
-    // --- ADDED MANAGER NAME ---
     let summary = `MANAGER: ${e(planData.managerName)}\n`;
     summary += `BAKERY: ${e(planData.bakeryLocation)}\n`;
     summary += `QUARTER: ${e(planData.quarter)}\n`;
@@ -175,15 +174,14 @@ export function summarizePlanForAI(planData) {
 
         summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
         summary += `KEY ACTIONS: ${e(planData[`m${m}s2_levers`])}\n`;
-
-        // --- REINTRODUCED UPHOLDING PILLARS ---
+        summary += `DEVELOPING OUR BREADHEADS: ${e(planData[`m${m}s3_people`])}\n`;
         summary += `UPHOLDING PILLARS (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
         summary += `UPHOLDING PILLARS (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
         summary += `UPHOLDING PILLARS (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
         summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
     }
     return summary;
-}
+}// Add a line break for separation
 
 function cacheFormElements() {
     cachedFormElements = Array.from(document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]'));
