@@ -9,8 +9,8 @@ let activeSaveDataFunction = null; // To hold the saveData function from the cur
 let currentPlanSummary = ''; // To hold the plan summary for on-demand generation
 
 // AI Action Plan State
-let undoStack = [];
-let redoStack = [];
+let undoHistory = { month1: [], month2: [], month3: [] };
+let redoHistory = { month1: [], month2: [], month3: [] };
 
 // --- DOM Element References ---
 const DOMElements = {
@@ -60,37 +60,54 @@ function managePlaceholder(editor) {
 }
 
 // --- AI Action Plan Logic (with Undo/Redo) ---
+function getActiveTabId() {
+    const activeTab = document.querySelector('.ai-tab-btn.active');
+    return activeTab ? activeTab.dataset.tab : null;
+}
+
 function updateUndoRedoButtons() {
+    const activeTabId = getActiveTabId();
+    if (!activeTabId) return;
+
     const undoBtn = document.getElementById('undo-btn');
     const redoBtn = document.getElementById('redo-btn');
-    if (undoBtn) undoBtn.disabled = undoStack.length <= 1;
-    if (redoBtn) redoBtn.disabled = redoStack.length === 0;
+    if (undoBtn) undoBtn.disabled = undoHistory[activeTabId].length <= 1;
+    if (redoBtn) redoBtn.disabled = redoHistory[activeTabId].length === 0;
 }
 
 function saveState() {
-    const printableArea = document.getElementById('ai-printable-area');
-    if (printableArea) {
-        undoStack.push(printableArea.innerHTML);
-        redoStack = []; // Clear redo stack on new action
+    const activeTabId = getActiveTabId();
+    const activePanel = document.querySelector(`.ai-tabs-content > div[data-tab-panel="${activeTabId}"]`);
+    if (activePanel) {
+        undoHistory[activeTabId].push(activePanel.innerHTML);
+        redoHistory[activeTabId] = []; // Clear redo stack for the current tab on new action
         updateUndoRedoButtons();
     }
 }
 
 function undo() {
-    if (undoStack.length > 1) {
-        const currentState = undoStack.pop();
-        redoStack.push(currentState);
-        const previousState = undoStack[undoStack.length - 1];
-        document.getElementById('ai-printable-area').innerHTML = previousState;
+    const activeTabId = getActiveTabId();
+    if (undoHistory[activeTabId] && undoHistory[activeTabId].length > 1) {
+        const currentState = undoHistory[activeTabId].pop();
+        redoHistory[activeTabId].push(currentState);
+        const previousState = undoHistory[activeTabId][undoHistory[activeTabId].length - 1];
+        const activePanel = document.querySelector(`.ai-tabs-content > div[data-tab-panel="${activeTabId}"]`);
+        if (activePanel) {
+            activePanel.innerHTML = previousState;
+        }
         updateUndoRedoButtons();
     }
 }
 
 function redo() {
-    if (redoStack.length > 0) {
-        const nextState = redoStack.pop();
-        undoStack.push(nextState);
-        document.getElementById('ai-printable-area').innerHTML = nextState;
+    const activeTabId = getActiveTabId();
+    if (redoHistory[activeTabId] && redoHistory[activeTabId].length > 0) {
+        const nextState = redoHistory[activeTabId].pop();
+        undoHistory[activeTabId].push(nextState);
+        const activePanel = document.querySelector(`.ai-tabs-content > div[data-tab-panel="${activeTabId}"]`);
+        if (activePanel) {
+            activePanel.innerHTML = nextState;
+        }
         updateUndoRedoButtons();
     }
 }
@@ -181,6 +198,7 @@ function setupAiModalInteractivity(container) {
             tab.classList.add('active');
             const targetPanel = tabContainer.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
             if (targetPanel) targetPanel.classList.add('active');
+            updateUndoRedoButtons(); // Update buttons on tab switch
         }
         if (sortHeader) { handleTableSort(sortHeader); }
 
@@ -255,17 +273,25 @@ async function saveActionPlan() {
         await activeSaveDataFunction(true, payload);
     }
 
-    const printableArea = document.getElementById('ai-printable-area');
-    if (printableArea) {
-        undoStack = [printableArea.innerHTML];
-        redoStack = [];
-        updateUndoRedoButtons();
-    }
+    // Reset history for each tab after saving
+    Object.keys(undoHistory).forEach(key => {
+        const panel = document.querySelector(`#ai-printable-area [data-tab-panel="${key}"]`);
+        if (panel) {
+            undoHistory[key] = [panel.innerHTML];
+            redoHistory[key] = [];
+        }
+    });
+    
+    updateUndoRedoButtons();
     
     setTimeout(() => {
         saveButton.disabled = false;
         saveButton.innerHTML = originalHTML;
     }, 2000);
+}
+
+function handleRegenerateActionPlan() {
+    openModal('confirmRegenerate');
 }
 
 function requestCloseModal() {
@@ -547,6 +573,11 @@ export function openModal(type, context = {}) {
             undoRedoContainer.querySelector('#undo-btn').onclick = undo;
             undoRedoContainer.querySelector('#redo-btn').onclick = redo;
 
+            const regenButton = document.createElement('button');
+            regenButton.className = 'btn btn-secondary dynamic-btn';
+            regenButton.innerHTML = `<i class="bi bi-stars"></i> Regenerate`;
+            regenButton.onclick = handleRegenerateActionPlan;
+
             const printBtn = document.createElement('button');
             printBtn.className = 'btn btn-secondary dynamic-btn';
             printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
@@ -606,55 +637,56 @@ export function openModal(type, context = {}) {
                 }
             }
             
-            undoStack = [];
-            redoStack = [];
-            saveState();
+            // 3. Setup interactivity and initialize history for all tabs
+            undoHistory = { month1: [], month2: [], month3: [] };
+            redoHistory = { month1: [], month2: [], month3: [] };
+            for (let i = 1; i <= 3; i++) {
+                const panel = DOMElements.modalContent.querySelector(`[data-tab-panel="month${i}"]`);
+                if(panel) {
+                    undoHistory[`month${i}`].push(panel.innerHTML);
+                }
+            }
             setupAiModalInteractivity(DOMElements.modalContent.querySelector('#ai-printable-area'));
-            updateUndoRedoButtons();
+            updateUndoRedoButtons(); // Update for the initially active tab
             break;
         }
-        case 'confirmRegenerate': // This case is now effectively "confirm clear and regenerate"
-            DOMElements.modalTitle.textContent = "Are you sure?";
-            DOMElements.modalContent.innerHTML = `<p>This will generate a new plan for the active month, overwriting any edits you've made. This cannot be undone.</p>`;
-            DOMElements.modalActionBtn.textContent = "Yes, Generate New";
+        case 'confirmRegenerate': {
+            const activeTabId = getActiveTabId();
+            const monthNum = activeTabId ? activeTabId.replace('month', '') : '';
+            
+            DOMElements.modalTitle.textContent = "Confirm Regeneration";
+            DOMElements.modalContent.innerHTML = `<p>Are you sure you want to generate a new plan for <strong>Month ${monthNum}</strong>? This will overwrite the current Month ${monthNum} plan and any edits you've made. This action cannot be undone.</p>`;
+            DOMElements.modalActionBtn.textContent = "Yes, Generate New Plan";
             DOMElements.modalActionBtn.className = 'btn btn-danger';
+            
             DOMElements.modalActionBtn.onclick = () => {
-                // Find active tab and trigger its generate button
-                const activeTab = document.querySelector('.ai-tab-btn.active');
-                if (activeTab) {
-                    const month = activeTab.dataset.tab.replace('month', '');
-                    const generateBtn = document.querySelector(`.generate-month-plan-btn[data-month="${month}"]`);
-                    if(generateBtn) {
-                       generateBtn.click(); // Simulate click
-                    } else {
-                        // If there's no generate button, we need to manually trigger it from an existing view
-                        const panel = document.querySelector(`[data-tab-panel="month${month}"]`);
-                        if(panel) {
-                            const tempBtn = document.createElement('button');
-                            tempBtn.className = 'generate-month-plan-btn';
-                            tempBtn.dataset.month = month;
-                            panel.innerHTML = '';
-                            panel.appendChild(tempBtn);
-                            tempBtn.click();
-                        }
-                    }
+                const panel = document.querySelector(`[data-tab-panel="${activeTabId}"]`);
+                if (panel) {
+                    // Create a temporary button to click, ensuring the generate logic runs
+                    const tempBtn = document.createElement('button');
+                    tempBtn.className = 'generate-month-plan-btn';
+                    tempBtn.dataset.month = monthNum;
+                    panel.innerHTML = ''; // Clear the panel before adding the button
+                    panel.appendChild(tempBtn);
+                    tempBtn.click();
                 }
                 closeModal();
             };
+            
+            DOMElements.modalCancelBtn.textContent = "Cancel";
+            DOMElements.modalCancelBtn.onclick = closeModal;
             break;
+        }
         case 'confirmClose':
             DOMElements.modalTitle.textContent = "Discard Changes?";
             DOMElements.modalContent.innerHTML = `<p>You have unsaved changes. Are you sure you want to close without saving?</p>`;
             DOMElements.modalActionBtn.textContent = "Discard";
             DOMElements.modalActionBtn.className = 'btn btn-danger';
-            DOMElements.modalActionBtn.onclick = () => closeModal();
+            DOMElements.modalActionBtn.onclick = closeModal; // The handler for 'aiActionPlan_view' will rebuild the modal from scratch
             DOMElements.modalCancelBtn.textContent = "Cancel";
             DOMElements.modalCancelBtn.onclick = () => {
-                openModal('aiActionPlan_view');
-                const lastState = undoStack[undoStack.length - 1];
-                document.getElementById('modal-content').innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${lastState}</div>`;
-                setupAiModalInteractivity(document.getElementById('ai-printable-area'));
-                updateUndoRedoButtons();
+                // Simply close the confirm dialog to return to the AI plan modal
+                openModal('aiActionPlan_view'); // This re-opens the main modal, preserving its state visually
             };
             break;
         case 'confirmDeleteEvent':
