@@ -27,9 +27,9 @@ const DOMElements = {
     sidebarLogoutBtn: document.getElementById('sidebar-logout-btn'),
     printBtn: document.getElementById('print-btn'),
     shareBtn: document.getElementById('share-btn'),
+    aiActionBtn: document.getElementById('ai-action-btn'),
     desktopHeaderButtons: document.getElementById('desktop-header-buttons'),
     saveIndicator: document.getElementById('save-indicator'),
-    monthlyAIActionBtn: document.getElementById('monthly-ai-action-btn'), // Corrected Reference
 };
 
 // --- HTML Templates for Views ---
@@ -65,10 +65,8 @@ const templates = {
                             <div class="flex flex-col">
                                 <label for="m${monthNum}s2_levers" class="font-semibold text-lg block mb-2 text-gray-800">My Key Actions:</label>
                                 <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing flex-grow key-levers-input" contenteditable="true" data-placeholder="1. Review Availability & Freshness report daily and adjust baking plans proactively.&#10;
-
-                                2. Lead a 'Coffee Dial-In' session in the management meeting &#10;
-
-                                3. Coach one team member daily on a specific SHINE principle." data-maxlength="600"></div>
+2. Lead a 'Coffee Dial-In' session in the management meeting &#10;
+3. Coach one team member daily on a specific SHINE principle." data-maxlength="600"></div>
                             </div>
                             <div class="space-y-4">
                                 <div>
@@ -507,7 +505,7 @@ function switchView(viewId) {
         summary: { title: `Plan Summary - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'A complete overview of your quarterly plan.' },
         files: { title: 'My Files', subtitle: "Manage documents for your plan, like P&L statements and KPIs." }
     };
-
+    
     DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
     DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
 
@@ -516,12 +514,9 @@ function switchView(viewId) {
 
     // Show the whole button container ONLY on the summary view
     DOMElements.desktopHeaderButtons.classList.toggle('hidden', !isSummaryView);
-    DOMElements.monthlyAIActionBtn.classList.add('hidden'); // Hide the monthly button by default
+    if(DOMElements.aiActionBtn) DOMElements.aiActionBtn.classList.toggle('hidden', !isSummaryView);
 
     if (isSummaryView) {
-        DOMElements.printBtn.classList.remove('hidden');
-        DOMElements.shareBtn.classList.remove('hidden');
-        DOMElements.aiActionBtn.classList.remove('hidden'); // Show the main AI button
         renderSummary();
     } else if (isFilesView) {
         renderFilesView(DOMElements.contentArea);
@@ -712,8 +707,8 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
         document.dispatchEvent(new CustomEvent('logout-request'));
     });
 
-    DOMElements.printBtn.addEventListener('click', () => window.print());
-    DOMElements.shareBtn.addEventListener('click', () => handleShare(db, appState));
+    if(DOMElements.printBtn) DOMElements.printBtn.addEventListener('click', () => window.print());
+    if(DOMElements.shareBtn) DOMElements.shareBtn.addEventListener('click', () => handleShare(db, appState));
     
     // This is the single listener for the main header AI button on the summary page
     if (DOMElements.aiActionBtn) {
