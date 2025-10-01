@@ -729,8 +729,7 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
     const geminiButton = document.getElementById('radial-action-gemini');
     if (geminiButton) {
         geminiButton.addEventListener('click', () => {
-            openChat();
-            document.getElementById('radial-menu-container').classList.remove('open');
+            openModal('aiActionPlan_summary');
         });
     }
 }
