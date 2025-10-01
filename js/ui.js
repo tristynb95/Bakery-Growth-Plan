@@ -679,6 +679,27 @@ export function openModal(type, context = {}) {
             // Add interactivity to BOTH header and content
             setupAiModalInteractivity(DOMElements.modalBox); 
             updateUndoRedoButtons();
+
+            // New logic to control the visibility of the "Generate New" button
+            const updateRegenButtonVisibility = () => {
+                const activeTabId = getActiveTabId();
+                const activePanel = DOMElements.modalContent.querySelector(`[data-tab-panel="${activeTabId}"]`);
+                const hasPlan = activePanel && activePanel.querySelector('table');
+                if (regenButton) {
+                    regenButton.style.display = hasPlan ? 'inline-flex' : 'none';
+                }
+            };
+
+            // Add the visibility check to the tab click listener
+            modalHeader.addEventListener('click', (e) => {
+                if (e.target.closest('.ai-tab-btn')) {
+                    // Timeout to allow the tab switch to complete before checking
+                    setTimeout(updateRegenButtonVisibility, 0);
+                }
+            });
+
+            // Set initial visibility
+            updateRegenButtonVisibility();
             break;
         }
         case 'confirmRegenerate': {
