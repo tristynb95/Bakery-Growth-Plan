@@ -8,4 +8,4 @@
 
 # Add this new entry for the plan generator
 [functions."generate-plan"]
-  timeout = 25
+  timeout = 120
