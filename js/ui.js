@@ -208,37 +208,35 @@ function setupAiModalInteractivity(container) {
             panel.innerHTML = `<div class="flex flex-col items-center justify-center p-8"><div class="loading-spinner"></div><p class="mt-4 text-gray-600">Generating plan for Month ${month}...</p></div>`;
             
             try {
-                // TODO: Update generateAiActionPlan in api.js and generate-plan.js on the backend.
-                // For now, this will simulate the API call.
-                console.log(`Generating plan for Month ${month} with summary:`, currentPlanSummary);
-                // const monthTableHTML = await generateAiActionPlan(currentPlanSummary, month);
-                await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
-                const monthTableHTML = `
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Action Step</th><th>Pillar</th><th>Owner</th><th>Due Date</th>
-                          <th>Resources / Support Needed</th><th>Status</th><th class="actions-cell">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td contenteditable="true">Mock action for Month ${month}.</td><td contenteditable="true">Product</td>
-                          <td contenteditable="true">Manager</td><td contenteditable="true">Ongoing</td>
-                          <td contenteditable="true">Reports</td><td contenteditable="true">To Do</td>
-                          <td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-trash3"></i></button></td>
-                        </tr>
-                      </tbody>
-                      <tfoot>
-                        <tr><td colspan="7"><button class="btn-add-row"><i class="bi bi-plus-circle"></i> Add Row</button></td></tr>
-                      </tfoot>
-                    </table>`;
+                if (appState.aiPlanGenerationController) {
+                    appState.aiPlanGenerationController.abort();
+                }
+                appState.aiPlanGenerationController = new AbortController();
+                const signal = appState.aiPlanGenerationController.signal;
+
+                const monthTableHTML = await generateAiActionPlan(currentPlanSummary, signal, month);
 
                 panel.innerHTML = monthTableHTML;
+                makeTablesSortable(panel); // Ensure the new table is sortable
                 saveState(); // Save the new state with the generated table
             } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log(`Month ${month} plan generation cancelled.`);
+                    // Optional: Restore the 'Generate' button if desired
+                    panel.innerHTML = `
+                        <div class="text-center p-8 flex flex-col items-center justify-center min-h-[300px]">
+                            <h3 class="font-bold text-lg text-gray-700">Generation Cancelled</h3>
+                            <button class="btn btn-primary generate-month-plan-btn mt-4" data-month="${month}">
+                                <i class="bi bi-stars"></i>
+                                <span>Generate Month ${month} Plan</span>
+                            </button>
+                        </div>`;
+                    return;
+                }
                 console.error("Error generating AI plan for month:", error);
                 panel.innerHTML = `<div class="text-center p-8 text-red-600"><p class="font-semibold">Generation Failed</p><p class="text-sm">${error.message}</p></div>`;
+            } finally {
+                appState.aiPlanGenerationController = null;
             }
         }
     });
