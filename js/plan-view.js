@@ -513,9 +513,10 @@ function switchView(viewId) {
     const isFilesView = viewId === 'files';
 
     // Show the whole button container ONLY on the summary view
-    DOMElements.desktopHeaderButtons.classList.toggle('hidden', !isSummaryView);
-    if(DOMElements.aiActionBtn) DOMElements.aiActionBtn.classList.toggle('hidden', !isSummaryView);
-
+    if (DOMElements.desktopHeaderButtons) {
+        DOMElements.desktopHeaderButtons.classList.toggle('hidden', !isSummaryView);
+    }
+    
     if (isSummaryView) {
         renderSummary();
     } else if (isFilesView) {
