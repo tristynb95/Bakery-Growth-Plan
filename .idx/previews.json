@@ -1,0 +1,13 @@
+{
+  "previews": [
+    {
+      "id": "web",
+      "name": "Web",
+      "port": 5173,
+      "type": "web",
+      "description": "The web application, running on Vite's dev server.",
+      "command": ["npm", "run", "dev"],
+      "manager": "vite"
+    }
+  ]
+}
