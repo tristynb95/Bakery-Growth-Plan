@@ -2,8 +2,7 @@
 
 import { calculatePlanCompletion, getVisionProgress, getMonthProgress, isWeekComplete, isContentEmpty } from './utils.js';
 import { openChat } from './chat.js';
-import { renderFilesView } from './files.js'; // <-- ADD THIS LINE
-
+import { renderFilesView } from './files.js';
 
 // Dependencies passed from main.js
 let db, appState, openModal, initializeCharCounters, handleAIActionPlan, handleShare;
@@ -28,9 +27,9 @@ const DOMElements = {
     sidebarLogoutBtn: document.getElementById('sidebar-logout-btn'),
     printBtn: document.getElementById('print-btn'),
     shareBtn: document.getElementById('share-btn'),
-    aiActionBtn: document.getElementById('ai-action-btn'),
     desktopHeaderButtons: document.getElementById('desktop-header-buttons'),
     saveIndicator: document.getElementById('save-indicator'),
+    monthlyAIActionBtn: document.getElementById('monthly-ai-action-btn'), // Corrected Reference
 };
 
 // --- HTML Templates for Views ---
@@ -150,7 +149,7 @@ const templates = {
 
 // --- Helper Functions ---
 
-export function summarizePlanForActionPlan(planData) {
+export function summarizePlanForActionPlan(planData, monthNum) {
     const e = (text) => {
         if (!text) return '';
         const tempDiv = document.createElement('div');
@@ -163,22 +162,21 @@ export function summarizePlanForActionPlan(planData) {
     summary += `QUARTER: ${e(planData.quarter)}\n`;
     summary += `QUARTERLY VISION: ${e(planData.quarterlyTheme)}\n\n`;
 
-    for (let m = 1; m <= 3; m++) {
-        summary += `--- MONTH ${m} ---\n`;
-        
-        const pillars = planData[`m${m}s1_pillar`];
-        if (Array.isArray(pillars) && pillars.length > 0) {
-            summary += `PILLAR FOCUS: ${pillars.join(', ')}\n`;
-        }
-
-        summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
-        summary += `KEY ACTIONS: ${e(planData[`m${m}s2_levers`])}\n`;
-        summary += `DEVELOPING OUR BREADHEADS: ${e(planData[`m${m}s3_people`])}\n`;
-        summary += `UPHOLDING PILLARS (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
-        summary += `UPHOLDING PILLARS (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
-        summary += `UPHOLDING PILLARS (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
-        summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
+    summary += `--- MONTH ${monthNum} ---\n`;
+    
+    const pillars = planData[`m${monthNum}s1_pillar`];
+    if (Array.isArray(pillars) && pillars.length > 0) {
+        summary += `PILLAR FOCUS: ${pillars.join(', ')}\n`;
     }
+
+    summary += `MUST-WIN BATTLE: ${e(planData[`m${monthNum}s1_battle`])}\n`;
+    summary += `KEY ACTIONS: ${e(planData[`m${monthNum}s2_levers`])}\n`;
+    summary += `DEVELOPING OUR BREADHEADS: ${e(planData[`m${monthNum}s3_people`])}\n`;
+    summary += `UPHOLDING PILLARS (PEOPLE): ${e(planData[`m${monthNum}s4_people`])}\n`;
+    summary += `UPHOLDING PILLARS (PRODUCT): ${e(planData[`m${monthNum}s4_product`])}\n`;
+    summary += `UPHOLDING PILLARS (CUSTOMER): ${e(planData[`m${monthNum}s4_customer`])}\n`;
+    summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${monthNum}s4_place`])}\n\n`;
+
     return summary;
 }
 
@@ -503,29 +501,34 @@ function switchView(viewId) {
 
     const titles = {
         vision: { title: `Bakery Growth Plan - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.' },
-         'month-1': { title: 'Month 1 Plan', subtitle: appState.planData.planName || 'Lay the foundations for success.' },
-         'month-2': { title: 'Month 2 Plan', subtitle: appState.planData.planName || 'Build momentum and embed processes.' },
-         'month-3': { title: 'Month 3 Plan', subtitle: appState.planData.planName || 'Refine execution and review the quarter.' },
-         summary: { title: `Plan Summary - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'A complete overview of your quarterly plan.' },
-         files: { title: 'My Files', subtitle: "Manage documents for your plan, like P&L statements and KPIs." }
-};
-    
+        'month-1': { title: 'Month 1 Plan', subtitle: appState.planData.planName || 'Lay the foundations for success.' },
+        'month-2': { title: 'Month 2 Plan', subtitle: appState.planData.planName || 'Build momentum and embed processes.' },
+        'month-3': { title: 'Month 3 Plan', subtitle: appState.planData.planName || 'Refine execution and review the quarter.' },
+        summary: { title: `Plan Summary - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'A complete overview of your quarterly plan.' },
+        files: { title: 'My Files', subtitle: "Manage documents for your plan, like P&L statements and KPIs." }
+    };
+
     DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
     DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
 
     const isSummaryView = viewId === 'summary';
-    const isFilesView = viewId === 'files'; 
+    const isFilesView = viewId === 'files';
 
+    // Show the whole button container ONLY on the summary view
     DOMElements.desktopHeaderButtons.classList.toggle('hidden', !isSummaryView);
+    DOMElements.monthlyAIActionBtn.classList.add('hidden'); // Hide the monthly button by default
 
     if (isSummaryView) {
+        DOMElements.printBtn.classList.remove('hidden');
+        DOMElements.shareBtn.classList.remove('hidden');
+        DOMElements.aiActionBtn.classList.remove('hidden'); // Show the main AI button
         renderSummary();
     } else if (isFilesView) {
         renderFilesView(DOMElements.contentArea);
     } else {
         const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
         DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
-        
+
         cacheFormElements();
         populateViewWithData();
 
@@ -541,6 +544,7 @@ function switchView(viewId) {
         initializeCharCounters();
     }
 }
+
 
 // --- Main Functions ---
 
@@ -710,17 +714,11 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
 
     DOMElements.printBtn.addEventListener('click', () => window.print());
     DOMElements.shareBtn.addEventListener('click', () => handleShare(db, appState));
-    DOMElements.aiActionBtn.addEventListener('click', () => {
-        const planSummary = summarizePlanForActionPlan(appState.planData);
-        handleAIActionPlan(appState, saveData, planSummary);
-    });
-
-    const actionPlanButton = document.getElementById('radial-action-plan');
-    if (actionPlanButton) {
-        actionPlanButton.addEventListener('click', () => {
-            const planSummary = summarizePlanForActionPlan(appState.planData);
-            handleAIActionPlan(appState, saveData, planSummary);
-            document.getElementById('radial-menu-container').classList.remove('open');
+    
+    // This is the single listener for the main header AI button on the summary page
+    if (DOMElements.aiActionBtn) {
+        DOMElements.aiActionBtn.addEventListener('click', () => {
+            openModal('aiActionPlan_summary');
         });
     }
 
@@ -740,3 +738,4 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
         });
     }
 }
+
