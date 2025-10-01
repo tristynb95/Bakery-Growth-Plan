@@ -856,3 +856,4 @@ export function initializeUI(database, state) {
         });
     }
 }
+
