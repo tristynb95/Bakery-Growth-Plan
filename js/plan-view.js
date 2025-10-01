@@ -28,9 +28,9 @@ const DOMElements = {
     sidebarLogoutBtn: document.getElementById('sidebar-logout-btn'),
     printBtn: document.getElementById('print-btn'),
     shareBtn: document.getElementById('share-btn'),
-    aiActionBtn: document.getElementById('ai-action-btn'),
     desktopHeaderButtons: document.getElementById('desktop-header-buttons'),
     saveIndicator: document.getElementById('save-indicator'),
+    monthlyAIActionBtn: document.getElementById('monthly-ai-action-btn'),
 };
 
 // --- HTML Templates for Views ---
@@ -44,9 +44,6 @@ const templates = {
         requiredFields: ['quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
     },
     month: (monthNum) => `
-            <div class="flex justify-end mb-4 -mt-4">
-                <button id="ai-action-btn-m${monthNum}" class="btn btn-primary"><i class="bi bi-stars"></i> AI Action Plan</button>
-            </div>
             <div class="space-y-8">
                 <div class="content-card p-6 md:p-8">
                     <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation</h2>
@@ -510,22 +507,28 @@ function switchView(viewId) {
          'month-3': { title: 'Month 3 Plan', subtitle: appState.planData.planName || 'Refine execution and review the quarter.' },
          summary: { title: `Plan Summary - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'A complete overview of your quarterly plan.' },
          files: { title: 'My Files', subtitle: "Manage documents for your plan, like P&L statements and KPIs." }
-};
+    };
     
     DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
     DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
 
     const isSummaryView = viewId === 'summary';
-    const isFilesView = viewId === 'files'; 
+    const isFilesView = viewId === 'files';
+    const isMonthView = viewId.startsWith('month-');
 
-    DOMElements.desktopHeaderButtons.classList.toggle('hidden', !isSummaryView);
+    // Hide all header buttons by default
+    DOMElements.printBtn.classList.add('hidden');
+    DOMElements.shareBtn.classList.add('hidden');
+    DOMElements.monthlyAIActionBtn.classList.add('hidden');
 
     if (isSummaryView) {
+        DOMElements.printBtn.classList.remove('hidden');
+        DOMElements.shareBtn.classList.remove('hidden');
         renderSummary();
     } else if (isFilesView) {
         renderFilesView(DOMElements.contentArea);
     } else {
-        const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
+        const monthNum = isMonthView ? viewId.split('-')[1] : null;
         DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
         
         cacheFormElements();
@@ -533,14 +536,11 @@ function switchView(viewId) {
 
         if (monthNum) {
             updateWeeklyTabCompletion(monthNum, appState.planData);
-             // Wire up the new button
-             const aiButton = document.getElementById(`ai-action-btn-m${monthNum}`);
-             if (aiButton) {
-                 aiButton.addEventListener('click', () => {
-                     const planSummary = summarizePlanForActionPlan(appState.planData, monthNum);
-                     handleAIActionPlan(appState, saveData, planSummary, monthNum);
-                 });
-             }
+            
+            // Show and configure the monthly AI button
+            const aiButton = DOMElements.monthlyAIActionBtn;
+            aiButton.classList.remove('hidden');
+            aiButton.dataset.monthNum = monthNum; // Store the month context
         }
     }
 
@@ -551,6 +551,7 @@ function switchView(viewId) {
         initializeCharCounters();
     }
 }
+
 
 // --- Main Functions ---
 
@@ -721,14 +722,16 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
     DOMElements.printBtn.addEventListener('click', () => window.print());
     DOMElements.shareBtn.addEventListener('click', () => handleShare(db, appState));
     
-    // Remove the global AI button listener
-    // DOMElements.aiActionBtn.addEventListener('click', () => { ... });
-
-    // Remove the radial menu AI button listener
-    const actionPlanButton = document.getElementById('radial-action-plan');
-    if (actionPlanButton) {
-        actionPlanButton.style.display = 'none'; // Hide the button
-    }
+    // This is the single listener for the header button
+    DOMElements.monthlyAIActionBtn.addEventListener('click', (e) => {
+        const monthNum = e.currentTarget.dataset.monthNum;
+        if (monthNum) {
+            const planSummary = summarizePlanForActionPlan(appState.planData, monthNum);
+            handleAIActionPlan(appState, saveData, planSummary, monthNum);
+        } else {
+            console.error("AI Action Plan button clicked without month context.");
+        }
+    });
 
 
     const sidebarLogoLink = document.getElementById('sidebar-logo-link');

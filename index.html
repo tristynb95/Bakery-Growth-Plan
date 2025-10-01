@@ -227,9 +227,9 @@
         <i class="bi bi-check-circle-fill text-green-500"></i>
         <span>Saved to Cloud</span>
     </div>
-    <button id="print-btn" class="btn btn-secondary"><i class="bi bi-printer-fill"></i><span>Print</span></button>
-    <button id="share-btn" class="btn btn-secondary"><i class="bi bi-share-fill"></i><span>Share</span></button>
-    <button id="ai-action-btn" class="btn btn-primary"><i class="bi bi-stars"></i><span>AI Action Plan</span></button>
+    <button id="print-btn" class="btn btn-secondary hidden"><i class="bi bi-printer-fill"></i><span>Print</span></button>
+    <button id="share-btn" class="btn btn-secondary hidden"><i class="bi bi-share-fill"></i><span>Share</span></button>
+    <button id="monthly-ai-action-btn" class="btn btn-primary hidden"><i class="bi bi-stars"></i> AI Action Plan</button>
 </div>
                         <button id="mobile-menu-btn" class="btn btn-secondary !p-2 sm:hidden"><i class="bi bi-list text-xl"></i></button>
                     </div>
@@ -274,7 +274,7 @@
             <button class="radial-menu-item" id="radial-action-gemini" data-tooltip="Gemini AI">
                 <i class="bi bi-stars"></i>
             </button>
-            <button class="radial-menu-item" id="radial-action-plan" data-tooltip="Action Plan">
+            <button class="radial-menu-item" id="radial-action-plan" data-tooltip="Action Plan" style="display: none;">
                 <i class="bi bi-list-check"></i>
             </button>
             <button class="radial-menu-item" id="radial-action-calendar" data-tooltip="Calendar">
