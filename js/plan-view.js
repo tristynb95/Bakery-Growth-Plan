@@ -27,9 +27,9 @@ const DOMElements = {
     sidebarLogoutBtn: document.getElementById('sidebar-logout-btn'),
     printBtn: document.getElementById('print-btn'),
     shareBtn: document.getElementById('share-btn'),
-    aiActionBtn: document.getElementById('ai-action-btn'), // This is the button we'll reuse
     desktopHeaderButtons: document.getElementById('desktop-header-buttons'),
     saveIndicator: document.getElementById('save-indicator'),
+    monthlyAIActionBtn: document.getElementById('monthly-ai-action-btn'), // Corrected Reference
 };
 
 // --- HTML Templates for Views ---
@@ -516,9 +516,12 @@ function switchView(viewId) {
 
     // Show the whole button container ONLY on the summary view
     DOMElements.desktopHeaderButtons.classList.toggle('hidden', !isSummaryView);
-    DOMElements.aiActionBtn.classList.toggle('hidden', !isSummaryView); // Also toggle the specific AI button
+    DOMElements.monthlyAIActionBtn.classList.add('hidden'); // Hide the monthly button by default
 
     if (isSummaryView) {
+        DOMElements.printBtn.classList.remove('hidden');
+        DOMElements.shareBtn.classList.remove('hidden');
+        DOMElements.aiActionBtn.classList.remove('hidden'); // Show the main AI button
         renderSummary();
     } else if (isFilesView) {
         renderFilesView(DOMElements.contentArea);
@@ -712,17 +715,12 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
     DOMElements.printBtn.addEventListener('click', () => window.print());
     DOMElements.shareBtn.addEventListener('click', () => handleShare(db, appState));
     
-    // REPURPOSED: This now opens the summary AI modal
-    DOMElements.aiActionBtn.addEventListener('click', () => {
-        openModal('aiActionPlan_summary');
-    });
-
-    // Remove the radial menu AI button listener
-    const actionPlanButton = document.getElementById('radial-action-plan');
-    if (actionPlanButton) {
-        actionPlanButton.style.display = 'none'; // Hide the button
+    // This is the single listener for the main header AI button on the summary page
+    if (DOMElements.aiActionBtn) {
+        DOMElements.aiActionBtn.addEventListener('click', () => {
+            openModal('aiActionPlan_summary');
+        });
     }
-
 
     const sidebarLogoLink = document.getElementById('sidebar-logo-link');
      if (sidebarLogoLink) {
@@ -740,3 +738,4 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
         });
     }
 }
+
