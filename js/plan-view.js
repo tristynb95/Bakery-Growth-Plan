@@ -158,8 +158,11 @@ export function summarizePlanForAI(planData) {
         return tempDiv.innerText.trim();
     };
 
-    // This summary is now highly focused on only the most critical strategic inputs.
-    let summary = `QUARTERLY VISION: ${e(planData.quarterlyTheme)}\n\n`;
+    // --- ADDED MANAGER NAME ---
+    let summary = `MANAGER: ${e(planData.managerName)}\n`;
+    summary += `BAKERY: ${e(planData.bakeryLocation)}\n`;
+    summary += `QUARTER: ${e(planData.quarter)}\n`;
+    summary += `QUARTERLY VISION: ${e(planData.quarterlyTheme)}\n\n`;
 
     for (let m = 1; m <= 3; m++) {
         summary += `--- MONTH ${m} ---\n`;
@@ -171,7 +174,13 @@ export function summarizePlanForAI(planData) {
         }
 
         summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
-        summary += `KEY ACTIONS: ${e(planData[`m${m}s2_levers`])}\n\n`; // End with a double line break for clarity
+        summary += `KEY ACTIONS: ${e(planData[`m${m}s2_levers`])}\n`;
+
+        // --- REINTRODUCED UPHOLDING PILLARS ---
+        summary += `UPHOLDING PILLARS (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
+        summary += `UPHOLDING PILLARS (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
+        summary += `UPHOLDING PILLARS (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
+        summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
     }
     return summary;
 }
