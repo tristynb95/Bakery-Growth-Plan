@@ -2,10 +2,11 @@
 
 import { generateAiActionPlan } from './api.js';
 import { parseUkDate } from './calendar.js';
+import { summarizePlanForActionPlan } from './utils.js';
 
 // Dependencies that will be passed in from main.js
 let db, appState;
-let activeSaveDataFunction = null; // To hold the saveData function from the current view
+let activeSaveDataFunction = null;// To hold the saveData function from the current view
 
 // AI Action Plan State
 let undoStack = [];
