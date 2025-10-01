@@ -180,9 +180,11 @@ export function summarizePlanForAI(planData) {
         summary += `UPHOLDING PILLARS (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
         summary += `UPHOLDING PILLARS (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
         summary += `UPHOLDING PILLARS (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
-        summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${m}s4_place`])}\n`;
+        summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`; // Add a line break for separation
 
-        // Add Weekly Momentum Check-ins
+        // --- FIX: REMOVE THE ENTIRE WEEKLY MOMENTUM SECTION ---
+        // By removing this block, we significantly reduce the input size and processing time.
+        /*
         summary += `\n--- WEEKLY MOMENTUM (MONTH ${m}) ---\n`;
         for (let w = 1; w <= 4; w++) {
             const status = e(planData[`m${m}s5_w${w}_status`]);
@@ -195,6 +197,7 @@ export function summarizePlanForAI(planData) {
             }
         }
         summary += `\n`;
+        */
     }
     return summary;
 }
