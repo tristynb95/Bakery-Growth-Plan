@@ -192,11 +192,12 @@ function setupAiModalInteractivity(container) {
         if (removeBtn) { removeBtn.closest('tr').remove(); saveState(); }
         if (tab) {
             if (tab.classList.contains('active')) return;
-            const tabContainer = tab.closest('.ai-action-plan-container');
+            const tabContainer = tab.closest('.ai-action-plan-container, .modal-header-main');
             tabContainer.querySelectorAll('.ai-tab-btn').forEach(t => t.classList.remove('active'));
-            tabContainer.querySelectorAll('.ai-tabs-content > div').forEach(p => p.classList.remove('active'));
             tab.classList.add('active');
-            const targetPanel = tabContainer.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
+            const contentContainer = container.querySelector('.ai-tabs-content');
+            contentContainer.querySelectorAll(':scope > div').forEach(p => p.classList.remove('active'));
+            const targetPanel = contentContainer.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
             if (targetPanel) targetPanel.classList.add('active');
             updateUndoRedoButtons(); // Update buttons on tab switch
         }
@@ -297,9 +298,12 @@ function requestCloseModal() {
     if (modalType === 'aiActionPlan_generate' && appState.aiPlanGenerationController) {
         appState.aiPlanGenerationController.abort();
     }
+    
+    const activeTabId = getActiveTabId();
     const isAiModal = modalType === 'aiActionPlan_view';
-    const hasUnsavedChanges = undoStack.length > 1;
-    if (isAiModal && hasUnsavedChanges) {
+    const hasUnsavedChanges = isAiModal && activeTabId && undoHistory[activeTabId] && undoHistory[activeTabId].length > 1;
+
+    if (hasUnsavedChanges) {
         openModal('confirmClose');
     } else {
         closeModal();
@@ -486,6 +490,21 @@ export function initializeCharCounters() {
 
 export function openModal(type, context = {}) {
     const { planId, currentName, planName, eventTitle, currentQuarter, fileName } = context;
+    
+    // --- HEADER RESET ---
+    // If the header was modified for the AI plan, reset it to the default structure.
+    const modalHeader = DOMElements.modalBox.querySelector('.modal-header');
+    if (modalHeader.querySelector('.modal-header-main')) {
+        modalHeader.innerHTML = `
+            <h3 id="modal-title" class="text-lg font-bold">Modal Title</h3>
+            <button id="modal-close-btn" class="btn btn-secondary btn-icon"><i class="bi bi-x-lg"></i></button>
+        `;
+        modalHeader.querySelector('#modal-close-btn').addEventListener('click', requestCloseModal);
+        // Re-acquire the global reference to the new title element
+        DOMElements.modalTitle = document.getElementById('modal-title');
+    }
+    // --- END HEADER RESET ---
+
     DOMElements.modalBox.dataset.type = type;
     DOMElements.modalBox.dataset.planId = planId;
     const footer = DOMElements.modalActionBtn.parentNode;
@@ -562,7 +581,22 @@ export function openModal(type, context = {}) {
             DOMElements.modalCancelBtn.textContent = 'Cancel';
             break;
         case 'aiActionPlan_view': {
-            DOMElements.modalTitle.textContent = "AI Action Plan";
+            // 1. Rebuild the header with tabs
+            const modalHeader = DOMElements.modalBox.querySelector('.modal-header');
+            modalHeader.innerHTML = `
+                <div class="modal-header-main">
+                    <h3 id="modal-title" class="text-lg font-bold">AI Action Plan</h3>
+                    <nav class="ai-tabs-nav header-tabs">
+                        <button class="btn btn-secondary ai-tab-btn active" data-tab="month1">Month 1</button>
+                        <button class="btn btn-secondary ai-tab-btn" data-tab="month2">Month 2</button>
+                        <button class="btn btn-secondary ai-tab-btn" data-tab="month3">Month 3</button>
+                    </nav>
+                </div>
+                <button id="modal-close-btn" class="btn btn-secondary btn-icon"><i class="bi bi-x-lg"></i></button>
+            `;
+            modalHeader.querySelector('#modal-close-btn').addEventListener('click', requestCloseModal);
+
+            // 2. Setup the modal footer
             footer.style.justifyContent = 'space-between';
             const undoRedoContainer = document.createElement('div');
             undoRedoContainer.className = 'undo-redo-container dynamic-btn';
@@ -571,18 +605,13 @@ export function openModal(type, context = {}) {
             undoRedoContainer.querySelector('#undo-btn').onclick = undo;
             undoRedoContainer.querySelector('#redo-btn').onclick = redo;
 
-            const regenButton = document.createElement('button');
-            regenButton.className = 'btn btn-secondary dynamic-btn';
-            regenButton.innerHTML = `<i class="bi bi-stars"></i> Regenerate`;
-            regenButton.onclick = handleRegenerateActionPlan;
-
             const printBtn = document.createElement('button');
             printBtn.className = 'btn btn-secondary dynamic-btn';
             printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
             printBtn.onclick = () => {
-                const content = document.getElementById('ai-printable-area').querySelector('.ai-tabs-content > div.active');
+                const content = DOMElements.modalContent.querySelector('.ai-tabs-content > div.active');
                 if (!content || !content.querySelector('table')) { alert("No plan to print for this month."); return; }
-                const title = document.querySelector('.ai-tabs-nav .ai-tab-btn.active')?.textContent || 'Action Plan';
+                const title = modalHeader.querySelector('.ai-tabs-nav .ai-tab-btn.active')?.textContent || 'Action Plan';
                 const printNode = content.cloneNode(true);
                 printNode.querySelectorAll('.actions-cell, tfoot').forEach(el => el.remove());
                 const styles = `@page { size: A4; margin: 25mm; } body { font-family: 'DM Sans', sans-serif; } .print-header { text-align: center; border-bottom: 2px solid #D10A11; padding-bottom: 15px; margin-bottom: 25px; } h1 { font-family: 'Poppins', sans-serif; } h2 { font-family: 'Poppins', sans-serif; color: #D10A11; } table { width: 100%; border-collapse: collapse; font-size: 9pt; } th, td { border: 1px solid #E5E7EB; padding: 10px; text-align: left; } thead { display: table-header-group; }`;
@@ -599,14 +628,10 @@ export function openModal(type, context = {}) {
             footer.insertBefore(printBtn, DOMElements.modalActionBtn);
             DOMElements.modalCancelBtn.style.display = 'none';
 
-            const modalHTML = `
+            // 3. Setup the modal content (panels without nav)
+            const modalContentHTML = `
                 <div id="ai-printable-area" class="editable-action-plan">
                     <div class="ai-action-plan-container">
-                        <nav class="ai-tabs-nav">
-                            <button class="btn btn-secondary ai-tab-btn active" data-tab="month1">Month 1</button>
-                            <button class="btn btn-secondary ai-tab-btn" data-tab="month2">Month 2</button>
-                            <button class="btn btn-secondary ai-tab-btn" data-tab="month3">Month 3</button>
-                        </nav>
                         <div class="ai-tabs-content">
                             <div class="active" data-tab-panel="month1"></div>
                             <div data-tab-panel="month2"></div>
@@ -614,8 +639,9 @@ export function openModal(type, context = {}) {
                         </div>
                     </div>
                 </div>`;
-            DOMElements.modalContent.innerHTML = modalHTML;
-
+            DOMElements.modalContent.innerHTML = modalContentHTML;
+            
+            // 4. Populate the panels
             for (let i = 1; i <= 3; i++) {
                 const panel = DOMElements.modalContent.querySelector(`[data-tab-panel="month${i}"]`);
                 const monthPlanHTML = appState.planData[`aiActionPlanMonth${i}`];
@@ -635,17 +661,18 @@ export function openModal(type, context = {}) {
                 }
             }
             
-            // 3. Setup interactivity and initialize history for all tabs
+            // 5. Setup interactivity and initialize history
             undoHistory = { month1: [], month2: [], month3: [] };
             redoHistory = { month1: [], month2: [], month3: [] };
             for (let i = 1; i <= 3; i++) {
                 const panel = DOMElements.modalContent.querySelector(`[data-tab-panel="month${i}"]`);
-                if(panel) {
+                if (panel) {
                     undoHistory[`month${i}`].push(panel.innerHTML);
                 }
             }
-            setupAiModalInteractivity(DOMElements.modalContent.querySelector('#ai-printable-area'));
-            updateUndoRedoButtons(); // Update for the initially active tab
+            // Add interactivity to BOTH header and content
+            setupAiModalInteractivity(DOMElements.modalBox); 
+            updateUndoRedoButtons();
             break;
         }
         case 'confirmRegenerate': {

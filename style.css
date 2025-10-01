@@ -2982,3 +2982,41 @@ input[type="time"] {
 body:has(#app-view) {
     overflow: hidden;
 }
+
+/* 64. AI Modal Header Tabs
+-------------------------------------------------- */
+
+.modal-header-main {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem; /* Space between title and tabs */
+    flex-grow: 1;
+    min-width: 0; /* Prevent flexbox overflow */
+}
+
+/* Override existing tab nav styles for the header context */
+.ai-tabs-nav.header-tabs {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding: 0;
+}
+
+.ai-tabs-nav.header-tabs .btn {
+    margin-bottom: 0;
+    border: none;
+    padding: 0.5rem 1rem; /* Make tabs a bit smaller */
+    border-bottom: 3px solid transparent;
+    border-radius: 0; /* Remove rounding */
+    background-color: transparent;
+    color: var(--gails-text-secondary);
+}
+
+.ai-tabs-nav.header-tabs .btn:hover {
+    color: var(--gails-text-primary);
+}
+
+.ai-tabs-nav.header-tabs .btn.active {
+    color: var(--gails-red);
+    border-bottom-color: var(--gails-red);
+    background-color: transparent;
+}
