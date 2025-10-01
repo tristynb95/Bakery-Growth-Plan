@@ -371,6 +371,7 @@ export async function handleShare(db, appState) {
 export async function handleAIActionPlan(appState, saveDataFn, planSummary) {
     activeSaveDataFunction = saveDataFn;
     const savedPlan = appState.planData.aiActionPlan;
+
     if (savedPlan) {
         openModal('aiActionPlan_view');
         const modalContent = document.getElementById('modal-content');
@@ -380,15 +381,37 @@ export async function handleAIActionPlan(appState, saveDataFn, planSummary) {
         saveState();
         setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
     } else {
-        if (appState.aiPlanGenerationController) {
-            appState.aiPlanGenerationController.abort();
-        }
         openModal('aiActionPlan_generate');
         try {
+            if (appState.aiPlanGenerationController) {
+                appState.aiPlanGenerationController.abort();
+            }
             appState.aiPlanGenerationController = new AbortController();
-            const cleanedHTML = await generateAiActionPlan(planSummary, appState.aiPlanGenerationController.signal);
-            appState.planData.aiActionPlan = cleanedHTML;
-            await activeSaveDataFunction(true, { aiActionPlan: cleanedHTML }); // Force save the new AI plan
+            const signal = appState.aiPlanGenerationController.signal;
+
+            const planPromises = [1, 2, 3].map(month => {
+                const monthSummary = summarizePlanForActionPlan(appState.planData, month);
+                return generateAiActionPlan(monthSummary, signal, month);
+            });
+
+            const results = await Promise.all(planPromises);
+
+            const finalHtml = `
+                <div class="ai-action-plan-container">
+                    <nav class="ai-tabs-nav">
+                        <button class="btn btn-secondary ai-tab-btn active" data-tab="month1">Month 1</button>
+                        <button class="btn btn-secondary ai-tab-btn" data-tab="month2">Month 2</button>
+                        <button class="btn btn-secondary ai-tab-btn" data-tab="month3">Month 3</button>
+                    </nav>
+                    <div class="ai-tabs-content">
+                        <div class="active" data-tab-panel="month1">${results[0]}</div>
+                        <div data-tab-panel="month2">${results[1]}</div>
+                        <div data-tab-panel="month3">${results[2]}</div>
+                    </div>
+                </div>`;
+
+            appState.planData.aiActionPlan = finalHtml;
+            await activeSaveDataFunction(true, { aiActionPlan: finalHtml });
             handleAIActionPlan(appState, saveDataFn, planSummary); // Recurse to show the plan
         } catch (error) {
             if (error.name === 'AbortError') {

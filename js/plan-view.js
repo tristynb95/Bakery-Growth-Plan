@@ -150,7 +150,7 @@ const templates = {
 
 // --- Helper Functions ---
 
-export function summarizePlanForActionPlan(planData) {
+export function summarizePlanForActionPlan(planData, month) {
     const e = (text) => {
         if (!text) return '';
         const tempDiv = document.createElement('div');
@@ -163,22 +163,21 @@ export function summarizePlanForActionPlan(planData) {
     summary += `QUARTER: ${e(planData.quarter)}\n`;
     summary += `QUARTERLY VISION: ${e(planData.quarterlyTheme)}\n\n`;
 
-    for (let m = 1; m <= 3; m++) {
-        summary += `--- MONTH ${m} ---\n`;
-        
-        const pillars = planData[`m${m}s1_pillar`];
-        if (Array.isArray(pillars) && pillars.length > 0) {
-            summary += `PILLAR FOCUS: ${pillars.join(', ')}\n`;
-        }
-
-        summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
-        summary += `KEY ACTIONS: ${e(planData[`m${m}s2_levers`])}\n`;
-        summary += `DEVELOPING OUR BREADHEADS: ${e(planData[`m${m}s3_people`])}\n`;
-        summary += `UPHOLDING PILLARS (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
-        summary += `UPHOLDING PILLARS (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
-        summary += `UPHOLDING PILLARS (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
-        summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
+    summary += `--- MONTH ${month} ---\n`;
+    
+    const pillars = planData[`m${month}s1_pillar`];
+    if (Array.isArray(pillars) && pillars.length > 0) {
+        summary += `PILLAR FOCUS: ${pillars.join(', ')}\n`;
     }
+
+    summary += `MUST-WIN BATTLE: ${e(planData[`m${month}s1_battle`])}\n`;
+    summary += `KEY ACTIONS: ${e(planData[`m${month}s2_levers`])}\n`;
+    summary += `DEVELOPING OUR BREADHEADS: ${e(planData[`m${month}s3_people`])}\n`;
+    summary += `UPHOLDING PILLARS (PEOPLE): ${e(planData[`m${month}s4_people`])}\n`;
+    summary += `UPHOLDING PILLARS (PRODUCT): ${e(planData[`m${month}s4_product`])}\n`;
+    summary += `UPHOLDING PILLARS (CUSTOMER): ${e(planData[`m${month}s4_customer`])}\n`;
+    summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${month}s4_place`])}\n\n`;
+    
     return summary;
 }
 
