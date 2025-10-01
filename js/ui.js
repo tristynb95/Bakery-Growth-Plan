@@ -490,7 +490,7 @@ export function initializeCharCounters() {
 
 export function openModal(type, context = {}) {
     const { planId, currentName, planName, eventTitle, currentQuarter, fileName } = context;
-    
+
     // --- HEADER RESET ---
     // If the header was modified for the AI plan, reset it to the default structure.
     const modalHeader = DOMElements.modalBox.querySelector('.modal-header');
@@ -623,8 +623,14 @@ export function openModal(type, context = {}) {
                 setTimeout(() => win.print(), 500);
             };
 
+            const regenButton = document.createElement('button');
+            regenButton.className = 'btn btn-secondary dynamic-btn';
+            regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
+            regenButton.onclick = handleRegenerateActionPlan;
+
             DOMElements.modalActionBtn.textContent = "Save Changes";
             DOMElements.modalActionBtn.onclick = saveActionPlan;
+            footer.insertBefore(regenButton, DOMElements.modalActionBtn);
             footer.insertBefore(printBtn, DOMElements.modalActionBtn);
             DOMElements.modalCancelBtn.style.display = 'none';
 
