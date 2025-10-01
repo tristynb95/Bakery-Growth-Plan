@@ -2,6 +2,8 @@
 
 import { generateAiActionPlan } from './api.js';
 import { parseUkDate } from './calendar.js';
+import { summarizePlanForActionPlan } from './plan-view.js';
+
 
 // Dependencies that will be passed in from main.js
 let db, appState;
@@ -188,28 +190,47 @@ function setupAiModalInteractivity(container) {
 }
 
 async function saveActionPlan() {
+    const monthNum = DOMElements.modalBox.dataset.monthNum;
+    if (!monthNum) {
+        console.error("Could not save AI plan: month number is missing from modal.");
+        openModal('warning', 'Save Error', 'Could not save the action plan because the month context was lost.');
+        return;
+    }
+
+    const planKey = `aiActionPlan_m${monthNum}`;
     const editedContent = document.getElementById('ai-printable-area').innerHTML;
     const saveButton = DOMElements.modalActionBtn;
     const originalHTML = saveButton.innerHTML;
+
     saveButton.disabled = true;
     saveButton.innerHTML = `<i class="bi bi-check-circle-fill"></i> Saved!`;
+
     if (activeSaveDataFunction) {
-        await activeSaveDataFunction(true, { aiActionPlan: editedContent });
+        await activeSaveDataFunction(true, { [planKey]: editedContent });
     } else {
-        console.error("No active save function to save AI plan!");
+        console.error("No active save function is available to save the AI plan!");
     }
+
     undoStack = [editedContent];
     redoStack = [];
     updateUndoRedoButtons();
+
     setTimeout(() => {
         saveButton.disabled = false;
         saveButton.innerHTML = originalHTML;
     }, 2000);
 }
 
+
 function handleRegenerateActionPlan() {
-    openModal('confirmRegenerate');
+    const monthNum = DOMElements.modalBox.dataset.monthNum;
+    if (!monthNum) {
+        openModal('warning', 'Generation Error', 'Could not regenerate the plan because the month context was lost.');
+        return;
+    }
+    openModal('confirmRegenerate', { monthNum });
 }
+
 
 function requestCloseModal() {
     const modalType = DOMElements.modalBox.dataset.type;
@@ -219,7 +240,7 @@ function requestCloseModal() {
     const isAiModal = modalType === 'aiActionPlan_view';
     const hasUnsavedChanges = undoStack.length > 1;
     if (isAiModal && hasUnsavedChanges) {
-        openModal('confirmClose');
+        openModal('confirmClose', { monthNum: DOMElements.modalBox.dataset.monthNum });
     } else {
         closeModal();
     }
@@ -368,12 +389,15 @@ export async function handleShare(db, appState) {
     }
 }
 
-export async function handleAIActionPlan(appState, saveDataFn, planSummary) {
+export async function handleAIActionPlan(appState, saveDataFn, planSummary, monthNum) {
     activeSaveDataFunction = saveDataFn;
-    const savedPlan = appState.planData.aiActionPlan;
+    const planKey = `aiActionPlan_m${monthNum}`;
+    const savedPlan = appState.planData[planKey];
+
     if (savedPlan) {
-        openModal('aiActionPlan_view');
+        openModal('aiActionPlan_view', { monthNum });
         const modalContent = document.getElementById('modal-content');
+        // The content will just be the table now, no tabs needed
         modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${savedPlan}</div>`;
         undoStack = [];
         redoStack = [];
@@ -383,13 +407,16 @@ export async function handleAIActionPlan(appState, saveDataFn, planSummary) {
         if (appState.aiPlanGenerationController) {
             appState.aiPlanGenerationController.abort();
         }
-        openModal('aiActionPlan_generate');
+        openModal('aiActionPlan_generate', { monthNum });
         try {
             appState.aiPlanGenerationController = new AbortController();
-            const cleanedHTML = await generateAiActionPlan(planSummary, appState.aiPlanGenerationController.signal);
-            appState.planData.aiActionPlan = cleanedHTML;
-            await activeSaveDataFunction(true, { aiActionPlan: cleanedHTML }); // Force save the new AI plan
-            handleAIActionPlan(appState, saveDataFn, planSummary); // Recurse to show the plan
+            const cleanedHTML = await generateAiActionPlan(planSummary, monthNum, appState.aiPlanGenerationController.signal);
+            
+            appState.planData[planKey] = cleanedHTML;
+            await activeSaveDataFunction(true, { [planKey]: cleanedHTML });
+            
+            // Recurse to show the newly generated plan
+            handleAIActionPlan(appState, saveDataFn, planSummary, monthNum);
         } catch (error) {
             if (error.name === 'AbortError') {
                 console.log('AI plan generation cancelled.');
@@ -404,6 +431,7 @@ export async function handleAIActionPlan(appState, saveDataFn, planSummary) {
         }
     }
 }
+
 
 export function initializeCharCounters() {
     document.querySelectorAll('div[data-maxlength]').forEach(editor => {
@@ -435,9 +463,16 @@ export function initializeCharCounters() {
 }
 
 export function openModal(type, context = {}) {
-    const { planId, currentName, planName, eventTitle, currentQuarter, fileName } = context;
+    const { planId, currentName, planName, eventTitle, currentQuarter, fileName, monthNum } = context;
     DOMElements.modalBox.dataset.type = type;
     DOMElements.modalBox.dataset.planId = planId;
+    
+    if (monthNum) {
+        DOMElements.modalBox.dataset.monthNum = monthNum;
+    } else {
+        delete DOMElements.modalBox.dataset.monthNum;
+    }
+
     const footer = DOMElements.modalActionBtn.parentNode;
 
     footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
@@ -506,13 +541,14 @@ export function openModal(type, context = {}) {
             DOMElements.modalCancelBtn.textContent = 'Cancel';
             break;
         case 'aiActionPlan_generate':
-            DOMElements.modalTitle.textContent = "Generating AI Action Plan";
+            DOMElements.modalTitle.textContent = `Generating AI Action Plan for Month ${monthNum}`;
             DOMElements.modalContent.innerHTML = `<div class="flex flex-col items-center justify-center p-8"><div class="loading-spinner"></div><p class="mt-4 text-gray-600">Please wait, the AI is creating your plan...</p></div>`;
             DOMElements.modalActionBtn.style.display = 'none';
+            DOMElements.modalCancelBtn.style.display = 'inline-flex';
             DOMElements.modalCancelBtn.textContent = 'Cancel';
             break;
         case 'aiActionPlan_view':
-            DOMElements.modalTitle.textContent = "Edit Your Action Plan";
+            DOMElements.modalTitle.textContent = `Edit Your Action Plan for Month ${monthNum}`;
             footer.style.justifyContent = 'space-between';
             const undoRedoContainer = document.createElement('div');
             undoRedoContainer.className = 'undo-redo-container dynamic-btn';
@@ -528,9 +564,9 @@ export function openModal(type, context = {}) {
             printBtn.className = 'btn btn-secondary dynamic-btn';
             printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
             printBtn.onclick = () => {
-                const content = document.getElementById('ai-printable-area').querySelector('.ai-tabs-content > div.active');
-                if (!content) { alert("Could not find active month to print."); return; }
-                const title = document.querySelector('.ai-tabs-nav .ai-tab-btn.active')?.textContent || 'Action Plan';
+                const content = document.getElementById('ai-printable-area');
+                if (!content) { alert("Could not find content to print."); return; }
+                const title = `Month ${DOMElements.modalBox.dataset.monthNum} Action Plan`;
                 const printNode = content.cloneNode(true);
                 printNode.querySelectorAll('.actions-cell, tfoot').forEach(el => el.remove());
                 const styles = `@page { size: A4; margin: 25mm; } body { font-family: 'DM Sans', sans-serif; } .print-header { text-align: center; border-bottom: 2px solid #D10A11; padding-bottom: 15px; margin-bottom: 25px; } h1 { font-family: 'Poppins', sans-serif; } h2 { font-family: 'Poppins', sans-serif; color: #D10A11; } table { width: 100%; border-collapse: collapse; font-size: 9pt; } th, td { border: 1px solid #E5E7EB; padding: 10px; text-align: left; } thead { display: table-header-group; }`;
@@ -550,29 +586,33 @@ export function openModal(type, context = {}) {
             updateUndoRedoButtons();
             break;
         case 'confirmRegenerate':
+            const { monthNum: regenMonthNum } = context;
             DOMElements.modalTitle.textContent = "Are you sure?";
-            DOMElements.modalContent.innerHTML = `<p>Generating a new plan will overwrite your existing action plan and any edits. This cannot be undone.</p>`;
+            DOMElements.modalContent.innerHTML = `<p>Generating a new plan for Month ${regenMonthNum} will overwrite the existing one and any edits. This cannot be undone.</p>`;
             DOMElements.modalActionBtn.textContent = "Yes, Generate New";
             DOMElements.modalActionBtn.className = 'btn btn-danger';
             DOMElements.modalActionBtn.onclick = () => {
-                delete appState.planData.aiActionPlan;
+                const planKey = `aiActionPlan_m${regenMonthNum}`;
                 if (activeSaveDataFunction) {
-                    activeSaveDataFunction(true, { aiActionPlan: firebase.firestore.FieldValue.delete() }).then(() => {
-                        handleAIActionPlan(appState, activeSaveDataFunction, null);
+                    // Delete the old plan and then regenerate
+                    activeSaveDataFunction(true, { [planKey]: firebase.firestore.FieldValue.delete() }).then(() => {
+                        const planSummary = summarizePlanForActionPlan(appState.planData, regenMonthNum);
+                        handleAIActionPlan(appState, activeSaveDataFunction, planSummary, regenMonthNum);
                     });
                 } else {
-                    console.error("Save function is not available for regenerating AI Plan.");
+                    console.error("Save function not available for regenerating AI Plan.");
                 }
             };
             DOMElements.modalCancelBtn.textContent = "Cancel";
             DOMElements.modalCancelBtn.onclick = () => {
-                openModal('aiActionPlan_view');
-                const lastState = undoStack.length > 0 ? undoStack[undoStack.length - 1] : appState.planData.aiActionPlan || '';
+                const lastState = undoStack.length > 0 ? undoStack[undoStack.length - 1] : (appState.planData[`aiActionPlan_m${regenMonthNum}`] || '');
+                openModal('aiActionPlan_view', { monthNum: regenMonthNum });
                 document.getElementById('modal-content').innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${lastState}</div>`;
                 setupAiModalInteractivity(document.getElementById('ai-printable-area'));
             };
             break;
         case 'confirmClose':
+            const { monthNum: closeMonthNum } = context;
             DOMElements.modalTitle.textContent = "Discard Changes?";
             DOMElements.modalContent.innerHTML = `<p>You have unsaved changes. Are you sure you want to close without saving?</p>`;
             DOMElements.modalActionBtn.textContent = "Discard";
@@ -580,8 +620,8 @@ export function openModal(type, context = {}) {
             DOMElements.modalActionBtn.onclick = () => closeModal();
             DOMElements.modalCancelBtn.textContent = "Cancel";
             DOMElements.modalCancelBtn.onclick = () => {
-                openModal('aiActionPlan_view');
                 const lastState = undoStack[undoStack.length - 1];
+                openModal('aiActionPlan_view', { monthNum: closeMonthNum });
                 document.getElementById('modal-content').innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${lastState}</div>`;
                 setupAiModalInteractivity(document.getElementById('ai-printable-area'));
                 updateUndoRedoButtons();
