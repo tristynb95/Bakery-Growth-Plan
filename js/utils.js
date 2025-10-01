@@ -21,6 +21,43 @@ export function isContentEmpty(htmlContent) {
 }
 
 /**
+ * Creates a text summary of a specific month's plan data for the AI.
+ * @param {object} planData The data for the plan.
+ * @param {number} month The month number (1, 2, or 3) to summarize.
+ * @returns {string} A formatted text summary.
+ */
+export function summarizePlanForActionPlan(planData, month) {
+    const e = (text) => {
+        if (!text) return '';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = text;
+        return tempDiv.innerText.trim();
+    };
+
+    let summary = `MANAGER: ${e(planData.managerName)}\n`;
+    summary += `BAKERY: ${e(planData.bakeryLocation)}\n`;
+    summary += `QUARTER: ${e(planData.quarter)}\n`;
+    summary += `QUARTERLY VISION: ${e(planData.quarterlyTheme)}\n\n`;
+
+    summary += `--- MONTH ${month} ---\n`;
+    
+    const pillars = planData[`m${month}s1_pillar`];
+    if (Array.isArray(pillars) && pillars.length > 0) {
+        summary += `PILLAR FOCUS: ${pillars.join(', ')}\n`;
+    }
+
+    summary += `MUST-WIN BATTLE: ${e(planData[`m${month}s1_battle`])}\n`;
+    summary += `KEY ACTIONS: ${e(planData[`m${month}s2_levers`])}\n`;
+    summary += `DEVELOPING OUR BREADHEADS: ${e(planData[`m${month}s3_people`])}\n`;
+    summary += `UPHOLDING PILLARS (PEOPLE): ${e(planData[`m${month}s4_people`])}\n`;
+    summary += `UPHOLDING PILLARS (PRODUCT): ${e(planData[`m${month}s4_product`])}\n`;
+    summary += `UPHOLDING PILLARS (CUSTOMER): ${e(planData[`m${month}s4_customer`])}\n`;
+    summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${month}s4_place`])}\n\n`;
+    
+    return summary;
+}
+
+/**
  * Calculates the completion progress for the "Vision" section of a plan.
  * @param {object} planData The data for the plan.
  * @returns {{completed: number, total: number}} An object with completed and total field counts.
