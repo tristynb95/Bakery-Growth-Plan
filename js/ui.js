@@ -689,26 +689,32 @@ export function openModal(type, context = {}) {
             setupAiModalInteractivity(DOMElements.modalBox); 
             updateUndoRedoButtons();
 
-            // New logic to control the visibility of the "Generate New" button
-            const updateRegenButtonVisibility = () => {
-                const activeTabId = getActiveTabId();
-                const activePanel = DOMElements.modalContent.querySelector(`[data-tab-panel="${activeTabId}"]`);
-                const hasPlan = activePanel && activePanel.querySelector('table');
+            // New logic to control the visibility of all footer buttons
+            const updateFooterButtonVisibility = () => {
+                const anyPanelHasPlan = !!DOMElements.modalContent.querySelector('.ai-tabs-content table');
+                const activePanelHasPlan = !!DOMElements.modalContent.querySelector('.ai-tabs-content > div.active table');
+
                 if (regenButton) {
-                    regenButton.style.display = hasPlan ? 'inline-flex' : 'none';
+                    regenButton.style.display = activePanelHasPlan ? 'inline-flex' : 'none';
+                }
+                if (printBtn) {
+                    printBtn.style.display = anyPanelHasPlan ? 'inline-flex' : 'none';
+                }
+                if (DOMElements.modalActionBtn) {
+                    DOMElements.modalActionBtn.style.display = anyPanelHasPlan ? 'inline-flex' : 'none';
                 }
             };
 
-            // Add the visibility check to the tab click listener
-            modalHeader.addEventListener('click', (e) => {
-                if (e.target.closest('.ai-tab-btn')) {
-                    // Timeout to allow the tab switch to complete before checking
-                    setTimeout(updateRegenButtonVisibility, 0);
+            // Add the visibility check to the main container's click listener to handle tabs and generation
+            DOMElements.modalBox.addEventListener('click', (e) => {
+                if (e.target.closest('.ai-tab-btn') || e.target.closest('.generate-month-plan-btn')) {
+                    // Timeout to allow the DOM update to complete before checking
+                    setTimeout(updateFooterButtonVisibility, 50);
                 }
             });
 
             // Set initial visibility
-            updateRegenButtonVisibility();
+            updateFooterButtonVisibility();
             break;
         }
         case 'confirmRegenerate': {
@@ -735,7 +741,10 @@ export function openModal(type, context = {}) {
             };
             
             DOMElements.modalCancelBtn.textContent = "Cancel";
-            DOMElements.modalCancelBtn.onclick = closeModal;
+            DOMElements.modalCancelBtn.onclick = () => {
+                closeModal();
+                openModal('aiActionPlan_view');
+            };
             break;
         }
         case 'confirmClose':
