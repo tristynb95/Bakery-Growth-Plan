@@ -44,6 +44,9 @@ const templates = {
         requiredFields: ['quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
     },
     month: (monthNum) => `
+            <div class="flex justify-end mb-4 -mt-4">
+                <button id="ai-action-btn-m${monthNum}" class="btn btn-primary"><i class="bi bi-stars"></i> AI Action Plan</button>
+            </div>
             <div class="space-y-8">
                 <div class="content-card p-6 md:p-8">
                     <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation</h2>
@@ -150,7 +153,7 @@ const templates = {
 
 // --- Helper Functions ---
 
-export function summarizePlanForActionPlan(planData) {
+export function summarizePlanForActionPlan(planData, monthNum) {
     const e = (text) => {
         if (!text) return '';
         const tempDiv = document.createElement('div');
@@ -163,22 +166,21 @@ export function summarizePlanForActionPlan(planData) {
     summary += `QUARTER: ${e(planData.quarter)}\n`;
     summary += `QUARTERLY VISION: ${e(planData.quarterlyTheme)}\n\n`;
 
-    for (let m = 1; m <= 3; m++) {
-        summary += `--- MONTH ${m} ---\n`;
-        
-        const pillars = planData[`m${m}s1_pillar`];
-        if (Array.isArray(pillars) && pillars.length > 0) {
-            summary += `PILLAR FOCUS: ${pillars.join(', ')}\n`;
-        }
-
-        summary += `MUST-WIN BATTLE: ${e(planData[`m${m}s1_battle`])}\n`;
-        summary += `KEY ACTIONS: ${e(planData[`m${m}s2_levers`])}\n`;
-        summary += `DEVELOPING OUR BREADHEADS: ${e(planData[`m${m}s3_people`])}\n`;
-        summary += `UPHOLDING PILLARS (PEOPLE): ${e(planData[`m${m}s4_people`])}\n`;
-        summary += `UPHOLDING PILLARS (PRODUCT): ${e(planData[`m${m}s4_product`])}\n`;
-        summary += `UPHOLDING PILLARS (CUSTOMER): ${e(planData[`m${m}s4_customer`])}\n`;
-        summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${m}s4_place`])}\n\n`;
+    summary += `--- MONTH ${monthNum} ---\n`;
+    
+    const pillars = planData[`m${monthNum}s1_pillar`];
+    if (Array.isArray(pillars) && pillars.length > 0) {
+        summary += `PILLAR FOCUS: ${pillars.join(', ')}\n`;
     }
+
+    summary += `MUST-WIN BATTLE: ${e(planData[`m${monthNum}s1_battle`])}\n`;
+    summary += `KEY ACTIONS: ${e(planData[`m${monthNum}s2_levers`])}\n`;
+    summary += `DEVELOPING OUR BREADHEADS: ${e(planData[`m${monthNum}s3_people`])}\n`;
+    summary += `UPHOLDING PILLARS (PEOPLE): ${e(planData[`m${monthNum}s4_people`])}\n`;
+    summary += `UPHOLDING PILLARS (PRODUCT): ${e(planData[`m${monthNum}s4_product`])}\n`;
+    summary += `UPHOLDING PILLARS (CUSTOMER): ${e(planData[`m${monthNum}s4_customer`])}\n`;
+    summary += `UPHOLDING PILLARS (PLACE): ${e(planData[`m${monthNum}s4_place`])}\n\n`;
+
     return summary;
 }
 
@@ -531,6 +533,14 @@ function switchView(viewId) {
 
         if (monthNum) {
             updateWeeklyTabCompletion(monthNum, appState.planData);
+             // Wire up the new button
+             const aiButton = document.getElementById(`ai-action-btn-m${monthNum}`);
+             if (aiButton) {
+                 aiButton.addEventListener('click', () => {
+                     const planSummary = summarizePlanForActionPlan(appState.planData, monthNum);
+                     handleAIActionPlan(appState, saveData, planSummary, monthNum);
+                 });
+             }
         }
     }
 
@@ -710,19 +720,16 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
 
     DOMElements.printBtn.addEventListener('click', () => window.print());
     DOMElements.shareBtn.addEventListener('click', () => handleShare(db, appState));
-    DOMElements.aiActionBtn.addEventListener('click', () => {
-        const planSummary = summarizePlanForActionPlan(appState.planData);
-        handleAIActionPlan(appState, saveData, planSummary);
-    });
+    
+    // Remove the global AI button listener
+    // DOMElements.aiActionBtn.addEventListener('click', () => { ... });
 
+    // Remove the radial menu AI button listener
     const actionPlanButton = document.getElementById('radial-action-plan');
     if (actionPlanButton) {
-        actionPlanButton.addEventListener('click', () => {
-            const planSummary = summarizePlanForActionPlan(appState.planData);
-            handleAIActionPlan(appState, saveData, planSummary);
-            document.getElementById('radial-menu-container').classList.remove('open');
-        });
+        actionPlanButton.style.display = 'none'; // Hide the button
     }
+
 
     const sidebarLogoLink = document.getElementById('sidebar-logo-link');
      if (sidebarLogoLink) {
