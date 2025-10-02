@@ -102,7 +102,7 @@ function saveState() {
     if (activePanel) {
         const currentState = activePanel.innerHTML;
         // Prevent pushing duplicate states to the undo stack
-        if (undoHistory[activeTabId][undoHistory[activeTabId].length - 1] !== currentState) {
+        if (undoHistory[activeTabId] && undoHistory[activeTabId][undoHistory[activeTabId].length - 1] !== currentState) {
             undoHistory[activeTabId].push(currentState);
             redoHistory[activeTabId] = []; // Clear redo stack for the current tab on new action
             updateUndoRedoButtons();
@@ -244,27 +244,36 @@ function setupAiModalInteractivity(container) {
                 }
                 appState.aiPlanGenerationController = new AbortController();
                 const signal = appState.aiPlanGenerationController.signal;
+                
+                // The API generates all three months, so we fetch the full plan
+                const fullPlanHTML = await generateAiActionPlan(currentPlanSummary, signal);
 
-                const monthTableHTML = await generateAiActionPlan(currentPlanSummary, signal, month);
+                // Parse the full HTML to extract and update all month panels
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = fullPlanHTML;
 
-                panel.innerHTML = monthTableHTML;
-                makeTablesSortable(panel); // Ensure the new table is sortable
+                for (let i = 1; i <= 3; i++) {
+                    const sourcePanel = tempDiv.querySelector(`[data-tab-panel="month${i}"]`);
+                    const targetPanel = container.querySelector(`[data-tab-panel="month${i}"]`);
+                    if (sourcePanel && targetPanel) {
+                        targetPanel.innerHTML = sourcePanel.innerHTML;
+                        makeTablesSortable(targetPanel);
+                    }
+                }
                 
                 // Instantly save the newly generated plan
                 await saveActionPlan(true); 
 
-                // Now that it's saved, show the footer buttons
+                // Show the footer buttons now that content exists
                 const footer = document.querySelector('#modal-box .modal-footer');
                 const regenButton = footer.querySelector('.dynamic-btn[onclick*="handleRegenerateActionPlan"]');
                 const printButton = footer.querySelector('.dynamic-btn[onclick*="print"]');
                 if(regenButton) regenButton.style.display = 'inline-flex';
                 if(printButton) printButton.style.display = 'inline-flex';
 
-
             } catch (error) {
                 if (error.name === 'AbortError') {
-                    console.log(`Month ${month} plan generation cancelled.`);
-                    // Optional: Restore the 'Generate' button if desired
+                    console.log(`Plan generation cancelled.`);
                     panel.innerHTML = `
                         <div class="text-center p-8 flex flex-col items-center justify-center min-h-[300px]">
                             <h3 class="font-bold text-lg text-gray-700">Generation Cancelled</h3>
@@ -275,7 +284,7 @@ function setupAiModalInteractivity(container) {
                         </div>`;
                     return;
                 }
-                console.error("Error generating AI plan for month:", error);
+                console.error("Error generating AI plan:", error);
                 panel.innerHTML = `<div class="text-center p-8 text-red-600"><p class="font-semibold">Generation Failed</p><p class="text-sm">${error.message}</p></div>`;
             } finally {
                 appState.aiPlanGenerationController = null;
@@ -644,10 +653,12 @@ export function openModal(type, context = {}) {
 
             rightButtonsContainer.appendChild(regenButton);
             rightButtonsContainer.appendChild(printBtn);
-            footer.appendChild(rightButtonsContainer);
-
+            
             DOMElements.modalActionBtn.style.display = 'none';
             DOMElements.modalCancelBtn.textContent = 'Done';
+            // Move the right-aligned buttons before the "Done" button
+            footer.insertBefore(rightButtonsContainer, DOMElements.modalCancelBtn);
+
 
             // 3. Setup the modal content (panels without nav)
             const modalContentHTML = `
@@ -695,7 +706,6 @@ export function openModal(type, context = {}) {
             setupAiModalInteractivity(DOMElements.modalBox); 
             updateUndoRedoButtons();
 
-            // New logic to control the visibility of all footer buttons
             const updateFooterButtonVisibility = () => {
                 const anyPanelHasPlan = !!DOMElements.modalContent.querySelector('.ai-tabs-content table');
                 const activePanelHasPlan = !!DOMElements.modalContent.querySelector('.ai-tabs-content > div.active table');
@@ -728,24 +738,21 @@ export function openModal(type, context = {}) {
             
             DOMElements.modalActionBtn.onclick = () => {
                 closeModal(); // Close the confirmation modal
-                // Re-open the main modal and simulate the generate click
                 openModal('aiActionPlan_view'); 
-                // Use a timeout to ensure the DOM is ready
+                
                 setTimeout(() => {
-                    const generateBtn = document.querySelector(`.generate-month-plan-btn[data-month="${monthNum}"]`);
-                    if (generateBtn) {
-                        generateBtn.click();
-                    } else {
-                        // This case handles if the user wants to regenerate an *existing* plan
-                        const panel = document.querySelector(`[data-tab-panel="${activeTabId}"]`);
-                        if(panel){
-                            const tempBtn = document.createElement('button');
-                            tempBtn.className = 'generate-month-plan-btn';
-                            tempBtn.dataset.month = monthNum;
-                            panel.innerHTML = '';
-                            panel.appendChild(tempBtn);
-                            tempBtn.click();
-                        }
+                    // Activate the correct tab first
+                    const tabToActivate = document.querySelector(`.ai-tab-btn[data-tab="month${monthNum}"]`);
+                    if(tabToActivate) tabToActivate.click();
+                    
+                    const panel = document.querySelector(`[data-tab-panel="month${monthNum}"]`);
+                    if(panel){
+                        const tempBtn = document.createElement('button');
+                        tempBtn.className = 'generate-month-plan-btn';
+                        tempBtn.dataset.month = monthNum;
+                        panel.innerHTML = '';
+                        panel.appendChild(tempBtn);
+                        tempBtn.click();
                     }
                 }, 50);
             };
@@ -758,7 +765,6 @@ export function openModal(type, context = {}) {
             break;
         }
         case 'confirmClose':
-             // This case is no longer needed with real-time saving.
             closeModal();
             break;
         case 'confirmDeleteEvent':
