@@ -228,7 +228,7 @@ function setupAiModalInteractivity(container) {
         if (sortHeader) { handleTableSort(sortHeader); }
     });
 
-    // Use a MutationObserver to detect content changes for undo/redo
+    // Use a MutationObserver to detect content changes for undo/redo and saving
     const observer = new MutationObserver(() => {
         saveState();
         debouncedSave();
@@ -394,14 +394,46 @@ export async function handleShare(db, appState) {
 export async function handleAIActionPlan(appState, saveDataFn, planSummary) {
     activeSaveDataFunction = saveDataFn;
     const savedPlan = appState.planData.aiActionPlan;
+
     if (savedPlan) {
         openModal('aiActionPlan_view');
         const modalContent = document.getElementById('modal-content');
-        modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${savedPlan}</div>`;
+
+        const container = document.createElement('div');
+        container.id = 'ai-printable-area';
+        container.className = 'editable-action-plan';
+        container.innerHTML = `
+            <div class="ai-action-plan-container">
+                <nav class="ai-tabs-nav">
+                    <button class="btn btn-secondary ai-tab-btn active" data-tab="month1">Month 1</button>
+                    <button class="btn btn-secondary ai-tab-btn" data-tab="month2">Month 2</button>
+                    <button class="btn btn-secondary ai-tab-btn" data-tab="month3">Month 3</button>
+                </nav>
+                <div class="ai-tabs-content">
+                    <div class="active" data-tab-panel="month1"></div>
+                    <div data-tab-panel="month2"></div>
+                    <div data-tab-panel="month3"></div>
+                </div>
+            </div>`;
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = savedPlan;
+        
+        const month1Content = tempDiv.querySelector('[data-tab-panel="month1"]');
+        const month2Content = tempDiv.querySelector('[data-tab-panel="month2"]');
+        const month3Content = tempDiv.querySelector('[data-tab-panel="month3"]');
+
+        if (month1Content) container.querySelector('[data-tab-panel="month1"]').innerHTML = month1Content.innerHTML;
+        if (month2Content) container.querySelector('[data-tab-panel="month2"]').innerHTML = month2Content.innerHTML;
+        if (month3Content) container.querySelector('[data-tab-panel="month3"]').innerHTML = month3Content.innerHTML;
+        
+        modalContent.innerHTML = '';
+        modalContent.appendChild(container);
+        
         undoStack = [];
         redoStack = [];
-        saveState(); // Initial state for undo/redo
-        setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
+        saveState();
+        setupAiModalInteractivity(container);
     } else {
         if (appState.aiPlanGenerationController) {
             appState.aiPlanGenerationController.abort();
@@ -411,8 +443,8 @@ export async function handleAIActionPlan(appState, saveDataFn, planSummary) {
             appState.aiPlanGenerationController = new AbortController();
             const cleanedHTML = await generateAiActionPlan(planSummary, appState.aiPlanGenerationController.signal);
             appState.planData.aiActionPlan = cleanedHTML;
-            await activeSaveDataFunction(true, { aiActionPlan: cleanedHTML }); // Force save the new AI plan
-            handleAIActionPlan(appState, saveDataFn, planSummary); // Recurse to show the plan
+            await activeSaveDataFunction(true, { aiActionPlan: cleanedHTML });
+            handleAIActionPlan(appState, saveDataFn, planSummary);
         } catch (error) {
             if (error.name === 'AbortError') {
                 console.log('AI plan generation cancelled.');
@@ -431,7 +463,7 @@ export async function handleAIActionPlan(appState, saveDataFn, planSummary) {
 export function initializeCharCounters() {
     document.querySelectorAll('div[data-maxlength]').forEach(editor => {
         if (editor.parentNode.classList.contains('textarea-wrapper')) {
-            return; // Already initialized
+            return;
         }
         const newWrapper = document.createElement('div');
         newWrapper.className = 'textarea-wrapper';
@@ -616,7 +648,6 @@ export function openModal(type, context = {}) {
     }
     DOMElements.modalOverlay.classList.remove('hidden');
 }
-
 
 export function closeModal() {
     DOMElements.modalOverlay.classList.add('hidden');
