@@ -70,6 +70,7 @@ function debounce(func, wait) {
     };
 }
 
+
 function managePlaceholder(editor) {
     if (!editor || !editor.isContentEditable) return;
     if (editor.innerText.trim() === '') {
@@ -250,7 +251,7 @@ function setupAiModalInteractivity(container) {
                 makeTablesSortable(panel); // Ensure the new table is sortable
                 
                 // Instantly save the newly generated plan
-                await saveActionPlan(true);
+                await saveActionPlan(true); 
 
                 // Now that it's saved, show the "Generate New" button
                 const regenButton = document.querySelector('.modal-footer .dynamic-btn:not(#modal-print-btn)');
@@ -279,7 +280,6 @@ function setupAiModalInteractivity(container) {
             }
         }
     });
-
     const observer = new MutationObserver((mutations) => {
         if (mutations.some(m => m.type === 'characterData' || m.type === 'childList')) {
             saveState();
@@ -613,6 +613,9 @@ export function openModal(type, context = {}) {
             footer.insertBefore(undoRedoContainer, footer.firstChild);
             undoRedoContainer.querySelector('#undo-btn').onclick = undo;
             undoRedoContainer.querySelector('#redo-btn').onclick = redo;
+            
+            const rightButtonsContainer = document.createElement('div');
+            rightButtonsContainer.className = 'flex items-center gap-2 dynamic-btn';
 
             const printBtn = document.createElement('button');
             printBtn.className = 'btn btn-secondary dynamic-btn';
@@ -637,13 +640,12 @@ export function openModal(type, context = {}) {
             regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
             regenButton.onclick = handleRegenerateActionPlan;
 
-            // Remove the main action button, and replace cancel with "Done"
+            rightButtonsContainer.appendChild(regenButton);
+            rightButtonsContainer.appendChild(printBtn);
+            footer.appendChild(rightButtonsContainer);
+
             DOMElements.modalActionBtn.style.display = 'none';
             DOMElements.modalCancelBtn.textContent = 'Done';
-
-            // Add the new buttons to the footer
-            footer.insertBefore(regenButton, DOMElements.modalCancelBtn);
-            footer.insertBefore(printBtn, DOMElements.modalCancelBtn);
 
             // 3. Setup the modal content (panels without nav)
             const modalContentHTML = `
@@ -723,16 +725,27 @@ export function openModal(type, context = {}) {
             DOMElements.modalActionBtn.className = 'btn btn-danger';
             
             DOMElements.modalActionBtn.onclick = () => {
-                const panel = document.querySelector(`[data-tab-panel="${activeTabId}"]`);
-                if (panel) {
-                    const tempBtn = document.createElement('button');
-                    tempBtn.className = 'generate-month-plan-btn';
-                    tempBtn.dataset.month = monthNum;
-                    panel.innerHTML = '';
-                    panel.appendChild(tempBtn);
-                    tempBtn.click();
-                }
-                closeModal();
+                closeModal(); // Close the confirmation modal
+                // Re-open the main modal and simulate the generate click
+                openModal('aiActionPlan_view'); 
+                // Use a timeout to ensure the DOM is ready
+                setTimeout(() => {
+                    const generateBtn = document.querySelector(`.generate-month-plan-btn[data-month="${monthNum}"]`);
+                    if (generateBtn) {
+                        generateBtn.click();
+                    } else {
+                        // This case handles if the user wants to regenerate an *existing* plan
+                        const panel = document.querySelector(`[data-tab-panel="${activeTabId}"]`);
+                        if(panel){
+                            const tempBtn = document.createElement('button');
+                            tempBtn.className = 'generate-month-plan-btn';
+                            tempBtn.dataset.month = monthNum;
+                            panel.innerHTML = '';
+                            panel.appendChild(tempBtn);
+                            tempBtn.click();
+                        }
+                    }
+                }, 50);
             };
             
             DOMElements.modalCancelBtn.textContent = "Cancel";
