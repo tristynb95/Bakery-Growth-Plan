@@ -253,11 +253,13 @@ function setupAiModalInteractivity(container) {
                 // Instantly save the newly generated plan
                 await saveActionPlan(true); 
 
-                // Now that it's saved, show the "Generate New" button
-                const regenButton = document.querySelector('.modal-footer .dynamic-btn:not(#modal-print-btn)');
-                if (regenButton) {
-                    regenButton.style.display = 'inline-flex';
-                }
+                // Now that it's saved, show the footer buttons
+                const footer = document.querySelector('#modal-box .modal-footer');
+                const regenButton = footer.querySelector('.dynamic-btn[onclick*="handleRegenerateActionPlan"]');
+                const printButton = footer.querySelector('.dynamic-btn[onclick*="print"]');
+                if(regenButton) regenButton.style.display = 'inline-flex';
+                if(printButton) printButton.style.display = 'inline-flex';
+
 
             } catch (error) {
                 if (error.name === 'AbortError') {
@@ -756,15 +758,8 @@ export function openModal(type, context = {}) {
             break;
         }
         case 'confirmClose':
-            DOMElements.modalTitle.textContent = "Discard Changes?";
-            DOMElements.modalContent.innerHTML = `<p>You have unsaved changes. Are you sure you want to close without saving?</p>`;
-            DOMElements.modalActionBtn.textContent = "Discard";
-            DOMElements.modalActionBtn.className = 'btn btn-danger';
-            DOMElements.modalActionBtn.onclick = closeModal;
-            DOMElements.modalCancelBtn.textContent = "Cancel";
-            DOMElements.modalCancelBtn.onclick = () => {
-                openModal('aiActionPlan_view');
-            };
+             // This case is no longer needed with real-time saving.
+            closeModal();
             break;
         case 'confirmDeleteEvent':
             DOMElements.modalTitle.textContent = "Confirm Deletion";
