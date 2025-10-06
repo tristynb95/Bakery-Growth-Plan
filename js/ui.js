@@ -118,22 +118,6 @@ function updateUndoRedoButtons() {
     if (redoBtn) redoBtn.disabled = redoHistory[activeTabId].length === 0;
 }
 
-// ✨ NEW: This function centralizes the logic for print button visibility.
-function updatePrintButtonVisibility() {
-    const printBtn = document.getElementById('modal-print-btn');
-    if (!printBtn) return;
-
-    const activePanel = document.querySelector('#ai-printable-area .ai-tabs-content > div.active');
-    if (activePanel) {
-        // The button is shown only if there's at least one data row in the active table's body.
-        const hasContent = activePanel.querySelector('tbody tr');
-        printBtn.style.display = hasContent ? 'inline-flex' : 'none';
-    } else {
-        // Hide if no active panel is found.
-        printBtn.style.display = 'none';
-    }
-}
-
 function saveState() {
     const activeTabId = getActiveTabId();
     const activePanel = document.querySelector(`.ai-tabs-content > div[data-tab-panel="${activeTabId}"]`);
@@ -179,6 +163,9 @@ function redo() {
 
 function setupAiModalInteractivity(container) {
     if (!container) return;
+
+    debouncedSave = debounce(() => saveActionPlan(false), 1000);
+
     const makeTablesSortable = (container) => {
         const tables = container.querySelectorAll('table');
         tables.forEach(table => {
@@ -238,11 +225,13 @@ function setupAiModalInteractivity(container) {
         rows.forEach(row => tbody.appendChild(row));
         saveState();
     };
-    container.addEventListener('click', (e) => {
+    container.addEventListener('click', async (e) => {
         const addBtn = e.target.closest('.btn-add-row');
         const removeBtn = e.target.closest('.btn-remove-row');
         const tab = e.target.closest('.ai-tab-btn');
         const sortHeader = e.target.closest('.sortable-header');
+        const generateBtn = e.target.closest('.generate-month-plan-btn');
+
         if (addBtn) {
             const tableBody = addBtn.closest('table').querySelector('tbody');
             if (tableBody) {
@@ -255,35 +244,73 @@ function setupAiModalInteractivity(container) {
         if (removeBtn) { removeBtn.closest('tr').remove(); saveState(); }
         if (tab) {
             if (tab.classList.contains('active')) return;
-            const tabContainer = tab.closest('.ai-action-plan-container');
+            const tabContainer = tab.closest('.ai-action-plan-container, .modal-header-main');
             tabContainer.querySelectorAll('.ai-tab-btn').forEach(t => t.classList.remove('active'));
-            tabContainer.querySelectorAll('.ai-tabs-content > div').forEach(p => p.classList.remove('active'));
             tab.classList.add('active');
-            const targetPanel = tabContainer.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
+            const contentContainer = container.querySelector('.ai-tabs-content');
+            contentContainer.querySelectorAll(':scope > div').forEach(p => p.classList.remove('active'));
+            const targetPanel = contentContainer.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
             if (targetPanel) targetPanel.classList.add('active');
-
-            // ✨ MODIFIED: Update print button visibility when the tab changes.
-            updatePrintButtonVisibility();
+            updateUndoRedoButtons(); // Update buttons on tab switch
         }
         if (sortHeader) { handleTableSort(sortHeader); }
-    });
-    const observer = new MutationObserver((mutations) => {
-        // ✨ MODIFIED: Observe both text changes and row additions/removals.
-        const hasMeaningfulChange = mutations.some(m =>
-            m.type === 'characterData' ||
-            (m.type === 'childList' && (m.addedNodes.length > 0 || m.removedNodes.length > 0))
-        );
 
-        if (hasMeaningfulChange) {
-           saveState();
-           updatePrintButtonVisibility();
+        if (generateBtn) {
+            const month = generateBtn.dataset.month;
+            const panel = container.querySelector(`[data-tab-panel="month${month}"]`);
+            panel.innerHTML = `<div class="flex flex-col items-center justify-center p-8"><div class="loading-spinner"></div><p class="mt-4 text-gray-600">Generating plan for Month ${month}...</p></div>`;
+            
+            try {
+                if (appState.aiPlanGenerationController) {
+                    appState.aiPlanGenerationController.abort();
+                }
+                appState.aiPlanGenerationController = new AbortController();
+                const signal = appState.aiPlanGenerationController.signal;
+
+                const monthTableHTML = await generateAiActionPlan(currentPlanSummary, signal, month);
+
+                panel.innerHTML = monthTableHTML;
+                makeTablesSortable(panel); // Ensure the new table is sortable
+                
+                // Instantly save the newly generated plan
+                await saveActionPlan(true); 
+
+                // Now that it's saved, show the footer buttons
+                const footer = document.querySelector('#modal-box .modal-footer');
+                const regenButton = footer.querySelector('.dynamic-btn[onclick*="handleRegenerateActionPlan"]');
+                const printButton = footer.querySelector('.dynamic-btn[onclick*="print"]');
+                if(regenButton) regenButton.style.display = 'inline-flex';
+                if(printButton) printButton.style.display = 'inline-flex';
+
+
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log(`Month ${month} plan generation cancelled.`);
+                    // Optional: Restore the 'Generate' button if desired
+                    panel.innerHTML = `
+                        <div class="text-center p-8 flex flex-col items-center justify-center min-h-[300px]">
+                            <h3 class="font-bold text-lg text-gray-700">Generation Cancelled</h3>
+                            <button class="btn btn-primary generate-month-plan-btn mt-4" data-month="${month}">
+                                <i class="bi bi-stars"></i>
+                                <span>Generate Month ${month} Plan</span>
+                            </button>
+                        </div>`;
+                    return;
+                }
+                console.error("Error generating AI plan for month:", error);
+                panel.innerHTML = `<div class="text-center p-8 text-red-600"><p class="font-semibold">Generation Failed</p><p class="text-sm">${error.message}</p></div>`;
+            } finally {
+                appState.aiPlanGenerationController = null;
+            }
         }
     });
-    observer.observe(container, {
-        childList: true, // ✨ MODIFIED: This must be true to detect row changes.
-        subtree: true,
-        characterData: true
+    const observer = new MutationObserver((mutations) => {
+        if (mutations.some(m => m.type === 'characterData' || m.type === 'childList')) {
+            saveState();
+            debouncedSave();
+        }
     });
+    observer.observe(container, { childList: true, subtree: true, characterData: true });
 }
 
 async function saveActionPlan(forceImmediate = false) {
@@ -586,49 +613,132 @@ export function openModal(type, context = {}) {
             DOMElements.modalActionBtn.style.display = 'none';
             DOMElements.modalCancelBtn.textContent = 'Cancel';
             break;
-            case 'aiActionPlan_view':
-                {
-                    DOMElements.modalTitle.textContent = "Edit Your Action Plan";
-                    footer.style.justifyContent = 'space-between';
-                    const undoRedoContainer = document.createElement('div');
-                    undoRedoContainer.className = 'undo-redo-container dynamic-btn';
-                    undoRedoContainer.innerHTML = `<button id="undo-btn" class="btn btn-secondary btn-icon" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button><button id="redo-btn" class="btn btn-secondary btn-icon" title="Redo"><i class="bi bi-arrow-clockwise"></i></button>`;
-                    footer.insertBefore(undoRedoContainer, footer.firstChild);
-                    undoRedoContainer.querySelector('#undo-btn').onclick = undo;
-                    undoRedoContainer.querySelector('#redo-btn').onclick = redo;
-                    const regenButton = document.createElement('button');
-                    regenButton.className = 'btn btn-secondary dynamic-btn';
-                    regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
-                    regenButton.onclick = handleRegenerateActionPlan;
-                    const printBtn = document.createElement('button');
-                    printBtn.id = 'modal-print-btn';
-                    printBtn.className = 'btn btn-secondary dynamic-btn';
-                    printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
-                    printBtn.onclick = () => {
-                        const content = document.getElementById('ai-printable-area').querySelector('.ai-tabs-content > div.active');
-                        if (!content) { alert("Could not find active month to print."); return; }
-                        const title = document.querySelector('.ai-tabs-nav .ai-tab-btn.active')?.textContent || 'Action Plan';
-                        const printNode = content.cloneNode(true);
-                        printNode.querySelectorAll('.actions-cell, tfoot').forEach(el => el.remove());
-                        const styles = `@page { size: A4; margin: 25mm; } body { font-family: 'DM Sans', sans-serif; } .print-header { text-align: center; border-bottom: 2px solid #D10A11; padding-bottom: 15px; margin-bottom: 25px; } h1 { font-family: 'Poppins', sans-serif; } h2 { font-family: 'Poppins', sans-serif; color: #D10A11; } table { width: 100%; border-collapse: collapse; font-size: 9pt; } th, td { border: 1px solid #E5E7EB; padding: 10px; text-align: left; } thead { display: table-header-group; }`;
-                        const win = window.open('', '', 'height=800,width=1200');
-                        win.document.write(`<html><head><title>${title}</title><style>${styles}</style></head><body>`);
-                        win.document.write(`<div class="print-header"><h1>${title}</h1><h2>Our Bakery Action Plan</h2><p>${appState.planData.planName} | ${appState.planData.bakeryLocation}</p></div>`);
-                        win.document.write(printNode.innerHTML);
-                        win.document.write('</body></html>');
-                        win.document.close();
-                        setTimeout(() => win.print(), 500);
-                    };
-                    DOMElements.modalActionBtn.textContent = "Save Changes";
-                    DOMElements.modalActionBtn.onclick = saveActionPlan;
-                    footer.insertBefore(regenButton, DOMElements.modalActionBtn);
-                    footer.insertBefore(printBtn, DOMElements.modalActionBtn);
-                    DOMElements.modalCancelBtn.style.display = 'none';
-                    updateUndoRedoButtons();
-                    // ✨ ADDED: Set initial visibility of the print button.
-                    updatePrintButtonVisibility();
-                    break;
+        case 'aiActionPlan_view': {
+            // 1. Rebuild the header with tabs
+            const modalHeader = DOMElements.modalBox.querySelector('.modal-header');
+            modalHeader.innerHTML = `
+                <div class="modal-header-main">
+                    <h3 id="modal-title" class="text-lg font-bold">AI Action Plan</h3>
+                    <nav class="ai-tabs-nav header-tabs">
+                        <button class="btn btn-secondary ai-tab-btn active" data-tab="month1">Month 1</button>
+                        <button class="btn btn-secondary ai-tab-btn" data-tab="month2">Month 2</button>
+                        <button class="btn btn-secondary ai-tab-btn" data-tab="month3">Month 3</button>
+                    </nav>
+                </div>
+                <button id="modal-close-btn" class="btn btn-secondary btn-icon"><i class="bi bi-x-lg"></i></button>
+            `;
+            modalHeader.querySelector('#modal-close-btn').addEventListener('click', requestCloseModal);
+
+            // 2. Setup the modal footer
+            footer.style.justifyContent = 'space-between';
+            const undoRedoContainer = document.createElement('div');
+            undoRedoContainer.className = 'undo-redo-container dynamic-btn';
+            undoRedoContainer.innerHTML = `<button id="undo-btn" class="btn btn-secondary btn-icon" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button><button id="redo-btn" class="btn btn-secondary btn-icon" title="Redo"><i class="bi bi-arrow-clockwise"></i></button>`;
+            footer.insertBefore(undoRedoContainer, footer.firstChild);
+            undoRedoContainer.querySelector('#undo-btn').onclick = undo;
+            undoRedoContainer.querySelector('#redo-btn').onclick = redo;
+            
+            const rightButtonsContainer = document.createElement('div');
+            rightButtonsContainer.className = 'flex items-center gap-2 dynamic-btn';
+
+            const printBtn = document.createElement('button');
+            printBtn.className = 'btn btn-secondary dynamic-btn';
+            printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
+            printBtn.onclick = () => {
+                const content = DOMElements.modalContent.querySelector('.ai-tabs-content > div.active');
+                if (!content || !content.querySelector('table')) { alert("No plan to print for this month."); return; }
+                const title = modalHeader.querySelector('.ai-tabs-nav .ai-tab-btn.active')?.textContent || 'Action Plan';
+                const printNode = content.cloneNode(true);
+                printNode.querySelectorAll('.actions-cell, tfoot').forEach(el => el.remove());
+                const styles = `@page { size: A4; margin: 25mm; } body { font-family: 'DM Sans', sans-serif; } .print-header { text-align: center; border-bottom: 2px solid #D10A11; padding-bottom: 15px; margin-bottom: 25px; } h1 { font-family: 'Poppins', sans-serif; } h2 { font-family: 'Poppins', sans-serif; color: #D10A11; } table { width: 100%; border-collapse: collapse; font-size: 9pt; } th, td { border: 1px solid #E5E7EB; padding: 10px; text-align: left; } thead { display: table-header-group; }`;
+                const win = window.open('', '', 'height=800,width=1200');
+                win.document.write(`<html><head><title>${title}</title><style>${styles}</style></head><body>`);
+                win.document.write(`<div class="print-header"><h1>${title}</h1><h2>Our Bakery Action Plan</h2><p>${appState.planData.planName} | ${appState.planData.bakeryLocation}</p></div>`);
+                win.document.write(printNode.innerHTML);
+                win.document.write('</body></html>');
+                setTimeout(() => win.print(), 500);
+            };
+
+            const regenButton = document.createElement('button');
+            regenButton.className = 'btn btn-secondary dynamic-btn';
+            regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
+            regenButton.onclick = handleRegenerateActionPlan;
+
+            rightButtonsContainer.appendChild(regenButton);
+            rightButtonsContainer.appendChild(printBtn);
+            footer.appendChild(rightButtonsContainer);
+
+            DOMElements.modalActionBtn.style.display = 'none';
+            DOMElements.modalCancelBtn.textContent = 'Done';
+
+            // 3. Setup the modal content (panels without nav)
+            const modalContentHTML = `
+                <div id="ai-printable-area" class="editable-action-plan">
+                    <div class="ai-action-plan-container">
+                        <div class="ai-tabs-content">
+                            <div class="active" data-tab-panel="month1"></div>
+                            <div data-tab-panel="month2"></div>
+                            <div data-tab-panel="month3"></div>
+                        </div>
+                    </div>
+                </div>`;
+            DOMElements.modalContent.innerHTML = modalContentHTML;
+            
+            // 4. Populate the panels
+            for (let i = 1; i <= 3; i++) {
+                const panel = DOMElements.modalContent.querySelector(`[data-tab-panel="month${i}"]`);
+                const monthPlanHTML = appState.planData[`aiActionPlanMonth${i}`];
+                if (monthPlanHTML) {
+                    panel.innerHTML = monthPlanHTML;
+                } else {
+                    panel.innerHTML = `
+                        <div class="text-center p-8 flex flex-col items-center justify-center min-h-[300px]">
+                            <i class="bi bi-robot text-4xl text-gray-300 mb-4"></i>
+                            <h3 class="font-bold text-lg text-gray-700">Action Plan for Month ${i}</h3>
+                            <p class="text-gray-500 my-2 max-w-sm">Generate a tactical action plan using AI based on your goals for this month.</p>
+                            <button class="btn btn-primary generate-month-plan-btn mt-4" data-month="${i}">
+                                <i class="bi bi-stars"></i>
+                                <span>Generate Month ${i} Plan</span>
+                            </button>
+                        </div>`;
                 }
+            }
+            
+            // 5. Setup interactivity and initialize history
+            undoHistory = { month1: [], month2: [], month3: [] };
+            redoHistory = { month1: [], month2: [], month3: [] };
+            for (let i = 1; i <= 3; i++) {
+                const panel = DOMElements.modalContent.querySelector(`[data-tab-panel="month${i}"]`);
+                if (panel) {
+                    undoHistory[`month${i}`].push(panel.innerHTML);
+                }
+            }
+            // Add interactivity to BOTH header and content
+            setupAiModalInteractivity(DOMElements.modalBox); 
+            updateUndoRedoButtons();
+
+            // New logic to control the visibility of all footer buttons
+            const updateFooterButtonVisibility = () => {
+                const anyPanelHasPlan = !!DOMElements.modalContent.querySelector('.ai-tabs-content table');
+                const activePanelHasPlan = !!DOMElements.modalContent.querySelector('.ai-tabs-content > div.active table');
+
+                if (regenButton) {
+                    regenButton.style.display = activePanelHasPlan ? 'inline-flex' : 'none';
+                }
+                if (printBtn) {
+                    printBtn.style.display = anyPanelHasPlan ? 'inline-flex' : 'none';
+                }
+            };
+
+            DOMElements.modalBox.addEventListener('click', (e) => {
+                if (e.target.closest('.ai-tab-btn') || e.target.closest('.generate-month-plan-btn')) {
+                    setTimeout(updateFooterButtonVisibility, 50);
+                }
+            });
+
+            updateFooterButtonVisibility();
+            break;
+        }
         case 'confirmRegenerate': {
             const activeTabId = getActiveTabId();
             const monthNum = activeTabId ? activeTabId.replace('month', '') : '';
