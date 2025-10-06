@@ -80,6 +80,28 @@ function managePlaceholder(editor) {
     }
 }
 
+/**
+ * Toggles the visibility of AI Action Plan modal footer buttons based on tab content.
+ * @param {HTMLElement} activePanel The currently active tab panel element.
+ */
+function toggleAiModalFooterButtons(activePanel) {
+    if (!activePanel) return;
+
+    const hasPlanContent = activePanel.querySelector('table');
+    const footer = DOMElements.modalBox.querySelector('.modal-footer');
+    if (!footer) return;
+
+    const undoRedoContainer = footer.querySelector('.undo-redo-container');
+    const regenButton = footer.querySelector('#modal-regen-btn');
+    const printButton = footer.querySelector('#modal-print-btn');
+    const saveButton = footer.querySelector('#modal-action-btn'); // In this context, it's the 'Save' button
+
+    if (undoRedoContainer) undoRedoContainer.style.display = hasPlanContent ? 'flex' : 'none';
+    if (regenButton) regenButton.style.display = hasPlanContent ? 'inline-flex' : 'none';
+    if (printButton) printButton.style.display = hasPlanContent ? 'inline-flex' : 'none';
+    if (saveButton) saveButton.style.display = hasPlanContent ? 'inline-flex' : 'none';
+}
+
 // --- AI Action Plan Logic (with Undo/Redo & Real-Time Saving) ---
 function getActiveTabId() {
     const activeTab = document.querySelector('.ai-tab-btn.active');
