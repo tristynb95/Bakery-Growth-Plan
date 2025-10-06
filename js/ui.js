@@ -6,10 +6,12 @@ import { parseUkDate } from './calendar.js';
 // Dependencies that will be passed in from main.js
 let db, appState;
 let activeSaveDataFunction = null; // To hold the saveData function from the current view
+let currentPlanSummary = ''; // To hold the plan summary for on-demand generation
 
 // AI Action Plan State
-let undoStack = [];
-let redoStack = [];
+let undoHistory = { month1: [], month2: [], month3: [] };
+let redoHistory = { month1: [], month2: [], month3: [] };
+let debouncedSave = null; // Will hold the debounced save function
 
 // --- DOM Element References ---
 const DOMElements = {
@@ -49,6 +51,26 @@ const DOMElements = {
 
 // --- Private Helper Functions ---
 
+/**
+ * A utility function to delay invoking a function until after `wait` milliseconds
+ * have elapsed since the last time it was invoked.
+ * @param {Function} func The function to debounce.
+ * @param {number} wait The number of milliseconds to delay.
+ * @returns {Function} The new debounced function.
+ */
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+
 function managePlaceholder(editor) {
     if (!editor || !editor.isContentEditable) return;
     if (editor.innerText.trim() === '') {
@@ -58,44 +80,70 @@ function managePlaceholder(editor) {
     }
 }
 
-// --- AI Action Plan Logic (with Undo/Redo) ---
+// --- AI Action Plan Logic (with Undo/Redo & Real-Time Saving) ---
+function getActiveTabId() {
+    const activeTab = document.querySelector('.ai-tab-btn.active');
+    return activeTab ? activeTab.dataset.tab : null;
+}
+
 function updateUndoRedoButtons() {
+    const activeTabId = getActiveTabId();
+    if (!activeTabId) return;
+
     const undoBtn = document.getElementById('undo-btn');
     const redoBtn = document.getElementById('redo-btn');
-    if (undoBtn) undoBtn.disabled = undoStack.length <= 1;
-    if (redoBtn) redoBtn.disabled = redoStack.length === 0;
+    if (undoBtn) undoBtn.disabled = undoHistory[activeTabId].length <= 1;
+    if (redoBtn) redoBtn.disabled = redoHistory[activeTabId].length === 0;
 }
 
 function saveState() {
-    const printableArea = document.getElementById('ai-printable-area');
-    if (printableArea) {
-        undoStack.push(printableArea.innerHTML);
-        redoStack = []; // Clear redo stack on new action
-        updateUndoRedoButtons();
+    const activeTabId = getActiveTabId();
+    const activePanel = document.querySelector(`.ai-tabs-content > div[data-tab-panel="${activeTabId}"]`);
+    if (activePanel) {
+        const currentState = activePanel.innerHTML;
+        // Prevent pushing duplicate states to the undo stack
+        if (undoHistory[activeTabId][undoHistory[activeTabId].length - 1] !== currentState) {
+            undoHistory[activeTabId].push(currentState);
+            redoHistory[activeTabId] = []; // Clear redo stack for the current tab on new action
+            updateUndoRedoButtons();
+        }
     }
 }
 
 function undo() {
-    if (undoStack.length > 1) {
-        const currentState = undoStack.pop();
-        redoStack.push(currentState);
-        const previousState = undoStack[undoStack.length - 1];
-        document.getElementById('ai-printable-area').innerHTML = previousState;
+    const activeTabId = getActiveTabId();
+    if (undoHistory[activeTabId] && undoHistory[activeTabId].length > 1) {
+        const currentState = undoHistory[activeTabId].pop();
+        redoHistory[activeTabId].push(currentState);
+        const previousState = undoHistory[activeTabId][undoHistory[activeTabId].length - 1];
+        const activePanel = document.querySelector(`.ai-tabs-content > div[data-tab-panel="${activeTabId}"]`);
+        if (activePanel) {
+            activePanel.innerHTML = previousState;
+        }
         updateUndoRedoButtons();
+        debouncedSave(); // Trigger save after undo
     }
 }
 
 function redo() {
-    if (redoStack.length > 0) {
-        const nextState = redoStack.pop();
-        undoStack.push(nextState);
-        document.getElementById('ai-printable-area').innerHTML = nextState;
+    const activeTabId = getActiveTabId();
+    if (redoHistory[activeTabId] && redoHistory[activeTabId].length > 0) {
+        const nextState = redoHistory[activeTabId].pop();
+        undoHistory[activeTabId].push(nextState);
+        const activePanel = document.querySelector(`.ai-tabs-content > div[data-tab-panel="${activeTabId}"]`);
+        if (activePanel) {
+            activePanel.innerHTML = nextState;
+        }
         updateUndoRedoButtons();
+        debouncedSave(); // Trigger save after redo
     }
 }
 
 function setupAiModalInteractivity(container) {
     if (!container) return;
+
+    debouncedSave = debounce(() => saveActionPlan(false), 1000);
+
     const makeTablesSortable = (container) => {
         const tables = container.querySelectorAll('table');
         tables.forEach(table => {
@@ -155,11 +203,13 @@ function setupAiModalInteractivity(container) {
         rows.forEach(row => tbody.appendChild(row));
         saveState();
     };
-    container.addEventListener('click', (e) => {
+    container.addEventListener('click', async (e) => {
         const addBtn = e.target.closest('.btn-add-row');
         const removeBtn = e.target.closest('.btn-remove-row');
         const tab = e.target.closest('.ai-tab-btn');
         const sortHeader = e.target.closest('.sortable-header');
+        const generateBtn = e.target.closest('.generate-month-plan-btn');
+
         if (addBtn) {
             const tableBody = addBtn.closest('table').querySelector('tbody');
             if (tableBody) {
@@ -172,40 +222,93 @@ function setupAiModalInteractivity(container) {
         if (removeBtn) { removeBtn.closest('tr').remove(); saveState(); }
         if (tab) {
             if (tab.classList.contains('active')) return;
-            const tabContainer = tab.closest('.ai-action-plan-container');
+            const tabContainer = tab.closest('.ai-action-plan-container, .modal-header-main');
             tabContainer.querySelectorAll('.ai-tab-btn').forEach(t => t.classList.remove('active'));
-            tabContainer.querySelectorAll('.ai-tabs-content > div').forEach(p => p.classList.remove('active'));
             tab.classList.add('active');
-            const targetPanel = tabContainer.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
+            const contentContainer = container.querySelector('.ai-tabs-content');
+            contentContainer.querySelectorAll(':scope > div').forEach(p => p.classList.remove('active'));
+            const targetPanel = contentContainer.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
             if (targetPanel) targetPanel.classList.add('active');
+            updateUndoRedoButtons(); // Update buttons on tab switch
         }
         if (sortHeader) { handleTableSort(sortHeader); }
+
+        if (generateBtn) {
+            const month = generateBtn.dataset.month;
+            const panel = container.querySelector(`[data-tab-panel="month${month}"]`);
+            panel.innerHTML = `<div class="flex flex-col items-center justify-center p-8"><div class="loading-spinner"></div><p class="mt-4 text-gray-600">Generating plan for Month ${month}...</p></div>`;
+            
+            try {
+                if (appState.aiPlanGenerationController) {
+                    appState.aiPlanGenerationController.abort();
+                }
+                appState.aiPlanGenerationController = new AbortController();
+                const signal = appState.aiPlanGenerationController.signal;
+
+                const monthTableHTML = await generateAiActionPlan(currentPlanSummary, signal, month);
+
+                panel.innerHTML = monthTableHTML;
+                makeTablesSortable(panel); // Ensure the new table is sortable
+                
+                // Instantly save the newly generated plan
+                await saveActionPlan(true); 
+
+                // Now that it's saved, show the footer buttons
+                const footer = document.querySelector('#modal-box .modal-footer');
+                const regenButton = footer.querySelector('.dynamic-btn[onclick*="handleRegenerateActionPlan"]');
+                const printButton = footer.querySelector('.dynamic-btn[onclick*="print"]');
+                if(regenButton) regenButton.style.display = 'inline-flex';
+                if(printButton) printButton.style.display = 'inline-flex';
+
+
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log(`Month ${month} plan generation cancelled.`);
+                    // Optional: Restore the 'Generate' button if desired
+                    panel.innerHTML = `
+                        <div class="text-center p-8 flex flex-col items-center justify-center min-h-[300px]">
+                            <h3 class="font-bold text-lg text-gray-700">Generation Cancelled</h3>
+                            <button class="btn btn-primary generate-month-plan-btn mt-4" data-month="${month}">
+                                <i class="bi bi-stars"></i>
+                                <span>Generate Month ${month} Plan</span>
+                            </button>
+                        </div>`;
+                    return;
+                }
+                console.error("Error generating AI plan for month:", error);
+                panel.innerHTML = `<div class="text-center p-8 text-red-600"><p class="font-semibold">Generation Failed</p><p class="text-sm">${error.message}</p></div>`;
+            } finally {
+                appState.aiPlanGenerationController = null;
+            }
+        }
     });
     const observer = new MutationObserver((mutations) => {
-        if (mutations.some(m => m.type === 'characterData')) { saveState(); }
+        if (mutations.some(m => m.type === 'characterData' || m.type === 'childList')) {
+            saveState();
+            debouncedSave();
+        }
     });
-    observer.observe(container, { childList: false, subtree: true, characterData: true });
+    observer.observe(container, { childList: true, subtree: true, characterData: true });
 }
 
-async function saveActionPlan() {
-    const editedContent = document.getElementById('ai-printable-area').innerHTML;
-    const saveButton = DOMElements.modalActionBtn;
-    const originalHTML = saveButton.innerHTML;
-    saveButton.disabled = true;
-    saveButton.innerHTML = `<i class="bi bi-check-circle-fill"></i> Saved!`;
-    if (activeSaveDataFunction) {
-        await activeSaveDataFunction(true, { aiActionPlan: editedContent });
-    } else {
-        console.error("No active save function to save AI plan!");
+async function saveActionPlan(forceImmediate = false) {
+    const payload = {};
+    for (let i = 1; i <= 3; i++) {
+        const panel = document.querySelector(`#ai-printable-area [data-tab-panel="month${i}"]`);
+        if (panel && panel.querySelector('table')) {
+            payload[`aiActionPlanMonth${i}`] = panel.innerHTML;
+        } else {
+            if(appState.planData[`aiActionPlanMonth${i}`]) {
+               payload[`aiActionPlanMonth${i}`] = firebase.firestore.FieldValue.delete();
+            }
+        }
     }
-    undoStack = [editedContent];
-    redoStack = [];
-    updateUndoRedoButtons();
-    setTimeout(() => {
-        saveButton.disabled = false;
-        saveButton.innerHTML = originalHTML;
-    }, 2000);
+
+    if (activeSaveDataFunction && Object.keys(payload).length > 0) {
+        await activeSaveDataFunction(forceImmediate, payload);
+    }
 }
+
 
 function handleRegenerateActionPlan() {
     openModal('confirmRegenerate');
@@ -216,13 +319,8 @@ function requestCloseModal() {
     if (modalType === 'aiActionPlan_generate' && appState.aiPlanGenerationController) {
         appState.aiPlanGenerationController.abort();
     }
-    const isAiModal = modalType === 'aiActionPlan_view';
-    const hasUnsavedChanges = undoStack.length > 1;
-    if (isAiModal && hasUnsavedChanges) {
-        openModal('confirmClose');
-    } else {
-        closeModal();
-    }
+    // Since we save automatically, we don't need to check for unsaved changes.
+    closeModal();
 }
 
 async function handleModalAction() {
@@ -370,95 +468,9 @@ export async function handleShare(db, appState) {
 
 export async function handleAIActionPlan(appState, saveDataFn, planSummary) {
     activeSaveDataFunction = saveDataFn;
-    
-    // Store the plan summary in the modal box's dataset to be accessible later
-    if (planSummary) {
-        DOMElements.modalBox.dataset.planSummary = planSummary;
-    }
-    
-    const savedPlanHTML = appState.planData.aiActionPlan;
-
-    // This is the main entry point, so we open the generic 'aiActionPlan' modal
-    openModal('aiActionPlan');
-
-    // Now, we populate the content based on whether a plan already exists
-    const modalContent = document.getElementById('modal-content');
-    const aiTabsContent = modalContent.querySelector('.ai-tabs-content');
-
-    if (savedPlanHTML) {
-        // If plan exists, parse it and populate the tabs
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = savedPlanHTML;
-        
-        for (let i = 1; i <= 3; i++) {
-            const sourcePanel = tempDiv.querySelector(`[data-tab-panel="month${i}"]`);
-            const targetPanel = aiTabsContent.querySelector(`[data-tab-panel="month${i}"]`);
-            if (sourcePanel && targetPanel) {
-                targetPanel.innerHTML = sourcePanel.innerHTML;
-            }
-        }
-        
-        // Since a plan exists, show the edit buttons in the footer
-        const footer = DOMElements.modalActionBtn.parentNode;
-        footer.style.justifyContent = 'space-between';
-        
-        // Add Undo/Redo buttons if they don't exist
-        if (!document.getElementById('undo-btn')) {
-            const undoRedoContainer = document.createElement('div');
-            undoRedoContainer.className = 'undo-redo-container dynamic-btn';
-            undoRedoContainer.innerHTML = `<button id="undo-btn" class="btn btn-secondary btn-icon" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button><button id="redo-btn" class="btn btn-secondary btn-icon" title="Redo"><i class="bi bi-arrow-clockwise"></i></button>`;
-            footer.insertBefore(undoRedoContainer, footer.firstChild);
-            undoRedoContainer.querySelector('#undo-btn').onclick = undo;
-            undoRedoContainer.querySelector('#redo-btn').onclick = redo;
-        }
-
-        // Add Print/Regenerate buttons if they don't exist
-        if (!document.getElementById('modal-print-btn')) {
-            const regenButton = document.createElement('button');
-            regenButton.className = 'btn btn-secondary dynamic-btn';
-            regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
-            regenButton.onclick = handleRegenerateActionPlan;
-
-            const printBtn = document.createElement('button');
-            printBtn.id = 'modal-print-btn';
-            printBtn.className = 'btn btn-secondary dynamic-btn';
-            printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
-            printBtn.onclick = () => { /* Print logic from your previous code */ };
-
-            footer.insertBefore(regenButton, DOMElements.modalActionBtn);
-            footer.insertBefore(printBtn, DOMElements.modalActionBtn);
-        }
-
-        DOMElements.modalActionBtn.textContent = "Save Changes";
-        DOMElements.modalActionBtn.onclick = saveActionPlan;
-        DOMElements.modalCancelBtn.style.display = 'none';
-
-        // Initialize state for editing
-        undoStack = [];
-        redoStack = [];
-        saveState();
-        setupAiModalInteractivity(document.getElementById('ai-printable-area'));
-
-    } else {
-        // If no plan exists, show the generate buttons in each tab
-        for (let i = 1; i <= 3; i++) {
-            const targetPanel = aiTabsContent.querySelector(`[data-tab-panel="month${i}"]`);
-            if (targetPanel) {
-                targetPanel.innerHTML = `<div class="flex flex-col items-center justify-center p-8 text-center">
-                                           <i class="bi bi-robot text-5xl text-gray-400 mb-4"></i>
-                                           <h3 class="text-xl font-bold font-poppins">Action Plan for Month ${i}</h3>
-                                           <p class="text-gray-600 mt-2 max-w-md">Generate a tactical action plan using AI based on your goals for this month.</p>
-                                           <button class="btn btn-primary mt-6 generate-month-plan-btn" data-month="${i}"><i class="bi bi-stars"></i> Generate Month ${i} Plan</button>
-                                       </div>`;
-            }
-        }
-        
-        // Hide the main footer buttons as they are not needed yet
-        DOMElements.modalActionBtn.style.display = 'none';
-        DOMElements.modalCancelBtn.textContent = 'Done';
-    }
+    currentPlanSummary = planSummary; // Store the summary for later use
+    openModal('aiActionPlan_view');
 }
-
 
 export function initializeCharCounters() {
     document.querySelectorAll('div[data-maxlength]').forEach(editor => {
@@ -491,11 +503,23 @@ export function initializeCharCounters() {
 
 export function openModal(type, context = {}) {
     const { planId, currentName, planName, eventTitle, currentQuarter, fileName } = context;
+
+    // --- HEADER RESET ---
+    const modalHeader = DOMElements.modalBox.querySelector('.modal-header');
+    if (modalHeader.querySelector('.modal-header-main')) {
+        modalHeader.innerHTML = `
+            <h3 id="modal-title" class="text-lg font-bold">Modal Title</h3>
+            <button id="modal-close-btn" class="btn btn-secondary btn-icon"><i class="bi bi-x-lg"></i></button>
+        `;
+        modalHeader.querySelector('#modal-close-btn').addEventListener('click', requestCloseModal);
+        DOMElements.modalTitle = document.getElementById('modal-title');
+    }
+    // --- END HEADER RESET ---
+
     DOMElements.modalBox.dataset.type = type;
     DOMElements.modalBox.dataset.planId = planId;
     const footer = DOMElements.modalActionBtn.parentNode;
 
-    // --- ROBUST CLEANUP ---
     footer.querySelectorAll('.dynamic-btn').forEach(btn => btn.remove());
     DOMElements.modalActionBtn.style.display = 'inline-flex';
     DOMElements.modalCancelBtn.style.display = 'inline-flex';
@@ -508,7 +532,6 @@ export function openModal(type, context = {}) {
     DOMElements.modalActionBtn.onclick = handleModalAction;
     DOMElements.modalCancelBtn.onclick = requestCloseModal;
     footer.style.justifyContent = 'flex-end';
-    // --- END CLEANUP ---
 
     switch (type) {
         case 'create':
@@ -562,62 +585,181 @@ export function openModal(type, context = {}) {
             DOMElements.modalActionBtn.style.display = 'none';
             DOMElements.modalCancelBtn.textContent = 'Cancel';
             break;
-        case 'aiActionPlan': // Main entry point for the AI modal
-            DOMElements.modalTitle.textContent = "AI Action Plan";
-            DOMElements.modalContent.innerHTML = `<div id="ai-printable-area">
-                                                      <div class="ai-action-plan-container">
-                                                        <nav class="ai-tabs-nav">
-                                                          <button class="btn btn-secondary ai-tab-btn active" data-tab="month1">Month 1</button>
-                                                          <button class="btn btn-secondary ai-tab-btn" data-tab="month2">Month 2</button>
-                                                          <button class="btn btn-secondary ai-tab-btn" data-tab="month3">Month 3</button>
-                                                        </nav>
-                                                        <div class="ai-tabs-content">
-                                                          <div class="active" data-tab-panel="month1"></div>
-                                                          <div data-tab-panel="month2"></div>
-                                                          <div data-tab-panel="month3"></div>
-                                                        </div>
-                                                      </div>
-                                                  </div>`;
-            DOMElements.modalActionBtn.style.display = 'none'; // Hide by default
-            DOMElements.modalCancelBtn.textContent = 'Done';
-            break;
-        case 'aiActionPlan_generate': // Only for showing loading state
+        case 'aiActionPlan_generate': // This case is now a fallback, but kept for clarity.
             DOMElements.modalTitle.textContent = "Generating AI Action Plan";
             DOMElements.modalContent.innerHTML = `<div class="flex flex-col items-center justify-center p-8"><div class="loading-spinner"></div><p class="mt-4 text-gray-600">Please wait, the AI is creating your plan...</p></div>`;
             DOMElements.modalActionBtn.style.display = 'none';
             DOMElements.modalCancelBtn.textContent = 'Cancel';
             break;
-        case 'confirmRegenerate':
-            DOMElements.modalTitle.textContent = "Are you sure?";
-            DOMElements.modalContent.innerHTML = `<p>Generating a new plan will overwrite your existing action plan and any edits. This cannot be undone.</p>`;
-            DOMElements.modalActionBtn.textContent = "Yes, Generate New";
-            DOMElements.modalActionBtn.className = 'btn btn-danger';
-            DOMElements.modalActionBtn.onclick = () => {
-                delete appState.planData.aiActionPlan;
-                if (activeSaveDataFunction) {
-                    activeSaveDataFunction(true, { aiActionPlan: firebase.firestore.FieldValue.delete() }).then(() => {
-                        handleAIActionPlan(appState, activeSaveDataFunction, null);
-                    });
+        case 'aiActionPlan_view': {
+            // 1. Rebuild the header with tabs
+            const modalHeader = DOMElements.modalBox.querySelector('.modal-header');
+            modalHeader.innerHTML = `
+                <div class="modal-header-main">
+                    <h3 id="modal-title" class="text-lg font-bold">AI Action Plan</h3>
+                    <nav class="ai-tabs-nav header-tabs">
+                        <button class="btn btn-secondary ai-tab-btn active" data-tab="month1">Month 1</button>
+                        <button class="btn btn-secondary ai-tab-btn" data-tab="month2">Month 2</button>
+                        <button class="btn btn-secondary ai-tab-btn" data-tab="month3">Month 3</button>
+                    </nav>
+                </div>
+                <button id="modal-close-btn" class="btn btn-secondary btn-icon"><i class="bi bi-x-lg"></i></button>
+            `;
+            modalHeader.querySelector('#modal-close-btn').addEventListener('click', requestCloseModal);
+
+            // 2. Setup the modal footer
+            footer.style.justifyContent = 'space-between';
+            const undoRedoContainer = document.createElement('div');
+            undoRedoContainer.className = 'undo-redo-container dynamic-btn';
+            undoRedoContainer.innerHTML = `<button id="undo-btn" class="btn btn-secondary btn-icon" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button><button id="redo-btn" class="btn btn-secondary btn-icon" title="Redo"><i class="bi bi-arrow-clockwise"></i></button>`;
+            footer.insertBefore(undoRedoContainer, footer.firstChild);
+            undoRedoContainer.querySelector('#undo-btn').onclick = undo;
+            undoRedoContainer.querySelector('#redo-btn').onclick = redo;
+            
+            const rightButtonsContainer = document.createElement('div');
+            rightButtonsContainer.className = 'flex items-center gap-2 dynamic-btn';
+
+            const printBtn = document.createElement('button');
+            printBtn.className = 'btn btn-secondary dynamic-btn';
+            printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
+            printBtn.onclick = () => {
+                const content = DOMElements.modalContent.querySelector('.ai-tabs-content > div.active');
+                if (!content || !content.querySelector('table')) { alert("No plan to print for this month."); return; }
+                const title = modalHeader.querySelector('.ai-tabs-nav .ai-tab-btn.active')?.textContent || 'Action Plan';
+                const printNode = content.cloneNode(true);
+                printNode.querySelectorAll('.actions-cell, tfoot').forEach(el => el.remove());
+                const styles = `@page { size: A4; margin: 25mm; } body { font-family: 'DM Sans', sans-serif; } .print-header { text-align: center; border-bottom: 2px solid #D10A11; padding-bottom: 15px; margin-bottom: 25px; } h1 { font-family: 'Poppins', sans-serif; } h2 { font-family: 'Poppins', sans-serif; color: #D10A11; } table { width: 100%; border-collapse: collapse; font-size: 9pt; } th, td { border: 1px solid #E5E7EB; padding: 10px; text-align: left; } thead { display: table-header-group; }`;
+                const win = window.open('', '', 'height=800,width=1200');
+                win.document.write(`<html><head><title>${title}</title><style>${styles}</style></head><body>`);
+                win.document.write(`<div class="print-header"><h1>${title}</h1><h2>Our Bakery Action Plan</h2><p>${appState.planData.planName} | ${appState.planData.bakeryLocation}</p></div>`);
+                win.document.write(printNode.innerHTML);
+                win.document.write('</body></html>');
+                setTimeout(() => win.print(), 500);
+            };
+
+            const regenButton = document.createElement('button');
+            regenButton.className = 'btn btn-secondary dynamic-btn';
+            regenButton.innerHTML = `<i class="bi bi-stars"></i> Generate New`;
+            regenButton.onclick = handleRegenerateActionPlan;
+
+            rightButtonsContainer.appendChild(regenButton);
+            rightButtonsContainer.appendChild(printBtn);
+            footer.appendChild(rightButtonsContainer);
+
+            DOMElements.modalActionBtn.style.display = 'none';
+            DOMElements.modalCancelBtn.textContent = 'Done';
+
+            // 3. Setup the modal content (panels without nav)
+            const modalContentHTML = `
+                <div id="ai-printable-area" class="editable-action-plan">
+                    <div class="ai-action-plan-container">
+                        <div class="ai-tabs-content">
+                            <div class="active" data-tab-panel="month1"></div>
+                            <div data-tab-panel="month2"></div>
+                            <div data-tab-panel="month3"></div>
+                        </div>
+                    </div>
+                </div>`;
+            DOMElements.modalContent.innerHTML = modalContentHTML;
+            
+            // 4. Populate the panels
+            for (let i = 1; i <= 3; i++) {
+                const panel = DOMElements.modalContent.querySelector(`[data-tab-panel="month${i}"]`);
+                const monthPlanHTML = appState.planData[`aiActionPlanMonth${i}`];
+                if (monthPlanHTML) {
+                    panel.innerHTML = monthPlanHTML;
                 } else {
-                    console.error("Save function is not available for regenerating AI Plan.");
+                    panel.innerHTML = `
+                        <div class="text-center p-8 flex flex-col items-center justify-center min-h-[300px]">
+                            <i class="bi bi-robot text-4xl text-gray-300 mb-4"></i>
+                            <h3 class="font-bold text-lg text-gray-700">Action Plan for Month ${i}</h3>
+                            <p class="text-gray-500 my-2 max-w-sm">Generate a tactical action plan using AI based on your goals for this month.</p>
+                            <button class="btn btn-primary generate-month-plan-btn mt-4" data-month="${i}">
+                                <i class="bi bi-stars"></i>
+                                <span>Generate Month ${i} Plan</span>
+                            </button>
+                        </div>`;
+                }
+            }
+            
+            // 5. Setup interactivity and initialize history
+            undoHistory = { month1: [], month2: [], month3: [] };
+            redoHistory = { month1: [], month2: [], month3: [] };
+            for (let i = 1; i <= 3; i++) {
+                const panel = DOMElements.modalContent.querySelector(`[data-tab-panel="month${i}"]`);
+                if (panel) {
+                    undoHistory[`month${i}`].push(panel.innerHTML);
+                }
+            }
+            // Add interactivity to BOTH header and content
+            setupAiModalInteractivity(DOMElements.modalBox); 
+            updateUndoRedoButtons();
+
+            // New logic to control the visibility of all footer buttons
+            const updateFooterButtonVisibility = () => {
+                const anyPanelHasPlan = !!DOMElements.modalContent.querySelector('.ai-tabs-content table');
+                const activePanelHasPlan = !!DOMElements.modalContent.querySelector('.ai-tabs-content > div.active table');
+
+                if (regenButton) {
+                    regenButton.style.display = activePanelHasPlan ? 'inline-flex' : 'none';
+                }
+                if (printBtn) {
+                    printBtn.style.display = anyPanelHasPlan ? 'inline-flex' : 'none';
                 }
             };
+
+            DOMElements.modalBox.addEventListener('click', (e) => {
+                if (e.target.closest('.ai-tab-btn') || e.target.closest('.generate-month-plan-btn')) {
+                    setTimeout(updateFooterButtonVisibility, 50);
+                }
+            });
+
+            updateFooterButtonVisibility();
+            break;
+        }
+        case 'confirmRegenerate': {
+            const activeTabId = getActiveTabId();
+            const monthNum = activeTabId ? activeTabId.replace('month', '') : '';
+            
+            DOMElements.modalTitle.textContent = "Confirm Regeneration";
+            DOMElements.modalContent.innerHTML = `<p>Are you sure you want to generate a new plan for <strong>Month ${monthNum}</strong>? This will overwrite the current Month ${monthNum} plan and any edits you've made. This action cannot be undone.</p>`;
+            DOMElements.modalActionBtn.textContent = "Yes, Generate New Plan";
+            DOMElements.modalActionBtn.className = 'btn btn-danger';
+            
+            DOMElements.modalActionBtn.onclick = () => {
+                closeModal(); // Close the confirmation modal
+                // Re-open the main modal and simulate the generate click
+                openModal('aiActionPlan_view'); 
+                // Use a timeout to ensure the DOM is ready
+                setTimeout(() => {
+                    const generateBtn = document.querySelector(`.generate-month-plan-btn[data-month="${monthNum}"]`);
+                    if (generateBtn) {
+                        generateBtn.click();
+                    } else {
+                        // This case handles if the user wants to regenerate an *existing* plan
+                        const panel = document.querySelector(`[data-tab-panel="${activeTabId}"]`);
+                        if(panel){
+                            const tempBtn = document.createElement('button');
+                            tempBtn.className = 'generate-month-plan-btn';
+                            tempBtn.dataset.month = monthNum;
+                            panel.innerHTML = '';
+                            panel.appendChild(tempBtn);
+                            tempBtn.click();
+                        }
+                    }
+                }, 50);
+            };
+            
             DOMElements.modalCancelBtn.textContent = "Cancel";
             DOMElements.modalCancelBtn.onclick = () => {
-                const lastState = undoStack.length > 0 ? undoStack[undoStack.length - 1] : appState.planData.aiActionPlan || '';
-                handleAIActionPlan(appState, activeSaveDataFunction, DOMElements.modalBox.dataset.planSummary);
+                closeModal();
+                openModal('aiActionPlan_view');
             };
             break;
+        }
         case 'confirmClose':
-            DOMElements.modalTitle.textContent = "Discard Changes?";
-            DOMElements.modalContent.innerHTML = `<p>You have unsaved changes. Are you sure you want to close without saving?</p>`;
-            DOMElements.modalActionBtn.textContent = "Discard";
-            DOMElements.modalActionBtn.className = 'btn btn-danger';
-            DOMElements.modalActionBtn.onclick = () => closeModal();
-            DOMElements.modalCancelBtn.textContent = "Cancel";
-            DOMElements.modalCancelBtn.onclick = () => {
-                 handleAIActionPlan(appState, activeSaveDataFunction, DOMElements.modalBox.dataset.planSummary);
-            };
+             // This case is no longer needed with real-time saving.
+            closeModal();
             break;
         case 'confirmDeleteEvent':
             DOMElements.modalTitle.textContent = "Confirm Deletion";
@@ -647,13 +789,6 @@ export function initializeUI(database, state) {
     DOMElements.modalOverlay.addEventListener('mousedown', (e) => {
         if (e.target === DOMElements.modalOverlay) {
             requestCloseModal();
-        }
-    });
-    
-    // Listener for the generate buttons inside the AI modal
-    DOMElements.modalContent.addEventListener('click', e => {
-        if (e.target.classList.contains('generate-month-plan-btn')) {
-            executePlanGeneration();
         }
     });
 
