@@ -16,13 +16,14 @@ export async function getFirebaseConfig() {
  * Sends the plan summary to the backend to generate an AI Action Plan.
  * @param {string} planSummary - A text summary of the user's plan.
  * @param {AbortSignal} signal - Allows the request to be cancelled.
+ * @param {string} month - The month number (e.g., "1", "2", "3").
  * @returns {Promise<string>} The HTML for the action plan.
  */
-export async function generateAiActionPlan(planSummary, signal) {
+export async function generateAiActionPlan(planSummary, signal, month) {
     const response = await fetch('/.netlify/functions/generate-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planSummary }),
+        body: JSON.stringify({ planSummary, month }), // Include the month in the request
         signal: signal // This allows us to cancel the request if needed
     });
 
