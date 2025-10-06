@@ -150,7 +150,7 @@ const templates = {
 
 // --- Helper Functions ---
 
-export function summarizePlanForActionPlan(planData, monthToGenerate = null) {
+export function summarizePlanForActionPlan(planData) {
     const e = (text) => {
         if (!text) return '';
         const tempDiv = document.createElement('div');
@@ -158,18 +158,13 @@ export function summarizePlanForActionPlan(planData, monthToGenerate = null) {
         return tempDiv.innerText.trim();
     };
 
-    // Always include the high-level plan details for context
     let summary = `MANAGER: ${e(planData.managerName)}\n`;
     summary += `BAKERY: ${e(planData.bakeryLocation)}\n`;
     summary += `QUARTER: ${e(planData.quarter)}\n`;
     summary += `QUARTERLY VISION: ${e(planData.quarterlyTheme)}\n\n`;
 
-    // Determine which months to include in the summary
-    const monthsToSummarize = monthToGenerate ? [monthToGenerate] : [1, 2, 3];
-
-    for (const m of monthsToSummarize) {
+    for (let m = 1; m <= 3; m++) {
         summary += `--- MONTH ${m} ---\n`;
-        summary += `GOAL: ${e(planData[`month${m}Goal`])}\n`;
         
         const pillars = planData[`m${m}s1_pillar`];
         if (Array.isArray(pillars) && pillars.length > 0) {
@@ -186,7 +181,6 @@ export function summarizePlanForActionPlan(planData, monthToGenerate = null) {
     }
     return summary;
 }
-
 
 function cacheFormElements() {
     cachedFormElements = Array.from(document.querySelectorAll('#app-view input, #app-view [contenteditable="true"]'));
@@ -624,11 +618,6 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
             }
         }
     });
-    
-        DOMElements.aiActionBtn.addEventListener('click', () => {
-            const planSummary = summarizePlanForActionPlan(appState.planData, null); // Explicitly null for full plan
-            handleAIActionPlan(appState, saveData, planSummary, null);
-        });
 
     DOMElements.contentArea.addEventListener('keydown', (e) => {
         const editor = e.target.closest('[contenteditable="true"]');
@@ -729,8 +718,8 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
     const actionPlanButton = document.getElementById('radial-action-plan');
     if (actionPlanButton) {
         actionPlanButton.addEventListener('click', () => {
-            const planSummary = summarizePlanForActionPlan(appState.planData, null); // Explicitly null for full plan
-            handleAIActionPlan(appState, saveData, planSummary, null);
+            const planSummary = summarizePlanForActionPlan(appState.planData);
+            handleAIActionPlan(appState, saveData, planSummary);
             document.getElementById('radial-menu-container').classList.remove('open');
         });
     }

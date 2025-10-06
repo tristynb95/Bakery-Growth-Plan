@@ -333,10 +333,7 @@ async function saveActionPlan(forceImmediate = false) {
 
 
 function handleRegenerateActionPlan() {
-    // This now calls the modal with context about which month is active
-    const activeTab = document.querySelector('#ai-printable-area .ai-tab-btn.active');
-    const monthToRegen = activeTab ? activeTab.dataset.tab.replace('month', '') : null;
-    openModal('confirmRegenerate', { monthToRegen });
+    openModal('confirmRegenerate');
 }
 
 function requestCloseModal() {
@@ -491,78 +488,10 @@ export async function handleShare(db, appState) {
     }
 }
 
-// --- Public (Exported) Functions ---
-
-export async function handleAIActionPlan(appState, saveDataFn, planSummary, monthToGenerate = null) {
+export async function handleAIActionPlan(appState, saveDataFn, planSummary) {
     activeSaveDataFunction = saveDataFn;
-    const savedPlan = appState.planData.aiActionPlan;
-
-    // This logic handles VIEWING an existing plan and remains mostly the same.
-    if (savedPlan && !monthToGenerate) {
-        openModal('aiActionPlan_view');
-        const modalContent = document.getElementById('modal-content');
-        modalContent.innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${savedPlan}</div>`;
-        undoStack = [];
-        redoStack = [];
-        saveState();
-        setupAiModalInteractivity(modalContent.querySelector('#ai-printable-area'));
-        return;
-    }
-
-    // This logic handles GENERATING a new plan or REGENERATING a month.
-    if (appState.aiPlanGenerationController) {
-        appState.aiPlanGenerationController.abort();
-    }
-    openModal('aiActionPlan_generate');
-
-    try {
-        appState.aiPlanGenerationController = new AbortController();
-        const signal = appState.aiPlanGenerationController.signal;
-
-        // Use the passed summary on first creation, or generate a new one for regeneration.
-        // The key change is passing monthToGenerate to the summarizer.
-        const summaryForAPI = planSummary || summarizePlanForActionPlan(appState.planData, monthToGenerate);
-
-        const newPlanHtml = await generateAiActionPlan(summaryForAPI, signal, monthToGenerate);
-
-        if (monthToGenerate && appState.planData.aiActionPlan) {
-            // REGENERATION LOGIC: Surgically replace only the specific month's content.
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(appState.planData.aiActionPlan, 'text/html');
-            const panelToUpdate = doc.querySelector(`[data-tab-panel="month${monthToGenerate}"]`);
-
-            if (panelToUpdate) {
-                // The API now correctly returns just the table, so we set innerHTML.
-                panelToUpdate.innerHTML = newPlanHtml;
-                appState.planData.aiActionPlan = doc.body.firstChild.outerHTML;
-            } else {
-                // Fallback in case the panel doesn't exist (shouldn't happen).
-                console.error(`Could not find panel for month ${monthToGenerate} to update. Overwriting.`);
-                appState.planData.aiActionPlan = newPlanHtml;
-            }
-        } else {
-            // INITIAL GENERATION: Set the entire HTML content.
-            appState.planData.aiActionPlan = newPlanHtml;
-        }
-
-        // Save the updated data and show the result.
-        await activeSaveDataFunction(true, { aiActionPlan: appState.planData.aiActionPlan });
-        handleAIActionPlan(appState, saveDataFn, null, null); // Recurse to show the view modal.
-
-    } catch (error) {
-        if (error.name === 'AbortError') {
-            console.log('AI plan generation was cancelled by the user.');
-            closeModal(); // Close the "generating..." modal
-            return;
-        }
-        console.error("Error generating AI plan:", error);
-        const modalContent = document.getElementById('modal-content');
-        modalContent.innerHTML = `<p class="text-red-600 font-semibold">An error occurred.</p><p class="text-gray-600 mt-2 text-sm">${error.message}</p>`;
-        DOMElements.modalActionBtn.style.display = 'none';
-        DOMElements.modalCancelBtn.textContent = 'Close';
-    } finally {
-        appState.aiPlanGenerationController = null;
-    }
+    currentPlanSummary = planSummary; // Store the summary for later use
+    openModal('aiActionPlan_view');
 }
 
 export function initializeCharCounters() {
@@ -810,21 +739,46 @@ export function openModal(type, context = {}) {
             updateFooterButtonVisibility();
             break;
         }
-        case 'confirmRegenerate':
-            DOMElements.modalTitle.textContent = "Are you sure?";
-            DOMElements.modalContent.innerHTML = `<p>Generating a new plan for <strong>Month ${context.monthToRegen}</strong> will overwrite its current content and any edits you've made. This cannot be undone.</p>`;
-            DOMElements.modalActionBtn.textContent = "Yes, Generate New";
+        case 'confirmRegenerate': {
+            const activeTabId = getActiveTabId();
+            const monthNum = activeTabId ? activeTabId.replace('month', '') : '';
+            
+            DOMElements.modalTitle.textContent = "Confirm Regeneration";
+            DOMElements.modalContent.innerHTML = `<p>Are you sure you want to generate a new plan for <strong>Month ${monthNum}</strong>? This will overwrite the current Month ${monthNum} plan and any edits you've made. This action cannot be undone.</p>`;
+            DOMElements.modalActionBtn.textContent = "Yes, Generate New Plan";
             DOMElements.modalActionBtn.className = 'btn btn-danger';
-            DOMElements.modalActionBtn.onclick = () => handleModalAction(); // Simplified to just call the handler
+            
+            DOMElements.modalActionBtn.onclick = () => {
+                closeModal(); // Close the confirmation modal
+                // Re-open the main modal and simulate the generate click
+                openModal('aiActionPlan_view'); 
+                // Use a timeout to ensure the DOM is ready
+                setTimeout(() => {
+                    const generateBtn = document.querySelector(`.generate-month-plan-btn[data-month="${monthNum}"]`);
+                    if (generateBtn) {
+                        generateBtn.click();
+                    } else {
+                        // This case handles if the user wants to regenerate an *existing* plan
+                        const panel = document.querySelector(`[data-tab-panel="${activeTabId}"]`);
+                        if(panel){
+                            const tempBtn = document.createElement('button');
+                            tempBtn.className = 'generate-month-plan-btn';
+                            tempBtn.dataset.month = monthNum;
+                            panel.innerHTML = '';
+                            panel.appendChild(tempBtn);
+                            tempBtn.click();
+                        }
+                    }
+                }, 50);
+            };
+            
             DOMElements.modalCancelBtn.textContent = "Cancel";
             DOMElements.modalCancelBtn.onclick = () => {
-                // Re-open the view modal without losing state if cancelled
+                closeModal();
                 openModal('aiActionPlan_view');
-                const lastUnsavedState = undoStack.length > 0 ? undoStack[undoStack.length - 1] : appState.planData.aiActionPlan || '';
-                document.getElementById('modal-content').innerHTML = `<div id="ai-printable-area" class="editable-action-plan">${lastUnsavedState}</div>`;
-                setupAiModalInteractivity(document.getElementById('ai-printable-area'));
             };
             break;
+        }
         case 'confirmClose':
              // This case is no longer needed with real-time saving.
             closeModal();
