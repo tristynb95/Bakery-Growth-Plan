@@ -19,12 +19,12 @@ export async function getFirebaseConfig() {
  * @param {string} month - The month number (e.g., "1", "2", "3").
  * @returns {Promise<string>} The HTML for the action plan.
  */
-export async function generateAiActionPlan(planSummary, signal, month) {
+export async function generateAiActionPlan(planSummary, signal, monthToGenerate = null) {
     const response = await fetch('/.netlify/functions/generate-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planSummary, month }), // Include the month in the request
-        signal: signal // This allows us to cancel the request if needed
+        body: JSON.stringify({ planSummary, monthToGenerate }), // Pass the month
+        signal: signal
     });
 
     if (!response.ok) {
@@ -38,7 +38,6 @@ export async function generateAiActionPlan(planSummary, signal, month) {
     }
 
     const data = await response.json();
-    // Clean the response to remove any markdown backticks
     return data.actionPlan.replace(/^```(html)?\s*/, '').replace(/```$/, '').trim();
 }
 
