@@ -70,6 +70,158 @@ function debounce(func, wait) {
     };
 }
 
+/**
+ * Creates a custom searchable, keyboard-navigable dropdown.
+ * @param {HTMLElement} dropdownEl The main container element for the dropdown.
+ */
+function createCustomDropdown(dropdownEl) {
+    const searchInput = dropdownEl.querySelector('input[type="text"]');
+    const selectedDisplay = dropdownEl.querySelector('.dropdown-selected');
+    const optionsContainer = dropdownEl.querySelector('.dropdown-options');
+    const hiddenInput = dropdownEl.querySelector('input[type="hidden"]');
+    const iconContainer = dropdownEl.querySelector('.selected-icon-container');
+
+    // If essential elements aren't found, exit.
+    if (!searchInput || !selectedDisplay || !optionsContainer || !hiddenInput) {
+        console.warn("Custom dropdown is missing essential elements.", dropdownEl);
+        return;
+    }
+
+    const filterOptions = () => {
+        const highlighted = optionsContainer.querySelector('.is-highlighted');
+        if (highlighted) highlighted.classList.remove('is-highlighted');
+        const searchTerm = searchInput.value.toLowerCase();
+        const options = optionsContainer.querySelectorAll('.dropdown-option:not(.no-results)');
+        let visibleCount = 0;
+        options.forEach(option => {
+            const text = option.textContent.trim().toLowerCase();
+            if (text.includes(searchTerm)) {
+                option.style.display = 'flex';
+                visibleCount++;
+            } else {
+                option.style.display = 'none';
+            }
+        });
+        let noResultsMsg = optionsContainer.querySelector('.no-results');
+        if (visibleCount === 0) {
+            if (!noResultsMsg) {
+                noResultsMsg = document.createElement('div');
+                noResultsMsg.className = 'dropdown-option no-results';
+                noResultsMsg.textContent = 'No results found';
+                optionsContainer.appendChild(noResultsMsg);
+            }
+            noResultsMsg.style.display = 'flex';
+        } else if (noResultsMsg) {
+            noResultsMsg.style.display = 'none';
+        }
+    };
+
+    const selectOption = (option) => {
+        const value = option.dataset.value;
+
+        // Handle icon if the container exists
+        if (iconContainer) {
+            const iconElement = option.querySelector('.option-icon, .option-dot');
+            if (iconElement) {
+                iconContainer.innerHTML = iconElement.outerHTML;
+                 // Add class based on value for styling if needed
+                iconContainer.className = `selected-icon-container ${value}`;
+                iconContainer.classList.toggle('has-icon', iconElement.classList.contains('option-icon'));
+            } else {
+                // Default state if no icon
+                iconContainer.innerHTML = '';
+                iconContainer.className = 'selected-icon-container';
+            }
+        }
+
+        searchInput.value = option.textContent.trim();
+        hiddenInput.value = value;
+        dropdownEl.classList.remove('open');
+
+        // Dispatch a change event on the hidden input for frameworks or other listeners
+        hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    searchInput.addEventListener('focus', () => {
+        dropdownEl.classList.add('open');
+        searchInput.select();
+        filterOptions();
+    });
+    searchInput.addEventListener('input', filterOptions);
+    searchInput.addEventListener('keydown', (e) => {
+        if (!dropdownEl.classList.contains('open')) {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                dropdownEl.classList.add('open');
+            }
+            return;
+        }
+        const options = Array.from(optionsContainer.querySelectorAll('.dropdown-option:not(.no-results)')).filter(opt => opt.style.display !== 'none');
+        if (options.length === 0) return;
+        let currentIndex = options.findIndex(opt => opt.classList.contains('is-highlighted'));
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                if (currentIndex >= 0) options[currentIndex].classList.remove('is-highlighted');
+                const nextIndex = (currentIndex + 1) % options.length;
+                options[nextIndex].classList.add('is-highlighted');
+                options[nextIndex].scrollIntoView({ block: 'nearest' });
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                if (currentIndex >= 0) options[currentIndex].classList.remove('is-highlighted');
+                const prevIndex = (currentIndex - 1 + options.length) % options.length;
+                options[prevIndex].classList.add('is-highlighted');
+                options[prevIndex].scrollIntoView({ block: 'nearest' });
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (currentIndex >= 0) {
+                    selectOption(options[currentIndex]);
+                } else if (options.length > 0) {
+                    // If no option is highlighted, select the first visible one
+                    selectOption(options[0]);
+                }
+                break;
+            case 'Escape':
+                dropdownEl.classList.remove('open');
+                break;
+        }
+    });
+
+    selectedDisplay.addEventListener('click', (e) => {
+        if (e.target !== searchInput) searchInput.focus();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!dropdownEl.contains(e.target)) {
+            dropdownEl.classList.remove('open');
+            const currentVal = searchInput.value;
+            const hiddenVal = hiddenInput.value;
+            // If there's a hidden value, ensure the displayed text matches it.
+            // This prevents the user from typing something invalid and clicking away.
+            if (hiddenVal && currentVal) {
+                const validOption = optionsContainer.querySelector(`.dropdown-option[data-value="${hiddenVal}"]`);
+                if (validOption && searchInput.value !== validOption.textContent.trim()) {
+                    searchInput.value = validOption.textContent.trim();
+                } else if (!validOption) {
+                    // The hidden value is not in the options, clear both
+                    searchInput.value = '';
+                    hiddenInput.value = '';
+                }
+            } else if (!hiddenVal) {
+                // If there's no hidden value, clear the search input
+                searchInput.value = '';
+            }
+        }
+    });
+
+    optionsContainer.addEventListener('click', (e) => {
+        const option = e.target.closest('.dropdown-option:not(.no-results)');
+        if (option) selectOption(option);
+    });
+}
+
 
 function managePlaceholder(editor) {
     if (!editor || !editor.isContentEditable) return;
@@ -990,14 +1142,34 @@ export function openModal(type, context = {}) {
     ];
 
     const buildQuarterSelect = (id, selectedValue = '') => {
+        // Ensure selectedValue is always an option
         const options = (selectedValue && !quarterOptions.includes(selectedValue))
             ? [selectedValue, ...quarterOptions]
-            : quarterOptions;
-        const optionsHtml = options
-            .map(option => `<option value="${option}" ${option === selectedValue ? 'selected' : ''}>${option}</option>`)
-            .join('');
-        const placeholderOption = `<option value="" disabled ${selectedValue ? '' : 'selected'}>Select a quarter</option>`;
-        return `<select id="${id}" class="form-input" aria-label="Quarter">${placeholderOption}${optionsHtml}</select>`;
+            : [...quarterOptions];
+
+        // Generate the option elements
+        const optionsHtml = options.map(option => `
+            <div class="dropdown-option" data-value="${option}">
+                <span>${option}</span>
+            </div>
+        `).join('');
+
+        const selectedOptionText = selectedValue || 'Select a quarter';
+        const hiddenInputValue = selectedValue || '';
+
+        // Return the full custom dropdown HTML structure
+        return `
+            <div id="${id}-dropdown" class="custom-dropdown-container">
+                <div class="dropdown-selected">
+                    <input type="text" id="${id}-search" placeholder="${selectedOptionText}" value="${selectedValue}" class="dropdown-search-input">
+                    <i class="bi bi-chevron-down dropdown-arrow"></i>
+                </div>
+                <div class="dropdown-options">
+                    ${optionsHtml}
+                </div>
+                <input type="hidden" id="${id}" value="${hiddenInputValue}" name="${id}">
+            </div>
+        `;
     };
 
     switch (type) {
@@ -1006,27 +1178,27 @@ export function openModal(type, context = {}) {
             const newPlanQuarterSelect = buildQuarterSelect('newPlanQuarter');
             DOMElements.modalContent.innerHTML = `<label for="newPlanName" class="font-semibold block mb-2">Plan Name:</label>
                                                   <input type="text" id="newPlanName" class="form-input" placeholder="e.g., Q4 2025 Focus" value="New Plan ${new Date().toLocaleDateString('en-GB')}">
-                                                  <label for="newPlanQuarter" class="font-semibold block mb-2 mt-4">Quarter:</label>
+                                                  <label for="newPlanQuarter-search" class="font-semibold block mb-2 mt-4">Quarter:</label>
                                                   ${newPlanQuarterSelect}
                                                   <div id="modal-error-container" class="modal-error-container"></div>`;
             DOMElements.modalActionBtn.textContent = "Create Plan";
-             const newPlanNameInput = document.getElementById('newPlanName');
-             if (newPlanNameInput) newPlanNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') DOMElements.modalActionBtn.click(); }); // Use click() for consistency
-            const newPlanQuarterInput = document.getElementById('newPlanQuarter');
-            if (newPlanQuarterInput) newPlanQuarterInput.addEventListener('change', () => newPlanQuarterInput.classList.remove('input-error'));
+            const newPlanNameInput = document.getElementById('newPlanName');
+            if (newPlanNameInput) newPlanNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') DOMElements.modalActionBtn.click(); });
+            const newPlanQuarterDropdown = document.getElementById('newPlanQuarter-dropdown');
+            if (newPlanQuarterDropdown) createCustomDropdown(newPlanQuarterDropdown);
             break;
         case 'edit':
             if (DOMElements.modalTitle) DOMElements.modalTitle.textContent = "Edit Plan Details"; // Check title element
             const editPlanQuarterSelect = buildQuarterSelect('editPlanQuarter', currentQuarter || '');
             DOMElements.modalContent.innerHTML = `<label for="editPlanName" class="font-semibold block mb-2">Plan Name:</label>
                                                   <input type="text" id="editPlanName" class="form-input" value="${currentName || ''}">
-                                                  <label for="editPlanQuarter" class="font-semibold block mb-2 mt-4">Quarter:</label>
+                                                  <label for="editPlanQuarter-search" class="font-semibold block mb-2 mt-4">Quarter:</label>
                                                   ${editPlanQuarterSelect}`;
             DOMElements.modalActionBtn.textContent = "Save Changes";
-             const editPlanNameInput = document.getElementById('editPlanName');
-             if (editPlanNameInput) editPlanNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') DOMElements.modalActionBtn.click(); }); // Use click()
-            const editPlanQuarterInput = document.getElementById('editPlanQuarter');
-            if (editPlanQuarterInput) editPlanQuarterInput.addEventListener('change', () => editPlanQuarterInput.classList.remove('input-error'));
+            const editPlanNameInput = document.getElementById('editPlanName');
+            if (editPlanNameInput) editPlanNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') DOMElements.modalActionBtn.click(); });
+             const editPlanQuarterDropdown = document.getElementById('editPlanQuarter-dropdown');
+            if (editPlanQuarterDropdown) createCustomDropdown(editPlanQuarterDropdown);
             break;
         case 'delete':
              if (DOMElements.modalTitle) DOMElements.modalTitle.textContent = "Confirm Deletion"; // Check title element

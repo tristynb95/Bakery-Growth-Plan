@@ -2316,6 +2316,18 @@ input[type="time"] {
     opacity: 1;
 }
 
+/* 57. Custom Dropdown (Standalone)
+-------------------------------------------------- */
+.custom-dropdown-container {
+    position: relative;
+}
+
+.custom-dropdown-container .dropdown-options {
+    /* This sets a height equivalent to roughly 3 items */
+    max-height: calc(3 * (0.75rem * 2 + 1em + 2px)); /* 3 * (padding + font-size + border) */
+    overflow-y: auto;
+}
+
 /* 56. Chat History Panel Styles
 -------------------------------------------------- */
 .chat-history-panel {
