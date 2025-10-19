@@ -558,8 +558,8 @@ textarea.form-input {
     flex-direction: column;
 }
 
-.modal-content {
-    overflow-y: auto; /* Make the content area scrollable if it overflows */
+.modal-box.modal-scrollable .modal-content {
+    overflow-y: auto; /* Allow scrolling only for designated modals */
 }
 
 /* Give the AI modal a bit more width to better display the plan */
@@ -1605,8 +1605,8 @@ tr:hover .btn-remove-row {
     transform: translateY(-10px);
     visibility: hidden;
     transition: all 0.2s ease;
-    max-height: 145px; /* <-- ADD THIS LINE */
-    overflow-y: auto;  /* <-- ADD THIS LINE */
+    max-height: calc(5 * 2.75rem); /* Show five options before scrolling */
+    overflow-y: auto;  /* Allow scrolling when more than five options */
 }
 .custom-dropdown.open .dropdown-options {
     opacity: 1;
@@ -2314,6 +2314,18 @@ input[type="time"] {
 #gemini-chat-modal:not(.hidden) .chat-modal-box {
     transform: scale(1);
     opacity: 1;
+}
+
+/* 57. Custom Dropdown (Standalone)
+-------------------------------------------------- */
+.custom-dropdown-container {
+    position: relative;
+}
+
+.custom-dropdown-container .dropdown-options {
+    /* This sets a height equivalent to roughly 3 items */
+    max-height: calc(3 * (0.75rem * 2 + 1em + 2px)); /* 3 * (padding + font-size + border) */
+    overflow-y: auto;
 }
 
 /* 56. Chat History Panel Styles
