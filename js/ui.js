@@ -1128,7 +1128,10 @@ export function openModal(type, context = {}) {
          console.error("Modal content element not found.");
          return;
      }
-     DOMElements.modalContent.innerHTML = ''; // Clear previous content reliably
+    DOMElements.modalContent.innerHTML = ''; // Clear previous content reliably
+
+    const scrollableModalTypes = new Set(['aiActionPlan', 'aiActionPlan_view', 'aiActionPlan_generate']);
+    DOMElements.modalBox.classList.toggle('modal-scrollable', scrollableModalTypes.has(type));
 
 
     const quarterOptions = [
@@ -1142,27 +1145,35 @@ export function openModal(type, context = {}) {
     ];
 
     const buildQuarterSelect = (id, selectedValue = '') => {
-        // Ensure selectedValue is always an option
+        const escapeHtml = (str = '') => str.replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        })[char] || char);
+
         const options = (selectedValue && !quarterOptions.includes(selectedValue))
             ? [selectedValue, ...quarterOptions]
             : [...quarterOptions];
 
-        // Generate the option elements
-        const optionsHtml = options.map(option => `
-            <div class="dropdown-option" data-value="${option}">
-                <span>${option}</span>
-            </div>
-        `).join('');
+        const sanitizedSelectedValue = escapeHtml(selectedValue);
+        const optionsHtml = options.map(option => {
+            const sanitizedOption = escapeHtml(option);
+            return `
+                <div class="dropdown-option" data-value="${sanitizedOption}">
+                    <span>${sanitizedOption}</span>
+                </div>
+            `;
+        }).join('');
 
-        const selectedOptionText = selectedValue || 'Select a quarter';
-        const hiddenInputValue = selectedValue || '';
+        const hiddenInputValue = sanitizedSelectedValue || '';
 
-        // Return the full custom dropdown HTML structure
         return `
-            <div id="${id}-dropdown" class="custom-dropdown-container">
-                <div class="dropdown-selected">
-                    <input type="text" id="${id}-search" placeholder="${selectedOptionText}" value="${selectedValue}" class="dropdown-search-input">
-                    <i class="bi bi-chevron-down dropdown-arrow"></i>
+            <div id="${id}-dropdown" class="custom-dropdown quarter-dropdown">
+                <div class="dropdown-selected" tabindex="0">
+                    <input type="text" id="${id}-search" class="dropdown-search-input" placeholder="Search or select..." value="${sanitizedSelectedValue}" autocomplete="off">
+                    <i class="bi bi-chevron-down dropdown-caret"></i>
                 </div>
                 <div class="dropdown-options">
                     ${optionsHtml}
