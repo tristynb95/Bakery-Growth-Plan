@@ -81,23 +81,25 @@ function managePlaceholder(editor) {
 }
 
 /**
- * NEW: Helper function to get the data-tab ID of the currently active month tab.
+ * Helper function to get the data-tab ID of the currently active month tab.
  * @returns {string|null} The active tab ID (e.g., "month1") or null if none found.
  */
 function getActiveTabId() {
-    // Look within the modal header for the active tab
-    const activeTab = document.querySelector('#modal-box .modal-header .ai-tab-btn.active');
+    // Look within the *main AI modal structure* even if hidden
+    const mainAiModalContent = document.getElementById('ai-printable-area'); // Target stable element
+    const activeTab = mainAiModalContent?.closest('.modal-box')?.querySelector('.modal-header .ai-tab-btn.active'); // Find header from content area
     return activeTab ? activeTab.dataset.tab : null; // e.g., "month1"
 }
 
 
 /**
- * NEW: Helper function to update the visibility of AI modal footer buttons.
+ * Helper function to update the visibility of AI modal footer buttons.
  */
 function updateFooterButtonVisibility() {
     // Ensure modalContent is available before querying inside it
     if (!DOMElements.modalContent) return;
     const activePanel = DOMElements.modalContent.querySelector('.ai-tabs-content > div.active');
+    // If no active panel (e.g., during modal transitions), exit early
     if (!activePanel) return;
 
     const activePanelHasPlan = !!activePanel.querySelector('table');
@@ -109,7 +111,6 @@ function updateFooterButtonVisibility() {
     const undoRedoContainer = footer.querySelector('.undo-redo-container');
     const regenButton = footer.querySelector('#modal-regen-btn'); // Use ID now
     const printButton = footer.querySelector('#modal-print-btn'); // Use ID now
-    // Save button removed as saving is automatic
 
     // Undo/Redo visibility depends on history AND if the active panel has content
     if (undoRedoContainer) {
@@ -143,7 +144,7 @@ function saveState() {
     // Ensure activeTabId is valid before proceeding
     if (!activeTabId || !undoHistory[activeTabId]) return;
 
-    const activePanel = document.querySelector(`.ai-tabs-content > div[data-tab-panel="${activeTabId}"]`);
+    const activePanel = document.querySelector(`#ai-printable-area [data-tab-panel="${activeTabId}"]`); // Target within main AI modal structure
     if (activePanel) {
         const currentState = activePanel.innerHTML;
         // Prevent pushing duplicate states to the undo stack
@@ -163,7 +164,7 @@ function undo() {
     const currentState = undoHistory[activeTabId].pop();
     redoHistory[activeTabId].push(currentState);
     const previousState = undoHistory[activeTabId][undoHistory[activeTabId].length - 1];
-    const activePanel = document.querySelector(`.ai-tabs-content > div[data-tab-panel="${activeTabId}"]`);
+    const activePanel = document.querySelector(`#ai-printable-area [data-tab-panel="${activeTabId}"]`); // Target within main AI modal structure
     if (activePanel) {
         activePanel.innerHTML = previousState;
         makeTablesSortable(activePanel); // Re-apply sortability after changing content
@@ -178,7 +179,7 @@ function redo() {
 
     const nextState = redoHistory[activeTabId].pop();
     undoHistory[activeTabId].push(nextState);
-    const activePanel = document.querySelector(`.ai-tabs-content > div[data-tab-panel="${activeTabId}"]`);
+    const activePanel = document.querySelector(`#ai-printable-area [data-tab-panel="${activeTabId}"]`); // Target within main AI modal structure
     if (activePanel) {
         activePanel.innerHTML = nextState;
         makeTablesSortable(activePanel); // Re-apply sortability after changing content
@@ -319,7 +320,8 @@ function setupAiModalInteractivity(container) {
          // --- Initial Generation Logic ---
         if (generateBtn) {
             const month = generateBtn.dataset.month;
-            const panel = container.querySelector(`[data-tab-panel="month${month}"]`);
+             // Ensure container refers to the modal box for finding the panel
+            const panel = DOMElements.modalBox?.querySelector(`[data-tab-panel="month${month}"]`);
             if (!panel) return; // Exit if panel not found
             panel.innerHTML = `<div class="flex flex-col items-center justify-center p-8"><div class="loading-spinner"></div><p class="mt-4 text-gray-600">Generating plan for Month ${month}...</p></div>`;
 
@@ -391,7 +393,8 @@ function setupAiModalInteractivity(container) {
         const retryBtn = e.target.closest('.retry-generation-btn');
         if (retryBtn) {
             const month = retryBtn.dataset.month;
-            const panel = container.querySelector(`[data-tab-panel="month${month}"]`);
+             // Ensure container refers to the modal box for finding the panel
+            const panel = DOMElements.modalBox?.querySelector(`[data-tab-panel="month${month}"]`);
             if (panel) {
                 // Re-show the original generate button structure
                  panel.innerHTML = `
@@ -427,7 +430,7 @@ function setupAiModalInteractivity(container) {
                                           (mutation.addedNodes.length > 0 && mutation.addedNodes[0].nodeType === Node.ELEMENT_NODE && mutation.addedNodes[0].classList.contains('is-highlighted'));
 
                 // Ignore changes that are just adding/removing the highlight class or involve empty text nodes
-                 if (!isHighlightChange && !(mutation.target.nodeType === Node.TEXT_NODE && mutation.target.textContent.trim() === '')) {
+                 if (!isHighlightChange && !(mutation.target.nodeType === Node.TEXT_NODE && mutation.target.textContent?.trim() === '')) { // Optional chaining on textContent
                      contentChanged = true;
                      break;
                  }
@@ -441,14 +444,16 @@ function setupAiModalInteractivity(container) {
 
     observerInstance = new MutationObserver(observerCallback);
     const observerConfig = { childList: true, subtree: true, characterData: true };
-    const targetNode = container.querySelector('.ai-tabs-content');
+    // Target the specific content area within the AI modal structure
+    const targetNode = DOMElements.modalBox?.querySelector('#ai-printable-area .ai-tabs-content'); // More specific target
+
     if (targetNode) {
         observerInstance.observe(targetNode, observerConfig);
         // Store the instance on the modal box to disconnect later
-        DOMElements.modalBox.observerInstance = observerInstance;
+         if (DOMElements.modalBox) DOMElements.modalBox.observerInstance = observerInstance; // Check modalBox exists
          console.log("MutationObserver attached."); // Debug log
     } else {
-        console.error("Could not find '.ai-tabs-content' to observe.");
+        console.error("Could not find '.ai-tabs-content' within the AI modal to observe.");
     }
 
     // --- END Observer Setup ---
@@ -458,7 +463,6 @@ function setupAiModalInteractivity(container) {
 }
 
 
-// --- MODIFIED: saveActionPlan Function ---
 /**
  * Saves the AI action plan content for one or all months to Firestore.
  * @param {boolean} forceImmediate - If true, saves immediately bypassing debounce.
@@ -466,7 +470,7 @@ function setupAiModalInteractivity(container) {
  */
 async function saveActionPlan(forceImmediate = false, monthToSave = null) {
     // Ensure we have the necessary context before proceeding
-    if (!appState || !appState.currentUser || !appState.currentPlanId || !activeSaveDataFunction) {
+    if (!appState || !appState.currentUser || !appState.currentPlanId || !activeSaveDataFunction || !db) { // Added db check
          console.warn("Save context not fully available. Skipping saveActionPlan.");
          return;
      }
@@ -477,6 +481,7 @@ async function saveActionPlan(forceImmediate = false, monthToSave = null) {
     console.log(`saveActionPlan called: forceImmediate=${forceImmediate}, monthToSave=${monthToSave}`); // Debug log
 
     for (let i of months) { // Iterate only through the required months
+         // Target panel within the main AI modal structure
         const panel = document.querySelector(`#ai-printable-area [data-tab-panel="month${i}"]`);
         // Check if the panel exists AND contains a table (meaning it has a generated plan)
         if (panel && panel.querySelector('table')) {
@@ -495,7 +500,7 @@ async function saveActionPlan(forceImmediate = false, monthToSave = null) {
     if (Object.keys(payload).length > 0) {
         try {
              console.log(`Calling activeSaveDataFunction with payload:`, payload); // Debug log
-             await activeSaveDataFunction(forceImmediate, payload);
+             await activeSaveDataFunction(forceImmediate, payload); // Use the passed-in saveData function
              console.log(`Action plan saved successfully for month(s): ${months.join(', ')}`);
              // Optionally show a brief success indicator if needed (saveIndicator already handled by activeSaveDataFunction)
          } catch (error) {
@@ -504,13 +509,12 @@ async function saveActionPlan(forceImmediate = false, monthToSave = null) {
              openModal('warning', { title: 'Save Failed', message: 'Could not save the action plan changes. Please check your connection and try again.' });
          }
     } else {
-         console.log("No changes detected in saveActionPlan, skipping save.");
+         // console.log("No changes detected in saveActionPlan, skipping save.");
     }
 }
 
 
-// --- MODIFIED: handleRegenerateActionPlan ---
-// Gets the active month *before* opening the confirmation modal
+/** Gets the active month *before* opening the confirmation modal */
 function handleRegenerateActionPlan() {
     const activeTabId = getActiveTabId();
     const monthNum = activeTabId ? activeTabId.replace('month', '') : null;
@@ -573,8 +577,8 @@ async function handleModalAction() {
             }
             DOMElements.modalActionBtn.disabled = true;
             DOMElements.modalActionBtn.textContent = 'Checking...';
-             if (!appState.currentUser?.uid) { // Check if user is logged in
-                 console.error("User not logged in, cannot create plan.");
+             if (!appState.currentUser?.uid || !db) { // Check if user is logged in AND db is available
+                 console.error("User not logged in or DB not initialized, cannot create plan.");
                  if (errorContainer) errorContainer.innerHTML = `<p class="auth-error" style="display:block; margin: 0; width: 100%;">Authentication error. Please log in again.</p>`;
                  DOMElements.modalActionBtn.disabled = false;
                  DOMElements.modalActionBtn.textContent = originalButtonText;
@@ -620,7 +624,7 @@ async function handleModalAction() {
         case 'edit':
             const newName = document.getElementById('editPlanName')?.value.trim(); // Optional chaining
             const newQuarter = document.getElementById('editPlanQuarter')?.value.trim(); // Optional chaining
-            if (newName && planId && appState.currentUser?.uid) { // Add checks
+            if (newName && planId && appState.currentUser?.uid && db) { // Add checks
                 try {
                     await db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(planId).update({
                         planName: newName,
@@ -639,11 +643,15 @@ async function handleModalAction() {
                      setTimeout(() => nameInput.classList.remove('shake'), 500);
                  }
                  return; // Prevent closing modal if validation fails
+             } else if (!appState.currentUser?.uid || !db) {
+                 console.error("User not logged in or DB not available for edit.");
+                 openModal('warning', { title: 'Error', message: 'Authentication or connection error. Please try again.' });
+                 return;
              }
             closeModal();
             break;
         case 'delete':
-            if (planId && appState.currentUser?.uid) { // Add checks
+            if (planId && appState.currentUser?.uid && db) { // Add checks
                 try {
                     await db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(planId).delete();
                     document.dispatchEvent(new CustomEvent('rerender-dashboard'));
@@ -651,7 +659,11 @@ async function handleModalAction() {
                      console.error("Error deleting plan:", error);
                      openModal('warning', { title: 'Deletion Failed', message: 'Could not delete the plan. Please try again.' });
                  }
-            }
+            } else if (!appState.currentUser?.uid || !db) {
+                 console.error("User not logged in or DB not available for delete.");
+                 openModal('warning', { title: 'Error', message: 'Authentication or connection error. Please try again.' });
+                 return; // Prevent closing modal if context missing
+             }
             closeModal();
             break;
         case 'confirmDeleteEvent':
@@ -670,10 +682,6 @@ async function handleModalAction() {
             }));
             closeModal();
             break;
-          // Action for the AI save button is handled directly in its event listener now
-         // case 'saveActionPlan':
-         //    await saveActionPlan(true); // Force immediate save
-         //    break;
     }
 }
 
@@ -681,8 +689,8 @@ async function handleModalAction() {
 // --- Public (Exported) Functions ---
 
 export async function handleShare(db, appState) {
-    if (!appState.currentUser || !appState.currentPlanId) {
-        openModal('warning', { title: 'Error', message: 'Cannot share plan. Please ensure you are logged in and have a plan selected.' });
+    if (!appState.currentUser || !appState.currentPlanId || !db) { // Added db check
+        openModal('warning', { title: 'Error', message: 'Cannot share plan. Please ensure you are logged in, have a plan selected, and the database is connected.' });
         return;
     }
     openModal('sharing');
@@ -704,21 +712,18 @@ export async function handleShare(db, appState) {
             if (!planDoc.exists) {
                 throw new Error("Cannot share a plan that doesn't exist.");
             }
-            // Update the original plan to mark it as shared (optional, but can be useful)
-            // Consider if this update is necessary - might trigger unnecessary writes.
-            // await originalPlanRef.update({ isShared: true });
-
             // Create the pointer document
             const pointerDoc = {
                 originalUserId: appState.currentUser.uid,
                 originalPlanId: appState.currentPlanId,
                 sharedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                // Add plan details for easier querying/display if needed, e.g.:
                 planName: planDoc.data()?.planName || 'Untitled Plan',
                 managerName: planDoc.data()?.managerName || 'Unknown Manager'
             };
             const newPointerRef = await db.collection('sharedPlans').add(pointerDoc);
             shareableLink = `${window.location.origin}/view.html?id=${newPointerRef.id}`;
+            // Optional: Mark original plan as shared *after* successful pointer creation
+            // await originalPlanRef.update({ isShared: true });
         }
         // Update the modal content with the link
         const modalContent = document.getElementById('modal-content');
@@ -754,7 +759,7 @@ export async function handleShare(db, appState) {
     } catch (error) {
         console.error("Error creating shareable link:", error);
          const modalContent = document.getElementById('modal-content');
-         if(modalContent) modalContent.innerHTML = `<p class="text-red-600">Could not create a shareable link. Please try again.</p>`; // Add check
+         if(modalContent) modalContent.innerHTML = `<p class="text-red-600">Could not create a shareable link. ${error.message}</p>`; // Show error message
          DOMElements.modalActionBtn.style.display = 'none'; // Ensure action btn is hidden on error too
          DOMElements.modalCancelBtn.textContent = 'Close';
     }
@@ -845,6 +850,10 @@ export function openModal(type, context = {}) {
          return;
      }
 
+    // Clear previous dynamic content/listeners before setting up new ones
+     const oldCloseBtn = modalHeader.querySelector('#modal-close-btn');
+     if(oldCloseBtn) oldCloseBtn.removeEventListener('click', requestCloseModal); // Remove old listener specifically
+
     if (modalHeader.querySelector('.modal-header-main')) {
         // Reset only if the complex AI header is present
         modalHeader.innerHTML = `
@@ -867,7 +876,7 @@ export function openModal(type, context = {}) {
               closeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
               modalHeader.appendChild(closeBtn);
           }
-           // Remove existing listener before adding a new one to prevent duplicates
+           // Remove potential existing listener before adding a new one to prevent duplicates
            closeBtn.removeEventListener('click', requestCloseModal);
            closeBtn.addEventListener('click', requestCloseModal);
     }
@@ -896,7 +905,8 @@ export function openModal(type, context = {}) {
     DOMElements.modalCancelBtn.textContent = 'Cancel';
     DOMElements.modalActionBtn.disabled = false;
     DOMElements.modalCancelBtn.disabled = false;
-    // Remove previous listeners before adding new ones - CLONE NODE METHOD
+
+    // --- Replace buttons to reliably clear listeners ---
     const actionBtnClone = DOMElements.modalActionBtn.cloneNode(true);
     const cancelBtnClone = DOMElements.modalCancelBtn.cloneNode(true);
     DOMElements.modalActionBtn.replaceWith(actionBtnClone);
@@ -905,8 +915,8 @@ export function openModal(type, context = {}) {
     DOMElements.modalActionBtn = footer.querySelector('.btn-primary');
     DOMElements.modalCancelBtn = footer.querySelector('.btn-secondary');
      // Ensure the elements were found before adding listeners
-     if (DOMElements.modalActionBtn) DOMElements.modalActionBtn.addEventListener('click', handleModalAction);
-     if (DOMElements.modalCancelBtn) DOMElements.modalCancelBtn.addEventListener('click', requestCloseModal);
+     if (DOMElements.modalActionBtn) DOMElements.modalActionBtn.addEventListener('click', handleModalAction); // Add general action handler
+     if (DOMElements.modalCancelBtn) DOMElements.modalCancelBtn.addEventListener('click', requestCloseModal); // Add general close handler
 
 
     footer.style.justifyContent = 'flex-end'; // Default alignment
@@ -917,6 +927,8 @@ export function openModal(type, context = {}) {
          console.error("Modal content element not found.");
          return;
      }
+     DOMElements.modalContent.innerHTML = ''; // Clear previous content reliably
+
 
     switch (type) {
         case 'create':
@@ -928,7 +940,7 @@ export function openModal(type, context = {}) {
                                                   <div id="modal-error-container" class="modal-error-container"></div>`;
             DOMElements.modalActionBtn.textContent = "Create Plan";
              const newPlanNameInput = document.getElementById('newPlanName');
-             if (newPlanNameInput) newPlanNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleModalAction(); }); // Check element
+             if (newPlanNameInput) newPlanNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') DOMElements.modalActionBtn.click(); }); // Use click() for consistency
             break;
         case 'edit':
             if (DOMElements.modalTitle) DOMElements.modalTitle.textContent = "Edit Plan Details"; // Check title element
@@ -938,7 +950,7 @@ export function openModal(type, context = {}) {
                                                   <input type="text" id="editPlanQuarter" class="form-input" placeholder="e.g., Q3 FY26" value="${currentQuarter || ''}">`;
             DOMElements.modalActionBtn.textContent = "Save Changes";
              const editPlanNameInput = document.getElementById('editPlanName');
-             if (editPlanNameInput) editPlanNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleModalAction(); }); // Check element
+             if (editPlanNameInput) editPlanNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') DOMElements.modalActionBtn.click(); }); // Use click()
             break;
         case 'delete':
              if (DOMElements.modalTitle) DOMElements.modalTitle.textContent = "Confirm Deletion"; // Check title element
@@ -964,7 +976,10 @@ export function openModal(type, context = {}) {
             DOMElements.modalContent.innerHTML = `<p>Your work has been saved automatically. For your security, please sign in to continue.</p>`;
             DOMElements.modalActionBtn.textContent = "Continue";
             DOMElements.modalCancelBtn.style.display = 'none';
-            DOMElements.modalActionBtn.onclick = closeModal; // Simpler action
+            // DOMElements.modalActionBtn.onclick = closeModal; // Overwrite general handler
+             // Replace listener instead of using onclick
+             DOMElements.modalActionBtn.removeEventListener('click', handleModalAction);
+             DOMElements.modalActionBtn.addEventListener('click', closeModal);
             break;
         case 'sharing':
             if (DOMElements.modalTitle) DOMElements.modalTitle.textContent = "Share Your Plan"; // Check title element
@@ -980,7 +995,6 @@ export function openModal(type, context = {}) {
             break;
         case 'aiActionPlan_view': {
             // 1. Rebuild the header with tabs
-           // const modalHeader = DOMElements.modalBox.querySelector('.modal-header'); // Already defined above
             if (!modalHeader) break; // Exit if header missing
             modalHeader.innerHTML = `
                 <div class="modal-header-main">
@@ -1021,7 +1035,7 @@ export function openModal(type, context = {}) {
             printBtn.id = 'modal-print-btn'; // Give it an ID
             printBtn.className = 'btn btn-secondary dynamic-btn'; // Add dynamic-btn
             printBtn.innerHTML = `<i class="bi bi-printer-fill"></i> Print Plan`;
-            printBtn.onclick = () => { // Keep onclick for simplicity here
+            printBtn.addEventListener('click', () => { // Use addEventListener
                  if (!DOMElements.modalContent) return; // Add check
                 const content = DOMElements.modalContent.querySelector('.ai-tabs-content > div.active');
                 if (!content || !content.querySelector('table')) { alert("No plan to print for this month."); return; }
@@ -1037,8 +1051,8 @@ export function openModal(type, context = {}) {
                 win.document.write(printNode.innerHTML);
                 win.document.write('</body></html>');
                  win.document.close(); // Important for some browsers
-                setTimeout(() => { try { win.print(); } catch (e) { console.error("Print error:", e); win.close(); } }, 500); // Delay print slightly + error handling
-            };
+                setTimeout(() => { try { win.print(); win.close(); } catch (e) { console.error("Print error:", e); win.close(); } }, 500); // Close window after print attempt
+            });
 
             const regenButton = document.createElement('button');
             regenButton.id = 'modal-regen-btn'; // Give it an ID
@@ -1130,127 +1144,95 @@ export function openModal(type, context = {}) {
         // --- FIX: Revised confirmRegenerate Case ---
         case 'confirmRegenerate': {
             // *** Use monthNum passed from context ***
-            // const activeTabId = getActiveTabId(); // REMOVED
-            // const monthNum = activeTabId ? activeTabId.replace('month', '') : null; // REMOVED
-
-            // Check if monthNum was passed correctly
-            if (!monthNum) {
+            if (!monthNum) { // Check if monthNum was passed correctly
                 console.error("Month number missing in context for regeneration.");
                 closeModal(); // Close the confirmation modal
                 setTimeout(() => openModal('warning', { title: 'Error', message: 'Could not determine which month to regenerate. Please try again.' }), 50);
                 return;
             }
 
-            if (DOMElements.modalTitle) DOMElements.modalTitle.textContent = "Confirm Regeneration"; // Check title element
+            if (DOMElements.modalTitle) DOMElements.modalTitle.textContent = "Confirm Regeneration";
             DOMElements.modalContent.innerHTML = `<p>Are you sure you want to generate a new plan for <strong>Month ${monthNum}</strong>? This will overwrite the current Month ${monthNum} plan and any edits you've made. This action cannot be undone.</p>`;
             DOMElements.modalActionBtn.textContent = "Yes, Generate New Plan";
-            DOMElements.modalActionBtn.className = 'btn btn-danger'; // Keep danger style
+            DOMElements.modalActionBtn.className = 'btn btn-danger';
 
             // *** REVISED ONCLICK LOGIC ***
-            DOMElements.modalActionBtn.onclick = async () => {
-                // 1. Close the small confirmation modal FIRST
-                closeModal();
+            DOMElements.modalActionBtn.onclick = async () => { // Make async
+                 // 1. Find the target panel in the main AI modal *before* closing confirmation
+                 const mainAiModalPanel = document.querySelector(`#ai-printable-area [data-tab-panel="month${monthNum}"]`);
+                 if (!mainAiModalPanel) {
+                     console.error("Target panel for regeneration not found in the main AI modal.");
+                     closeModal(); // Close confirmation
+                     openModal('warning', { title: 'Error', message: 'Could not start regeneration. Target panel not found.' });
+                     return;
+                 }
 
-                // 2. Target the panel in the *main* AI modal (which should still be open or re-opened if needed)
-                 setTimeout(async () => { // Use setTimeout to ensure the main modal is ready
-                     // --- Ensure main modal is open and structured ---
-                     // Check if the main modal is already open and is the correct type
-                     const isMainModalOpen = !DOMElements.modalOverlay?.classList.contains('hidden') && DOMElements.modalBox?.dataset.type === 'aiActionPlan_view';
-                     if (!isMainModalOpen) {
-                         openModal('aiActionPlan_view'); // Re-ensure the main modal is open and structured correctly
-                         // Wait briefly for the modal to potentially re-render
-                         await new Promise(resolve => setTimeout(resolve, 100)); // Increased wait slightly
+                 // 2. Set loading state in the target panel
+                 mainAiModalPanel.innerHTML = `<div class="flex flex-col items-center justify-center p-8"><div class="loading-spinner"></div><p class="mt-4 text-gray-600">Generating new plan for Month ${monthNum}...</p></div>`;
+
+                 // 3. Hide footer buttons in the main AI modal
+                 const mainAiModalFooter = document.querySelector('#modal-box[data-type="aiActionPlan_view"] .modal-footer'); // Target specific modal
+                 const regenButton = mainAiModalFooter?.querySelector('#modal-regen-btn');
+                 const printButton = mainAiModalFooter?.querySelector('#modal-print-btn');
+                 const undoRedoContainer = mainAiModalFooter?.querySelector('.undo-redo-container');
+
+                 if (regenButton) regenButton.style.display = 'none';
+                 if (printButton) printButton.style.display = 'none';
+                 if (undoRedoContainer) undoRedoContainer.style.display = 'none';
+
+                 // 4. Close the confirmation modal *NOW*
+                 closeModal();
+
+                 // 5. Perform the generation and update
+                 try {
+                     if (appState.aiPlanGenerationController) {
+                         appState.aiPlanGenerationController.abort();
                      }
-                     // --- End ensure main modal open ---
+                     appState.aiPlanGenerationController = new AbortController();
+                     const signal = appState.aiPlanGenerationController.signal;
 
-                     const panel = document.querySelector(`#ai-printable-area [data-tab-panel="month${monthNum}"]`);
-                     if (!panel) {
-                          console.error("Target panel for regeneration not found after re-opening modal.");
-                          openModal('warning', { title: 'Error', message: 'Could not start regeneration. Panel not found.' });
-                          return;
+                     // Call API
+                     const monthTableHTML = await generateAiActionPlan(currentPlanSummary, signal, monthNum);
+
+                     // Update panel content
+                     mainAiModalPanel.innerHTML = monthTableHTML;
+                     makeTablesSortable(mainAiModalPanel); // Re-apply sortability
+
+                     // Save only the regenerated month
+                     await saveActionPlan(true, parseInt(monthNum, 10));
+
+                     // Reset undo/redo
+                      if(undoHistory[`month${monthNum}`]) {
+                         undoHistory[`month${monthNum}`] = [mainAiModalPanel.innerHTML];
+                         redoHistory[`month${monthNum}`] = [];
                       }
+                     updateUndoRedoButtons(); // Update button states
 
-                     // 3. Display loading state
-                     panel.innerHTML = `<div class="flex flex-col items-center justify-center p-8"><div class="loading-spinner"></div><p class="mt-4 text-gray-600">Generating new plan for Month ${monthNum}...</p></div>`;
-
-                     // 4. Hide relevant footer buttons
-                     const footer = DOMElements.modalBox?.querySelector('.modal-footer'); // Optional chaining
-                     const regenButton = footer?.querySelector('#modal-regen-btn'); // Use ID
-                     const printButton = footer?.querySelector('#modal-print-btn'); // Use ID
-                     const undoRedoContainer = footer?.querySelector('.undo-redo-container');
-
-                     if (regenButton) regenButton.style.display = 'none';
-                     if (printButton) printButton.style.display = 'none';
-                     if (undoRedoContainer) undoRedoContainer.style.display = 'none';
-
-                     try {
-                         if (appState.aiPlanGenerationController) {
-                             appState.aiPlanGenerationController.abort();
-                         }
-                         appState.aiPlanGenerationController = new AbortController();
-                         const signal = appState.aiPlanGenerationController.signal;
-
-                         // 5. Call API for the specific month
-                         const monthTableHTML = await generateAiActionPlan(currentPlanSummary, signal, monthNum);
-
-                         // 6. Update only the specific panel
-                         panel.innerHTML = monthTableHTML;
-                         makeTablesSortable(panel); // Re-apply sortability
-
-                         // 7. Save only the regenerated month immediately
-                         await saveActionPlan(true, parseInt(monthNum, 10));
-
-                         // 8. Reset undo/redo history for the regenerated month
-                          if(undoHistory[`month${monthNum}`]) { // Check array exists
-                            undoHistory[`month${monthNum}`] = [panel.innerHTML];
-                            redoHistory[`month${monthNum}`] = [];
-                          }
-                         updateUndoRedoButtons(); // Update button states
-
-                         // 9. Restore footer button visibility after success
-                         if (regenButton) regenButton.style.display = 'inline-flex';
-                         if (printButton) printButton.style.display = 'inline-flex';
-                         if (undoRedoContainer) undoRedoContainer.style.display = 'flex';
-
-
-                     } catch (error) {
-                          // Restore button visibility even on error/cancel
-                          if (regenButton) regenButton.style.display = 'inline-flex';
-                          // Only show print button if *any* plan exists after potential failure
-                          const anyPlanExists = !!DOMElements.modalContent?.querySelector('.ai-tabs-content table');
-                          if (printButton) printButton.style.display = anyPlanExists ? 'inline-flex' : 'none';
-                          // Show undo/redo only if current panel has content (might be error message)
-                          const activePanelHasContent = !!panel?.innerHTML.trim(); // Check if panel is empty after error
-                          if (undoRedoContainer) undoRedoContainer.style.display = activePanelHasContent ? 'flex' : 'none';
-
-
-                         if (error.name === 'AbortError') {
-                              panel.innerHTML = `
-                                 <div class="text-center p-8 flex flex-col items-center justify-center min-h-[300px]">
-                                     <h3 class="font-bold text-lg text-gray-700">Generation Cancelled</h3>
-                                     <button class="btn btn-primary generate-month-plan-btn mt-4" data-month="${monthNum}">
-                                         <i class="bi bi-stars"></i>
-                                         <span>Generate Month ${monthNum} Plan</span>
-                                     </button>
-                                 </div>`;
-                         } else {
-                             console.error(`Error regenerating AI plan for month ${monthNum}:`, error);
-                             panel.innerHTML = `<div class="text-center p-8 text-red-600"><p class="font-semibold">Generation Failed</p><p class="text-sm">${error.message}</p><button class="btn btn-secondary mt-4 retry-generation-btn" data-month="${monthNum}">Retry</button></div>`;
-                         }
-                     } finally {
-                         appState.aiPlanGenerationController = null;
-                         // Ensure footer visibility is finally correct based on the potentially updated content
-                         setTimeout(updateFooterButtonVisibility, 50); // Use helper
+                 } catch (error) {
+                     if (error.name === 'AbortError') {
+                         mainAiModalPanel.innerHTML = `
+                             <div class="text-center p-8 flex flex-col items-center justify-center min-h-[300px]">
+                                 <h3 class="font-bold text-lg text-gray-700">Generation Cancelled</h3>
+                                 <button class="btn btn-primary generate-month-plan-btn mt-4" data-month="${monthNum}">
+                                     <i class="bi bi-stars"></i>
+                                     <span>Generate Month ${monthNum} Plan</span>
+                                 </button>
+                             </div>`;
+                     } else {
+                         console.error(`Error regenerating AI plan for month ${monthNum}:`, error);
+                         mainAiModalPanel.innerHTML = `<div class="text-center p-8 text-red-600"><p class="font-semibold">Generation Failed</p><p class="text-sm">${error.message}</p><button class="btn btn-secondary mt-4 retry-generation-btn" data-month="${monthNum}">Retry</button></div>`;
                      }
-                 }, 50); // Delay ensures the main modal is likely ready
+                 } finally {
+                     appState.aiPlanGenerationController = null;
+                     // Ensure footer visibility is updated AFTER generation attempt
+                     setTimeout(updateFooterButtonVisibility, 50);
+                 }
             }; // End onclick
 
-            // Cancel button logic: close confirmation, ensure main modal is visible.
+            // Cancel button logic: simply close the confirmation modal.
              DOMElements.modalCancelBtn.textContent = "Cancel";
-             DOMElements.modalCancelBtn.onclick = () => {
+             DOMElements.modalCancelBtn.onclick = () => { // Overwrite general handler
                  closeModal(); // Only close the confirmation modal
-                 // Re-open main modal to be safe, in case it somehow closed
-                  setTimeout(() => openModal('aiActionPlan_view'), 50);
              };
             break; // End confirmRegenerate case
         }
@@ -1269,7 +1251,10 @@ export function openModal(type, context = {}) {
              DOMElements.modalContent.innerHTML = `<p>${context.message || 'An unexpected issue occurred.'}</p>`; // Use context message
              DOMElements.modalActionBtn.textContent = "OK";
              DOMElements.modalCancelBtn.style.display = 'none'; // Hide cancel button
-             DOMElements.modalActionBtn.onclick = closeModal; // Simple close action
+             // DOMElements.modalActionBtn.onclick = closeModal; // Overwrite general handler
+             // Replace listener instead of using onclick
+             DOMElements.modalActionBtn.removeEventListener('click', handleModalAction);
+             DOMElements.modalActionBtn.addEventListener('click', closeModal);
              break;
     }
      // Ensure overlay is visible only if modal content was successfully set up
@@ -1306,20 +1291,28 @@ export function closeModal() {
      delete DOMElements.modalBox.dataset.type;
      delete DOMElements.modalBox.dataset.planId;
 
-     // Ensure default footer button event listeners are reset (important!)
-     const footer = DOMElements.modalActionBtn?.parentNode; // Optional chaining
-     if (footer && DOMElements.modalActionBtn && DOMElements.modalCancelBtn) { // Check if buttons exist before cloning
-         // Re-clone and replace to remove specific listeners from this modal instance
-         const actionBtnClone = DOMElements.modalActionBtn.cloneNode(true);
-         const cancelBtnClone = DOMElements.modalCancelBtn.cloneNode(true);
-         DOMElements.modalActionBtn.replaceWith(actionBtnClone);
-         DOMElements.modalCancelBtn.replaceWith(cancelBtnClone);
-         // Re-select and re-attach general listeners
-         DOMElements.modalActionBtn = footer.querySelector('.btn-primary');
-         DOMElements.modalCancelBtn = footer.querySelector('.btn-secondary');
+     // --- Footer Button Listener Cleanup ---
+     // Select buttons specifically within the current modal footer
+     const currentFooter = DOMElements.modalBox.querySelector('.modal-footer');
+     const currentActionBtn = currentFooter?.querySelector('.btn-primary');
+     const currentCancelBtn = currentFooter?.querySelector('.btn-secondary');
+
+     if (currentFooter && currentActionBtn && currentCancelBtn) {
+         // Replace buttons to reliably clear listeners added *within openModal*
+         const actionBtnClone = currentActionBtn.cloneNode(true);
+         const cancelBtnClone = currentCancelBtn.cloneNode(true);
+         currentActionBtn.replaceWith(actionBtnClone);
+         currentCancelBtn.replaceWith(cancelBtnClone);
+         // Re-select the cloned elements *from the specific footer*
+         DOMElements.modalActionBtn = currentFooter.querySelector('.btn-primary');
+         DOMElements.modalCancelBtn = currentFooter.querySelector('.btn-secondary');
+         // Re-attach general listeners *only if elements were found*
          if(DOMElements.modalActionBtn) DOMElements.modalActionBtn.addEventListener('click', handleModalAction);
          if(DOMElements.modalCancelBtn) DOMElements.modalCancelBtn.addEventListener('click', requestCloseModal);
+     } else {
+         console.warn("Could not reliably clean up footer button listeners during closeModal.");
      }
+     // --- End Footer Button Listener Cleanup ---
 }
 
 
@@ -1330,18 +1323,21 @@ export function initializeUI(database, state) {
     appState = state;
 
     // Gracefully handle if elements are not found (e.g., on different pages)
-     // Find close button within the modal box for reliability
-     // Note: This listener is added/re-added dynamically in openModal now
-     // const modalCloseBtn = DOMElements.modalBox?.querySelector('#modal-close-btn');
-     // if (modalCloseBtn) {
-     //     modalCloseBtn.addEventListener('click', requestCloseModal);
-     // }
+     // The close button listener is now managed within openModal/closeModal
 
      if(DOMElements.modalOverlay){
         DOMElements.modalOverlay.addEventListener('mousedown', (e) => {
              // Ensure it's the overlay itself being clicked, not content within the modal box
             if (e.target === DOMElements.modalOverlay) {
-                requestCloseModal();
+                // Check if the currently displayed modal is 'aiActionPlan_view' before closing immediately
+                 // This prevents accidentally closing the main modal when clicking outside the confirmation
+                 if (DOMElements.modalBox?.dataset.type !== 'confirmRegenerate' &&
+                     DOMElements.modalBox?.dataset.type !== 'confirmDeleteEvent' && // Add other confirmation types
+                     DOMElements.modalBox?.dataset.type !== 'confirmDeleteConversation' &&
+                     DOMElements.modalBox?.dataset.type !== 'confirmDeleteFile')
+                  {
+                    requestCloseModal();
+                 }
             }
         });
      }
@@ -1351,7 +1347,7 @@ export function initializeUI(database, state) {
         DOMElements.sidebarOverlay.addEventListener('click', () => DOMElements.appView.classList.remove('sidebar-open'));
     }
 
-    // Swipe gestures (keep as is, ensure elements exist)
+    // Swipe gestures
     if (DOMElements.mainContent && DOMElements.appView) {
         let touchStartX = 0;
         const swipeThreshold = 50;
@@ -1359,19 +1355,19 @@ export function initializeUI(database, state) {
         DOMElements.mainContent.addEventListener('touchend', e => { if (e.changedTouches[0].screenX > touchStartX + swipeThreshold) { DOMElements.appView.classList.add('sidebar-open'); } });
     }
     if (DOMElements.sidebar && DOMElements.appView) {
-         let touchStartX = 0; // Declare locally
-         const swipeThreshold = 50; // Declare locally
+         let touchStartX = 0;
+         const swipeThreshold = 50;
         DOMElements.sidebar.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
         DOMElements.sidebar.addEventListener('touchend', e => { if (e.changedTouches[0].screenX < touchStartX - swipeThreshold) { DOMElements.appView.classList.remove('sidebar-open'); } });
     }
 
-    // Radial Menu (keep as is, ensure elements exist)
+    // Radial Menu
     if (DOMElements.radialMenuContainer && DOMElements.radialMenuFab && DOMElements.radialMenuOverlay) {
         DOMElements.radialMenuFab.addEventListener('click', () => DOMElements.radialMenuContainer.classList.toggle('open'));
         DOMElements.radialMenuOverlay.addEventListener('click', () => DOMElements.radialMenuContainer.classList.remove('open'));
     }
 
-    // Cookie Consent (keep as is, ensure elements exist)
+    // Cookie Consent
     if (DOMElements.cookieBanner && DOMElements.acceptBtn && DOMElements.declineBtn) {
         if (localStorage.getItem('gails_cookie_consent') === null) {
             DOMElements.cookieBanner.classList.remove('hidden');
@@ -1380,31 +1376,27 @@ export function initializeUI(database, state) {
         DOMElements.declineBtn.addEventListener('click', () => { localStorage.setItem('gails_cookie_consent', 'false'); DOMElements.cookieBanner.classList.add('hidden'); });
     }
 
-    // Chat Input Auto-Resize (keep as is, ensure element exists)
+    // Chat Input Auto-Resize
     const chatInput = document.getElementById('chat-input');
     if (chatInput) {
         chatInput.addEventListener('input', () => {
             chatInput.style.height = 'auto'; // Reset height
-            // Calculate scroll height but cap it to prevent excessive growth
-            const newHeight = Math.min(chatInput.scrollHeight, 150); // Cap at 150px for example
+            const newHeight = Math.min(chatInput.scrollHeight, 150);
             chatInput.style.height = `${newHeight}px`;
-            // Add overflow handling if content exceeds max height
             chatInput.style.overflowY = (newHeight >= 150) ? 'auto' : 'hidden';
         });
     }
 
 
-    // File Viewer Modal Listeners (keep as is, ensure elements exist)
+    // File Viewer Modal Listeners
     if (DOMElements.fileModal && DOMElements.fileModalCloseBtn) {
         DOMElements.fileModalCloseBtn.addEventListener('click', () => {
             DOMElements.fileModal.classList.add('hidden');
-            // Clear content when closing
              if (DOMElements.fileModalContent) DOMElements.fileModalContent.innerHTML = '';
         });
         DOMElements.fileModal.addEventListener('click', (e) => {
             if (e.target === DOMElements.fileModal) {
                 DOMElements.fileModal.classList.add('hidden');
-                 // Clear content when closing
                  if (DOMElements.fileModalContent) DOMElements.fileModalContent.innerHTML = '';
             }
         });
