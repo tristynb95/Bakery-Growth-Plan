@@ -2036,413 +2036,6 @@ input[type="time"] {
     margin-top: -4px; /* Adjust vertical alignment */
 }
 
-/* 50. Team Hub Redesign
--------------------------------------------------- */
-
-.page-header {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1.5rem;
-}
-
-.header-actions {
-    display: flex;
-    gap: 0.75rem;
-}
-
-.hub-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: auto auto;
-    gap: 1.5rem;
-    grid-template-areas:
-        "snapshot card1 card2"
-        "shoutouts card3 card4";
-}
-
-.hub-snapshot { grid-area: snapshot; }
-.hub-shoutouts { grid-area: shoutouts; }
-
-.bento-tile-large {
-    background-color: var(--gails-white);
-    border-radius: 1.5rem;
-    padding: 2rem;
-    border: 1px solid #E5E7EB;
-    box-shadow: var(--shadow-md);
-    display: flex;
-    flex-direction: column;
-    grid-column: span 1;
-}
-
-.hub-card {
-    background: linear-gradient(145deg, var(--gails-white) 0%, #F9FAFB 100%);
-    border-radius: 1.5rem;
-    padding: 2rem;
-    border: 1px solid #E5E7EB;
-    box-shadow: var(--shadow-md);
-    display: flex;
-    flex-direction: column;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hub-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--gails-red);
-}
-
-.tile-icon-large {
-    font-size: 2.5rem;
-    color: var(--gails-red);
-    margin-bottom: 1rem;
-    background: var(--gails-red-light);
-    width: 60px;
-    height: 60px;
-    border-radius: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.tile-link {
-    margin-top: auto;
-    font-weight: 600;
-    color: var(--gails-red);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: gap 0.2s ease;
-}
-
-.tile-link:hover {
-    gap: 0.75rem;
-    text-decoration: underline;
-}
-
-/* Snapshot Tile */
-.snapshot-header {
-    border-bottom: 1px solid #F3F4F6;
-    padding-bottom: 1rem;
-    margin-bottom: 1.5rem;
-}
-.tile-title-large {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 700;
-}
-.snapshot-date {
-    font-size: 0.875rem;
-    color: var(--gails-text-secondary);
-    font-weight: 500;
-}
-.snapshot-body {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    gap: 1rem;
-}
-.stat-large {
-    text-align: center;
-}
-.stat-large-value {
-    font-family: 'Poppins', sans-serif;
-    font-size: 3rem;
-    font-weight: 900;
-    color: var(--gails-red);
-    line-height: 1;
-}
-.stat-large-label {
-    font-weight: 500;
-    color: var(--gails-text-secondary);
-    font-size: 0.875rem;
-}
-
-/* Shoutouts Tile */
-.hub-shoutouts {
-    background: linear-gradient(to top, #374151, #1F2937);
-    color: var(--gails-white);
-    justify-content: center;
-    text-align: center;
-}
-.shoutout-content .bi-megaphone-fill {
-    font-size: 2rem;
-    color: var(--gails-gold);
-}
-.shoutout-text {
-    font-size: 1.25rem;
-    font-weight: 600;
-    line-height: 1.4;
-    margin-top: 1rem;
-}
-.shoutout-author {
-    display: block;
-    margin-top: 1rem;
-    font-size: 0.875rem;
-    color: #9CA3AF;
-}
-
-/* Responsive Grid for Team Hub */
-@media (max-width: 1024px) {
-    .hub-grid {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-areas:
-            "snapshot snapshot"
-            "card1 card2"
-            "card3 card4"
-            "shoutouts shoutouts";
-    }
-}
-
-@media (max-width: 767px) {
-    .hub-grid {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "snapshot"
-            "shoutouts"
-            "card1"
-            "card2"
-            "card3"
-            "card4";
-    }
-    .page-header {
-      justify-content: center;
-      text-align: center;
-    }
-}
-
-/* 51. Manage Team Page Styles
--------------------------------------------------- */
-
-/* KPI Cards */
-.kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.5rem;
-}
-
-.kpi-card {
-    background-color: var(--gails-white);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    border: 1px solid #E5E7EB;
-    box-shadow: var(--shadow-sm);
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-}
-
-.kpi-icon {
-    font-size: 2rem;
-    color: var(--gails-red);
-}
-
-.kpi-value {
-    display: block;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 2rem;
-    color: var(--gails-text-primary);
-    line-height: 1;
-}
-
-.kpi-label {
-    font-size: 0.875rem;
-    color: var(--gails-text-secondary);
-}
-
-/* Team Roster Grid */
-.team-roster-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-}
-
-.team-roster-card {
-    background-color: var(--gails-white);
-    border-radius: 1rem;
-    border: 1px solid #E5E7EB;
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-    transition: all 0.2s ease-in-out;
-}
-
-.team-roster-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--gails-red);
-}
-
-.team-roster-card .card-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.25rem;
-}
-
-.profile-photo {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--gails-red-light);
-}
-
-.member-name {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1.125rem;
-    color: var(--gails-text-primary);
-}
-
-.member-position {
-    color: var(--gails-text-secondary);
-    font-weight: 500;
-}
-
-.team-roster-card .card-body {
-    padding: 0 1.25rem 1.25rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.status-tag {
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.25rem 0.75rem;
-    border-radius: 999px;
-    line-height: 1.5;
-}
-
-.status-tag.status-keyholder {
-    background-color: var(--gails-gold);
-    color: #78350F;
-}
-
-.status-tag.status-training {
-    background-color: #DBEAFE;
-    color: #1E4491;
-}
-
-.team-roster-card .card-footer {
-    background-color: #F9FAFB;
-    padding: 1rem;
-    border-top: 1px solid #F3F4F6;
-}
-
-/* 52. Employee Profile Page Styles
--------------------------------------------------- */
-
-.profile-header-container {
-    background-color: var(--gails-white);
-    border-radius: 1.5rem;
-    padding: 2rem;
-    border: 1px solid #E5E7EB;
-    box-shadow: var(--shadow-md);
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1.5rem;
-}
-
-.profile-header-photo {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--gails-white);
-    box-shadow: 0 0 0 3px var(--gails-red);
-}
-
-.status-tag.status-part-time {
-    background-color: #E0E7FF; /* Indigo 100 */
-    color: #3730A3; /* Indigo 800 */
-}
-
-.profile-grid-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-}
-
-@media (min-width: 1024px) {
-    .profile-grid-layout {
-        grid-template-columns: 320px 1fr; /* Fixed sidebar, flexible content */
-    }
-}
-
-.profile-card-title {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1.125rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #F3F4F6;
-    padding-bottom: 0.75rem;
-}
-
-.detail-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    space-y: 0.75rem;
-}
-
-.detail-list li {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.9rem;
-    color: var(--gails-text-primary);
-}
-
-.detail-list li i {
-    color: var(--gails-red);
-    font-size: 1.1rem;
-}
-
-/* Tab Navigation */
-.tab-navigation {
-    display: flex;
-    gap: 0.5rem;
-    border-bottom: 2px solid #E5E7EB;
-    margin-bottom: 1.5rem;
-}
-
-.tab-link {
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    color: var(--gails-text-secondary);
-    border: none;
-    background-color: transparent;
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px; /* Overlaps the main border */
-    transition: all 0.2s ease-in-out;
-}
-
-.tab-link:hover {
-    color: var(--gails-text-primary);
-}
-
-.tab-link.active {
-    color: var(--gails-red);
-    border-bottom-color: var(--gails-red);
-}
-
-.tab-panel {
-    display: none;
-    animation: fadeIn 0.5s ease;
-}
-
-.tab-panel.active {
-    display: block;
-}
-
 /* 53. Tags Input Component
 -------------------------------------------------- */
 
@@ -2981,4 +2574,42 @@ input[type="time"] {
 /* This targets the main app to prevent the whole page from scrolling */
 body:has(#app-view) {
     overflow: hidden;
+}
+
+/* 64. AI Modal Header Tabs
+-------------------------------------------------- */
+
+.modal-header-main {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem; /* Space between title and tabs */
+    flex-grow: 1;
+    min-width: 0; /* Prevent flexbox overflow */
+}
+
+/* Override existing tab nav styles for the header context */
+.ai-tabs-nav.header-tabs {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding: 0;
+}
+
+.ai-tabs-nav.header-tabs .btn {
+    margin-bottom: 0;
+    border: none;
+    padding: 0.5rem 1rem; /* Make tabs a bit smaller */
+    border-bottom: 3px solid transparent;
+    border-radius: 0; /* Remove rounding */
+    background-color: transparent;
+    color: var(--gails-text-secondary);
+}
+
+.ai-tabs-nav.header-tabs .btn:hover {
+    color: var(--gails-text-primary);
+}
+
+.ai-tabs-nav.header-tabs .btn.active {
+    color: var(--gails-red);
+    border-bottom-color: var(--gails-red);
+    background-color: transparent;
 }

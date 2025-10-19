@@ -11,8 +11,6 @@ export default defineConfig({
         privacy: 'privacy-policy.html',
         view: 'view.html',
         action: 'action.html',
-        team_hub: 'team.html',
-        manage_team: 'manage-team.html'
       }
     }
   },

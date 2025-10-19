@@ -113,7 +113,6 @@ export function initializeDashboard(database, state, modalOpener, planSelector) 
 
     const dashboardLogoutBtn = document.getElementById('dashboard-logout-btn');
     const dashboardProfileBtn = document.getElementById('dashboard-profile-btn');
-    const dashboardTeamBtn = document.getElementById('dashboard-team-btn');
 
     dashboardLogoutBtn.addEventListener('click', () => {
         document.dispatchEvent(new CustomEvent('logout-request'));
@@ -122,12 +121,6 @@ export function initializeDashboard(database, state, modalOpener, planSelector) 
     dashboardProfileBtn.addEventListener('click', () => {
         window.location.href = '/profile.html';
     });
-
-    if (dashboardTeamBtn) {
-        dashboardTeamBtn.addEventListener('click', () => {
-            window.location.href = '/team.html';
-        });
-    }
     
     dashboardContent.addEventListener('click', (e) => {
         const createBtn = e.target.closest('#create-new-plan-btn');
