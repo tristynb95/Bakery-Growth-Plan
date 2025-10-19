@@ -558,8 +558,8 @@ textarea.form-input {
     flex-direction: column;
 }
 
-.modal-content {
-    overflow-y: auto; /* Make the content area scrollable if it overflows */
+.modal-box.modal-scrollable .modal-content {
+    overflow-y: auto; /* Allow scrolling only for designated modals */
 }
 
 /* Give the AI modal a bit more width to better display the plan */
