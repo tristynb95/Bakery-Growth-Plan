@@ -92,6 +92,38 @@ function getActiveTabId() {
 }
 
 
+function activateAiModalMonth(monthNum) {
+    if (!monthNum || !DOMElements.modalBox || !DOMElements.modalContent) {
+        return null;
+    }
+
+    const tabId = `month${monthNum}`;
+
+    const headerTabs = DOMElements.modalBox.querySelectorAll('.ai-tab-btn');
+    headerTabs.forEach(btn => btn.classList.remove('active'));
+    const targetHeaderTab = DOMElements.modalBox.querySelector(`.ai-tab-btn[data-tab="${tabId}"]`);
+    if (targetHeaderTab) {
+        targetHeaderTab.classList.add('active');
+    }
+
+    const contentContainer = DOMElements.modalContent.querySelector('.ai-tabs-content');
+    if (!contentContainer) {
+        return null;
+    }
+
+    contentContainer.querySelectorAll(':scope > div').forEach(panel => panel.classList.remove('active'));
+    const targetPanel = contentContainer.querySelector(`[data-tab-panel="${tabId}"]`);
+    if (targetPanel) {
+        targetPanel.classList.add('active');
+    }
+
+    updateUndoRedoButtons();
+    updateFooterButtonVisibility();
+
+    return targetPanel;
+}
+
+
 /**
  * Helper function to update the visibility of AI modal footer buttons.
  */
@@ -1158,11 +1190,12 @@ export function openModal(type, context = {}) {
 
             // *** REVISED ONCLICK LOGIC ***
             DOMElements.modalActionBtn.onclick = async () => { // Make async
-                 // 1. Find the target panel in the main AI modal *before* closing confirmation
-                 const mainAiModalPanel = document.querySelector(`#ai-printable-area [data-tab-panel="month${monthNum}"]`);
+                 // 1. Re-open the AI modal view so we can target the selected month panel
+                 openModal('aiActionPlan_view');
+
+                 const mainAiModalPanel = activateAiModalMonth(monthNum);
                  if (!mainAiModalPanel) {
                      console.error("Target panel for regeneration not found in the main AI modal.");
-                     closeModal(); // Close confirmation
                      openModal('warning', { title: 'Error', message: 'Could not start regeneration. Target panel not found.' });
                      return;
                  }
@@ -1171,7 +1204,7 @@ export function openModal(type, context = {}) {
                  mainAiModalPanel.innerHTML = `<div class="flex flex-col items-center justify-center p-8"><div class="loading-spinner"></div><p class="mt-4 text-gray-600">Generating new plan for Month ${monthNum}...</p></div>`;
 
                  // 3. Hide footer buttons in the main AI modal
-                 const mainAiModalFooter = document.querySelector('#modal-box[data-type="aiActionPlan_view"] .modal-footer'); // Target specific modal
+                 const mainAiModalFooter = DOMElements.modalBox?.querySelector('.modal-footer');
                  const regenButton = mainAiModalFooter?.querySelector('#modal-regen-btn');
                  const printButton = mainAiModalFooter?.querySelector('#modal-print-btn');
                  const undoRedoContainer = mainAiModalFooter?.querySelector('.undo-redo-container');
@@ -1180,10 +1213,7 @@ export function openModal(type, context = {}) {
                  if (printButton) printButton.style.display = 'none';
                  if (undoRedoContainer) undoRedoContainer.style.display = 'none';
 
-                 // 4. Close the confirmation modal *NOW*
-                 closeModal();
-
-                 // 5. Perform the generation and update
+                 // 4. Perform the generation and update
                  try {
                      if (appState.aiPlanGenerationController) {
                          appState.aiPlanGenerationController.abort();
