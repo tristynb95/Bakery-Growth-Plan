@@ -1605,8 +1605,8 @@ tr:hover .btn-remove-row {
     transform: translateY(-10px);
     visibility: hidden;
     transition: all 0.2s ease;
-    max-height: 145px; /* <-- ADD THIS LINE */
-    overflow-y: auto;  /* <-- ADD THIS LINE */
+    max-height: calc(5 * 2.75rem); /* Show five options before scrolling */
+    overflow-y: auto;  /* Allow scrolling when more than five options */
 }
 .custom-dropdown.open .dropdown-options {
     opacity: 1;
