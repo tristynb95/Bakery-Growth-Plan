@@ -594,16 +594,25 @@ async function handleModalAction() {
         case 'create':
             const newPlanNameInput = document.getElementById('newPlanName');
             const newPlanName = newPlanNameInput?.value.trim(); // Optional chaining
-            const newPlanQuarter = document.getElementById('newPlanQuarter')?.value.trim(); // Optional chaining
+            const newPlanQuarterInput = document.getElementById('newPlanQuarter');
+            const newPlanQuarter = newPlanQuarterInput?.value.trim(); // Optional chaining
             const originalButtonText = DOMElements.modalActionBtn.textContent;
             const errorContainer = document.getElementById('modal-error-container');
             if(errorContainer) errorContainer.innerHTML = '';
              if (newPlanNameInput) newPlanNameInput.classList.remove('input-error'); // Check if element exists
+             if (newPlanQuarterInput) newPlanQuarterInput.classList.remove('input-error');
 
             if (!newPlanName) {
                 if (newPlanNameInput) {
                     newPlanNameInput.classList.add('input-error', 'shake');
                     setTimeout(() => newPlanNameInput.classList.remove('shake'), 500);
+                }
+                return;
+            }
+            if (!newPlanQuarter) {
+                if (newPlanQuarterInput) {
+                    newPlanQuarterInput.classList.add('input-error', 'shake');
+                    setTimeout(() => newPlanQuarterInput.classList.remove('shake'), 500);
                 }
                 return;
             }
@@ -655,8 +664,10 @@ async function handleModalAction() {
             break;
         case 'edit':
             const newName = document.getElementById('editPlanName')?.value.trim(); // Optional chaining
-            const newQuarter = document.getElementById('editPlanQuarter')?.value.trim(); // Optional chaining
-            if (newName && planId && appState.currentUser?.uid && db) { // Add checks
+            const newQuarterInput = document.getElementById('editPlanQuarter');
+            const newQuarter = newQuarterInput?.value.trim(); // Optional chaining
+            if (newQuarterInput) newQuarterInput.classList.remove('input-error');
+            if (newName && newQuarter && planId && appState.currentUser?.uid && db) { // Add checks
                 try {
                     await db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(planId).update({
                         planName: newName,
@@ -673,6 +684,12 @@ async function handleModalAction() {
                  if (nameInput) {
                      nameInput.classList.add('input-error', 'shake');
                      setTimeout(() => nameInput.classList.remove('shake'), 500);
+                 }
+                 return; // Prevent closing modal if validation fails
+             } else if (!newQuarter) {
+                 if (newQuarterInput) {
+                     newQuarterInput.classList.add('input-error', 'shake');
+                     setTimeout(() => newQuarterInput.classList.remove('shake'), 500);
                  }
                  return; // Prevent closing modal if validation fails
              } else if (!appState.currentUser?.uid || !db) {
@@ -962,27 +979,54 @@ export function openModal(type, context = {}) {
      DOMElements.modalContent.innerHTML = ''; // Clear previous content reliably
 
 
+    const quarterOptions = [
+        'Q2 FY26',
+        'Q3 FY26',
+        'Q4 FY26',
+        'Q1 FY27',
+        'Q2 FY27',
+        'Q3 FY27',
+        'Q4 FY27'
+    ];
+
+    const buildQuarterSelect = (id, selectedValue = '') => {
+        const options = (selectedValue && !quarterOptions.includes(selectedValue))
+            ? [selectedValue, ...quarterOptions]
+            : quarterOptions;
+        const optionsHtml = options
+            .map(option => `<option value="${option}" ${option === selectedValue ? 'selected' : ''}>${option}</option>`)
+            .join('');
+        const placeholderOption = `<option value="" disabled ${selectedValue ? '' : 'selected'}>Select a quarter</option>`;
+        return `<select id="${id}" class="form-input" aria-label="Quarter">${placeholderOption}${optionsHtml}</select>`;
+    };
+
     switch (type) {
         case 'create':
             if (DOMElements.modalTitle) DOMElements.modalTitle.textContent = "Create New Plan"; // Check title element
+            const newPlanQuarterSelect = buildQuarterSelect('newPlanQuarter');
             DOMElements.modalContent.innerHTML = `<label for="newPlanName" class="font-semibold block mb-2">Plan Name:</label>
                                                   <input type="text" id="newPlanName" class="form-input" placeholder="e.g., Q4 2025 Focus" value="New Plan ${new Date().toLocaleDateString('en-GB')}">
                                                   <label for="newPlanQuarter" class="font-semibold block mb-2 mt-4">Quarter:</label>
-                                                  <input type="text" id="newPlanQuarter" class="form-input" placeholder="e.g., Q3 FY26">
+                                                  ${newPlanQuarterSelect}
                                                   <div id="modal-error-container" class="modal-error-container"></div>`;
             DOMElements.modalActionBtn.textContent = "Create Plan";
              const newPlanNameInput = document.getElementById('newPlanName');
              if (newPlanNameInput) newPlanNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') DOMElements.modalActionBtn.click(); }); // Use click() for consistency
+            const newPlanQuarterInput = document.getElementById('newPlanQuarter');
+            if (newPlanQuarterInput) newPlanQuarterInput.addEventListener('change', () => newPlanQuarterInput.classList.remove('input-error'));
             break;
         case 'edit':
             if (DOMElements.modalTitle) DOMElements.modalTitle.textContent = "Edit Plan Details"; // Check title element
+            const editPlanQuarterSelect = buildQuarterSelect('editPlanQuarter', currentQuarter || '');
             DOMElements.modalContent.innerHTML = `<label for="editPlanName" class="font-semibold block mb-2">Plan Name:</label>
                                                   <input type="text" id="editPlanName" class="form-input" value="${currentName || ''}">
                                                   <label for="editPlanQuarter" class="font-semibold block mb-2 mt-4">Quarter:</label>
-                                                  <input type="text" id="editPlanQuarter" class="form-input" placeholder="e.g., Q3 FY26" value="${currentQuarter || ''}">`;
+                                                  ${editPlanQuarterSelect}`;
             DOMElements.modalActionBtn.textContent = "Save Changes";
              const editPlanNameInput = document.getElementById('editPlanName');
              if (editPlanNameInput) editPlanNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') DOMElements.modalActionBtn.click(); }); // Use click()
+            const editPlanQuarterInput = document.getElementById('editPlanQuarter');
+            if (editPlanQuarterInput) editPlanQuarterInput.addEventListener('change', () => editPlanQuarterInput.classList.remove('input-error'));
             break;
         case 'delete':
              if (DOMElements.modalTitle) DOMElements.modalTitle.textContent = "Confirm Deletion"; // Check title element
