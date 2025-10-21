@@ -26,6 +26,18 @@ function runViewScript(app) {
         contentArea: document.getElementById('content-area'),
     };
 
+    const planTitleMap = {
+        1: '30 Day Plan',
+        2: '60 Day Plan',
+        3: '90 Day Plan'
+    };
+
+    const goalLabelMap = {
+        1: '30 Day Goal',
+        2: '60 Day Goal',
+        3: '90 Day Goal'
+    };
+
     const renderSummary = (formData) => {
         const e = (html) => {
             if (!html) return '...';
@@ -53,10 +65,30 @@ function runViewScript(app) {
             return tempDiv.innerText.trim() === '';
         };
 
+        const getWeeksForMonth = (monthNum) => {
+            const weekPattern = new RegExp(`^m${monthNum}s5_w(\d+)_(status|win|spotlight|shine)$`);
+            const detectedWeeks = Object.keys(formData)
+                .map((key) => {
+                    const match = key.match(weekPattern);
+                    return match ? parseInt(match[1], 10) : null;
+                })
+                .filter((weekNum) => Number.isInteger(weekNum));
+
+            if (detectedWeeks.length > 0) {
+                return Array.from(new Set(detectedWeeks))
+                    .sort((a, b) => a - b)
+                    .slice(0, 5);
+            }
+
+            return [1, 2, 3, 4, 5];
+        };
+
         const renderMonthSummary = (monthNum) => {
+            const planTitle = planTitleMap[monthNum] || `Month ${monthNum} Plan`;
             let weeklyCheckinHTML = '<ul>';
             let hasLoggedWeeks = false;
-            for (let w = 1; w <= 4; w++) {
+            const weeksToRender = getWeeksForMonth(monthNum);
+            weeksToRender.forEach((w) => {
                 const status = formData[`m${monthNum}s5_w${w}_status`];
                 const win = formData[`m${monthNum}s5_w${w}_win`];
                 const spotlight = formData[`m${monthNum}s5_w${w}_spotlight`];
@@ -89,7 +121,7 @@ function runViewScript(app) {
                                             ${checkinContent}
                                           </li>`;
                 }
-            }
+            });
 
             if (!hasLoggedWeeks) {
                 weeklyCheckinHTML = '<p class="text-sm text-gray-500">No weekly check-ins have been logged for this month.</p>';
@@ -120,7 +152,7 @@ function runViewScript(app) {
 
             return `
                 <div class="content-card p-0 overflow-hidden mt-8">
-                    <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">Month ${monthNum} Plan</h2>
+                    <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">${planTitle}</h2>
                     <div class="summary-grid">
                         <div class="p-6">
                             ${pillarHTML}
@@ -168,6 +200,13 @@ function runViewScript(app) {
         DOMElements.headerTitle.textContent = formData.planName || 'Growth Plan Summary';
         DOMElements.headerSubtitle.textContent = `A read-only summary for ${formData.bakeryLocation || 'the bakery'}.`;
 
+        const monthlyGoalsHTML = [1, 2, 3]
+            .map((monthNum) => {
+                const goalLabel = goalLabelMap[monthNum] || `Month ${monthNum} Goal`;
+                return `<div><strong class="font-semibold text-gray-600 block">${goalLabel}:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData[`month${monthNum}Goal`])}</div></div>`;
+            })
+            .join('');
+
         DOMElements.contentArea.innerHTML = `
             <div class="space-y-8 summary-content">
                 <div id="quarter-overview" class="content-card p-6">
@@ -179,9 +218,7 @@ function runViewScript(app) {
                     </div>
                     <div class="mb-6"><h4 class="font-semibold text-sm text-gray-500">Quarterly Theme</h4><div class="text-gray-800 prose prose-sm">${e(formData.quarterlyTheme)}</div></div>
                     <div><h3 class="text-lg font-bold border-b pb-2 mb-3">Key Monthly Objectives</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3 text-sm">
-                        <div><strong class="font-semibold text-gray-600 block">Month 1 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month1Goal)}</div></div>
-                        <div><strong class="font-semibold text-gray-600 block">Month 2 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month2Goal)}</div></div>
-                        <div><strong class="font-semibold text-gray-600 block">Month 3 Goal:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData.month3Goal)}</div></div>
+                        ${monthlyGoalsHTML}
                     </div></div>
                 </div>
                 <div id="monthly-sections">
