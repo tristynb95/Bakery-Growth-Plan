@@ -183,7 +183,8 @@ const templates = {
                     </div>
                 </div>` : ''}
             </div>
-        `,
+        `;
+    },
 };
 
 function normalizeToStartOfDay(date) {
