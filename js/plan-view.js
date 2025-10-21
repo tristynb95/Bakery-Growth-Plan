@@ -65,11 +65,7 @@ const templates = {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
                             <div class="flex flex-col">
                                 <label for="m${monthNum}s2_levers" class="font-semibold text-lg block mb-2 text-gray-800">My Key Actions:</label>
-                                <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing flex-grow key-levers-input" contenteditable="true" data-placeholder="1. Review Availability & Freshness report daily and adjust baking plans proactively.&#10;
-
-                                2. Lead a 'Coffee Dial-In' session in the management meeting &#10;
-
-                                3. Coach one team member daily on a specific SHINE principle." data-maxlength="600"></div>
+                                <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing flex-grow key-levers-input" contenteditable="true" data-placeholder="1. Review Availability & Freshness report daily and adjust baking plans proactively.&#10;2. Lead a 'Coffee Dial-In' session in the management meeting.&#10;3. Coach one team member daily on a specific SHINE principle." data-maxlength="600"></div>
                             </div>
                             <div class="space-y-4">
                                 <div>

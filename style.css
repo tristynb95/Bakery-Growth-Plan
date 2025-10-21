@@ -510,6 +510,7 @@ textarea.form-input {
     content: attr(data-placeholder);
     color: #9CA3AF; /* Standard placeholder text colour */
     pointer-events: none; /* Allows clicking through the placeholder */
+    white-space: pre-line; /* Preserve intentional line breaks in placeholder content */
 
     /* New positioning rules */
     position: absolute;
