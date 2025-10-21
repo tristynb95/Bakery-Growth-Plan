@@ -13,21 +13,21 @@
     <link rel="icon" href="/favicon.ico" sizes="any">
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
 </head>
-<body class="antialiased bg-gray-50">
-    <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-        <header class="py-8 text-center relative">
-            <div class="absolute top-20 left-0">
-                <button id="back-btn" class="btn-subtle">
-                    <i class="bi bi-arrow-left"></i>
-                    <span>Go Back</span>
-                </button>
-            </div>
-            <a href="/index.html"><img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/92/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo" class="h-12 mx-auto mb-4"></a>
-            <h1 class="text-4xl font-black text-gray-900 font-poppins">Terms & Conditions</h1>
-            <p class="mt-1 text-lg text-gray-500">Last Updated: 11 August 2025</p>
+<body class="antialiased">
+    <div class="legal-container">
+        <header class="legal-header">
+            <button id="back-btn" class="btn-subtle legal-back">
+                <i class="bi bi-arrow-left"></i>
+                <span>Go Back</span>
+            </button>
+            <a href="/index.html" class="legal-logo">
+                <img src="https://cdn.brandfetch.io/idTR-Pb58u/w/401/h/92/theme/dark/logo.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="GAIL's Bakery Logo" class="h-12 mx-auto mb-4">
+            </a>
+            <h1 class="legal-title font-poppins">Terms & Conditions</h1>
+            <p class="legal-subtitle">Last Updated: 11 August 2025</p>
         </header>
-        <main class="bg-white shadow-md rounded-lg p-6 sm:p-8 lg:p-10">
-             <div class="prose prose-lg max-w-none prose-h2:font-poppins prose-h2:font-bold prose-a:text-red-600 hover:prose-a:text-red-700">
+        <main class="legal-card">
+             <div class="prose prose-lg max-w-none prose-h2:font-poppins prose-h2:font-bold">
                 <p>Welcome to the Bakery Growth Planner. These Terms and Conditions ("Terms") govern your use of the Bakery Growth Planner web application (the "Service") provided by Tristen Bayley ("I," "me," "my"). By accessing or using the Service, you agree to be bound by these Terms. If you disagree with any part of the terms, then you may not access the Service.</p>
 
                 <h2>1. Accounts</h2>
@@ -67,10 +67,10 @@
                 <p>I reserve the right to modify or replace these Terms at any time. If a revision is material, I will provide at least 30 days' notice prior to any new terms taking effect. What constitutes a material change will be determined at my sole discretion.</p>
 
                 <h2>8. Contact Me</h2>
-                <p>If you have any questions about these Terms, please contact me at <a href="mailto:tristen_bayley@gailsbread.co.uk">tristen_bayley@gailsbread.co.uk</a>.</p>
+                <p>If you have any questions about these Terms, please contact me at <a href="mailto:tristen_bayley@gailsbread.co.uk" class="hover:underline">tristen_bayley@gailsbread.co.uk</a>.</p>
             </div>
         </main>
-        <footer class="text-center text-sm text-gray-500 py-6">
+        <footer class="site-footer text-center text-sm py-6">
             <p>&copy; 2025 GAIL's Bakery Growth Planner</p>
         </footer>
     </div>
