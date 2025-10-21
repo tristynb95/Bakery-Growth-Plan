@@ -17,6 +17,9 @@ const DOMElements = {
     contentArea: document.getElementById('content-area'),
     mainContent: document.querySelector('#app-view main'),
     mainNav: document.getElementById('main-nav'),
+    navMonth1Text: document.querySelector('#nav-month-1 .nav-text'),
+    navMonth2Text: document.querySelector('#nav-month-2 .nav-text'),
+    navMonth3Text: document.querySelector('#nav-month-3 .nav-text'),
     headerTitle: document.getElementById('header-title'),
     headerSubtitle: document.getElementById('header-subtitle'),
     sidebarName: document.getElementById('sidebar-name'),
@@ -32,6 +35,23 @@ const DOMElements = {
     desktopHeaderButtons: document.getElementById('desktop-header-buttons'),
     saveIndicator: document.getElementById('save-indicator'),
 };
+
+const MONTH_PLAN_LABELS = ['30 Day Plan', '60 Day Plan', '90 Day Plan'];
+const DEFAULT_MONTH_TITLES = ['Month 1 Plan', 'Month 2 Plan', 'Month 3 Plan'];
+const FISCAL_YEAR_MONTHS = [
+    { name: 'March', yearOffset: 0 },
+    { name: 'April', yearOffset: 0 },
+    { name: 'May', yearOffset: 0 },
+    { name: 'June', yearOffset: 0 },
+    { name: 'July', yearOffset: 0 },
+    { name: 'August', yearOffset: 0 },
+    { name: 'September', yearOffset: 0 },
+    { name: 'October', yearOffset: 0 },
+    { name: 'November', yearOffset: 0 },
+    { name: 'December', yearOffset: 0 },
+    { name: 'January', yearOffset: 1 },
+    { name: 'February', yearOffset: 1 },
+];
 
 // --- HTML Templates for Views ---
 const templates = {
@@ -145,6 +165,61 @@ const templates = {
 };
 
 // --- Helper Functions ---
+
+function getQuarterMonthDetails(quarterString) {
+    if (!quarterString) return null;
+    const match = quarterString.match(/Q([1-4])\s*FY\s*(\d{2,4})/i);
+    if (!match) return null;
+
+    const quarter = parseInt(match[1], 10);
+    let fiscalYear = parseInt(match[2], 10);
+    if (Number.isNaN(quarter) || Number.isNaN(fiscalYear)) return null;
+
+    if (match[2].length === 2) {
+        fiscalYear += 2000;
+    }
+
+    const fiscalYearStart = fiscalYear - 1;
+    const startIndex = (quarter - 1) * 3;
+    if (startIndex < 0 || startIndex + 2 >= FISCAL_YEAR_MONTHS.length) return null;
+
+    return [0, 1, 2].map((offset) => {
+        const monthInfo = FISCAL_YEAR_MONTHS[startIndex + offset];
+        const year = fiscalYearStart + monthInfo.yearOffset;
+        return {
+            name: monthInfo.name,
+            year,
+            display: `${monthInfo.name} ${year}`
+        };
+    });
+}
+
+function getViewTitleConfig(viewId) {
+    const planData = (appState && appState.planData) ? appState.planData : {};
+    const planName = planData.planName || '';
+    const quarterLabel = planData.quarter || '';
+    const monthDetails = getQuarterMonthDetails(quarterLabel);
+    const monthTitles = Array.isArray(monthDetails) && monthDetails.length === 3
+        ? monthDetails.map((detail, index) => `${detail.display} (${MONTH_PLAN_LABELS[index]})`)
+        : DEFAULT_MONTH_TITLES;
+
+    const monthSubtitles = [
+        planName || 'Lay the foundations for success.',
+        planName || 'Build momentum and embed processes.',
+        planName || 'Refine execution and review the quarter.'
+    ];
+
+    const configs = {
+        vision: { title: `Bakery Growth Plan - ${quarterLabel}`, subtitle: planName || 'Your 90-Day Sprint to a Better Bakery.' },
+        'month-1': { title: monthTitles[0], subtitle: monthSubtitles[0] },
+        'month-2': { title: monthTitles[1], subtitle: monthSubtitles[1] },
+        'month-3': { title: monthTitles[2], subtitle: monthSubtitles[2] },
+        summary: { title: `Plan Summary - ${quarterLabel}`, subtitle: planName || 'A complete overview of your quarterly plan.' },
+        files: { title: 'My Files', subtitle: "Manage documents for your plan, like P&L statements and KPIs." }
+    };
+
+    return configs[viewId] || { title: 'Growth Plan', subtitle: '' };
+}
 
 export function summarizePlanForActionPlan(planData) {
     const e = (text) => {
@@ -340,6 +415,21 @@ function updateWeeklyTabCompletion(monthNum, planData) {
     }
 }
 
+function updateSidebarMonthLabels() {
+    const monthDetails = getQuarterMonthDetails(appState.planData.quarter);
+    const navTextElements = [
+        DOMElements.navMonth1Text,
+        DOMElements.navMonth2Text,
+        DOMElements.navMonth3Text
+    ];
+
+    navTextElements.forEach((element, index) => {
+        if (!element) return;
+        const detail = Array.isArray(monthDetails) ? monthDetails[index] : null;
+        element.textContent = detail ? detail.display : MONTH_PLAN_LABELS[index];
+    });
+}
+
 function updateSidebarNavStatus() {
     const updateNavItem = (navId, progress) => {
         const navLink = document.querySelector(navId);
@@ -387,12 +477,17 @@ function updateUI() {
     updateSidebarInfo();
     updateOverallProgress();
     updateSidebarNavStatus();
+    updateSidebarMonthLabels();
          // Add this line to update the sidebar context
      const sidebarContext = document.getElementById('sidebar-plan-context');
      if (sidebarContext) {
          sidebarContext.textContent = `${appState.planData.quarter || 'Your'} Plan`;
      }
- 
+
+    if (appState.currentView) {
+        updateHeaderForView(appState.currentView);
+    }
+
 }
 
 function renderSummary() {
@@ -491,23 +586,24 @@ function renderSummary() {
     </div>`;
 }
 
+function updateHeaderForView(viewId) {
+    const config = getViewTitleConfig(viewId);
+    if (!config) return;
+    if (DOMElements.headerTitle) {
+        DOMElements.headerTitle.textContent = config.title || 'Growth Plan';
+    }
+    if (DOMElements.headerSubtitle) {
+        DOMElements.headerSubtitle.textContent = config.subtitle || '';
+    }
+}
+
 function switchView(viewId) {
     DOMElements.mainContent.scrollTop = 0;
     appState.currentView = viewId;
     sessionStorage.setItem('lastPlanId', appState.currentPlanId);
     sessionStorage.setItem('lastViewId', viewId);
 
-    const titles = {
-        vision: { title: `Bakery Growth Plan - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.' },
-         'month-1': { title: 'Month 1 Plan', subtitle: appState.planData.planName || 'Lay the foundations for success.' },
-         'month-2': { title: 'Month 2 Plan', subtitle: appState.planData.planName || 'Build momentum and embed processes.' },
-         'month-3': { title: 'Month 3 Plan', subtitle: appState.planData.planName || 'Refine execution and review the quarter.' },
-         summary: { title: `Plan Summary - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'A complete overview of your quarterly plan.' },
-         files: { title: 'My Files', subtitle: "Manage documents for your plan, like P&L statements and KPIs." }
-};
-    
-    DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
-    DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
+    updateHeaderForView(viewId);
 
     const isSummaryView = viewId === 'summary';
     const isFilesView = viewId === 'files'; 
