@@ -368,6 +368,9 @@ function populateViewWithData() {
             el.classList.remove('is-placeholder-showing');
         }
     });
+    if (appState.currentView.startsWith('month-')) {
+        resetWeeklyProgressLabels();
+    }
 }
 
 function updateViewWithRemoteData(remoteData) {
@@ -428,7 +431,16 @@ function updateViewWithRemoteData(remoteData) {
                 if (buttonToSelect) buttonToSelect.classList.add('selected');
             }
         });
+        resetWeeklyProgressLabels();
     }
+}
+
+function resetWeeklyProgressLabels() {
+    document.querySelectorAll('[id^="weekly-progress-label-"]').forEach((label) => {
+        const parts = label.id.split('-');
+        const labelWeek = parts[parts.length - 1];
+        label.textContent = `Week ${labelWeek} Progress:`;
+    });
 }
 
 function updateWeeklyTabCompletion(monthNum, planData) {
@@ -834,6 +846,7 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
                     ? `Week ${labelWeek} Progress (${labelText}):`
                     : `Week ${labelWeek} Progress:`;
             });
+            resetWeeklyProgressLabels();
         }
     });
 
