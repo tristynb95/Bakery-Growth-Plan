@@ -66,7 +66,7 @@ function runViewScript(app) {
         };
 
         const getWeeksForMonth = (monthNum) => {
-            const weekPattern = new RegExp(`^m${monthNum}s5_w(\d+)_status$`);
+            const weekPattern = new RegExp(`^m${monthNum}s5_w(\d+)_(status|win|spotlight|shine)$`);
             const detectedWeeks = Object.keys(formData)
                 .map((key) => {
                     const match = key.match(weekPattern);
@@ -75,10 +75,12 @@ function runViewScript(app) {
                 .filter((weekNum) => Number.isInteger(weekNum));
 
             if (detectedWeeks.length > 0) {
-                return Array.from(new Set(detectedWeeks)).sort((a, b) => a - b);
+                return Array.from(new Set(detectedWeeks))
+                    .sort((a, b) => a - b)
+                    .slice(0, 5);
             }
 
-            return [1, 2, 3, 4];
+            return [1, 2, 3, 4, 5];
         };
 
         const renderMonthSummary = (monthNum) => {
