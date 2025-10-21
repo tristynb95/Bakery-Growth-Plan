@@ -1,6 +1,14 @@
 // js/plan-view.js
 
-import { calculatePlanCompletion, getVisionProgress, getMonthProgress, isWeekComplete, isContentEmpty } from './utils.js';
+import {
+    calculatePlanCompletion,
+    getVisionProgress,
+    getMonthProgress,
+    isWeekComplete,
+    isContentEmpty,
+    getQuarterMonthDetails,
+    getPlanMonthWeeks
+} from './utils.js';
 import { openChat } from './chat.js';
 import { renderFilesView } from './files.js'; // <-- ADD THIS LINE
 
@@ -17,6 +25,9 @@ const DOMElements = {
     contentArea: document.getElementById('content-area'),
     mainContent: document.querySelector('#app-view main'),
     mainNav: document.getElementById('main-nav'),
+    navMonth1Text: document.querySelector('#nav-month-1 .nav-text'),
+    navMonth2Text: document.querySelector('#nav-month-2 .nav-text'),
+    navMonth3Text: document.querySelector('#nav-month-3 .nav-text'),
     headerTitle: document.getElementById('header-title'),
     headerSubtitle: document.getElementById('header-subtitle'),
     sidebarName: document.getElementById('sidebar-name'),
@@ -33,6 +44,9 @@ const DOMElements = {
     saveIndicator: document.getElementById('save-indicator'),
 };
 
+const MONTH_PLAN_LABELS = ['30 Day Plan', '60 Day Plan', '90 Day Plan'];
+const DEFAULT_MONTH_TITLES = ['Month 1 Plan', 'Month 2 Plan', 'Month 3 Plan'];
+
 // --- HTML Templates for Views ---
 const templates = {
     vision: {
@@ -43,7 +57,49 @@ const templates = {
                    </div>`,
         requiredFields: ['quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
     },
-    month: (monthNum) => `
+    month: (monthNum, weekConfig = {}) => {
+        const { weeks = [], activeWeekIndex = 0 } = weekConfig;
+        const hasWeeks = Array.isArray(weeks) && weeks.length > 0;
+        const tabsHtml = hasWeeks
+            ? weeks.map((week, idx) => `
+                <a href="#" class="weekly-tab ${idx === activeWeekIndex ? 'active' : ''} flex items-center" data-week-index="${week.index}" data-week-label="${week.label}">
+                    <span>${week.label}</span>
+                    <i class="bi bi-check-circle-fill week-complete-icon ml-2 hidden"></i>
+                </a>
+            `).join('')
+            : '<span class="text-sm text-gray-500 py-2">Weekly ranges will appear once the month is set.</span>';
+        const panelsHtml = hasWeeks
+            ? weeks.map((week, idx) => `
+                <div class="weekly-tab-panel ${idx !== activeWeekIndex ? 'hidden' : ''}" data-week-panel="${week.index}" data-week-label="${week.label}">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                        <div class="md:col-span-2">
+                            <label id="weekly-progress-label-${week.index}" class="font-semibold block mb-3 text-gray-700" data-week-index="${week.index}" data-week-label="${week.label}">
+                                Week ${week.index} Progress (${week.label}):
+                            </label>
+                            <div class="flex items-center space-x-2 status-buttons" data-week-index="${week.index}">
+                                <button class="status-button" data-status="on-track">ON TRACK</button>
+                                <button class="status-button" data-status="issues">ISSUES</button>
+                                <button class="status-button" data-status="off-track">OFF TRACK</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="m${monthNum}s5_w${week.index}_win" class="font-semibold block mb-2 text-gray-700">A Win or Learning:</label>
+                            <div id="m${monthNum}s5_w${week.index}_win" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., The team hit 80% availability on Thursday!" data-maxlength="400"></div>
+                        </div>
+                        <div>
+                            <label for="m${monthNum}s5_w${week.index}_spotlight" class="font-semibold block mb-2 text-gray-700">Breadhead Spotlight:</label>
+                            <div id="m${monthNum}s5_w${week.index}_spotlight" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., Sarah, for making a customer's day by remembering their name and usual order—a perfect example of our SHINE values." data-maxlength="400"></div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="m${monthNum}s5_w${week.index}_shine" class="font-semibold block mb-2 text-gray-700">This Week's SHINE Focus:</label>
+                            <div id="m${monthNum}s5_w${week.index}_shine" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., Ensuring every customer is greeted within 30 seconds." data-maxlength="400"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('')
+            : '<p class="text-sm text-gray-500">Weekly check-ins will appear once the month is configured.</p>';
+
+        return `
             <div class="space-y-8">
                 <div class="content-card p-6 md:p-8">
                     <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation</h2>
@@ -99,25 +155,11 @@ const templates = {
                     <p class="text-gray-600 mb-6">Return here each week to log your progress, celebrate wins, and spotlight your team.</p>
                     <div class="mb-6 border-b border-gray-200">
                         <nav id="weekly-tabs" class="flex -mb-px space-x-6" aria-label="Tabs">
-                            ${[1, 2, 3, 4].map(w => `
-                                <a href="#" class="weekly-tab ${w === 1 ? 'active' : ''} flex items-center" data-week="${w}">
-                                    <span>Week ${w}</span>
-                                    <i class="bi bi-check-circle-fill week-complete-icon ml-2 hidden"></i>
-                                </a>
-                            `).join('')}
+                            ${tabsHtml}
                         </nav>
                     </div>
                     <div id="weekly-tab-content">
-                        ${[1, 2, 3, 4].map(w => `
-                            <div class="weekly-tab-panel ${w !== 1 ? 'hidden' : ''}" data-week-panel="${w}">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                                    <div class="md:col-span-2"><label id="weekly-progress-label-${w}" class="font-semibold block mb-3 text-gray-700">Week ${w} Progress:</label><div class="flex items-center space-x-2 status-buttons" data-week="${w}"><button class="status-button" data-status="on-track">ON TRACK</button><button class="status-button" data-status="issues">ISSUES</button><button class="status-button" data-status="off-track">OFF TRACK</button></div></div>
-                                    <div><label for="m${monthNum}s5_w${w}_win" class="font-semibold block mb-2 text-gray-700">A Win or Learning:</label><div id="m${monthNum}s5_w${w}_win" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., The team hit 80% availability on Thursday!" data-maxlength="400"></div></div>
-                                    <div><label for="m${monthNum}s5_w${w}_spotlight" class="font-semibold block mb-2 text-gray-700">Breadhead Spotlight:</label><div id="m${monthNum}s5_w${w}_spotlight" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., Sarah, for making a customer's day by remembering their name and usual order—a perfect example of our SHINE values." data-maxlength="400"></div></div>
-                                    <div class="md:col-span-2"><label for="m${monthNum}s5_w${w}_shine" class="font-semibold block mb-2 text-gray-700">This Week's SHINE Focus:</label><div id="m${monthNum}s5_w${w}_shine" class="form-input text-sm is-placeholder-showing weekly-check-in-input" contenteditable="true" data-placeholder="e.g., Ensuring every customer is greeted within 30 seconds." data-maxlength="400"></div></div>
-                                </div>
-                            </div>
-                        `).join('')}
+                        ${panelsHtml}
                     </div>
                 </div>
                 <div class="content-card p-6 md:p-8 bg-red-50 border border-red-100">
@@ -141,10 +183,72 @@ const templates = {
                     </div>
                 </div>` : ''}
             </div>
-        `,
+        `;
+    },
 };
 
+function normalizeToStartOfDay(date) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function formatWeekRange(startDate, endDate) {
+    const options = { day: '2-digit', month: 'short' };
+    const start = normalizeToStartOfDay(startDate instanceof Date ? startDate : new Date(startDate));
+    const end = normalizeToStartOfDay(endDate instanceof Date ? endDate : new Date(endDate));
+    const startLabel = start.toLocaleDateString('en-GB', options);
+    const endLabel = end.toLocaleDateString('en-GB', options);
+    return `${startLabel} - ${endLabel}`;
+}
+
+function getFormattedWeeks(monthNum, planData) {
+    const weeks = getPlanMonthWeeks(monthNum, planData);
+    return weeks.map((week) => ({
+        index: week.index,
+        startDate: week.startDate,
+        endDate: week.endDate,
+        label: formatWeekRange(week.startDate, week.endDate)
+    }));
+}
+
+function getActiveWeekIndex(weeks) {
+    if (!Array.isArray(weeks) || weeks.length === 0) return 0;
+    const today = normalizeToStartOfDay(new Date());
+    const foundIndex = weeks.findIndex((week) => {
+        const start = normalizeToStartOfDay(week.startDate instanceof Date ? week.startDate : new Date(week.startDate));
+        const end = normalizeToStartOfDay(week.endDate instanceof Date ? week.endDate : new Date(week.endDate));
+        return today >= start && today <= end;
+    });
+    return foundIndex === -1 ? 0 : foundIndex;
+}
+
 // --- Helper Functions ---
+
+function getViewTitleConfig(viewId) {
+    const planData = (appState && appState.planData) ? appState.planData : {};
+    const planName = planData.planName || '';
+    const quarterLabel = planData.quarter || '';
+    const monthDetails = getQuarterMonthDetails(quarterLabel);
+    const monthTitles = Array.isArray(monthDetails) && monthDetails.length === 3
+        ? monthDetails.map((detail, index) => `${detail.display} (${MONTH_PLAN_LABELS[index]})`)
+        : DEFAULT_MONTH_TITLES;
+
+    const monthSubtitles = [
+        planName || 'Lay the foundations for success.',
+        planName || 'Build momentum and embed processes.',
+        planName || 'Refine execution and review the quarter.'
+    ];
+
+    const configs = {
+        vision: { title: `Bakery Growth Plan - ${quarterLabel}`, subtitle: planName || 'Your 90-Day Sprint to a Better Bakery.' },
+        'month-1': { title: monthTitles[0], subtitle: monthSubtitles[0] },
+        'month-2': { title: monthTitles[1], subtitle: monthSubtitles[1] },
+        'month-3': { title: monthTitles[2], subtitle: monthSubtitles[2] },
+        summary: { title: `Plan Summary - ${quarterLabel}`, subtitle: planName || 'A complete overview of your quarterly plan.' },
+        files: { title: 'My Files', subtitle: "Manage documents for your plan, like P&L statements and KPIs." }
+    };
+
+    return configs[viewId] || { title: 'Growth Plan', subtitle: '' };
+}
 
 export function summarizePlanForActionPlan(planData) {
     const e = (text) => {
@@ -247,7 +351,7 @@ function populateViewWithData() {
     if (appState.currentView.startsWith('month-')) {
         const monthNum = appState.currentView.split('-')[1];
         document.querySelectorAll('.status-buttons').forEach(group => {
-            const week = group.dataset.week;
+            const week = group.dataset.weekIndex;
             const key = `m${monthNum}s5_w${week}_status`;
             const status = appState.planData[key];
             group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
@@ -315,7 +419,7 @@ function updateViewWithRemoteData(remoteData) {
     if (appState.currentView.startsWith('month-')) {
         const monthNum = appState.currentView.split('-')[1];
         document.querySelectorAll('.status-buttons').forEach(group => {
-            const week = group.dataset.week;
+            const week = group.dataset.weekIndex;
             const key = `m${monthNum}s5_w${week}_status`;
             const status = remoteData[key];
             group.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
@@ -328,16 +432,32 @@ function updateViewWithRemoteData(remoteData) {
 }
 
 function updateWeeklyTabCompletion(monthNum, planData) {
-    for (let w = 1; w <= 4; w++) {
-        const isComplete = isWeekComplete(monthNum, w, planData);
-        const tab = document.querySelector(`.weekly-tab[data-week="${w}"]`);
+    const weeks = getPlanMonthWeeks(monthNum, planData);
+    weeks.forEach((week) => {
+        const isComplete = isWeekComplete(monthNum, week.index, planData);
+        const tab = document.querySelector(`.weekly-tab[data-week-index="${week.index}"]`);
         if (tab) {
             const tickIcon = tab.querySelector('.week-complete-icon');
             if (tickIcon) {
                 tickIcon.classList.toggle('hidden', !isComplete);
             }
         }
-    }
+    });
+}
+
+function updateSidebarMonthLabels() {
+    const monthDetails = getQuarterMonthDetails(appState.planData.quarter);
+    const navTextElements = [
+        DOMElements.navMonth1Text,
+        DOMElements.navMonth2Text,
+        DOMElements.navMonth3Text
+    ];
+
+    navTextElements.forEach((element, index) => {
+        if (!element) return;
+        const detail = Array.isArray(monthDetails) ? monthDetails[index] : null;
+        element.textContent = detail ? detail.display : MONTH_PLAN_LABELS[index];
+    });
 }
 
 function updateSidebarNavStatus() {
@@ -387,12 +507,17 @@ function updateUI() {
     updateSidebarInfo();
     updateOverallProgress();
     updateSidebarNavStatus();
+    updateSidebarMonthLabels();
          // Add this line to update the sidebar context
      const sidebarContext = document.getElementById('sidebar-plan-context');
      if (sidebarContext) {
          sidebarContext.textContent = `${appState.planData.quarter || 'Your'} Plan`;
      }
- 
+
+    if (appState.currentView) {
+        updateHeaderForView(appState.currentView);
+    }
+
 }
 
 function renderSummary() {
@@ -426,11 +551,12 @@ function renderSummary() {
     const renderMonthSummary = (monthNum) => {
         let weeklyCheckinHTML = '<ul>';
         let hasLoggedWeeks = false;
-        for (let w = 1; w <= 4; w++) {
-            const status = formData[`m${monthNum}s5_w${w}_status`];
-            const win = formData[`m${monthNum}s5_w${w}_win`];
-            const spotlight = formData[`m${monthNum}s5_w${w}_spotlight`];
-            const shine = formData[`m${monthNum}s5_w${w}_shine`];
+        const weeks = getFormattedWeeks(monthNum, formData);
+        weeks.forEach((week) => {
+            const status = formData[`m${monthNum}s5_w${week.index}_status`];
+            const win = formData[`m${monthNum}s5_w${week.index}_win`];
+            const spotlight = formData[`m${monthNum}s5_w${week.index}_spotlight`];
+            const shine = formData[`m${monthNum}s5_w${week.index}_shine`];
 
             if (status) {
                 hasLoggedWeeks = true;
@@ -442,9 +568,9 @@ function renderSummary() {
                 if (!isContentEmpty(shine)) checkinContent += `<div class="text-sm text-gray-600"><strong>SHINE Focus:</strong><br>${e(shine)}</div>`;
                 if (checkinContent === '') checkinContent = '<p class="text-sm text-gray-500 italic">No details logged.</p>';
 
-                weeklyCheckinHTML += `<li class="mb-3 pb-3 border-b last:border-b-0"><div class="flex justify-between items-center mb-2"><strong class="font-semibold text-gray-700">Week ${w}</strong>${statusBadgeHTML}</div>${checkinContent}</li>`;
+                weeklyCheckinHTML += `<li class="mb-3 pb-3 border-b last:border-b-0"><div class="flex justify-between items-center mb-2"><strong class="font-semibold text-gray-700">${week.label}</strong>${statusBadgeHTML}</div>${checkinContent}</li>`;
             }
-        }
+        });
         if (!hasLoggedWeeks) weeklyCheckinHTML = '<p class="text-sm text-gray-500">No weekly check-ins logged.</p>';
         else weeklyCheckinHTML += '</ul>';
 
@@ -491,23 +617,24 @@ function renderSummary() {
     </div>`;
 }
 
+function updateHeaderForView(viewId) {
+    const config = getViewTitleConfig(viewId);
+    if (!config) return;
+    if (DOMElements.headerTitle) {
+        DOMElements.headerTitle.textContent = config.title || 'Growth Plan';
+    }
+    if (DOMElements.headerSubtitle) {
+        DOMElements.headerSubtitle.textContent = config.subtitle || '';
+    }
+}
+
 function switchView(viewId) {
     DOMElements.mainContent.scrollTop = 0;
     appState.currentView = viewId;
     sessionStorage.setItem('lastPlanId', appState.currentPlanId);
     sessionStorage.setItem('lastViewId', viewId);
 
-    const titles = {
-        vision: { title: `Bakery Growth Plan - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'Your 90-Day Sprint to a Better Bakery.' },
-         'month-1': { title: 'Month 1 Plan', subtitle: appState.planData.planName || 'Lay the foundations for success.' },
-         'month-2': { title: 'Month 2 Plan', subtitle: appState.planData.planName || 'Build momentum and embed processes.' },
-         'month-3': { title: 'Month 3 Plan', subtitle: appState.planData.planName || 'Refine execution and review the quarter.' },
-         summary: { title: `Plan Summary - ${appState.planData.quarter || ''}`, subtitle: appState.planData.planName || 'A complete overview of your quarterly plan.' },
-         files: { title: 'My Files', subtitle: "Manage documents for your plan, like P&L statements and KPIs." }
-};
-    
-    DOMElements.headerTitle.textContent = titles[viewId]?.title || 'Growth Plan';
-    DOMElements.headerSubtitle.textContent = titles[viewId]?.subtitle || '';
+    updateHeaderForView(viewId);
 
     const isSummaryView = viewId === 'summary';
     const isFilesView = viewId === 'files'; 
@@ -519,9 +646,16 @@ function switchView(viewId) {
     } else if (isFilesView) {
         renderFilesView(DOMElements.contentArea);
     } else {
-        const monthNum = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
-        DOMElements.contentArea.innerHTML = monthNum ? templates.month(monthNum) : templates.vision.html;
-        
+        const monthNumStr = viewId.startsWith('month-') ? viewId.split('-')[1] : null;
+        const monthNum = monthNumStr ? parseInt(monthNumStr, 10) : null;
+        if (monthNum) {
+            const weeks = getFormattedWeeks(monthNum, appState.planData);
+            const activeWeekIndex = getActiveWeekIndex(weeks);
+            DOMElements.contentArea.innerHTML = templates.month(monthNum, { weeks, activeWeekIndex });
+        } else {
+            DOMElements.contentArea.innerHTML = templates.vision.html;
+        }
+
         cacheFormElements();
         populateViewWithData();
 
@@ -658,9 +792,9 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
             const alreadySelected = statusButton.classList.contains('selected');
             const parent = statusButton.parentElement;
             parent.querySelectorAll('.status-button').forEach(btn => btn.classList.remove('selected'));
-            
+
             const monthNum = appState.currentView.split('-')[1];
-            const week = parent.dataset.week;
+            const week = parent.dataset.weekIndex;
             const key = `m${monthNum}s5_w${week}_status`;
             const payload = {};
 
@@ -683,15 +817,22 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
         const tab = e.target.closest('.weekly-tab');
         if (tab) {
             e.preventDefault();
-            const week = tab.dataset.week;
+            const weekIndex = tab.dataset.weekIndex;
+            const weekLabel = tab.dataset.weekLabel;
             document.querySelectorAll('.weekly-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             document.querySelectorAll('.weekly-tab-panel').forEach(p => {
-                p.classList.toggle('hidden', p.dataset.weekPanel !== week);
+                p.classList.toggle('hidden', p.dataset.weekPanel !== weekIndex);
             });
             document.querySelectorAll('[id^="weekly-progress-label-"]').forEach((label) => {
-                const labelWeek = label.id.split('-').pop();
-                label.textContent = `Week ${labelWeek} Progress:`;
+                const labelWeek = label.dataset.weekIndex || label.id.split('-').pop();
+                const labelText = label.dataset.weekLabel || weekLabel;
+                if (!label.dataset.weekLabel && weekLabel) {
+                    label.dataset.weekLabel = weekLabel;
+                }
+                label.textContent = labelText
+                    ? `Week ${labelWeek} Progress (${labelText}):`
+                    : `Week ${labelWeek} Progress:`;
             });
         }
     });
