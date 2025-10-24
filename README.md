@@ -1,139 +1,173 @@
-<h2>Bakery Growth Planner</h2><br>
+Okay, here is the updated README.md content, revised with a structure and tone appropriate for a software engineering project.
 
-Growth Planner is all-in-one digital hub for the planning and execution of bakery operations, built for Bakery Managers.
+-----
 
-The Bakery Growth Planner is a modern web application designed to empower Bakery Managers by streamlining the 30-60-90 day planning process. It replaces static documents with a dynamic, interactive, and intelligent platform, integrating AI to provide personalised support and reduce administrative overhead.
+markdown
+# Bakery Growth Planner
 
-This tool serves as a central hub for managers to define their vision, set actionable goals, track progress, and foster team development, ensuring alignment with core pillars: People, Product, Customer, and Place.
+**Version:** 1.0.0
 
-<br>
-<h3>✨ Key Features:</h3>
+## 📝 Overview
 
-📝 Guided 30-60-90 Day Plan: An intuitive, step-by-step template that walks managers through creating a comprehensive quarterly plan, from high-level vision to weekly check-ins.
+The **Bakery Growth Planner** is a web application designed specifically for Bakery Managers, serving as a centralised digital platform for **30-60-90 day operational planning and execution**. It aims to replace static documentation workflows with a dynamic, interactive system featuring AI integration for personalised support and reduced administrative overhead.
 
-📊 Interactive Dashboard: A central view of all growth plans, showcasing completion progress and last-edited status for quick access and management.
+The core objective is to provide managers with tools to:
+* Define and track quarterly strategic visions.
+* Set measurable, actionable goals aligned with operational pillars.
+* Monitor progress through regular check-ins.
+* Facilitate team development and performance management.
+* Ensure alignment with key pillars: **People**, **Product**, **Customer**, and **Place**.
 
-🗓️ Integrated Calendar: A full-featured calendar to schedule key dates, training sessions, 1-to-1s, and operational deadlines, directly linked to your growth plan.
+---
 
-🤖 AI-Generated Action Plans: Leverage the power of Google's Gemini AI to automatically generate a tactical, editable action plan from your completed 90-day summary, saving time and ensuring best practices.
+## ✨ Key Features
 
-☁️ Real-time Cloud Sync: All data is saved instantly and continuously to the cloud via Firebase, allowing you to access and edit your plans from any device.
+* **Guided 30-60-90 Day Planning Module:** A structured workflow for creating comprehensive quarterly plans, encompassing high-level objectives down to weekly tactical reviews.
+* **Centralised Dashboard:** Provides an aggregated view of all growth plans, highlighting key metadata like completion status and last modification time for quick access and oversight.
+* **Integrated Scheduling Calendar:** Allows managers to schedule and categorise events (e.g., training, 1-to-1s, audits, deadlines) directly within the planning context.
+* **AI-Generated Action Plans:** Utilises the Google Gemini API via a secure backend function to generate editable, tactical action plans derived from the manager's 90-day plan summary.
+* **Real-time Cloud Synchronisation:** Employs Google Cloud Firestore to ensure data consistency and real-time updates across multiple devices or sessions.
+* **Printable & Shareable Summaries:** Functionality to generate formatted plan summaries for printing or secure, read-only web link sharing.
+* **User Profile Management:** Standard user account management features including profile details (name, bakery) and optional photo upload.
 
-🖨️ Printable & Shareable Summaries: Generate clean, professional summaries of your plan, perfect for printing or sharing a secure, read-only link with your line manager.
+---
 
-👤 User Profiles: A dedicated space for managers to manage their account details and profile photo.
+## 🛠️ Technical Architecture & Stack
 
-<br>
-<h3>🚀 Roadmap & Future Features</h3>
-🧠 Myers-Briggs Integration: AI-generated action plans tailored to a manager's specific Myers-Briggs personality type for more effective strategies.
+The application utilises a decoupled architecture with a static frontend and a serverless backend, prioritising security, scalability, and maintainability.
 
-💬 AI Companion Chatbot: An intelligent assistant to support managers with real-time planning, execution advice, and data analysis.
+* **Frontend:**
+    * Vanilla JavaScript (ES Modules)
+    * HTML5
+    * Tailwind CSS (Utility-first CSS framework)
+* **Backend:**
+    * Netlify Functions (Serverless, Node.js runtime)
+* **Database:**
+    * Google Cloud Firestore (NoSQL, real-time capabilities)
+* **Authentication:**
+    * Firebase Authentication (Email/Password)
+* **AI Integration:**
+    * Google AI Gemini API (Accessed via secure Netlify function)
+* **Build Tool:**
+    * Vite (Frontend build tooling and development server)
+* **Deployment & Hosting:**
+    * Netlify (Static site hosting and serverless function deployment)
 
-👨‍👩‍👧‍👦 Team "Family Tree": A module to visualise your team structure, track individual development goals, and manage training schedules.
+**Architectural Considerations:**
 
-<br>
-<h3>🛠️ Tech Stack & Architecture</h3>
-This application is built with a modern, scalable, and secure architecture, prioritising performance and maintainability.
+* **Security:** API keys and sensitive credentials (Firebase Admin SDK, Gemini API Key) are managed exclusively within the serverless backend functions, preventing client-side exposure. Communication between frontend and backend is over HTTPS.
+* **Scalability:** Leverages serverless functions and Firestore, which scale automatically based on demand.
+* **Real-time Data:** Firestore enables real-time updates in the UI without manual refreshing, crucial for collaborative or multi-device usage scenarios.
 
-- Frontend: Vanilla JavaScript (ES Modules), HTML5, Tailwind CSS
+---
 
-- Backend: Netlify Serverless Functions (Node.js)
+## ⚙️ Getting Started (Local Development Environment)
 
-- Database: Google Cloud Firestore (Real-time NoSQL)
+Instructions for setting up and running the project locally.
 
-- Authentication: Firebase Authentication
+### Prerequisites
 
-- AI Integration: Google AI Gemini API
+* **Node.js:** Version 20.x or later is recommended. Verify with node -v.
+* **npm:** Version 9.x or later (usually included with Node.js). Verify with npm -v. (Or yarn if preferred).
+* **Firebase Project:**
+    * Access to a Google Cloud Firebase project.
+    * **Firestore Database** enabled within the project.
+    * **Firebase Authentication** enabled with the "Email/Password" sign-in provider.
+* **Google AI (Gemini) API Key:**
+    * Generated from Google AI Studio ([aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)).
+* **Netlify CLI:**
+    * Installation: npm install -g netlify-cli
+    * Authentication: netlify login
 
-- Deployment & Hosting: Netlify
+### Installation and Configuration
 
-- Build Tool: Vite
+1.  **Clone the Repository:**
+    bash
+    git clone [https://github.com/tristynb95/bakery-growth-plan.git](https://github.com/tristynb95/bakery-growth-plan.git)
+    cd bakery-growth-plan
+    
 
-The architecture is decoupled, with a static frontend that communicates with a secure serverless backend. This approach ensures that sensitive API keys (for Firebase and Google AI) are never exposed on the client-side. Firestore provides real-time data synchronisation, which is essential for a seamless user experience across devices.
+2.  **Install Dependencies:**
+    bash
+    npm install
+    
 
-<br>
-<h3>⚙️ Getting Started</h3>
-Follow these instructions to set up and run the project locally for development.
+3.  **Set Up Environment Variables:**
+    * Create a .env file by duplicating the example:
+        bash
+        cp .env.example .env
+        
+    * Edit the .env file and populate it with your specific Firebase project configuration values (found in your Firebase project settings: apiKey, authDomain, projectId, storageBucket, messagingSenderId, appId, measurementId) and your GEMINI_API_KEY.
 
-<h4>Prerequisites</h4>
+4.  **Run the Local Development Server:**
+    * Use the Netlify CLI to serve the application and emulate the serverless functions:
+        bash
+        netlify dev
+        
+    * The application will typically be available at http://localhost:8888 (confirm the URL provided in the terminal output). netlify dev handles proxying requests to your local functions.
 
-- Node.js (v18 or later recommended)
+---
 
-- npm or yarn
+## 📁 Project Structure
 
-- A Firebase project with Firestore and Authentication enabled.
-
-- A Google AI API Key for Gemini.
-
-- Netlify CLI
-
-<br>
-<h4>Local Development Setup</h4>
-Clone the repository:
-
-git clone [https://github.com/tristynb95/bakery-growth-plan.git](https://github.com/tristynb95/bakery-growth-plan.git)
-cd bakery-growth-plan
-
-Install dependencies:
-
-npm install
-
-Set up environment variables:
-Create a .env file in the root of the project by copying the example file:
-
-cp .env.example .env
-
-Now, fill in the .env file with your credentials from your Firebase project and Google AI Studio.
-
-Run the development server:
-This project uses the Netlify CLI to correctly serve the application and its serverless functions locally.
-
-netlify dev
-
-This command will start the Vite development server and the Netlify functions emulator. You can access the application at the URL provided in the terminal (usually http://localhost:8888).
-
-<br>
-<h3>📁 Folder Structure</h3>
 /
-├── js/                  # Frontend JavaScript modules
-│   ├── api.js           # Handles API calls to Netlify functions
-│   ├── auth.js          # Authentication logic and UI
-│   ├── calendar.js      # Interactive calendar functionality
-│   ├── dashboard.js     # Dashboard view logic
-│   ├── main.js          # Main application entry point
-│   ├── plan-view.js     # Logic for the 30-60-90 plan view
+├── js/                  # Frontend JavaScript modules (ES Modules)
+│   ├── api.js           # Client-side API call handlers (to Netlify functions)
+│   ├── auth.js          # Authentication UI logic, session management
+│   ├── calendar.js      # Calendar view rendering and interaction logic
+│   ├── chat.js          # AI Chat companion UI and logic
+│   ├── dashboard.js     # Dashboard view rendering and logic
+│   ├── files.js         # File upload and management view logic
+│   ├── main.js          # Main application entry point, initialization
+│   ├── plan-view.js     # 30-60-90 day plan view rendering and interaction
 │   ├── profile.js       # User profile page logic
-│   ├── ui.js            # General UI components (modals, menus)
-│   └── view.js          # Logic for the public shareable view
+│   ├── ui.js            # General UI components (modals, menus, etc.)
+│   ├── utils.js         # Utility functions (date formatting, calculations)
+│   └── view.js          # Logic for the public read-only shareable view
 ├── netlify/
-│   └── functions/       # Serverless backend functions
-│       ├── config.js    # Securely serves Firebase config
-│       └── generate-plan.js # Handles calls to the Gemini AI API
-├── index.html           # Main application shell
-├── profile.html         # User profile page
-├── view.html            # Public shareable plan page
-├── style.css            # Custom CSS styles with Tailwind directives
+│   └── functions/       # Serverless backend functions (Node.js)
+│       ├── config.js    # Securely serves Firebase frontend config
+│       ├── generate-chat-response.js # Handles calls to Gemini API for chat
+│       └── generate-plan.js # Handles calls to Gemini API for action plan generation
+├── index.html           # Main application shell (SPA entry)
+├── profile.html         # User profile page HTML
+├── view.html            # Public shareable plan page HTML
+├── action.html          # Handles Firebase email actions (e.g., password reset)
+├── privacy-policy.html  # Static privacy policy page
+├── terms-and-conditions.html # Static terms page
+├── style.css            # Custom CSS styles (including Tailwind directives)
 ├── vite.config.js       # Vite build configuration
-└── netlify.toml         # Netlify deployment configuration
+├── netlify.toml         # Netlify deployment and function configuration
+├── package.json         # Project dependencies and scripts
+├── .env.example         # Example environment variables file
+├── README.md            # This file
+└── .gitignore           # Specifies intentionally untracked files
 
-<br>
-<h3>🤝 Contributing**</h3>
-Contributions are welcome! Please follow these steps to contribute:
 
-Fork the repository.
 
-Create a new branch (git checkout -b feature/your-feature-name).
+-----
 
-Make your changes and commit them (git commit -m 'Add some feature').
+## 🚀 Roadmap & Potential Future Enhancements
 
-Push to the branch (git push origin feature/your-feature-name).
+  * **MBTI-Informed AI:** Explore integration of Myers-Briggs Type Indicator frameworks to allow the AI to optionally tailor suggestions and action plan phrasing to a manager's personality profile.
+  * **AI Chat Companion:** Implement an interactive chat interface allowing managers to query their plan data, ask for strategic advice, or brainstorm ideas conversationally using the Gemini API.
+  * **Team Organisation Module:** Develop functionality to map team structures, associate team members with development goals (IDPs), and track training progress.
 
-Open a Pull Request.
+-----
 
-<br>
-<h3>📄 License**</h3>
-This project is proprietary and intended for use by Bakery managers. All rights reserved.
+## 🤝 Contributing
 
-<br>
-<br>
-Created with ❤️ by Tristen Bayley
+This project is currently maintained as proprietary software for Bakery internal use. Contributions are not open at this time. Bug reports or feature suggestions should be directed through the appropriate internal channels.
+
+Should this project transition to an open contribution model, standard GitHub practices (Fork, Feature Branch, Pull Request) will apply.
+
+-----
+
+## 📄 License
+
+Proprietary. All rights reserved. Intended solely for authorised use by Bakery managers.
+
+-----
+
+*Authored by Tristen Bayley*
+
