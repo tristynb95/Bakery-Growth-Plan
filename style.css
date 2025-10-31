@@ -660,6 +660,248 @@ textarea.form-input {
     border-top: 1px solid var(--gails-grey-light);
 }
 
+.pillar-badge {
+    margin: 0.25rem 0.5rem 0.25rem 0;
+}
+
+.monthly-summary {
+    padding: 0;
+    overflow: hidden;
+}
+
+.monthly-summary__header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.75rem 2rem 1.5rem;
+    background-color: var(--gails-grey-light);
+    border-bottom: 1px solid var(--gails-grey-mid);
+}
+
+@media (min-width: 768px) {
+    .monthly-summary__header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.monthly-summary__eyebrow {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gails-text-secondary);
+}
+
+.monthly-summary__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 0.35rem;
+    color: var(--gails-text-primary);
+}
+
+.monthly-summary__pillars {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--gails-text-secondary);
+}
+
+.monthly-summary__pillars-label {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 0.25rem;
+}
+
+.monthly-summary__body {
+    display: grid;
+    gap: 0;
+}
+
+@media (min-width: 1024px) {
+    .monthly-summary__body {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    }
+}
+
+.monthly-summary__column {
+    padding: 1.75rem 2rem;
+}
+
+.monthly-summary__column--weekly {
+    background-color: #F9FAFB;
+    border-top: 1px solid var(--gails-grey-light);
+}
+
+@media (min-width: 1024px) {
+    .monthly-summary__column--weekly {
+        border-top: 0;
+        border-left: 1px solid var(--gails-grey-light);
+    }
+}
+
+.summary-panel + .summary-panel {
+    margin-top: 1.75rem;
+}
+
+.pillar-checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.pillar-checklist__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--gails-text-secondary);
+}
+
+.pillar-checklist__item i {
+    color: var(--gails-text-secondary);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.weekly-checkin-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.weekly-checkin {
+    background-color: var(--gails-white);
+    border: 1px solid var(--gails-grey-light);
+    border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.weekly-checkin__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.weekly-checkin__week {
+    font-weight: 700;
+    color: var(--gails-text-primary);
+}
+
+.weekly-checkin__body {
+    display: grid;
+    gap: 1rem;
+}
+
+.weekly-checkin__detail {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.weekly-checkin__label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gails-text-secondary);
+}
+
+.weekly-checkin__value {
+    font-size: 0.9rem;
+    color: var(--gails-text-primary);
+    line-height: 1.5;
+}
+
+.team-powerup {
+    display: grid;
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .team-powerup {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.team-powerup__item {
+    background-color: var(--gails-grey-light);
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+}
+
+.team-powerup__label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gails-text-secondary);
+    margin-bottom: 0.35rem;
+}
+
+.team-powerup__value {
+    font-size: 0.95rem;
+    color: var(--gails-text-primary);
+    line-height: 1.6;
+}
+
+.monthly-summary__footer {
+    background-color: #FEF2F2;
+    border-top: 1px solid #FECACA;
+    padding: 1.75rem 2rem 2rem;
+}
+
+.monthly-review-grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.25rem;
+}
+
+@media (min-width: 640px) {
+    .monthly-review-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.monthly-review-card {
+    background-color: var(--gails-white);
+    border-radius: 0.75rem;
+    border: 1px solid #FECACA;
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    gap: 0.75rem;
+}
+
+.monthly-review-card__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    color: var(--gails-red);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.8rem;
+}
+
+.monthly-review-card__header i {
+    font-size: 1.1rem;
+}
+
+.monthly-review-card__body {
+    font-size: 0.95rem;
+    color: var(--gails-text-primary);
+    line-height: 1.6;
+}
+
 /* 27. Editable AI Action Plan Styles
 -------------------------------------------------- */
 .editable-action-plan {
