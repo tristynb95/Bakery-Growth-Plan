@@ -85,7 +85,7 @@ function runViewScript(app) {
 
         const renderMonthSummary = (monthNum) => {
             const planTitle = planTitleMap[monthNum] || `Month ${monthNum} Plan`;
-            let weeklyCheckinHTML = '<ul>';
+            let weeklyCheckins = [];
             let hasLoggedWeeks = false;
             const weeksToRender = getWeeksForMonth(monthNum);
             weeksToRender.forEach((w) => {
@@ -98,35 +98,50 @@ function runViewScript(app) {
                     hasLoggedWeeks = true;
                     const statusText = status.replace('-', ' ').toUpperCase();
                     const statusBadgeHTML = `<span class="summary-status-badge status-${status}">${statusText}</span>`;
-                    
-                    let checkinContent = '';
+
+                    const detailBlocks = [];
                     if (!isContentEmpty(win)) {
-                        checkinContent += `<div class="text-sm text-gray-600 mb-2"><strong>Win/Learning:</strong><br>${e(win)}</div>`;
+                        detailBlocks.push(`
+                            <div class="weekly-checkin__detail">
+                                <span class="weekly-checkin__label">Win / Learning</span>
+                                <div class="weekly-checkin__value">${e(win)}</div>
+                            </div>`);
                     }
                     if (!isContentEmpty(spotlight)) {
-                        checkinContent += `<div class="text-sm text-gray-600 mb-2"><strong>Breadhead Spotlight:</strong><br>${e(spotlight)}</div>`;
+                        detailBlocks.push(`
+                            <div class="weekly-checkin__detail">
+                                <span class="weekly-checkin__label">Breadhead Spotlight</span>
+                                <div class="weekly-checkin__value">${e(spotlight)}</div>
+                            </div>`);
                     }
                     if (!isContentEmpty(shine)) {
-                        checkinContent += `<div class="text-sm text-gray-600"><strong>SHINE Focus:</strong><br>${e(shine)}</div>`;
-                    }
-                     if (checkinContent === '') {
-                        checkinContent = '<p class="text-sm text-gray-500 italic">No details logged for this week.</p>';
+                        detailBlocks.push(`
+                            <div class="weekly-checkin__detail">
+                                <span class="weekly-checkin__label">SHINE Focus</span>
+                                <div class="weekly-checkin__value">${e(shine)}</div>
+                            </div>`);
                     }
 
-                    weeklyCheckinHTML += `<li class="mb-3 pb-3 border-b last:border-b-0">
-                                            <div class="flex justify-between items-center mb-2">
-                                                <strong class="font-semibold text-gray-700">Week ${w}</strong>
-                                                ${statusBadgeHTML}
-                                            </div>
-                                            ${checkinContent}
-                                          </li>`;
+                    const checkinContent = detailBlocks.length > 0
+                        ? detailBlocks.join('')
+                        : '<p class="text-sm text-gray-500 italic">No details logged for this week.</p>';
+
+                    weeklyCheckins.push(`
+                        <article class="weekly-checkin">
+                            <div class="weekly-checkin__meta">
+                                <span class="weekly-checkin__week">Week ${w}</span>
+                                ${statusBadgeHTML}
+                            </div>
+                            <div class="weekly-checkin__body">
+                                ${checkinContent}
+                            </div>
+                        </article>
+                    `);
                 }
             });
 
             if (!hasLoggedWeeks) {
-                weeklyCheckinHTML = '<p class="text-sm text-gray-500">No weekly check-ins have been logged for this month.</p>';
-            } else {
-                weeklyCheckinHTML += '</ul>';
+                weeklyCheckins = ['<p class="text-sm text-gray-500 italic">No weekly check-ins have been logged for this month.</p>'];
             }
 
             const pillars = formData[`m${monthNum}s1_pillar`];
@@ -144,56 +159,106 @@ function runViewScript(app) {
                     return `<span class="pillar-badge">${pillarIcon} ${pillarText}</span>`;
                 }).join('');
             }
-            
-            let pillarHTML = '';
-            if (pillarBadgesHTML) {
-                pillarHTML = `<div class="flex items-center gap-2 mb-4 flex-wrap"><span class="font-semibold text-sm text-gray-500">Pillar Focus:</span>${pillarBadgesHTML}</div>`;
+
+            const powerUpQuestion = formData[`m${monthNum}s2_powerup_q`];
+            const powerUpIdea = formData[`m${monthNum}s2_powerup_a`];
+
+            let teamPowerUpHTML = '';
+            if (!isContentEmpty(powerUpQuestion) || !isContentEmpty(powerUpIdea)) {
+                teamPowerUpHTML = `
+                    <section class="summary-panel">
+                        <h3 class="summary-heading">Team Power-Up</h3>
+                        <div class="team-powerup">
+                            ${!isContentEmpty(powerUpQuestion) ? `
+                                <div class="team-powerup__item">
+                                    <span class="team-powerup__label">Question</span>
+                                    <div class="team-powerup__value">${e(powerUpQuestion)}</div>
+                                </div>
+                            ` : ''}
+                            ${!isContentEmpty(powerUpIdea) ? `
+                                <div class="team-powerup__item">
+                                    <span class="team-powerup__label">Winning Idea</span>
+                                    <div class="team-powerup__value">${e(powerUpIdea)}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </section>`;
             }
 
+            const pillarHTML = pillarBadgesHTML
+                ? `<div class="monthly-summary__pillars"><span class="monthly-summary__pillars-label">Pillar Focus:</span>${pillarBadgesHTML}</div>`
+                : '';
+
             return `
-                <div class="content-card p-0 overflow-hidden mt-8">
-                    <h2 class="text-2xl font-bold font-poppins p-6 bg-gray-50 border-b">${planTitle}</h2>
-                    <div class="summary-grid">
-                        <div class="p-6">
-                            ${pillarHTML}
-                            <div class="summary-section">
+                <section class="content-card monthly-summary mt-8">
+                    <header class="monthly-summary__header">
+                        <div>
+                            <p class="monthly-summary__eyebrow">${planTitle}</p>
+                            <h2 class="monthly-summary__title">Focus & Momentum</h2>
+                        </div>
+                        ${pillarHTML}
+                    </header>
+                    <div class="monthly-summary__body">
+                        <div class="monthly-summary__column monthly-summary__column--focus">
+                            <section class="summary-panel">
                                 <h3 class="summary-heading">Must-Win Battle</h3>
                                 <div class="summary-content text-sm">${e(formData[`m${monthNum}s1_battle`])}</div>
-                            </div>
-                            <div class="summary-section">
+                            </section>
+                            <section class="summary-panel">
                                 <h3 class="summary-heading">Key Actions</h3>
                                 <div class="summary-content text-sm">${e(formData[`m${monthNum}s2_levers`])}</div>
-                            </div>
-                            <div class="summary-section">
+                            </section>
+                            ${teamPowerUpHTML}
+                            <section class="summary-panel">
                                 <h3 class="summary-heading">Developing Our Breadheads</h3>
                                 <div class="summary-content text-sm">${e(formData[`m${monthNum}s3_people`])}</div>
-                            </div>
-                            <div class="summary-section">
-                                <h3 class="summary-heading">Upholding Pillars</h3>
-                                <ul class="space-y-3 mt-2">
-                                    <li class="flex items-start text-sm"><i class="bi bi-people-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_people`])}</span></li>
-                                    <li class="flex items-start text-sm"><i class="bi bi-cup-hot-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_product`])}</span></li>
-                                    <li class="flex items-start text-sm"><i class="bi bi-heart-fill w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_customer`])}</span></li>
-                                    <li class="flex items-start text-sm"><i class="bi bi-shop w-5 text-center mr-3 text-gray-400"></i><span class="flex-1">${e(formData[`m${monthNum}s4_place`])}</span></li>
+                            </section>
+                            <section class="summary-panel">
+                                <h3 class="summary-heading">Upholding Our Pillars</h3>
+                                <ul class="pillar-checklist">
+                                    <li class="pillar-checklist__item"><i class="bi bi-people-fill"></i><span>${e(formData[`m${monthNum}s4_people`])}</span></li>
+                                    <li class="pillar-checklist__item"><i class="bi bi-cup-hot-fill"></i><span>${e(formData[`m${monthNum}s4_product`])}</span></li>
+                                    <li class="pillar-checklist__item"><i class="bi bi-heart-fill"></i><span>${e(formData[`m${monthNum}s4_customer`])}</span></li>
+                                    <li class="pillar-checklist__item"><i class="bi bi-shop"></i><span>${e(formData[`m${monthNum}s4_place`])}</span></li>
                                 </ul>
-                            </div>
+                            </section>
                         </div>
-                        <div class="p-6 bg-gray-50/70 border-l">
-                            <div class="summary-section">
+                        <div class="monthly-summary__column monthly-summary__column--weekly">
+                            <section class="summary-panel">
                                 <h3 class="summary-heading">Weekly Momentum</h3>
-                                ${weeklyCheckinHTML}
-                            </div>
+                                <div class="weekly-checkin-list">
+                                    ${weeklyCheckins.join('')}
+                                </div>
+                            </section>
                         </div>
                     </div>
-                    <div class="p-6 bg-red-50 border-t border-gray-200">
-                        <h3 class="summary-heading !text-red-800">End of Month Review</h3>
-                        <ul class="space-y-3 mt-2">
-                            <li class="flex items-start text-sm"><i class="bi bi-trophy-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Biggest Win:</strong> ${e(formData[`m${monthNum}s6_win`])}</span></li>
-                            <li class="flex items-start text-sm"><i class="bi bi-lightbulb-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Toughest Challenge & Learning:</strong> ${e(formData[`m${monthNum}s6_challenge`])}</span></li>
-                            <li class="flex items-start text-sm"><i class="bi bi-rocket-takeoff-fill w-5 text-center mr-3 text-red-400"></i><span class="flex-1"><strong class="font-semibold text-gray-700">Focus for Next Month:</strong> ${e(formData[`m${monthNum}s6_next`])}</span></li>
-                        </ul>
-                    </div>
-                </div>`;
+                    <footer class="monthly-summary__footer">
+                        <h3 class="summary-heading">End of Month Review</h3>
+                        <div class="monthly-review-grid">
+                            <article class="monthly-review-card">
+                                <div class="monthly-review-card__header">
+                                    <i class="bi bi-trophy-fill"></i>
+                                    <span>Biggest Win</span>
+                                </div>
+                                <div class="monthly-review-card__body">${e(formData[`m${monthNum}s6_win`])}</div>
+                            </article>
+                            <article class="monthly-review-card">
+                                <div class="monthly-review-card__header">
+                                    <i class="bi bi-lightbulb-fill"></i>
+                                    <span>Toughest Challenge & Learning</span>
+                                </div>
+                                <div class="monthly-review-card__body">${e(formData[`m${monthNum}s6_challenge`])}</div>
+                            </article>
+                            <article class="monthly-review-card">
+                                <div class="monthly-review-card__header">
+                                    <i class="bi bi-rocket-takeoff-fill"></i>
+                                    <span>Focus for Next Month</span>
+                                </div>
+                                <div class="monthly-review-card__body">${e(formData[`m${monthNum}s6_next`])}</div>
+                            </article>
+                        </div>
+                    </footer>
+                </section>`;
         };
         
 
@@ -203,7 +268,8 @@ function runViewScript(app) {
         const monthlyGoalsHTML = [1, 2, 3]
             .map((monthNum) => {
                 const goalLabel = goalLabelMap[monthNum] || `Month ${monthNum} Goal`;
-                return `<div><strong class="font-semibold text-gray-600 block">${goalLabel}:</strong><div class="text-gray-800 mt-1 prose prose-sm">${e(formData[`month${monthNum}Goal`])}</div></div>`;
+                const goalContent = e(formData[`month${monthNum}Goal`]);
+                return `<div><strong class="font-semibold text-gray-600 block">${goalLabel}:</strong><div class="text-gray-800 mt-1 prose prose-sm">${goalContent}</div></div>`;
             })
             .join('');
 
