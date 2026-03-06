@@ -56,8 +56,7 @@ exports.handler = async function(event, context) {
     const { planSummary, chatHistory, userMessage, calendarData } = JSON.parse(event.body);
     
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // --- FIX: Corrected the model name from "gemini-2.5-flash-lite" to "gemini-2.5-flash" ---
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest"});
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash"});
     
     const calendarContext = formatCalendarDataForAI(calendarData, 30);
     

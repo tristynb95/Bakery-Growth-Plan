@@ -11,7 +11,7 @@ exports.handler = async function(event, context) {
     
     // Securely get the API key from the environment variables you set in Netlify
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest"});
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash"});
 
     // --- ENHANCED PROMPT FOR CONSISTENCY ---
     const prompt = `
