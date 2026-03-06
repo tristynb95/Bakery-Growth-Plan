@@ -61,35 +61,65 @@ export async function renderDashboard() {
         console.error("Error fetching user plans:", error);
     }
 
-    let dashboardHTML = `<div class="flex justify-between items-center"><h1 class="text-4xl font-black text-gray-900 font-poppins">Your Growth Plans</h1></div><div class="dashboard-grid">`;
+    const firstName = (appState.currentUser.displayName || appState.currentUser.email || '').split(' ')[0] || 'there';
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
+    let dashboardHTML = `
+        <div class="dashboard-hero">
+            <div class="dashboard-hero-text">
+                <h1 class="text-4xl font-black text-gray-900 font-poppins">${greeting}, ${firstName}</h1>
+                <p class="text-lg text-gray-500 mt-1">You have <strong>${plans.length}</strong> growth plan${plans.length !== 1 ? 's' : ''}. Keep up the momentum.</p>
+            </div>
+        </div>
+        <div class="dashboard-grid">`;
+
     plans.forEach(plan => {
         const completion = calculatePlanCompletion(plan);
         const editedDate = formatLastEditedDate(plan.lastEdited);
         const planName = plan.planName || 'Untitled Plan';
+        const progressColor = completion === 100 ? 'var(--gails-green)' : 'var(--gails-red)';
+        const statusLabel = completion === 100 ? 'Complete' : completion > 0 ? 'In Progress' : 'Not Started';
+        const statusClass = completion === 100 ? 'status-complete' : completion > 0 ? 'status-in-progress' : 'status-not-started';
+
         dashboardHTML += `
             <div class="plan-card">
+                <div class="plan-card-accent" style="--accent-progress: ${completion}; --accent-color: ${progressColor}"></div>
                 <div class="plan-card-actions">
                     <button class="plan-action-btn edit-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" data-plan-quarter="${plan.quarter || ''}" title="Edit Details"><i class="bi bi-pencil-square"></i></button>
                     <button class="plan-action-btn delete-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" data-plan-quarter="${plan.quarter || ''}" title="Delete Plan"><i class="bi bi-trash3-fill"></i></button>
                 </div>
                 <div class="plan-card-main" data-plan-id="${plan.id}">
-                    <div class="flex-grow">
-                        <h3 class="text-xl font-bold font-poppins">${planName}</h3>
-                        <p class="text-sm text-gray-500 mt-1">${plan.quarter || 'No quarter set'}</p>
+                    <div class="plan-card-header">
+                        <div class="plan-card-icon"><i class="bi bi-journal-richtext"></i></div>
+                        <span class="plan-card-status ${statusClass}">${statusLabel}</span>
                     </div>
-                    <div class="mt-6 pt-4 border-t text-sm space-y-2">
-                        <div class="flex justify-between"><span class="font-semibold text-gray-600">Last Edited:</span><span>${editedDate}</span></div>
-                        <div class="flex justify-between items-center">
-                            <span class="font-semibold text-gray-600">Completion:</span>
-                            <div class="progress-circle" style="--progress: ${completion}">
-                                <div class="progress-circle-inner">${completion}%</div>
-                            </div>
+                    <div class="plan-card-body">
+                        <h3 class="plan-card-title">${planName}</h3>
+                        <p class="plan-card-quarter"><i class="bi bi-calendar3"></i> ${plan.quarter || 'No quarter set'}</p>
+                    </div>
+                    <div class="plan-card-footer">
+                        <div class="plan-card-progress-bar">
+                            <div class="plan-card-progress-fill" style="width: ${completion}%; background-color: ${progressColor}"></div>
+                        </div>
+                        <div class="plan-card-meta">
+                            <span class="plan-card-completion">${completion}%</span>
+                            <span class="plan-card-edited"><i class="bi bi-clock"></i> ${editedDate}</span>
                         </div>
                     </div>
                 </div>
             </div>`;
     });
-    dashboardHTML += `<div class="plan-card new-plan-card" id="create-new-plan-btn"><i class="bi bi-plus-circle-dotted text-4xl"></i><p class="mt-2 font-semibold">Create New Plan</p></div></div>`;
+
+    dashboardHTML += `
+        <div class="plan-card new-plan-card" id="create-new-plan-btn">
+            <div class="new-plan-card-inner">
+                <div class="new-plan-icon-ring"><i class="bi bi-plus-lg"></i></div>
+                <p class="new-plan-label">Create New Plan</p>
+                <p class="new-plan-sublabel">Start a fresh 90-day sprint</p>
+            </div>
+        </div>
+    </div>`;
     dashboardContent.innerHTML = dashboardHTML;
 }
 
