@@ -55,25 +55,35 @@ exports.handler = async function (event) {
       };
     }
 
+    // Collect all document refs to delete
+    const refsToDelete = [];
+
     // Delete user's plans subcollection
     const plansSnapshot = await db
       .collection("users")
       .doc(uid)
       .collection("plans")
       .get();
-    const batch = db.batch();
-    plansSnapshot.forEach((doc) => batch.delete(doc.ref));
+    plansSnapshot.forEach((doc) => refsToDelete.push(doc.ref));
 
     // Delete from top-level plans collection
     const topPlansSnapshot = await db
       .collection("plans")
       .where("userId", "==", uid)
       .get();
-    topPlansSnapshot.forEach((doc) => batch.delete(doc.ref));
+    topPlansSnapshot.forEach((doc) => refsToDelete.push(doc.ref));
 
     // Delete user document
-    batch.delete(db.collection("users").doc(uid));
-    await batch.commit();
+    refsToDelete.push(db.collection("users").doc(uid));
+
+    // Firestore batches are limited to 500 operations, so chunk if needed
+    const BATCH_LIMIT = 500;
+    for (let i = 0; i < refsToDelete.length; i += BATCH_LIMIT) {
+      const chunk = refsToDelete.slice(i, i + BATCH_LIMIT);
+      const batch = db.batch();
+      chunk.forEach((ref) => batch.delete(ref));
+      await batch.commit();
+    }
 
     // Delete the Firebase Auth account
     try {
