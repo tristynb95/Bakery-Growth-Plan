@@ -134,26 +134,44 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
     gap: 0.5rem;
 }
 
+/* Dashboard Hero */
 .dashboard-hero {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
 }
-.dashboard-hero-text p { font-size: 1.05rem; }
-.dashboard-hero-text p strong { color: var(--gails-text-primary); }
+.dashboard-hero-greeting {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--gails-text-secondary);
+    margin-bottom: 0.25rem;
+}
+.dashboard-hero-title {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--gails-text-primary);
+    line-height: 1.2;
+}
+.dashboard-hero-subtitle {
+    font-size: 0.9rem;
+    color: var(--gails-text-secondary);
+    margin-top: 0.375rem;
+}
 
+/* Dashboard Grid */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+    gap: 1.25rem;
     max-width: 100%;
 }
 
 /* Plan Card */
 .plan-card {
     background-color: var(--gails-white);
-    border: 1px solid #E5E7EB;
-    border-radius: 1rem;
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+    border: 1px solid #E8EAED;
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.04), 0 1px 2px rgb(0 0 0 / 0.06);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -161,28 +179,18 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
     overflow: hidden;
 }
 .plan-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--gails-red);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -4px rgb(0 0 0 / 0.08), 0 4px 8px -2px rgb(0 0 0 / 0.04);
+    border-color: #C7CBD1;
 }
 
-/* Accent bar at top of card */
-.plan-card-accent {
-    height: 4px;
-    background: linear-gradient(
-        90deg,
-        var(--accent-color, var(--gails-red)) calc(var(--accent-progress, 0) * 1%),
-        var(--gails-grey-light) calc(var(--accent-progress, 0) * 1%)
-    );
-    transition: background 0.6s ease-out;
-}
-
+/* Action buttons */
 .plan-card-actions {
     position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
+    top: 0.875rem;
+    right: 0.875rem;
     display: flex;
-    gap: 0.35rem;
+    gap: 0.25rem;
     opacity: 0;
     transition: opacity 0.2s ease;
     z-index: 2;
@@ -190,7 +198,7 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 .plan-card:hover .plan-card-actions { opacity: 1; }
 .plan-action-btn {
     background-color: var(--gails-white);
-    border: 1px solid var(--gails-grey-mid);
+    border: 1px solid #E5E7EB;
     color: var(--gails-text-secondary);
     border-radius: 0.5rem;
     width: 2rem;
@@ -199,166 +207,171 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     transition: all 0.15s ease;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
 }
 .plan-action-btn:hover {
-    color: var(--gails-text-primary);
-    border-color: #4B5563;
-    background-color: var(--gails-grey-light);
+    color: var(--gails-red);
+    border-color: var(--gails-red);
+    background-color: var(--gails-red-light);
 }
 
+/* Card main */
 .plan-card-main {
     cursor: pointer;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    padding: 1.25rem 1.5rem 1.5rem;
-    gap: 0.75rem;
+    padding: 1.375rem 1.375rem 1.25rem;
 }
 
-/* Card header row: icon + status badge */
-.plan-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+/* Card body */
+.plan-card-body {
+    flex-grow: 1;
+    margin-bottom: 1.25rem;
 }
-.plan-card-icon {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 0.625rem;
-    background-color: var(--gails-red-light);
+.plan-card-quarter-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.725rem;
+    font-weight: 600;
     color: var(--gails-red);
+    background-color: var(--gails-red-light);
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.375rem;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.02em;
+}
+.plan-card-quarter-badge i { font-size: 0.65rem; }
+.plan-card-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+    color: var(--gails-text-primary);
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Card footer */
+.plan-card-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding-top: 1rem;
+    border-top: 1px solid #F0F1F3;
+}
+.plan-card-progress-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 1.15rem;
+    gap: 0.625rem;
+}
+.plan-card-progress-bar {
+    flex: 1;
+    height: 5px;
+    background-color: #F0F1F3;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+.plan-card-progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.plan-card-completion {
+    font-size: 0.8rem;
+    font-weight: 700;
+    min-width: 2.25rem;
+    text-align: right;
+}
+.plan-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 .plan-card-status {
-    font-size: 0.7rem;
+    font-size: 0.675rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 0.25rem 0.625rem;
-    border-radius: 9999px;
-    line-height: 1;
+    letter-spacing: 0.05em;
+    padding: 0.225rem 0.55rem;
+    border-radius: 0.3rem;
+    line-height: 1.1;
 }
 .plan-card-status.status-complete {
     background-color: var(--status-on-track-bg);
     color: var(--status-on-track-text);
 }
 .plan-card-status.status-in-progress {
-    background-color: var(--status-issues-bg);
-    color: var(--status-issues-text);
+    background-color: var(--gails-red-light);
+    color: var(--gails-red);
 }
 .plan-card-status.status-not-started {
     background-color: var(--gails-grey-light);
     color: var(--gails-text-secondary);
 }
-
-/* Card body */
-.plan-card-body { flex-grow: 1; }
-.plan-card-title {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1.15rem;
-    letter-spacing: -0.01em;
-    color: var(--gails-text-primary);
-    line-height: 1.3;
-}
-.plan-card-quarter {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.825rem;
-    color: var(--gails-text-secondary);
-    margin-top: 0.25rem;
-}
-.plan-card-quarter i { font-size: 0.75rem; }
-
-/* Card footer */
-.plan-card-footer {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid #F3F4F6;
-}
-.plan-card-progress-bar {
-    width: 100%;
-    height: 6px;
-    background-color: var(--gails-grey-light);
-    border-radius: 3px;
-    overflow: hidden;
-}
-.plan-card-progress-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.plan-card-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.775rem;
-}
-.plan-card-completion {
-    font-weight: 700;
-    color: var(--gails-text-primary);
-}
 .plan-card-edited {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.25rem;
+    font-size: 0.75rem;
     color: var(--gails-text-secondary);
 }
-.plan-card-edited i { font-size: 0.7rem; }
+.plan-card-edited i { font-size: 0.675rem; }
 
 /* New Plan Card */
 .plan-card.new-plan-card {
-    border-style: dashed;
-    border-width: 2px;
-    border-color: var(--gails-grey-mid);
+    border: 2px dashed #D5D8DC;
+    background-color: transparent;
     color: var(--gails-text-secondary);
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    min-height: 220px;
-    background-color: transparent;
+    min-height: 200px;
+    box-shadow: none;
 }
 .plan-card.new-plan-card:hover {
     color: var(--gails-red);
     background-color: var(--gails-red-light);
     border-color: var(--gails-red);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -4px rgb(209 10 17 / 0.08);
 }
 .new-plan-card-inner {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.625rem;
     padding: 1.5rem;
 }
 .new-plan-icon-ring {
-    width: 3.5rem;
-    height: 3.5rem;
+    width: 3rem;
+    height: 3rem;
     border-radius: 50%;
     border: 2px dashed currentColor;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-size: 1.25rem;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), border-style 0.2s ease;
 }
 .plan-card.new-plan-card:hover .new-plan-icon-ring {
     transform: scale(1.1) rotate(90deg);
+    border-style: solid;
 }
 .new-plan-label {
+    font-family: 'Poppins', sans-serif;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 .new-plan-sublabel {
-    font-size: 0.8rem;
-    opacity: 0.7;
+    font-size: 0.775rem;
+    opacity: 0.65;
 }
 
 /* 4. Main App Layout & Sidebar
