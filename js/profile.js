@@ -21,10 +21,11 @@ function runProfileScript(app) {
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    const bakeryList = [
+    const DEFAULT_BAKERIES = [
         'Beaconsfield', 'Berkhamsted', 'Gerrards Cross', 'Harpenden', 'Henley',
         'Marlow', 'Radlett', 'Ruislip', 'St Albans', 'Welwyn Garden City'
     ].sort();
+    let bakeryList = [...DEFAULT_BAKERIES];
 
     const DOMElements = {
         profileName: document.getElementById('profile-name'),
@@ -46,6 +47,14 @@ function runProfileScript(app) {
         modalContent: document.getElementById('modal-content'),
         modalActionBtn: document.getElementById('modal-action-btn'),
         modalCloseBtn: document.getElementById('modal-close-btn'),
+        dangerZone: document.getElementById('danger-zone'),
+        deleteAccountBtn: document.getElementById('delete-account-btn'),
+        deleteModalOverlay: document.getElementById('delete-modal-overlay'),
+        deleteModalCloseBtn: document.getElementById('delete-modal-close-btn'),
+        deleteConfirmHint: document.getElementById('delete-confirm-hint'),
+        deleteConfirmInput: document.getElementById('delete-confirm-input'),
+        deleteConfirmBtn: document.getElementById('delete-confirm-btn'),
+        deleteCancelBtn: document.getElementById('delete-cancel-btn'),
     };
 
     let currentUser = null;
@@ -169,6 +178,7 @@ function runProfileScript(app) {
                     DOMElements.removePhotoBtn.classList.remove('hidden');
                 }
                 DOMElements.headerBackBtn.classList.remove('hidden');
+                DOMElements.dangerZone.classList.remove('hidden');
                 checkFormValidity();
             } else {
                 DOMElements.headerTitle.textContent = 'Welcome! Let\'s Set Up Your Profile.';
@@ -311,9 +321,103 @@ function runProfileScript(app) {
         }
     });
 
-    auth.onAuthStateChanged((user) => {
+    async function loadBakeryList() {
+        try {
+            const doc = await db.collection('settings').doc('bakeries').get();
+            if (doc.exists && Array.isArray(doc.data().list)) {
+                bakeryList = doc.data().list.sort();
+            }
+        } catch (error) {
+            console.warn('Could not load bakeries from Firestore, using defaults:', error);
+        }
+    }
+
+    // --- Delete Account Logic ---
+    function getExpectedConfirmation() {
+        const name = DOMElements.profileName.value.trim();
+        return name ? `delete ${name}` : '';
+    }
+
+    function openDeleteModal() {
+        const expected = getExpectedConfirmation();
+        if (!expected) {
+            openModal('warning', 'Cannot Delete', 'Your profile name must be set before you can delete your account.');
+            return;
+        }
+        DOMElements.deleteConfirmHint.textContent = expected;
+        DOMElements.deleteConfirmInput.value = '';
+        DOMElements.deleteConfirmBtn.disabled = true;
+        DOMElements.deleteModalOverlay.classList.remove('hidden');
+        DOMElements.deleteConfirmInput.focus();
+    }
+
+    function closeDeleteModal() {
+        DOMElements.deleteModalOverlay.classList.add('hidden');
+        DOMElements.deleteConfirmInput.value = '';
+        DOMElements.deleteConfirmBtn.disabled = true;
+    }
+
+    DOMElements.deleteConfirmInput.addEventListener('input', () => {
+        const expected = getExpectedConfirmation();
+        DOMElements.deleteConfirmBtn.disabled = DOMElements.deleteConfirmInput.value !== expected;
+    });
+
+    DOMElements.deleteAccountBtn.addEventListener('click', openDeleteModal);
+    DOMElements.deleteModalCloseBtn.addEventListener('click', closeDeleteModal);
+    DOMElements.deleteCancelBtn.addEventListener('click', closeDeleteModal);
+    DOMElements.deleteModalOverlay.addEventListener('mousedown', (e) => {
+        if (e.target === DOMElements.deleteModalOverlay) closeDeleteModal();
+    });
+
+    DOMElements.deleteConfirmBtn.addEventListener('click', async () => {
+        const expected = getExpectedConfirmation();
+        if (DOMElements.deleteConfirmInput.value !== expected) return;
+        if (!currentUser) return;
+
+        DOMElements.deleteConfirmBtn.disabled = true;
+        DOMElements.deleteConfirmBtn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Deleting...';
+
+        try {
+            // Delete profile photo from storage
+            try {
+                const photoRef = storage.ref(`profilePhotos/${currentUser.uid}`);
+                await photoRef.delete();
+            } catch (e) {
+                // Photo may not exist, that's fine
+            }
+
+            // Delete all user plans
+            const plansSnapshot = await db.collection('plans').where('userId', '==', currentUser.uid).get();
+            const batch = db.batch();
+            plansSnapshot.forEach((doc) => batch.delete(doc.ref));
+
+            // Delete user document
+            batch.delete(db.collection('users').doc(currentUser.uid));
+            await batch.commit();
+
+            // Delete the Firebase auth account
+            await currentUser.delete();
+
+            // Redirect to login
+            window.location.href = '/index.html';
+        } catch (error) {
+            console.error('Error deleting account:', error);
+            if (error.code === 'auth/requires-recent-login') {
+                closeDeleteModal();
+                openModal('warning', 'Re-authentication Required', 'For security, please sign out, sign back in, and try again.');
+            } else {
+                closeDeleteModal();
+                openModal('warning', 'Delete Failed', 'Could not delete your account. Please try again or contact support.');
+            }
+            DOMElements.deleteConfirmBtn.innerHTML = 'Delete My Account';
+            DOMElements.deleteConfirmBtn.disabled = false;
+        }
+    });
+
+    auth.onAuthStateChanged(async (user) => {
         if (user) {
             currentUser = user;
+            await loadBakeryList();
             loadUserProfile(user);
             setupBakeryDropdown();
         } else {

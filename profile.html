@@ -83,6 +83,14 @@
 
                 </div>
             </div>
+
+            <div id="danger-zone" class="content-card p-8 mt-8 border-2 border-red-200 hidden">
+                <h2 class="text-xl font-bold text-red-600 mb-2">Danger Zone</h2>
+                <p class="text-gray-600 mb-4">Permanently delete your account and all associated data. This action cannot be undone.</p>
+                <button id="delete-account-btn" class="btn bg-red-600 text-white hover:bg-red-700 transition-colors">
+                    <i class="bi bi-trash-fill"></i> Delete Account
+                </button>
+            </div>
         </main>
 
         <footer class="text-center text-sm text-gray-500 py-6">
@@ -94,12 +102,30 @@
         <div id="modal-box" class="modal-box">
             <div class="modal-header">
                 <h3 id="modal-title" class="text-lg font-bold">Modal Title</h3>
-                <button id="modal-close-btn" class="modal-close-btn">&times;</button>
+                <button id="modal-close-btn" class="btn btn-secondary btn-icon"><i class="bi bi-x-lg"></i></button>
             </div>
             <div id="modal-content" class="modal-content">
                 </div>
             <div class="modal-footer">
                 <button id="modal-action-btn" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-modal-overlay" class="modal-overlay hidden">
+        <div id="delete-modal-box" class="modal-box" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3 class="text-lg font-bold text-red-600"><i class="bi bi-exclamation-triangle-fill mr-2"></i>Delete Account</h3>
+                <button id="delete-modal-close-btn" class="btn btn-secondary btn-icon"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-content">
+                <p class="mb-3">This will permanently delete your account and all your data. This action <strong>cannot be undone</strong>.</p>
+                <p class="mb-2 text-sm text-gray-600">To confirm, type <strong id="delete-confirm-hint" class="text-red-600"></strong> below:</p>
+                <input type="text" id="delete-confirm-input" class="form-input" placeholder="Type confirmation here..." autocomplete="off">
+            </div>
+            <div class="modal-footer" style="gap: 0.5rem;">
+                <button id="delete-cancel-btn" class="btn btn-secondary">Cancel</button>
+                <button id="delete-confirm-btn" class="btn bg-red-600 text-white hover:bg-red-700 transition-colors" disabled>Delete My Account</button>
             </div>
         </div>
     </div>

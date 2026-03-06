@@ -9,3 +9,6 @@
 # Add this new entry for the plan generator
 [functions."generate-plan"]
   timeout = 240
+
+[functions."admin-delete-user"]
+  timeout = 25
