@@ -21,6 +21,24 @@ async function initializeFirebase() {
     }
 }
 
+import { doc, deleteDoc } from "firebase/firestore";
+// Import your initialized database instance (adjust the path as needed)
+import { db } from "./api.js"; 
+
+async function deleteUserRecord(targetUserId) {
+  try {
+    const userDocRef = doc(db, "users", targetUserId);
+    await deleteDoc(userDocRef);
+    console.log(`User ${targetUserId} successfully deleted from Firestore.`);
+    
+    // Add any UI updates here (e.g., removing the user from the admin table)
+    
+  } catch (error) {
+    console.error("Error deleting user: ", error);
+    alert("Failed to delete user. Check console for details.");
+  }
+}
+
 function runAdminPortal(app) {
     const auth = firebase.auth();
     const db = firebase.firestore();
