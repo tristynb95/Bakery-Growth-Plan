@@ -65,6 +65,23 @@
                 </div>
             </div>
 
+            <div class="content-card mb-8">
+                <div class="p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h2 class="text-xl font-bold font-poppins">Manage Bakeries</h2>
+                    <button id="add-bakery-btn" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Bakery</button>
+                </div>
+                <div id="add-bakery-form" class="hidden p-4 border-b border-gray-200 bg-gray-50">
+                    <div class="flex items-center gap-3">
+                        <input type="text" id="new-bakery-input" class="form-input !py-2 flex-grow" placeholder="Enter bakery name...">
+                        <button id="save-new-bakery-btn" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save</button>
+                        <button id="cancel-new-bakery-btn" class="btn btn-secondary"><i class="bi bi-x-lg"></i> Cancel</button>
+                    </div>
+                    <p id="add-bakery-error" class="text-sm text-red-600 mt-2 hidden"></p>
+                </div>
+                <div id="bakery-list" class="divide-y divide-gray-100">
+                </div>
+            </div>
+
             <div class="content-card">
                 <div class="p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h2 class="text-xl font-bold font-poppins">All Users</h2>
@@ -91,6 +108,20 @@
         <footer class="text-center text-sm text-gray-500 py-6">
             <p>&copy; 2025 Bakery Growth Planner | <a href="/privacy-policy.html" class="text-red-600 hover:underline">Privacy Policy</a> | <a href="/terms-and-conditions.html" class="text-red-600 hover:underline">Terms & Conditions</a></p>
         </footer>
+    </div>
+
+    <div id="admin-modal-overlay" class="modal-overlay hidden">
+        <div id="admin-modal-box" class="modal-box" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3 id="admin-modal-title" class="text-lg font-bold">Confirm</h3>
+                <button id="admin-modal-close-btn" class="btn btn-secondary btn-icon"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div id="admin-modal-content" class="modal-content"></div>
+            <div class="modal-footer">
+                <button id="admin-modal-cancel-btn" class="btn btn-secondary">Cancel</button>
+                <button id="admin-modal-action-btn" class="btn btn-danger">Confirm</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>

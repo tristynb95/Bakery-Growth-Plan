@@ -2,6 +2,11 @@
 
 const ADMIN_EMAIL = 'tristen_bayley@gailsbread.co.uk';
 
+const DEFAULT_BAKERIES = [
+    'Beaconsfield', 'Berkhamsted', 'Gerrards Cross', 'Harpenden', 'Henley',
+    'Marlow', 'Radlett', 'Ruislip', 'St Albans', 'Welwyn Garden City'
+];
+
 async function initializeFirebase() {
     try {
         const response = await fetch('/.netlify/functions/config');
@@ -29,7 +34,50 @@ function runAdminPortal(app) {
     const usersList = document.getElementById('admin-users-list');
     const emptyState = document.getElementById('admin-empty-state');
 
+    // Bakery management elements
+    const addBakeryBtn = document.getElementById('add-bakery-btn');
+    const addBakeryForm = document.getElementById('add-bakery-form');
+    const newBakeryInput = document.getElementById('new-bakery-input');
+    const saveNewBakeryBtn = document.getElementById('save-new-bakery-btn');
+    const cancelNewBakeryBtn = document.getElementById('cancel-new-bakery-btn');
+    const addBakeryError = document.getElementById('add-bakery-error');
+    const bakeryListEl = document.getElementById('bakery-list');
+
+    // Modal elements
+    const modalOverlay = document.getElementById('admin-modal-overlay');
+    const modalTitle = document.getElementById('admin-modal-title');
+    const modalContent = document.getElementById('admin-modal-content');
+    const modalActionBtn = document.getElementById('admin-modal-action-btn');
+    const modalCancelBtn = document.getElementById('admin-modal-cancel-btn');
+    const modalCloseBtn = document.getElementById('admin-modal-close-btn');
+
     let allUsersData = [];
+    let bakeries = [];
+    let modalActionCallback = null;
+
+    // --- Modal helpers ---
+    function openAdminModal(title, contentHTML, actionLabel, actionClass, onAction) {
+        modalTitle.textContent = title;
+        modalContent.innerHTML = contentHTML;
+        modalActionBtn.textContent = actionLabel;
+        modalActionBtn.className = `btn ${actionClass}`;
+        modalActionCallback = onAction;
+        modalOverlay.classList.remove('hidden');
+    }
+
+    function closeAdminModal() {
+        modalOverlay.classList.add('hidden');
+        modalActionCallback = null;
+    }
+
+    modalCloseBtn.addEventListener('click', closeAdminModal);
+    modalCancelBtn.addEventListener('click', closeAdminModal);
+    modalOverlay.addEventListener('mousedown', (e) => {
+        if (e.target === modalOverlay) closeAdminModal();
+    });
+    modalActionBtn.addEventListener('click', () => {
+        if (modalActionCallback) modalActionCallback();
+    });
 
     logoutBtn.addEventListener('click', () => {
         auth.signOut();
@@ -48,8 +96,10 @@ function runAdminPortal(app) {
         }
 
         try {
+            bakeries = await loadBakeries(db);
             allUsersData = await fetchAllUsers(db);
-            populateBakeryFilter(allUsersData);
+            renderBakeries();
+            populateBakeryFilter();
             renderUsers(allUsersData);
             updateStats(allUsersData);
 
@@ -64,6 +114,219 @@ function runAdminPortal(app) {
 
     searchInput.addEventListener('input', () => filterAndRender());
     bakeryFilter.addEventListener('change', () => filterAndRender());
+
+    // --- Bakery management ---
+
+    async function loadBakeries(db) {
+        const doc = await db.collection('settings').doc('bakeries').get();
+        if (doc.exists && Array.isArray(doc.data().list)) {
+            return doc.data().list.sort();
+        }
+        // Seed with defaults on first load
+        await db.collection('settings').doc('bakeries').set({ list: DEFAULT_BAKERIES });
+        return [...DEFAULT_BAKERIES].sort();
+    }
+
+    async function saveBakeries(db) {
+        await db.collection('settings').doc('bakeries').set({ list: bakeries });
+    }
+
+    addBakeryBtn.addEventListener('click', () => {
+        addBakeryForm.classList.remove('hidden');
+        addBakeryError.classList.add('hidden');
+        newBakeryInput.value = '';
+        newBakeryInput.focus();
+    });
+
+    cancelNewBakeryBtn.addEventListener('click', () => {
+        addBakeryForm.classList.add('hidden');
+        addBakeryError.classList.add('hidden');
+    });
+
+    newBakeryInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') saveNewBakeryBtn.click();
+        if (e.key === 'Escape') cancelNewBakeryBtn.click();
+    });
+
+    saveNewBakeryBtn.addEventListener('click', async () => {
+        const name = newBakeryInput.value.trim();
+        if (!name) {
+            showBakeryError('Please enter a bakery name.');
+            return;
+        }
+        if (bakeries.some(b => b.toLowerCase() === name.toLowerCase())) {
+            showBakeryError('A bakery with this name already exists.');
+            return;
+        }
+        saveNewBakeryBtn.disabled = true;
+        saveNewBakeryBtn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Saving...';
+        bakeries.push(name);
+        bakeries.sort();
+        await saveBakeries(db);
+        addBakeryForm.classList.add('hidden');
+        saveNewBakeryBtn.disabled = false;
+        saveNewBakeryBtn.innerHTML = '<i class="bi bi-check-lg"></i> Save';
+        renderBakeries();
+        populateBakeryFilter();
+        updateStats(allUsersData);
+    });
+
+    function showBakeryError(msg) {
+        addBakeryError.textContent = msg;
+        addBakeryError.classList.remove('hidden');
+    }
+
+    bakeryListEl.addEventListener('click', (e) => {
+        const editBtn = e.target.closest('.edit-bakery-btn');
+        const deleteBtn = e.target.closest('.delete-bakery-btn');
+        const saveEditBtn = e.target.closest('.save-edit-bakery-btn');
+        const cancelEditBtn = e.target.closest('.cancel-edit-bakery-btn');
+
+        if (editBtn) {
+            const row = editBtn.closest('.bakery-row');
+            row.querySelector('.bakery-display').classList.add('hidden');
+            row.querySelector('.bakery-edit').classList.remove('hidden');
+            row.querySelector('.bakery-edit-input').focus();
+        }
+
+        if (cancelEditBtn) {
+            const row = cancelEditBtn.closest('.bakery-row');
+            row.querySelector('.bakery-display').classList.remove('hidden');
+            row.querySelector('.bakery-edit').classList.add('hidden');
+        }
+
+        if (saveEditBtn) {
+            handleRenameBakery(saveEditBtn);
+        }
+
+        if (deleteBtn) {
+            handleDeleteBakery(deleteBtn.dataset.bakery);
+        }
+    });
+
+    bakeryListEl.addEventListener('keyup', (e) => {
+        if (e.target.classList.contains('bakery-edit-input')) {
+            if (e.key === 'Enter') {
+                const row = e.target.closest('.bakery-row');
+                row.querySelector('.save-edit-bakery-btn').click();
+            }
+            if (e.key === 'Escape') {
+                const row = e.target.closest('.bakery-row');
+                row.querySelector('.cancel-edit-bakery-btn').click();
+            }
+        }
+    });
+
+    async function handleRenameBakery(saveBtn) {
+        const row = saveBtn.closest('.bakery-row');
+        const oldName = saveBtn.dataset.bakery;
+        const newName = row.querySelector('.bakery-edit-input').value.trim();
+
+        if (!newName) return;
+        if (newName === oldName) {
+            row.querySelector('.bakery-display').classList.remove('hidden');
+            row.querySelector('.bakery-edit').classList.add('hidden');
+            return;
+        }
+        if (bakeries.some(b => b.toLowerCase() === newName.toLowerCase() && b !== oldName)) {
+            openAdminModal('Name Conflict', '<p>A bakery with this name already exists.</p>', 'OK', 'btn-primary', closeAdminModal);
+            return;
+        }
+
+        const affectedUsers = allUsersData.filter(u => u.bakery === oldName);
+        const confirmMsg = affectedUsers.length > 0
+            ? `<p>Renaming <strong>${oldName}</strong> to <strong>${newName}</strong> will update <strong>${affectedUsers.length} user${affectedUsers.length !== 1 ? 's' : ''}</strong>.</p><p class="mt-2 text-sm text-gray-500">This action cannot be undone.</p>`
+            : `<p>Rename <strong>${oldName}</strong> to <strong>${newName}</strong>?</p>`;
+
+        openAdminModal('Rename Bakery', confirmMsg, 'Rename', 'btn-primary', async () => {
+            closeAdminModal();
+
+            // Update bakery list
+            const idx = bakeries.indexOf(oldName);
+            if (idx !== -1) bakeries[idx] = newName;
+            bakeries.sort();
+            await saveBakeries(db);
+
+            // Update affected users in Firestore
+            const batch = db.batch();
+            for (const user of affectedUsers) {
+                batch.update(db.collection('users').doc(user.uid), { bakery: newName });
+                user.bakery = newName;
+            }
+            if (affectedUsers.length > 0) await batch.commit();
+
+            renderBakeries();
+            populateBakeryFilter();
+            filterAndRender();
+            updateStats(allUsersData);
+        });
+    }
+
+    function handleDeleteBakery(bakeryName) {
+        const affectedUsers = allUsersData.filter(u => u.bakery === bakeryName);
+        let confirmMsg = `<p>Are you sure you want to delete <strong>${bakeryName}</strong>?</p>`;
+        if (affectedUsers.length > 0) {
+            confirmMsg += `<div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg"><p class="text-sm font-semibold text-yellow-800"><i class="bi bi-exclamation-triangle-fill mr-1"></i> ${affectedUsers.length} user${affectedUsers.length !== 1 ? 's' : ''} will be set to "No Bakery":</p><ul class="mt-2 text-sm text-yellow-700 space-y-1">`;
+            affectedUsers.forEach(u => {
+                confirmMsg += `<li>&bull; ${u.name} (${u.email})</li>`;
+            });
+            confirmMsg += '</ul></div>';
+        }
+        confirmMsg += '<p class="mt-3 text-sm text-gray-500">This action cannot be undone.</p>';
+
+        openAdminModal('Delete Bakery', confirmMsg, 'Delete', 'btn-danger', async () => {
+            closeAdminModal();
+
+            // Remove from bakery list
+            bakeries = bakeries.filter(b => b !== bakeryName);
+            await saveBakeries(db);
+
+            // Update affected users in Firestore
+            const batch = db.batch();
+            for (const user of affectedUsers) {
+                batch.update(db.collection('users').doc(user.uid), { bakery: '' });
+                user.bakery = 'No Bakery';
+            }
+            if (affectedUsers.length > 0) await batch.commit();
+
+            renderBakeries();
+            populateBakeryFilter();
+            filterAndRender();
+            updateStats(allUsersData);
+        });
+    }
+
+    function renderBakeries() {
+        if (bakeries.length === 0) {
+            bakeryListEl.innerHTML = '<div class="p-6 text-center text-gray-500"><p>No bakeries configured.</p></div>';
+            return;
+        }
+
+        bakeryListEl.innerHTML = bakeries.map(bakery => {
+            const userCount = allUsersData.filter(u => u.bakery === bakery).length;
+            return `
+                <div class="bakery-row p-4 hover:bg-gray-50 transition-colors">
+                    <div class="bakery-display flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="bi bi-shop text-gray-400"></i>
+                            <span class="font-semibold text-gray-800">${bakery}</span>
+                            <span class="text-xs text-gray-500">${userCount} user${userCount !== 1 ? 's' : ''}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="edit-bakery-btn btn btn-secondary !py-1 !px-2.5 text-sm" data-bakery="${bakery}"><i class="bi bi-pencil"></i> Rename</button>
+                            <button class="delete-bakery-btn btn btn-secondary !py-1 !px-2.5 text-sm text-red-600 hover:text-red-700" data-bakery="${bakery}"><i class="bi bi-trash3"></i> Delete</button>
+                        </div>
+                    </div>
+                    <div class="bakery-edit hidden flex items-center gap-3">
+                        <input type="text" class="bakery-edit-input form-input !py-2 flex-grow" value="${bakery}">
+                        <button class="save-edit-bakery-btn btn btn-primary !py-1 !px-2.5 text-sm" data-bakery="${bakery}"><i class="bi bi-check-lg"></i> Save</button>
+                        <button class="cancel-edit-bakery-btn btn btn-secondary !py-1 !px-2.5 text-sm"><i class="bi bi-x-lg"></i> Cancel</button>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    // --- User list (unchanged logic) ---
 
     function filterAndRender() {
         const searchTerm = searchInput.value.toLowerCase().trim();
@@ -99,7 +362,7 @@ function runAdminPortal(app) {
                 uid: userDoc.id,
                 name: userData.name || 'No Name',
                 email: userData.email || 'No Email',
-                bakery: userData.bakery || 'Unassigned',
+                bakery: userData.bakery || 'No Bakery',
                 photoURL: userData.photoURL || null,
                 plans: plans,
                 planCount: plans.length
@@ -110,10 +373,10 @@ function runAdminPortal(app) {
         return usersData;
     }
 
-    function populateBakeryFilter(users) {
-        const bakeries = [...new Set(users.map(u => u.bakery).filter(b => b && b !== 'Unassigned'))].sort();
+    function populateBakeryFilter() {
+        const allBakeries = [...new Set([...bakeries, ...allUsersData.map(u => u.bakery)].filter(b => b && b !== 'No Bakery'))].sort();
         bakeryFilter.innerHTML = '<option value="">All Bakeries</option>';
-        bakeries.forEach(bakery => {
+        allBakeries.forEach(bakery => {
             const option = document.createElement('option');
             option.value = bakery;
             option.textContent = bakery;
@@ -125,7 +388,7 @@ function runAdminPortal(app) {
         document.getElementById('stat-total-users').textContent = users.length;
         const totalPlans = users.reduce((sum, u) => sum + u.planCount, 0);
         document.getElementById('stat-total-plans').textContent = totalPlans;
-        const uniqueBakeries = new Set(users.map(u => u.bakery).filter(b => b && b !== 'Unassigned'));
+        const uniqueBakeries = new Set(users.map(u => u.bakery).filter(b => b && b !== 'No Bakery'));
         document.getElementById('stat-total-bakeries').textContent = uniqueBakeries.size;
     }
 
@@ -206,6 +469,8 @@ function runAdminPortal(app) {
                 }).join('')
                 : '<p class="text-sm text-gray-400 italic px-3">No plans created yet</p>';
 
+            const bakeryBadgeClass = user.bakery === 'No Bakery' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700';
+
             return `
                 <div class="admin-user-row p-4 sm:p-6 hover:bg-gray-50 transition-colors">
                     <div class="flex items-start gap-4">
@@ -217,7 +482,7 @@ function runAdminPortal(app) {
                                     <p class="text-sm text-gray-500">${user.email}</p>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700"><i class="bi bi-shop"></i> ${user.bakery}</span>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${bakeryBadgeClass}"><i class="bi bi-shop"></i> ${user.bakery}</span>
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600"><i class="bi bi-journal-text"></i> ${user.planCount} plan${user.planCount !== 1 ? 's' : ''}</span>
                                 </div>
                             </div>
