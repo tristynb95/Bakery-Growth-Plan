@@ -392,7 +392,7 @@ textarea.form-input {
 
     .summary-content { font-size: 10pt; }
     .summary-redesigned { gap: 1rem; }
-    .summary-month-card { box-shadow: none; border: 1px solid var(--gails-grey-mid); page-break-inside: avoid; }
+    .summary-month-card { box-shadow: none; border: 1px solid var(--gails-grey-mid); page-break-inside: avoid; margin-top: 0.5rem; }
     .summary-quarterly-reflection { box-shadow: none; }
     .summary-reflection-grid { grid-template-columns: 1fr; }
     h1, h2, h3, h4, h5 { page-break-after: avoid; }
@@ -722,6 +722,7 @@ textarea.form-input {
     box-shadow: var(--shadow-sm);
     border: 1px solid #E5E7EB;
     overflow: hidden;
+    margin-top: 1rem;
 }
 .summary-month-header {
     padding: 1.5rem;
