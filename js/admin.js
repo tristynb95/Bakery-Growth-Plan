@@ -139,18 +139,20 @@ function runAdminPortal(app) {
             modalActionBtn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Deleting...';
 
             try {
-                // Delete all user plans (subcollection)
-                const plansSnapshot = await db.collection('users').doc(uid).collection('plans').get();
-                const batch = db.batch();
-                plansSnapshot.forEach((doc) => batch.delete(doc.ref));
+                const idToken = await auth.currentUser.getIdToken();
+                const response = await fetch('/.netlify/functions/admin-delete-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`
+                    },
+                    body: JSON.stringify({ uid })
+                });
 
-                // Also delete from top-level plans collection if used
-                const topPlansSnapshot = await db.collection('plans').where('userId', '==', uid).get();
-                topPlansSnapshot.forEach((doc) => batch.delete(doc.ref));
-
-                // Delete user document
-                batch.delete(db.collection('users').doc(uid));
-                await batch.commit();
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || 'Server error');
+                }
 
                 // Remove from local data and re-render
                 allUsersData = allUsersData.filter(u => u.uid !== uid);
