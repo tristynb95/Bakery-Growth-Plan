@@ -11,6 +11,7 @@ export default defineConfig({
         privacy: 'privacy-policy.html',
         view: 'view.html',
         action: 'action.html',
+        admin: 'admin.html',
       }
     }
   },
