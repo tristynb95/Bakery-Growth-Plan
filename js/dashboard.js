@@ -107,7 +107,6 @@ export async function renderDashboard() {
                         <div class="plan-card-quarter-badge"><i class="bi bi-calendar3"></i> ${plan.quarter || 'No quarter'}</div>
                         <h3 class="plan-card-title">${planName}</h3>
                         <div class="plan-card-quick-meta">
-                            <span class="plan-card-kpi ${progressToneClass}"><i class="bi bi-graph-up-arrow"></i> ${completion}% complete</span>
                             <span class="plan-card-kpi"><i class="bi bi-clock-history"></i> ${editedDate}</span>
                         </div>
                     </div>
