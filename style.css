@@ -376,6 +376,12 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--gails-text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+.plan-card-last-edited i {
+    font-size: 0.8rem;
 }
 /* New Plan Card */
 .plan-card.new-plan-card {

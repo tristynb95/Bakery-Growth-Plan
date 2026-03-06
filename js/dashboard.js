@@ -120,7 +120,7 @@ export async function renderDashboard() {
                         </div>
                         <div class="plan-card-meta">
                             <span class="plan-card-status ${statusClass}">${statusLabel}</span>
-                            <span class="plan-card-last-edited">Last edited ${editedDate}</span>
+                            <span class="plan-card-last-edited" aria-label="Last edited ${editedDate}" title="Last edited ${editedDate}"><i class="bi bi-clock-history" aria-hidden="true"></i> ${editedDate}</span>
                         </div>
                     </div>
                 </div>
