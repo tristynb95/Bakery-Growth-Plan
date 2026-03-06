@@ -924,7 +924,7 @@ export async function handleShare(db, appState) {
             const newPointerRef = await db.collection('sharedPlans').add(pointerDoc);
             shareableLink = `${window.location.origin}/view.html?id=${newPointerRef.id}`;
             // Optional: Mark original plan as shared *after* successful pointer creation
-            // await originalPlanRef.update({ isShared: true });
+            await originalPlanRef.update({ isShared: true });
         }
         // Update the modal content with the link
         const modalContent = document.getElementById('modal-content');
