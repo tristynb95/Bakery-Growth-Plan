@@ -46,6 +46,7 @@ const DOMElements = {
 
 const MONTH_PLAN_LABELS = ['30 Day Plan', '60 Day Plan', '90 Day Plan'];
 const DEFAULT_MONTH_TITLES = ['Month 1 Plan', 'Month 2 Plan', 'Month 3 Plan'];
+const MONTH_STAGE_LABELS = ['Launch', 'Build', 'Embed'];
 
 // --- HTML Templates for Views ---
 const templates = {
@@ -58,7 +59,7 @@ const templates = {
                             <p class="plan-mission-text">"To make world-class, craft baking a part of every neighbourhood."</p>
                         </div>
                     </div>
-                    <div class="content-card plan-card-elevated">
+                    <div class="content-card plan-card-elevated plan-vision-card">
                         <div class="plan-card-header">
                             <div class="plan-card-header-icon"><i class="bi bi-binoculars-fill"></i></div>
                             <div>
@@ -66,9 +67,14 @@ const templates = {
                                 <p class="plan-card-description">The big, overarching mission for the next 90 days.</p>
                             </div>
                         </div>
+                        <div class="plan-vision-meta">
+                            <span class="plan-meta-pill"><i class="bi bi-calendar3"></i> 90-Day Horizon</span>
+                            <span class="plan-meta-pill"><i class="bi bi-diagram-3"></i> People · Product · Customer · Place</span>
+                            <span class="plan-meta-pill"><i class="bi bi-graph-up-arrow"></i> Review Weekly Momentum</span>
+                        </div>
                         <div id="quarterlyTheme" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Become the undisputed neighbourhood favourite by mastering our availability." data-maxlength="400"></div>
                     </div>
-                    <div class="content-card plan-card-elevated">
+                    <div class="content-card plan-card-elevated plan-objectives-card">
                         <div class="plan-card-header">
                             <div class="plan-card-header-icon"><i class="bi bi-flag-fill"></i></div>
                             <div>
@@ -80,21 +86,21 @@ const templates = {
                             <div class="plan-objective-item plan-objective-month-1">
                                 <div class="plan-objective-indicator" style="background-color: #D10A11;"></div>
                                 <div class="plan-objective-content">
-                                    <label for="month1Goal" class="plan-objective-label">Month 1 <i class="bi bi-info-circle info-icon" title="High-level goal for the first 30-day sprint."></i></label>
+                                    <label for="month1Goal" class="plan-objective-label"><span>Month 1 · 30 Days</span> <i class="bi bi-info-circle info-icon" title="High-level goal for the first 30-day sprint."></i></label>
                                     <div id="month1Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PRODUCT: Master afternoon availability and reduce waste." data-maxlength="300"></div>
                                 </div>
                             </div>
                             <div class="plan-objective-item plan-objective-month-2">
                                 <div class="plan-objective-indicator" style="background-color: #B45309;"></div>
                                 <div class="plan-objective-content">
-                                    <label for="month2Goal" class="plan-objective-label">Month 2 <i class="bi bi-info-circle info-icon" title="High-level goal for the second 30-day sprint."></i></label>
+                                    <label for="month2Goal" class="plan-objective-label"><span>Month 2 · 60 Days</span> <i class="bi bi-info-circle info-icon" title="High-level goal for the second 30-day sprint."></i></label>
                                     <div id="month2Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PLACE: Embed new production processes and daily checks." data-maxlength="300"></div>
                                 </div>
                             </div>
                             <div class="plan-objective-item plan-objective-month-3">
                                 <div class="plan-objective-indicator" style="background-color: #065F46;"></div>
                                 <div class="plan-objective-content">
-                                    <label for="month3Goal" class="plan-objective-label">Month 3 <i class="bi bi-info-circle info-icon" title="High-level goal for the third 30-day sprint."></i></label>
+                                    <label for="month3Goal" class="plan-objective-label"><span>Month 3 · 90 Days</span> <i class="bi bi-info-circle info-icon" title="High-level goal for the third 30-day sprint."></i></label>
                                     <div id="month3Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PEOPLE: Develop team skills for consistent execution." data-maxlength="300"></div>
                                 </div>
                             </div>
@@ -147,18 +153,26 @@ const templates = {
 
         const monthColorMap = { 1: '#D10A11', 2: '#B45309', 3: '#065F46' };
         const monthAccent = monthColorMap[monthNum] || '#D10A11';
+        const monthPlanLabel = MONTH_PLAN_LABELS[monthNum - 1] || `Month ${monthNum} Plan`;
+        const monthStageLabel = MONTH_STAGE_LABELS[monthNum - 1] || 'Execute';
 
         return `
             <div class="plan-section-flow">
                 <div class="content-card plan-card-elevated plan-foundation-card">
                     <div class="plan-section-accent" style="background-color: ${monthAccent};"></div>
                     <div class="plan-card-inner">
+                        <div class="plan-month-kicker" style="color: ${monthAccent};">${monthPlanLabel} · ${monthStageLabel} Phase</div>
                         <div class="plan-card-header">
                             <div class="plan-card-header-icon" style="background-color: ${monthAccent}1A; color: ${monthAccent};"><i class="bi bi-crosshair"></i></div>
                             <div>
                                 <h2 class="plan-card-title">Your Foundation</h2>
                                 <p class="plan-card-description">Complete these sections at the start of your month to set a clear direction.</p>
                             </div>
+                        </div>
+                        <div class="plan-stage-rail">
+                            <span class="plan-stage-chip" style="border-color: ${monthAccent}33; color: ${monthAccent};"><i class="bi bi-bullseye"></i> Define the must-win battle</span>
+                            <span class="plan-stage-chip" style="border-color: ${monthAccent}33; color: ${monthAccent};"><i class="bi bi-lightning-charge-fill"></i> Align actions with the team</span>
+                            <span class="plan-stage-chip" style="border-color: ${monthAccent}33; color: ${monthAccent};"><i class="bi bi-columns-gap"></i> Keep all four pillars strong</span>
                         </div>
 
                         <div class="plan-form-section">
