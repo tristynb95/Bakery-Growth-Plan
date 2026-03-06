@@ -61,11 +61,39 @@ export async function renderDashboard() {
         console.error("Error fetching user plans:", error);
     }
 
-    let dashboardHTML = `<div class="flex justify-between items-center"><h1 class="text-4xl font-black text-gray-900 font-poppins">Your Growth Plans</h1></div><div class="dashboard-grid">`;
+    let firstName = '';
+    try {
+        const userDoc = await db.collection('users').doc(appState.currentUser.uid).get();
+        if (userDoc.exists && userDoc.data().name) {
+            firstName = userDoc.data().name.split(' ')[0];
+        }
+    } catch (e) { /* fall through */ }
+    if (!firstName) {
+        firstName = (appState.currentUser.displayName || '').split(' ')[0] || '';
+    }
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
+    const greetName = firstName ? `, ${firstName}` : '';
+
+    let dashboardHTML = `
+        <div class="dashboard-hero">
+            <div class="dashboard-hero-text">
+                <p class="dashboard-hero-greeting">${greeting}${greetName}</p>
+                <h1 class="dashboard-hero-title font-poppins">Your Growth Plans</h1>
+                <p class="dashboard-hero-subtitle">${plans.length} plan${plans.length !== 1 ? 's' : ''} &middot; Keep building momentum</p>
+            </div>
+        </div>
+        <div class="dashboard-grid">`;
+
     plans.forEach(plan => {
         const completion = calculatePlanCompletion(plan);
         const editedDate = formatLastEditedDate(plan.lastEdited);
         const planName = plan.planName || 'Untitled Plan';
+        const progressColor = completion === 100 ? 'var(--gails-green)' : 'var(--gails-red)';
+        const statusLabel = completion === 100 ? 'Complete' : completion > 0 ? 'In Progress' : 'Not Started';
+        const statusClass = completion === 100 ? 'status-complete' : completion > 0 ? 'status-in-progress' : 'status-not-started';
+
         dashboardHTML += `
             <div class="plan-card">
                 <div class="plan-card-actions">
@@ -73,23 +101,35 @@ export async function renderDashboard() {
                     <button class="plan-action-btn delete-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" data-plan-quarter="${plan.quarter || ''}" title="Delete Plan"><i class="bi bi-trash3-fill"></i></button>
                 </div>
                 <div class="plan-card-main" data-plan-id="${plan.id}">
-                    <div class="flex-grow">
-                        <h3 class="text-xl font-bold font-poppins">${planName}</h3>
-                        <p class="text-sm text-gray-500 mt-1">${plan.quarter || 'No quarter set'}</p>
+                    <div class="plan-card-body">
+                        <div class="plan-card-quarter-badge"><i class="bi bi-calendar3"></i> ${plan.quarter || 'No quarter'}</div>
+                        <h3 class="plan-card-title">${planName}</h3>
                     </div>
-                    <div class="mt-6 pt-4 border-t text-sm space-y-2">
-                        <div class="flex justify-between"><span class="font-semibold text-gray-600">Last Edited:</span><span>${editedDate}</span></div>
-                        <div class="flex justify-between items-center">
-                            <span class="font-semibold text-gray-600">Completion:</span>
-                            <div class="progress-circle" style="--progress: ${completion}">
-                                <div class="progress-circle-inner">${completion}%</div>
+                    <div class="plan-card-footer">
+                        <div class="plan-card-progress-row">
+                            <div class="plan-card-progress-bar">
+                                <div class="plan-card-progress-fill" style="width: ${completion}%; background-color: ${progressColor}"></div>
                             </div>
+                            <span class="plan-card-completion" style="color: ${completion === 100 ? 'var(--gails-green)' : 'var(--gails-text-primary)'}">${completion}%</span>
+                        </div>
+                        <div class="plan-card-meta">
+                            <span class="plan-card-status ${statusClass}">${statusLabel}</span>
+                            <span class="plan-card-edited"><i class="bi bi-clock-history"></i> ${editedDate}</span>
                         </div>
                     </div>
                 </div>
             </div>`;
     });
-    dashboardHTML += `<div class="plan-card new-plan-card" id="create-new-plan-btn"><i class="bi bi-plus-circle-dotted text-4xl"></i><p class="mt-2 font-semibold">Create New Plan</p></div></div>`;
+
+    dashboardHTML += `
+        <div class="plan-card new-plan-card" id="create-new-plan-btn">
+            <div class="new-plan-card-inner">
+                <div class="new-plan-icon-ring"><i class="bi bi-plus-lg"></i></div>
+                <p class="new-plan-label">Create New Plan</p>
+                <p class="new-plan-sublabel">Start a fresh 90-day growth sprint</p>
+            </div>
+        </div>
+    </div>`;
     dashboardContent.innerHTML = dashboardHTML;
 }
 
