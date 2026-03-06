@@ -117,6 +117,68 @@ function runAdminPortal(app) {
     searchInput.addEventListener('input', () => filterAndRender());
     bakeryFilter.addEventListener('change', () => filterAndRender());
 
+    // --- Delete user from admin ---
+    usersList.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('.delete-user-btn');
+        if (deleteBtn) {
+            handleDeleteUser(deleteBtn.dataset.uid, deleteBtn.dataset.name);
+        }
+    });
+
+    function handleDeleteUser(uid, name) {
+        const expectedPhrase = `delete ${name}`;
+        let confirmMsg = `<p>This will permanently delete <strong>${name}</strong> and all their data (profile, plans, and files). This action <strong>cannot be undone</strong>.</p>`;
+        confirmMsg += `<div class="mt-3"><label class="block text-sm font-medium text-gray-700 mb-1">Type <strong class="text-red-600">${expectedPhrase}</strong> to confirm:</label><input type="text" id="delete-user-confirm-input" class="form-input w-full !py-2" placeholder="${expectedPhrase}" autocomplete="off"></div>`;
+
+        openAdminModal('Delete User', confirmMsg, 'Delete User', 'btn-danger', async () => {
+            const input = document.getElementById('delete-user-confirm-input');
+            if (input.value.trim() !== expectedPhrase) return;
+
+            modalActionBtn.disabled = true;
+            modalActionBtn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Deleting...';
+
+            try {
+                // Delete all user plans (subcollection)
+                const plansSnapshot = await db.collection('users').doc(uid).collection('plans').get();
+                const batch = db.batch();
+                plansSnapshot.forEach((doc) => batch.delete(doc.ref));
+
+                // Also delete from top-level plans collection if used
+                const topPlansSnapshot = await db.collection('plans').where('userId', '==', uid).get();
+                topPlansSnapshot.forEach((doc) => batch.delete(doc.ref));
+
+                // Delete user document
+                batch.delete(db.collection('users').doc(uid));
+                await batch.commit();
+
+                // Remove from local data and re-render
+                allUsersData = allUsersData.filter(u => u.uid !== uid);
+                filterAndRender();
+                updateStats(allUsersData);
+                renderBakeries();
+                closeAdminModal();
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                closeAdminModal();
+                openAdminModal('Error', '<p>Could not delete the user. Please try again.</p>', 'OK', 'btn-primary', closeAdminModal);
+            }
+        });
+
+        // Disable delete button until correct phrase is typed
+        requestAnimationFrame(() => {
+            const input = document.getElementById('delete-user-confirm-input');
+            if (!input) return;
+            modalActionBtn.disabled = true;
+            modalActionBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            input.addEventListener('input', () => {
+                const match = input.value.trim() === expectedPhrase;
+                modalActionBtn.disabled = !match;
+                modalActionBtn.classList.toggle('opacity-50', !match);
+                modalActionBtn.classList.toggle('cursor-not-allowed', !match);
+            });
+        });
+    }
+
     // --- Bakery management ---
 
     async function loadBakeries(db) {
@@ -504,6 +566,7 @@ function runAdminPortal(app) {
                                 <div class="flex items-center gap-2">
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${bakeryBadgeClass}"><i class="bi bi-shop"></i> ${user.bakery}</span>
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600"><i class="bi bi-journal-text"></i> ${user.planCount} plan${user.planCount !== 1 ? 's' : ''}</span>
+                                    <button class="delete-user-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-600 hover:bg-red-200 transition-colors" data-uid="${user.uid}" data-name="${user.name}"><i class="bi bi-trash3"></i> Delete</button>
                                 </div>
                             </div>
                             <div class="mt-3 space-y-2">
