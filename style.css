@@ -267,10 +267,7 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
     letter-spacing: -0.01em;
     color: var(--gails-text-primary);
     line-height: 1.35;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    overflow-wrap: anywhere;
     margin-bottom: 0.8rem;
 }
 .plan-card-quick-meta {
