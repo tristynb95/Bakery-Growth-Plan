@@ -1,6 +1,7 @@
 // js/admin.js
 
-const ADMIN_EMAIL = 'tristen_bayley@gailsbread.co.uk';
+const OWNER_EMAIL = 'tristen_bayley@gailsbread.co.uk';
+const ADMIN_ROLES_DOC = 'adminRoles';
 
 const DEFAULT_BAKERIES = [
     'Beaconsfield', 'Berkhamsted', 'Gerrards Cross', 'Harpenden', 'Henley',
@@ -55,6 +56,8 @@ function runAdminPortal(app) {
     let allUsersData = [];
     let bakeries = [];
     let modalActionCallback = null;
+    let adminRoles = null;
+    let isCurrentUserOwner = false;
 
     // --- Modal helpers ---
     function openAdminModal(title, contentHTML, actionLabel, actionClass, onAction) {
@@ -87,18 +90,27 @@ function runAdminPortal(app) {
     });
 
     auth.onAuthStateChanged(async (user) => {
-        if (!user || user.email !== ADMIN_EMAIL) {
+        if (!user) {
             loadingView.classList.add('hidden');
             adminView.classList.add('hidden');
-            if (user && user.email !== ADMIN_EMAIL) {
-                accessDeniedView.classList.remove('hidden');
-            } else {
-                window.location.href = '/index.html';
-            }
+            window.location.href = '/index.html';
             return;
         }
 
         try {
+            adminRoles = await loadAdminRoles();
+            const signedInEmail = normalizeEmail(user.email);
+            const canAccessAdminPortal = adminRoles.admins.includes(signedInEmail);
+
+            if (!canAccessAdminPortal) {
+                loadingView.classList.add('hidden');
+                adminView.classList.add('hidden');
+                accessDeniedView.classList.remove('hidden');
+                return;
+            }
+
+            isCurrentUserOwner = signedInEmail === adminRoles.ownerEmail;
+
             bakeries = await loadBakeries(db);
             allUsersData = await fetchAllUsers(db);
             renderBakeries();
@@ -107,6 +119,7 @@ function runAdminPortal(app) {
             updateStats(allUsersData);
 
             loadingView.classList.add('hidden');
+            accessDeniedView.classList.add('hidden');
             adminView.classList.remove('hidden');
         } catch (error) {
             console.error('Error loading admin data:', error);
@@ -120,13 +133,54 @@ function runAdminPortal(app) {
 
     // --- Delete user from admin ---
     usersList.addEventListener('click', (e) => {
+        const promoteBtn = e.target.closest('.promote-admin-btn');
+        if (promoteBtn) {
+            handlePromoteToAdmin(promoteBtn.dataset.email);
+            return;
+        }
+
+        const demoteBtn = e.target.closest('.demote-admin-btn');
+        if (demoteBtn) {
+            handleDemoteAdmin(demoteBtn.dataset.email);
+            return;
+        }
+
         const deleteBtn = e.target.closest('.delete-user-btn');
         if (deleteBtn) {
-            handleDeleteUser(deleteBtn.dataset.uid, deleteBtn.dataset.name);
+            handleDeleteUser(deleteBtn.dataset.uid, deleteBtn.dataset.name, deleteBtn.dataset.email);
         }
     });
 
-    function handleDeleteUser(uid, name) {
+    async function handlePromoteToAdmin(email) {
+        if (!isCurrentUserOwner) return;
+
+        const normalizedEmail = normalizeEmail(email);
+        if (!normalizedEmail) return;
+        if (normalizedEmail === adminRoles.ownerEmail || adminRoles.admins.includes(normalizedEmail)) return;
+
+        adminRoles.admins = [...new Set([...adminRoles.admins, normalizedEmail])];
+        await saveAdminRoles();
+        filterAndRender();
+    }
+
+    async function handleDemoteAdmin(email) {
+        if (!isCurrentUserOwner) return;
+
+        const normalizedEmail = normalizeEmail(email);
+        if (!normalizedEmail || normalizedEmail === adminRoles.ownerEmail) return;
+
+        adminRoles.admins = adminRoles.admins.filter(adminEmail => adminEmail !== normalizedEmail);
+        await saveAdminRoles();
+        filterAndRender();
+    }
+
+    function handleDeleteUser(uid, name, email) {
+        const normalizedEmail = normalizeEmail(email);
+        if (normalizedEmail === adminRoles.ownerEmail) {
+            openAdminModal('Action Not Allowed', '<p>The owner account cannot be deleted from the admin portal.</p>', 'OK', 'btn-primary', closeAdminModal);
+            return;
+        }
+
         const expectedPhrase = `delete ${name}`;
         let confirmMsg = `<p>This will permanently delete <strong>${name}</strong> and all their data (profile, plans, and files). This action <strong>cannot be undone</strong>.</p>`;
         confirmMsg += `<div class="mt-3"><label class="block text-sm font-medium text-gray-700 mb-1">Type <strong class="text-red-600">${expectedPhrase}</strong> to confirm:</label><input type="text" id="delete-user-confirm-input" class="form-input w-full !py-2" placeholder="${expectedPhrase}" autocomplete="off"></div>`;
@@ -196,6 +250,54 @@ function runAdminPortal(app) {
 
     async function saveBakeries(db) {
         await db.collection('settings').doc('bakeries').set({ list: bakeries });
+    }
+
+    function normalizeEmail(email) {
+        return (email || '').trim().toLowerCase();
+    }
+
+    async function loadAdminRoles() {
+        const ownerEmail = normalizeEmail(OWNER_EMAIL);
+        const docRef = db.collection('settings').doc(ADMIN_ROLES_DOC);
+        const doc = await docRef.get();
+
+        let resolvedOwner = ownerEmail;
+        let admins = [ownerEmail];
+
+        if (doc.exists) {
+            const data = doc.data() || {};
+            const configuredOwner = normalizeEmail(data.ownerEmail);
+            const configuredAdmins = Array.isArray(data.admins)
+                ? data.admins.map(normalizeEmail).filter(Boolean)
+                : [];
+
+            if (configuredOwner) {
+                resolvedOwner = configuredOwner;
+            }
+
+            admins = [...new Set([...configuredAdmins, resolvedOwner])];
+        }
+
+        if (!doc.exists || !Array.isArray((doc.data() || {}).admins) || (doc.data() || {}).ownerEmail !== resolvedOwner || admins.length !== ((doc.data() || {}).admins || []).length) {
+            await docRef.set({ ownerEmail: resolvedOwner, admins }, { merge: true });
+        }
+
+        return { ownerEmail: resolvedOwner, admins };
+    }
+
+    async function saveAdminRoles() {
+        await db.collection('settings').doc(ADMIN_ROLES_DOC).set({
+            ownerEmail: adminRoles.ownerEmail,
+            admins: adminRoles.admins
+        }, { merge: true });
+    }
+
+    function getRoleForEmail(email) {
+        const normalizedEmail = normalizeEmail(email);
+        if (!normalizedEmail) return 'user';
+        if (normalizedEmail === adminRoles.ownerEmail) return 'owner';
+        if (adminRoles.admins.includes(normalizedEmail)) return 'admin';
+        return 'user';
     }
 
     addBakeryBtn.addEventListener('click', () => {
@@ -514,6 +616,15 @@ function runAdminPortal(app) {
         return total > 0 ? Math.round((completed / total) * 100) : 0;
     }
 
+    function getAdminPreviewUrl(uid, planId) {
+        const params = new URLSearchParams({
+            mode: 'admin',
+            uid,
+            planId
+        });
+        return `/view.html?${params.toString()}`;
+    }
+
     function renderUsers(users) {
         if (users.length === 0) {
             usersList.innerHTML = '';
@@ -545,6 +656,10 @@ function runAdminPortal(app) {
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
+                                <a href="${getAdminPreviewUrl(user.uid, plan.id)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition-colors" title="Preview this plan as an admin">
+                                    <i class="bi bi-eye-fill"></i>
+                                    Preview
+                                </a>
                                 <div class="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
                                     <div class="h-full rounded-full ${completion >= 75 ? 'bg-green-500' : completion >= 40 ? 'bg-yellow-500' : 'bg-red-400'}" style="width: ${completion}%"></div>
                                 </div>
@@ -555,6 +670,23 @@ function runAdminPortal(app) {
                 : '<p class="text-sm text-gray-400 italic px-3">No plans created yet</p>';
 
             const bakeryBadgeClass = user.bakery === 'No Bakery' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700';
+            const userRole = getRoleForEmail(user.email);
+            const roleBadge = userRole === 'owner'
+                ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700"><i class="bi bi-gem"></i> Owner</span>'
+                : userRole === 'admin'
+                    ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700"><i class="bi bi-shield-lock"></i> Admin</span>'
+                    : '';
+            const canDeleteUser = userRole !== 'owner';
+            const deleteUserBtn = canDeleteUser
+                ? `<button class="delete-user-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-600 hover:bg-red-200 transition-colors" data-uid="${user.uid}" data-name="${user.name}" data-email="${user.email}"><i class="bi bi-trash3"></i> Delete</button>`
+                : '';
+            const roleActionBtn = !isCurrentUserOwner
+                ? ''
+                : userRole === 'owner'
+                    ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-600"><i class="bi bi-lock-fill"></i> Protected</span>'
+                    : userRole === 'admin'
+                        ? `<button class="demote-admin-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 hover:bg-orange-200 transition-colors" data-email="${user.email}"><i class="bi bi-person-dash-fill"></i> Demote Admin</button>`
+                        : `<button class="promote-admin-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors" data-email="${user.email}"><i class="bi bi-person-up"></i> Make Admin</button>`;
 
             return `
                 <div class="admin-user-row p-4 sm:p-6 hover:bg-gray-50 transition-colors">
@@ -566,10 +698,12 @@ function runAdminPortal(app) {
                                     <h3 class="font-bold text-gray-900">${user.name}</h3>
                                     <p class="text-sm text-gray-500">${user.email}</p>
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 flex-wrap sm:justify-end">
+                                    ${roleBadge}
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${bakeryBadgeClass}"><i class="bi bi-shop"></i> ${user.bakery}</span>
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600"><i class="bi bi-journal-text"></i> ${user.planCount} plan${user.planCount !== 1 ? 's' : ''}</span>
-                                    <button class="delete-user-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-600 hover:bg-red-200 transition-colors" data-uid="${user.uid}" data-name="${user.name}"><i class="bi bi-trash3"></i> Delete</button>
+                                    ${roleActionBtn}
+                                    ${deleteUserBtn}
                                 </div>
                             </div>
                             <div class="mt-3 space-y-2">
