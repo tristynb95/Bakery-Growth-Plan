@@ -113,14 +113,29 @@ export function initializeDashboard(database, state, modalOpener, planSelector) 
 
     const dashboardLogoutBtn = document.getElementById('dashboard-logout-btn');
     const dashboardProfileBtn = document.getElementById('dashboard-profile-btn');
+    const dashboardAdminBtn = document.getElementById('dashboard-admin-btn');
 
     dashboardLogoutBtn.addEventListener('click', () => {
         document.dispatchEvent(new CustomEvent('logout-request'));
     });
-    
+
     dashboardProfileBtn.addEventListener('click', () => {
         window.location.href = '/profile.html';
     });
+
+    if (dashboardAdminBtn) {
+        dashboardAdminBtn.addEventListener('click', () => {
+            window.location.href = '/admin.html';
+        });
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user && user.email === 'tristen_bayley@gailsbread.co.uk') {
+                dashboardAdminBtn.classList.remove('hidden');
+            } else {
+                dashboardAdminBtn.classList.add('hidden');
+            }
+        });
+    }
     
     dashboardContent.addEventListener('click', (e) => {
         const createBtn = e.target.closest('#create-new-plan-btn');

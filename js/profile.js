@@ -21,10 +21,11 @@ function runProfileScript(app) {
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    const bakeryList = [
+    const DEFAULT_BAKERIES = [
         'Beaconsfield', 'Berkhamsted', 'Gerrards Cross', 'Harpenden', 'Henley',
         'Marlow', 'Radlett', 'Ruislip', 'St Albans', 'Welwyn Garden City'
     ].sort();
+    let bakeryList = [...DEFAULT_BAKERIES];
 
     const DOMElements = {
         profileName: document.getElementById('profile-name'),
@@ -311,9 +312,21 @@ function runProfileScript(app) {
         }
     });
 
-    auth.onAuthStateChanged((user) => {
+    async function loadBakeryList() {
+        try {
+            const doc = await db.collection('settings').doc('bakeries').get();
+            if (doc.exists && Array.isArray(doc.data().list)) {
+                bakeryList = doc.data().list.sort();
+            }
+        } catch (error) {
+            console.warn('Could not load bakeries from Firestore, using defaults:', error);
+        }
+    }
+
+    auth.onAuthStateChanged(async (user) => {
         if (user) {
             currentUser = user;
+            await loadBakeryList();
             loadUserProfile(user);
             setupBakeryDropdown();
         } else {
