@@ -70,7 +70,7 @@ export async function renderDashboard() {
             <div class="plan-card">
                 <div class="plan-card-actions">
                     <button class="plan-action-btn edit-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" data-plan-quarter="${plan.quarter || ''}" title="Edit Details"><i class="bi bi-pencil-square"></i></button>
-                    <button class="plan-action-btn delete-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" title="Delete Plan"><i class="bi bi-trash3-fill"></i></button>
+                    <button class="plan-action-btn delete-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" data-plan-quarter="${plan.quarter || ''}" title="Delete Plan"><i class="bi bi-trash3-fill"></i></button>
                 </div>
                 <div class="plan-card-main" data-plan-id="${plan.id}">
                     <div class="flex-grow">
@@ -137,7 +137,7 @@ export function initializeDashboard(database, state, modalOpener, planSelector) 
             });
         } else if (deleteBtn) {
             e.stopPropagation();
-            openModal('delete', { planId: deleteBtn.dataset.planId, planName: deleteBtn.dataset.planName });
+            openModal('delete', { planId: deleteBtn.dataset.planId, planName: deleteBtn.dataset.planName, planQuarter: deleteBtn.dataset.planQuarter });
         } else if (createBtn) {
             openModal('create');
         } else if (mainCard) {

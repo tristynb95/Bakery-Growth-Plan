@@ -1043,7 +1043,7 @@ export function openModal(type, context = {}) {
      }
 
     // *** FIX: Destructure monthNum from context for confirmRegenerate ***
-    const { planId, currentName, planName, eventTitle, currentQuarter, fileName, monthNum } = context;
+    const { planId, currentName, planName, eventTitle, currentQuarter, planQuarter, fileName, monthNum } = context;
 
 
     // --- HEADER RESET ---
@@ -1090,6 +1090,7 @@ export function openModal(type, context = {}) {
     DOMElements.modalBox.dataset.type = type;
     // Store planId safely, ensuring it's not undefined or null being stored
     DOMElements.modalBox.dataset.planId = planId || '';
+    DOMElements.modalBox.dataset.planQuarter = planQuarter || '';
     const footer = DOMElements.modalActionBtn.parentNode;
     if (!footer) { // Add safety check for footer
         console.error("Modal footer element not found.");
@@ -1215,9 +1216,24 @@ export function openModal(type, context = {}) {
             break;
         case 'delete':
              if (DOMElements.modalTitle) DOMElements.modalTitle.textContent = "Confirm Deletion"; // Check title element
-            DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete the plan: <strong class="font-bold">${planName || 'this plan'}</strong>?</p><p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action is final and cannot be undone.</p>`;
+            const deleteConfirmQuarter = planQuarter || 'this plan';
+            DOMElements.modalContent.innerHTML = `<p>Are you sure you want to permanently delete the plan: <strong class="font-bold">${planName || 'this plan'}</strong>?</p>
+                <p class="mt-2 text-sm text-red-700 bg-red-100 p-3 rounded-lg">This action is final and cannot be undone.</p>
+                <label for="deleteConfirmInput" class="font-semibold block mb-2 mt-4">Type <strong class="text-red-600">delete ${deleteConfirmQuarter}</strong> to confirm:</label>
+                <input type="text" id="deleteConfirmInput" class="form-input" placeholder="delete ${deleteConfirmQuarter}" autocomplete="off">`;
             DOMElements.modalActionBtn.textContent = "Confirm Delete";
             DOMElements.modalActionBtn.className = 'btn btn-danger';
+            DOMElements.modalActionBtn.disabled = true;
+            const deleteConfirmInput = document.getElementById('deleteConfirmInput');
+            if (deleteConfirmInput) {
+                deleteConfirmInput.addEventListener('input', () => {
+                    const expected = `delete ${deleteConfirmQuarter}`;
+                    DOMElements.modalActionBtn.disabled = deleteConfirmInput.value.trim().toLowerCase() !== expected.toLowerCase();
+                });
+                deleteConfirmInput.addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter' && !DOMElements.modalActionBtn.disabled) DOMElements.modalActionBtn.click();
+                });
+            }
             break;
         case 'confirmDeleteFile':
              if (DOMElements.modalTitle) DOMElements.modalTitle.textContent = "Confirm Deletion"; // Check title element
@@ -1549,6 +1565,7 @@ export function closeModal() {
      if(DOMElements.modalContent) DOMElements.modalContent.innerHTML = '';
      delete DOMElements.modalBox.dataset.type;
      delete DOMElements.modalBox.dataset.planId;
+     delete DOMElements.modalBox.dataset.planQuarter;
 
      // --- Footer Button Listener Cleanup ---
      // Select buttons specifically within the current modal footer
