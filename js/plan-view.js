@@ -50,11 +50,57 @@ const DEFAULT_MONTH_TITLES = ['Month 1 Plan', 'Month 2 Plan', 'Month 3 Plan'];
 // --- HTML Templates for Views ---
 const templates = {
     vision: {
-        html: `<div class="space-y-8">
-                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-sm"><h3 class="font-bold text-lg text-amber-900 mb-2">Our Mission</h3><p class="text-xl font-semibold text-gray-800">"To make world-class, craft baking a part of every neighbourhood."</p></div>
-                        <div class="content-card p-8"><label for="quarterlyTheme" class="block text-lg font-semibold mb-2">Quarterly Vision: <i class="bi bi-info-circle info-icon" title="The big, overarching mission for the next 90 days."></i></label><div id="quarterlyTheme" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Become the undisputed neighbourhood favourite by mastering our availability." data-maxlength="400"></div></div>
-                        <div class="content-card p-8"><h3 class="text-2xl font-bold mb-6">Key Monthly Objectives</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div><label for="month1Goal" class="font-bold block mb-1">Month 1: <i class="bi bi-info-circle info-icon" title="High-level goal for the first 30-day sprint."></i></label><div id="month1Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PRODUCT: Master afternoon availability and reduce waste." data-maxlength="300"></div></div><div><label for="month2Goal" class="font-bold block mb-1">Month 2: <i class="bi bi-info-circle info-icon" title="High-level goal for the second 30-day sprint."></i></label><div id="month2Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PLACE: Embed new production processes and daily checks." data-maxlength="300"></div></div><div><label for="month3Goal" class="font-bold block mb-1">Month 3: <i class="bi bi-info-circle info-icon" title="High-level goal for the third 30-day sprint."></i></label><div id="month3Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PEOPLE: Develop team skills for consistent execution." data-maxlength="300"></div></div></div></div>
-                   </div>`,
+        html: `<div class="plan-section-flow">
+                    <div class="plan-mission-banner">
+                        <div class="plan-mission-icon"><i class="bi bi-flower1"></i></div>
+                        <div>
+                            <span class="plan-mission-label">Our Mission</span>
+                            <p class="plan-mission-text">"To make world-class, craft baking a part of every neighbourhood."</p>
+                        </div>
+                    </div>
+                    <div class="content-card plan-card-elevated">
+                        <div class="plan-card-header">
+                            <div class="plan-card-header-icon"><i class="bi bi-binoculars-fill"></i></div>
+                            <div>
+                                <h2 class="plan-card-title">Quarterly Vision</h2>
+                                <p class="plan-card-description">The big, overarching mission for the next 90 days.</p>
+                            </div>
+                        </div>
+                        <div id="quarterlyTheme" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Become the undisputed neighbourhood favourite by mastering our availability." data-maxlength="400"></div>
+                    </div>
+                    <div class="content-card plan-card-elevated">
+                        <div class="plan-card-header">
+                            <div class="plan-card-header-icon"><i class="bi bi-flag-fill"></i></div>
+                            <div>
+                                <h2 class="plan-card-title">Key Monthly Objectives</h2>
+                                <p class="plan-card-description">Set a high-level goal for each 30-day sprint.</p>
+                            </div>
+                        </div>
+                        <div class="plan-objectives-grid">
+                            <div class="plan-objective-item plan-objective-month-1">
+                                <div class="plan-objective-indicator" style="background-color: #D10A11;"></div>
+                                <div class="plan-objective-content">
+                                    <label for="month1Goal" class="plan-objective-label">Month 1 <i class="bi bi-info-circle info-icon" title="High-level goal for the first 30-day sprint."></i></label>
+                                    <div id="month1Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PRODUCT: Master afternoon availability and reduce waste." data-maxlength="300"></div>
+                                </div>
+                            </div>
+                            <div class="plan-objective-item plan-objective-month-2">
+                                <div class="plan-objective-indicator" style="background-color: #B45309;"></div>
+                                <div class="plan-objective-content">
+                                    <label for="month2Goal" class="plan-objective-label">Month 2 <i class="bi bi-info-circle info-icon" title="High-level goal for the second 30-day sprint."></i></label>
+                                    <div id="month2Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PLACE: Embed new production processes and daily checks." data-maxlength="300"></div>
+                                </div>
+                            </div>
+                            <div class="plan-objective-item plan-objective-month-3">
+                                <div class="plan-objective-indicator" style="background-color: #065F46;"></div>
+                                <div class="plan-objective-content">
+                                    <label for="month3Goal" class="plan-objective-label">Month 3 <i class="bi bi-info-circle info-icon" title="High-level goal for the third 30-day sprint."></i></label>
+                                    <div id="month3Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PEOPLE: Develop team skills for consistent execution." data-maxlength="300"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+               </div>`,
         requiredFields: ['quarterlyTheme', 'month1Goal', 'month2Goal', 'month3Goal']
     },
     month: (monthNum, weekConfig = {}) => {
@@ -99,18 +145,31 @@ const templates = {
             `).join('')
             : '<p class="text-sm text-gray-500">Weekly check-ins will appear once the month is configured.</p>';
 
+        const monthColorMap = { 1: '#D10A11', 2: '#B45309', 3: '#065F46' };
+        const monthAccent = monthColorMap[monthNum] || '#D10A11';
+
         return `
-            <div class="space-y-8">
-                <div class="content-card p-6 md:p-8">
-                    <h2 class="text-2xl font-bold font-poppins mb-1">Your Foundation</h2>
-                    <p class="text-gray-600 mb-6">Complete these sections at the start of your month to set a clear direction.</p>
-                    <div class="space-y-6">
-                        <div>
-                            <label class="font-semibold text-lg block mb-2 text-gray-800">Must-Win Battle:</label>
+            <div class="plan-section-flow">
+                <div class="content-card plan-card-elevated plan-foundation-card">
+                    <div class="plan-section-accent" style="background-color: ${monthAccent};"></div>
+                    <div class="plan-card-inner">
+                        <div class="plan-card-header">
+                            <div class="plan-card-header-icon" style="background-color: ${monthAccent}1A; color: ${monthAccent};"><i class="bi bi-crosshair"></i></div>
+                            <div>
+                                <h2 class="plan-card-title">Your Foundation</h2>
+                                <p class="plan-card-description">Complete these sections at the start of your month to set a clear direction.</p>
+                            </div>
+                        </div>
+
+                        <div class="plan-form-section">
+                            <div class="plan-form-section-header">
+                                <i class="bi bi-crosshair plan-form-section-icon" style="color: ${monthAccent};"></i>
+                                <label class="plan-form-section-title">Must-Win Battle</label>
+                            </div>
                             <div id="m${monthNum}s1_battle" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Achieve >80% availability by implementing the production matrix correctly...'" data-maxlength="500"></div>
                             <div class="mt-4">
-                                <label class="font-semibold block mb-3 text-sm text-gray-600">Pillar Focus:</label>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pillar-buttons" data-step-key="m${monthNum}s1">
+                                <label class="plan-form-inline-label">Pillar Focus:</label>
+                                <div class="plan-pillar-grid pillar-buttons" data-step-key="m${monthNum}s1">
                                     <button class="btn pillar-button" data-pillar="people"><i class="bi bi-people-fill"></i> People</button>
                                     <button class="btn pillar-button" data-pillar="product"><i class="bi bi-cup-hot-fill"></i> Product</button>
                                     <button class="btn pillar-button" data-pillar="customer"><i class="bi bi-heart-fill"></i> Customer</button>
@@ -118,43 +177,87 @@ const templates = {
                                 </div>
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
+
+                        <div class="plan-form-divider"></div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="flex flex-col">
-                                <label for="m${monthNum}s2_levers" class="font-semibold text-lg block mb-2 text-gray-800">My Key Actions:</label>
+                                <div class="plan-form-section-header">
+                                    <i class="bi bi-lightning-charge-fill plan-form-section-icon" style="color: ${monthAccent};"></i>
+                                    <label for="m${monthNum}s2_levers" class="plan-form-section-title">My Key Actions</label>
+                                </div>
                                 <div id="m${monthNum}s2_levers" class="form-input is-placeholder-showing flex-grow key-levers-input" contenteditable="true" data-placeholder="1. Review Availability & Freshness report daily and adjust baking plans proactively.&#10;2. Lead a 'Coffee Dial-In' session in the management meeting.&#10;3. Coach one team member daily on a specific SHINE principle." data-maxlength="600"></div>
                             </div>
                             <div class="space-y-4">
                                 <div>
-                                    <label for="m${monthNum}s2_powerup_q" class="font-semibold text-lg block mb-2 text-gray-800">Team Power-Up Question:</label>
+                                    <div class="plan-form-section-header">
+                                        <i class="bi bi-chat-square-quote-fill plan-form-section-icon" style="color: ${monthAccent};"></i>
+                                        <label for="m${monthNum}s2_powerup_q" class="plan-form-section-title">Team Power-Up Question</label>
+                                    </div>
                                     <div id="m${monthNum}s2_powerup_q" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="What's one small change we could make this week to make our customers smile?" data-maxlength="300"></div>
                                 </div>
                                 <div>
-                                    <label for="m${monthNum}s2_powerup_a" class="font-semibold text-lg block mb-2 text-gray-800">Our Team's Winning Idea:</label>
+                                    <div class="plan-form-section-header">
+                                        <i class="bi bi-lightbulb-fill plan-form-section-icon" style="color: ${monthAccent};"></i>
+                                        <label for="m${monthNum}s2_powerup_a" class="plan-form-section-title">Our Team's Winning Idea</label>
+                                    </div>
                                     <div id="m${monthNum}s2_powerup_a" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Creating a 'regular's board' to remember our most frequent customers' orders." data-maxlength="300"></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="pt-6 border-t">
-                            <label class="font-semibold text-lg block mb-2 text-gray-800">Developing Our Breadheads:</label>
+
+                        <div class="plan-form-divider"></div>
+
+                        <div class="plan-form-section">
+                            <div class="plan-form-section-header">
+                                <i class="bi bi-people-fill plan-form-section-icon" style="color: ${monthAccent};"></i>
+                                <label class="plan-form-section-title">Developing Our Breadheads</label>
+                            </div>
                             <div id="m${monthNum}s3_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="Example: 'Sarah: Coach on the production matrix to build her confidence.'" data-maxlength="600"></div>
                         </div>
-                        <div class="pt-6 border-t">
-                            <label class="font-semibold text-lg block mb-2 text-gray-800">Upholding Our Pillars:</label>
-                            <p class="text-gray-600 mb-4 -mt-2 text-sm">One key behaviour for each pillar to ensure standards don't slip.</p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                                <div><label for="m${monthNum}s4_people" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-people-fill"></i> PEOPLE</label><div id="m${monthNum}s4_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Meaningful 1-2-1s with my two keyholders." data-maxlength="300"></div></div>
-                                <div><label for="m${monthNum}s4_product" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-cup-hot-fill"></i> PRODUCT</label><div id="m${monthNum}s4_product" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Daily quality checks of the first bake." data-maxlength="300"></div></div>
-                                <div><label for="m${monthNum}s4_customer" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-heart-fill"></i> CUSTOMER</label><div id="m${monthNum}s4_customer" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Action all customer feedback within 24 hours." data-maxlength="300"></div></div>
-                                <div><label for="m${monthNum}s4_place" class="font-semibold block mb-2 flex items-center gap-2"><i class="bi bi-shop"></i> PLACE</label><div id="m${monthNum}s4_place" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Complete a bakery travel path twice a day." data-maxlength="300"></div></div>
+
+                        <div class="plan-form-divider"></div>
+
+                        <div class="plan-form-section">
+                            <div class="plan-form-section-header">
+                                <i class="bi bi-columns-gap plan-form-section-icon" style="color: ${monthAccent};"></i>
+                                <div>
+                                    <label class="plan-form-section-title">Upholding Our Pillars</label>
+                                    <p class="plan-card-description mt-0">One key behaviour for each pillar to ensure standards don't slip.</p>
+                                </div>
+                            </div>
+                            <div class="plan-pillars-form-grid">
+                                <div class="plan-pillar-form-item">
+                                    <label for="m${monthNum}s4_people" class="plan-pillar-form-label"><i class="bi bi-people-fill"></i> People</label>
+                                    <div id="m${monthNum}s4_people" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Meaningful 1-2-1s with my two keyholders." data-maxlength="300"></div>
+                                </div>
+                                <div class="plan-pillar-form-item">
+                                    <label for="m${monthNum}s4_product" class="plan-pillar-form-label"><i class="bi bi-cup-hot-fill"></i> Product</label>
+                                    <div id="m${monthNum}s4_product" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Daily quality checks of the first bake." data-maxlength="300"></div>
+                                </div>
+                                <div class="plan-pillar-form-item">
+                                    <label for="m${monthNum}s4_customer" class="plan-pillar-form-label"><i class="bi bi-heart-fill"></i> Customer</label>
+                                    <div id="m${monthNum}s4_customer" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Action all customer feedback within 24 hours." data-maxlength="300"></div>
+                                </div>
+                                <div class="plan-pillar-form-item">
+                                    <label for="m${monthNum}s4_place" class="plan-pillar-form-label"><i class="bi bi-shop"></i> Place</label>
+                                    <div id="m${monthNum}s4_place" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Complete a bakery travel path twice a day." data-maxlength="300"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="content-card p-6 md:p-8">
-                    <h2 class="text-2xl font-bold font-poppins mb-1">Weekly Momentum</h2>
-                    <p class="text-gray-600 mb-6">Return here each week to log your progress, celebrate wins, and spotlight your team.</p>
-                    <div class="mb-6 border-b border-gray-200">
-                        <nav id="weekly-tabs" class="flex -mb-px space-x-6" aria-label="Tabs">
+
+                <div class="content-card plan-card-elevated">
+                    <div class="plan-card-header">
+                        <div class="plan-card-header-icon" style="background-color: ${monthAccent}1A; color: ${monthAccent};"><i class="bi bi-graph-up-arrow"></i></div>
+                        <div>
+                            <h2 class="plan-card-title">Weekly Momentum</h2>
+                            <p class="plan-card-description">Return here each week to log your progress, celebrate wins, and spotlight your team.</p>
+                        </div>
+                    </div>
+                    <div class="plan-weekly-tabs-wrapper">
+                        <nav id="weekly-tabs" class="plan-weekly-tabs" aria-label="Tabs">
                             ${tabsHtml}
                         </nav>
                     </div>
@@ -162,24 +265,78 @@ const templates = {
                         ${panelsHtml}
                     </div>
                 </div>
-                <div class="content-card p-6 md:p-8 bg-red-50 border border-red-100">
-                    <h2 class="text-2xl font-bold font-poppins mb-1">End of Month Review</h2>
-                    <p class="text-gray-600 mb-6">At the end of the month, reflect on your performance to prepare for your line manager conversation.</p>
-                    <div class="space-y-6">
-                        <div><label for="m${monthNum}s6_win" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-trophy-fill"></i> Biggest Win:</label><div id="m${monthNum}s6_win" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
-                        <div><label for="m${monthNum}s6_challenge" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-lightbulb-fill"></i> Toughest Challenge & What I Learned:</label><div id="m${monthNum}s6_challenge" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
-                        <div><label for="m${monthNum}s6_next" class="font-semibold block mb-1 text-lg gails-red-text flex items-center gap-2"><i class="bi bi-rocket-takeoff-fill"></i> Focus for Next Month:</label><div id="m${monthNum}s6_next" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div></div>
+
+                <div class="content-card plan-card-elevated plan-review-card">
+                    <div class="plan-card-header">
+                        <div class="plan-card-header-icon plan-card-header-icon--review"><i class="bi bi-journal-check"></i></div>
+                        <div>
+                            <h2 class="plan-card-title">End of Month Review</h2>
+                            <p class="plan-card-description">At the end of the month, reflect on your performance to prepare for your line manager conversation.</p>
+                        </div>
+                    </div>
+                    <div class="plan-review-fields">
+                        <div class="plan-review-field">
+                            <div class="plan-review-field-icon plan-review-field-icon--win"><i class="bi bi-trophy-fill"></i></div>
+                            <div class="plan-review-field-content">
+                                <label for="m${monthNum}s6_win" class="plan-review-field-label">Biggest Win</label>
+                                <div id="m${monthNum}s6_win" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div>
+                            </div>
+                        </div>
+                        <div class="plan-review-field">
+                            <div class="plan-review-field-icon plan-review-field-icon--challenge"><i class="bi bi-lightbulb-fill"></i></div>
+                            <div class="plan-review-field-content">
+                                <label for="m${monthNum}s6_challenge" class="plan-review-field-label">Toughest Challenge & What I Learned</label>
+                                <div id="m${monthNum}s6_challenge" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div>
+                            </div>
+                        </div>
+                        <div class="plan-review-field">
+                            <div class="plan-review-field-icon plan-review-field-icon--next"><i class="bi bi-rocket-takeoff-fill"></i></div>
+                            <div class="plan-review-field-content">
+                                <label for="m${monthNum}s6_next" class="plan-review-field-label">Focus for Next Month</label>
+                                <div id="m${monthNum}s6_next" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="500"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
                 ${monthNum == 3 ? `
-                <div class="content-card p-8" style="background-color: var(--review-blue-bg); border-color: var(--review-blue-border);">
-                    <h2 class="text-2xl font-bold font-poppins mb-1" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2>
-                    <p class="text-gray-600 mb-6">A deep dive into the quarter's performance for your review.</p>
-                    <div class="space-y-6">
-                        <div><label for="m3s7_achievements" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-award-fill"></i> Quarter's Biggest Achievements:</label><div id="m3s7_achievements" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
-                        <div><label for="m3s7_challenges" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bar-chart-line-fill"></i> Biggest Challenges & Learnings:</label><div id="m3s7_challenges" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
-                        <div><label for="m3s7_narrative" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-bullseye"></i> Performance vs Quarterly Narrative:</label><div id="m3s7_narrative" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
-                        <div><label for="m3s7_next_quarter" class="font-semibold block mb-1 text-lg" style="color: var(--review-blue-text);"><i class="bi bi-forward-fill"></i> Primary Focus for Next Quarter:</label><div id="m3s7_next_quarter" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div></div>
+                <div class="content-card plan-card-elevated plan-quarterly-card">
+                    <div class="plan-card-header">
+                        <div class="plan-card-header-icon plan-card-header-icon--quarterly"><i class="bi bi-mortarboard-fill"></i></div>
+                        <div>
+                            <h2 class="plan-card-title" style="color: var(--review-blue-text);">Final Quarterly Reflection</h2>
+                            <p class="plan-card-description">A deep dive into the quarter's performance for your review.</p>
+                        </div>
+                    </div>
+                    <div class="plan-review-fields">
+                        <div class="plan-review-field">
+                            <div class="plan-review-field-icon" style="background-color: #D1FAE5; color: #065F46;"><i class="bi bi-award-fill"></i></div>
+                            <div class="plan-review-field-content">
+                                <label for="m3s7_achievements" class="plan-review-field-label">Quarter's Biggest Achievements</label>
+                                <div id="m3s7_achievements" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div>
+                            </div>
+                        </div>
+                        <div class="plan-review-field">
+                            <div class="plan-review-field-icon" style="background-color: #FEF3C7; color: #92400E;"><i class="bi bi-bar-chart-line-fill"></i></div>
+                            <div class="plan-review-field-content">
+                                <label for="m3s7_challenges" class="plan-review-field-label">Biggest Challenges & Learnings</label>
+                                <div id="m3s7_challenges" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div>
+                            </div>
+                        </div>
+                        <div class="plan-review-field">
+                            <div class="plan-review-field-icon" style="background-color: #EFF6FF; color: #1E40AF;"><i class="bi bi-bullseye"></i></div>
+                            <div class="plan-review-field-content">
+                                <label for="m3s7_narrative" class="plan-review-field-label">Performance vs Quarterly Narrative</label>
+                                <div id="m3s7_narrative" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div>
+                            </div>
+                        </div>
+                        <div class="plan-review-field">
+                            <div class="plan-review-field-icon" style="background-color: #FFF1F2; color: #D10A11;"><i class="bi bi-forward-fill"></i></div>
+                            <div class="plan-review-field-content">
+                                <label for="m3s7_next_quarter" class="plan-review-field-label">Primary Focus for Next Quarter</label>
+                                <div id="m3s7_next_quarter" class="form-input is-placeholder-showing" contenteditable="true" data-maxlength="800"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>` : ''}
             </div>
@@ -618,21 +775,21 @@ function renderSummary() {
                     <div class="summary-strategy-section">
                         <div class="summary-strategy-card summary-strategy-card--battle">
                             <div class="summary-strategy-icon"><i class="bi bi-crosshair"></i></div>
-                            <div>
+                            <div class="min-w-0">
                                 <h3 class="summary-strategy-label">Must-Win Battle</h3>
                                 <div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div>
                             </div>
                         </div>
                         <div class="summary-strategy-card">
                             <div class="summary-strategy-icon"><i class="bi bi-lightning-charge-fill"></i></div>
-                            <div>
+                            <div class="min-w-0">
                                 <h3 class="summary-strategy-label">Key Actions</h3>
                                 <div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div>
                             </div>
                         </div>
                         <div class="summary-strategy-card">
                             <div class="summary-strategy-icon"><i class="bi bi-people-fill"></i></div>
-                            <div>
+                            <div class="min-w-0">
                                 <h3 class="summary-strategy-label">Developing Our Breadheads</h3>
                                 <div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div>
                             </div>
@@ -685,21 +842,21 @@ function renderSummary() {
         <div class="summary-hero-card content-card">
             <div class="summary-hero-meta">
                 <div class="summary-meta-item">
-                    <i class="bi bi-person-fill summary-meta-icon"></i>
+                    <div class="summary-meta-icon"><i class="bi bi-person-fill"></i></div>
                     <div>
                         <span class="summary-meta-label">Manager</span>
                         <span class="summary-meta-value">${formData.managerName || '...'}</span>
                     </div>
                 </div>
                 <div class="summary-meta-item">
-                    <i class="bi bi-shop summary-meta-icon"></i>
+                    <div class="summary-meta-icon"><i class="bi bi-shop"></i></div>
                     <div>
                         <span class="summary-meta-label">Bakery</span>
                         <span class="summary-meta-value">${formData.bakeryLocation || '...'}</span>
                     </div>
                 </div>
                 <div class="summary-meta-item">
-                    <i class="bi bi-calendar3 summary-meta-icon"></i>
+                    <div class="summary-meta-icon"><i class="bi bi-calendar3"></i></div>
                     <div>
                         <span class="summary-meta-label">Quarter</span>
                         <span class="summary-meta-value">${formData.quarter || '...'}</span>
