@@ -905,6 +905,8 @@ export async function handleShare(db, appState) {
             // If a pointer exists, use its ID
             const existingPointer = querySnapshot.docs[0];
             shareableLink = `${window.location.origin}/view.html?id=${existingPointer.id}`;
+            const originalPlanRef = db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(appState.currentPlanId);
+            await originalPlanRef.update({ isShared: true });
         } else {
             // If no pointer exists, create one
             const originalPlanRef = db.collection('users').doc(appState.currentUser.uid).collection('plans').doc(appState.currentPlanId);
