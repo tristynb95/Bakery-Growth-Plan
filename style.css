@@ -122,9 +122,10 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 .dashboard-header { background-color: var(--gails-white); padding: 1.25rem 2.5rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; }
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2rem; /* Increased gap */
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+    gap: 2rem;
     margin-top: 2.5rem;
+    max-width: 100%;
 }
 .plan-card {
     background-color: var(--gails-white);
@@ -138,6 +139,8 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
     flex-direction: column;
     position: relative;
     min-height: 250px;
+    min-width: 0;
+    overflow: hidden;
 }
 .plan-card:hover {
     transform: translateY(-6px);
@@ -444,8 +447,8 @@ textarea.form-input {
 .cookie-consent-buttons { display: flex; gap: 0.75rem; }
 
 /* 14. Dashboard Layout Fix */
-#dashboard-view { display: flex; flex-direction: column; min-height: 100vh; }
-#dashboard-content { flex-grow: 1; }
+#dashboard-view { display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+#dashboard-content { flex-grow: 1; overflow-x: hidden; }
 
 /* 15. Subtle Button Style */
 .btn-subtle {
