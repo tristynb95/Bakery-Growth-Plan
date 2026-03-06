@@ -58,13 +58,75 @@ function runViewScript(app) {
             return tempDiv.innerText.trim() === '';
         };
 
+        const FISCAL_YEAR_MONTHS = [
+            { name: 'March', month: 3, yearOffset: 0 },
+            { name: 'April', month: 4, yearOffset: 0 },
+            { name: 'May', month: 5, yearOffset: 0 },
+            { name: 'June', month: 6, yearOffset: 0 },
+            { name: 'July', month: 7, yearOffset: 0 },
+            { name: 'August', month: 8, yearOffset: 0 },
+            { name: 'September', month: 9, yearOffset: 0 },
+            { name: 'October', month: 10, yearOffset: 0 },
+            { name: 'November', month: 11, yearOffset: 0 },
+            { name: 'December', month: 12, yearOffset: 0 },
+            { name: 'January', month: 1, yearOffset: 1 },
+            { name: 'February', month: 2, yearOffset: 1 },
+        ];
+
+        const getMonthMetadata = (monthNum) => {
+            const quarterString = formData.quarter;
+            if (quarterString) {
+                const match = quarterString.match(/Q([1-4])\s*FY\s*(\d{2,4})/i);
+                if (match) {
+                    const quarter = parseInt(match[1], 10);
+                    let fiscalYear = parseInt(match[2], 10);
+                    if (match[2].length === 2) fiscalYear += 2000;
+                    const fiscalYearStart = fiscalYear - 1;
+                    const startIndex = (quarter - 1) * 3;
+                    const index = Number(monthNum) - 1;
+                    if (startIndex >= 0 && startIndex + index < FISCAL_YEAR_MONTHS.length) {
+                        const monthInfo = FISCAL_YEAR_MONTHS[startIndex + index];
+                        return { month: monthInfo.month, year: fiscalYearStart + monthInfo.yearOffset };
+                    }
+                }
+            }
+            // Fallback: offset from current month
+            const baseDate = new Date();
+            baseDate.setDate(1);
+            baseDate.setMonth(baseDate.getMonth() + (Number(monthNum) - 1));
+            return { month: baseDate.getMonth() + 1, year: baseDate.getFullYear() };
+        };
+
+        const generateWeeksForMonth = (month, year) => {
+            const targetMonth = month - 1;
+            const firstDay = new Date(year, targetMonth, 1);
+            const lastDay = new Date(year, targetMonth + 1, 0);
+            const weeks = [];
+            const start = new Date(firstDay.getFullYear(), firstDay.getMonth(), firstDay.getDate());
+            const day = start.getDay();
+            const diff = day === 0 ? -6 : 1 - day;
+            start.setDate(start.getDate() + diff);
+            while (start <= lastDay) {
+                const weekStart = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+                const weekEnd = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 6);
+                let daysInMonth = 0;
+                for (let i = 0; i < 7; i++) {
+                    const dayDate = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + i);
+                    if (dayDate.getMonth() === targetMonth) daysInMonth++;
+                }
+                if (daysInMonth >= 4) weeks.push({ startDate: weekStart, endDate: weekEnd });
+                start.setDate(start.getDate() + 7);
+            }
+            return weeks;
+        };
+
         const getWeeksForMonth = (monthNum) => {
-            const weekPattern = new RegExp(`^m${monthNum}s5_w(\\d+)_(status|win|spotlight|shine)$`);
-            const detectedWeeks = Object.keys(formData)
-                .map((key) => { const match = key.match(weekPattern); return match ? parseInt(match[1], 10) : null; })
-                .filter((weekNum) => Number.isInteger(weekNum));
-            if (detectedWeeks.length > 0) return Array.from(new Set(detectedWeeks)).sort((a, b) => a - b).slice(0, 5);
-            return [1, 2, 3, 4, 5];
+            const metadata = getMonthMetadata(monthNum);
+            if (metadata && metadata.month && metadata.year) {
+                const weeks = generateWeeksForMonth(metadata.month, metadata.year);
+                return weeks.map((_, idx) => idx + 1);
+            }
+            return [1, 2, 3, 4];
         };
 
         const monthColors = { 1: '#D10A11', 2: '#B45309', 3: '#065F46' };
