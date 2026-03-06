@@ -106,11 +106,11 @@ export async function renderDashboard() {
                     <div class="plan-card-body">
                         <div class="plan-card-quarter-badge"><i class="bi bi-calendar3"></i> ${plan.quarter || 'No quarter'}</div>
                         <h3 class="plan-card-title">${planName}</h3>
-                    </div>
-                    <div class="plan-card-footer">
                         <div class="plan-card-quick-meta">
                             <span class="plan-card-kpi"><i class="bi bi-clock-history"></i> ${editedDate}</span>
                         </div>
+                    </div>
+                    <div class="plan-card-footer">
                         <div class="plan-card-progress-label-row">
                             <span class="plan-card-progress-label">Progress</span>
                             <span class="plan-card-progress-label">${statusLabel}</span>
