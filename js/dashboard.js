@@ -106,9 +106,6 @@ export async function renderDashboard() {
                     <div class="plan-card-body">
                         <div class="plan-card-quarter-badge"><i class="bi bi-calendar3"></i> ${plan.quarter || 'No quarter'}</div>
                         <h3 class="plan-card-title">${planName}</h3>
-                        <div class="plan-card-quick-meta">
-                            <span class="plan-card-kpi"><i class="bi bi-clock-history"></i> ${editedDate}</span>
-                        </div>
                     </div>
                     <div class="plan-card-footer">
                         <div class="plan-card-progress-label-row">
@@ -123,7 +120,7 @@ export async function renderDashboard() {
                         </div>
                         <div class="plan-card-meta">
                             <span class="plan-card-status ${statusClass}">${statusLabel}</span>
-                            <span class="plan-card-open-cta">Open plan <i class="bi bi-arrow-right-short"></i></span>
+                            <span class="plan-card-last-edited">Last edited ${editedDate}</span>
                         </div>
                     </div>
                 </div>
