@@ -514,6 +514,15 @@ function runAdminPortal(app) {
         return total > 0 ? Math.round((completed / total) * 100) : 0;
     }
 
+    function getAdminPreviewUrl(uid, planId) {
+        const params = new URLSearchParams({
+            mode: 'admin',
+            uid,
+            planId
+        });
+        return `/view.html?${params.toString()}`;
+    }
+
     function renderUsers(users) {
         if (users.length === 0) {
             usersList.innerHTML = '';
@@ -545,6 +554,10 @@ function runAdminPortal(app) {
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
+                                <a href="${getAdminPreviewUrl(user.uid, plan.id)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition-colors" title="Preview this plan as an admin">
+                                    <i class="bi bi-eye-fill"></i>
+                                    Preview
+                                </a>
                                 <div class="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
                                     <div class="h-full rounded-full ${completion >= 75 ? 'bg-green-500' : completion >= 40 ? 'bg-yellow-500' : 'bg-red-400'}" style="width: ${completion}%"></div>
                                 </div>

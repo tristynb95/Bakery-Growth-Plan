@@ -20,6 +20,8 @@ async function initializeFirebase() {
 
 function runViewScript(app) {
     const db = firebase.firestore();
+    const auth = firebase.auth();
+    const ADMIN_EMAIL = 'tristen_bayley@gailsbread.co.uk';
     const DOMElements = {
         headerTitle: document.getElementById('header-title'),
         headerSubtitle: document.getElementById('header-subtitle'),
@@ -293,6 +295,55 @@ function runViewScript(app) {
             }
         }
     };
+
+    const loadAdminPreview = async () => {
+        const params = new URLSearchParams(window.location.search);
+        const uid = params.get('uid');
+        const planId = params.get('planId');
+
+        if (!uid || !planId) {
+            DOMElements.headerTitle.textContent = 'Invalid Preview Link';
+            DOMElements.headerSubtitle.textContent = 'This admin preview link is missing required details.';
+            return;
+        }
+
+        try {
+            await new Promise((resolve, reject) => {
+                const unsubscribe = auth.onAuthStateChanged((user) => {
+                    unsubscribe();
+                    if (!user || user.email !== ADMIN_EMAIL) {
+                        reject(new Error('admin-auth-required'));
+                        return;
+                    }
+                    resolve(user);
+                }, reject);
+            });
+
+            const planRef = db.collection('users').doc(uid).collection('plans').doc(planId);
+            const planDoc = await planRef.get();
+
+            if (!planDoc.exists) {
+                throw new Error('The selected plan no longer exists.');
+            }
+
+            renderSummary(planDoc.data());
+        } catch (error) {
+            console.error('Error loading admin preview:', error);
+            DOMElements.headerTitle.textContent = 'Preview Not Available';
+            if (error.message === 'admin-auth-required') {
+                DOMElements.headerSubtitle.textContent = 'Only signed-in admins can preview plans from the admin portal.';
+                return;
+            }
+            DOMElements.headerSubtitle.textContent = error.message || 'Could not load the selected plan.';
+        }
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    if (mode === 'admin') {
+        loadAdminPreview();
+        return;
+    }
 
     loadSharedPlan();
 }
