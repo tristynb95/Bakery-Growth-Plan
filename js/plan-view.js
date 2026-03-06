@@ -732,6 +732,9 @@ function renderSummary() {
         let loggedCount = 0;
         let totalWeeks = weeks.length;
         let weekRows = '';
+        const colorNames = { 1: 'red', 2: 'amber', 3: 'green' };
+        const dotClasses = { 'on-track': 'dot-on-track', 'issues': 'dot-issues', 'off-track': 'dot-off-track' };
+
         weeks.forEach((week) => {
             const status = formData[`m${monthNum}s5_w${week.index}_status`];
             const win = formData[`m${monthNum}s5_w${week.index}_win`];
@@ -742,19 +745,23 @@ function renderSummary() {
                 loggedCount++;
                 const statusText = status.replace('-', ' ').toUpperCase();
                 const statusBadgeHTML = `<span class="summary-status-badge status-${status}">${statusText}</span>`;
+                const dotClass = dotClasses[status] || 'dot-on-track';
                 let details = '';
                 if (!isContentEmpty(win)) details += `<div class="summary-week-detail"><i class="bi bi-trophy text-amber-500"></i><div><strong>Win/Learning</strong><div class="prose prose-sm">${e(win)}</div></div></div>`;
                 if (!isContentEmpty(spotlight)) details += `<div class="summary-week-detail"><i class="bi bi-star text-purple-500"></i><div><strong>Breadhead Spotlight</strong><div class="prose prose-sm">${e(spotlight)}</div></div></div>`;
                 if (!isContentEmpty(shine)) details += `<div class="summary-week-detail"><i class="bi bi-brightness-high text-amber-500"></i><div><strong>SHINE Focus</strong><div class="prose prose-sm">${e(shine)}</div></div></div>`;
-                if (!details) details = '<p class="text-sm text-gray-400 italic ml-1">No details logged for this week.</p>';
+                if (!details) details = '<p class="text-sm text-gray-400 italic">No details logged.</p>';
 
                 weekRows += `
                     <div class="summary-week-row">
-                        <div class="summary-week-header">
-                            <span class="font-semibold text-gray-700 text-sm">${week.label}</span>
-                            ${statusBadgeHTML}
+                        <div class="summary-week-dot ${dotClass}"><span>${week.index}</span></div>
+                        <div class="summary-week-content">
+                            <div class="summary-week-header">
+                                <span class="font-semibold text-gray-700 text-sm">${week.label}</span>
+                                ${statusBadgeHTML}
+                            </div>
+                            <div class="summary-week-details">${details}</div>
                         </div>
-                        <div class="summary-week-details">${details}</div>
                     </div>`;
             }
         });
@@ -767,20 +774,36 @@ function renderSummary() {
         }
 
         const hasReview = !isContentEmpty(formData[`m${monthNum}s6_win`]) || !isContentEmpty(formData[`m${monthNum}s6_challenge`]) || !isContentEmpty(formData[`m${monthNum}s6_next`]);
-
         const accentColor = monthColors[monthNum];
+
+        // Progress ring calculations
+        const pct = totalWeeks > 0 ? loggedCount / totalWeeks : 0;
+        const r = 14;
+        const circ = 2 * Math.PI * r;
+        const dashoffset = circ * (1 - pct);
 
         return `
             <div class="summary-month-card" id="summary-month-${monthNum}">
-                <div class="summary-month-header" style="border-left-color: ${accentColor}">
+                <div class="summary-month-header" data-color="${colorNames[monthNum]}">
                     <div class="summary-month-title-row">
-                        <div>
-                            <h2 class="text-2xl font-bold font-poppins">${monthLabels[monthNum]}</h2>
-                            ${pillarBadgesHTML ? `<div class="flex items-center gap-2 mt-2 flex-wrap">${pillarBadgesHTML}</div>` : ''}
+                        <div class="summary-month-title-group">
+                            <div class="summary-month-num" style="background-color: ${accentColor}">${monthNum}</div>
+                            <div class="summary-month-info">
+                                <h2>${monthLabels[monthNum]}</h2>
+                                ${pillarBadgesHTML ? `<div class="summary-month-pillars">${pillarBadgesHTML}</div>` : ''}
+                            </div>
                         </div>
                         <div class="summary-momentum-indicator">
-                            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Weekly Momentum</span>
-                            <span class="text-lg font-bold" style="color: ${accentColor}">${loggedCount}/${totalWeeks}</span>
+                            <div class="summary-momentum-ring">
+                                <svg viewBox="0 0 36 36">
+                                    <circle class="ring-bg" cx="18" cy="18" r="${r}"/>
+                                    <circle class="ring-fill" cx="18" cy="18" r="${r}" stroke="${accentColor}" stroke-dasharray="${circ}" stroke-dashoffset="${dashoffset}"/>
+                                </svg>
+                            </div>
+                            <div class="summary-momentum-text">
+                                <span class="summary-momentum-label">Momentum</span>
+                                <span class="summary-momentum-value" style="color: ${accentColor}">${loggedCount}/${totalWeeks}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -836,15 +859,18 @@ function renderSummary() {
                         <div class="summary-review-items">
                             <div class="summary-review-item">
                                 <div class="summary-review-icon summary-review-icon--win"><i class="bi bi-trophy-fill"></i></div>
-                                <div><h4 class="font-semibold text-sm text-gray-700">Biggest Win</h4><div class="text-sm text-gray-600 prose prose-sm">${e(formData[`m${monthNum}s6_win`])}</div></div>
+                                <h4 class="summary-review-label">Biggest Win</h4>
+                                <div class="summary-review-text prose prose-sm">${e(formData[`m${monthNum}s6_win`])}</div>
                             </div>
                             <div class="summary-review-item">
                                 <div class="summary-review-icon summary-review-icon--challenge"><i class="bi bi-lightbulb-fill"></i></div>
-                                <div><h4 class="font-semibold text-sm text-gray-700">Toughest Challenge & Learning</h4><div class="text-sm text-gray-600 prose prose-sm">${e(formData[`m${monthNum}s6_challenge`])}</div></div>
+                                <h4 class="summary-review-label">Challenge & Learning</h4>
+                                <div class="summary-review-text prose prose-sm">${e(formData[`m${monthNum}s6_challenge`])}</div>
                             </div>
                             <div class="summary-review-item">
                                 <div class="summary-review-icon summary-review-icon--next"><i class="bi bi-rocket-takeoff-fill"></i></div>
-                                <div><h4 class="font-semibold text-sm text-gray-700">Focus for Next Month</h4><div class="text-sm text-gray-600 prose prose-sm">${e(formData[`m${monthNum}s6_next`])}</div></div>
+                                <h4 class="summary-review-label">Next Month Focus</h4>
+                                <div class="summary-review-text prose prose-sm">${e(formData[`m${monthNum}s6_next`])}</div>
                             </div>
                         </div>` : '<p class="text-sm text-gray-400 italic">End of month review has not been completed yet.</p>'}
                     </div>
@@ -853,7 +879,11 @@ function renderSummary() {
     };
 
     DOMElements.contentArea.innerHTML = `<div class="summary-redesigned">
-        <div class="summary-hero-card content-card">
+        <div class="summary-hero-card">
+            <div class="summary-hero-banner">
+                <div class="summary-hero-plan-name">${formData.planName || 'Growth Plan'}</div>
+                <div class="summary-hero-plan-sub">${formData.quarter || 'Quarterly'} Overview</div>
+            </div>
             <div class="summary-hero-meta">
                 <div class="summary-meta-item">
                     <div class="summary-meta-icon"><i class="bi bi-person-fill"></i></div>
@@ -887,25 +917,25 @@ function renderSummary() {
                 <h3 class="summary-objectives-title">Key Monthly Objectives</h3>
                 <div class="summary-objectives-grid">
                     <div class="summary-objective-card">
-                        <span class="summary-objective-num" style="background-color: ${monthColors[1]}">1</span>
-                        <div>
+                        <div class="summary-objective-header">
+                            <span class="summary-objective-num" style="background-color: ${monthColors[1]}">1</span>
                             <span class="summary-objective-label">Month 1</span>
-                            <div class="summary-objective-text prose prose-sm">${e(formData.month1Goal)}</div>
                         </div>
+                        <div class="summary-objective-text prose prose-sm">${e(formData.month1Goal)}</div>
                     </div>
                     <div class="summary-objective-card">
-                        <span class="summary-objective-num" style="background-color: ${monthColors[2]}">2</span>
-                        <div>
+                        <div class="summary-objective-header">
+                            <span class="summary-objective-num" style="background-color: ${monthColors[2]}">2</span>
                             <span class="summary-objective-label">Month 2</span>
-                            <div class="summary-objective-text prose prose-sm">${e(formData.month2Goal)}</div>
                         </div>
+                        <div class="summary-objective-text prose prose-sm">${e(formData.month2Goal)}</div>
                     </div>
                     <div class="summary-objective-card">
-                        <span class="summary-objective-num" style="background-color: ${monthColors[3]}">3</span>
-                        <div>
+                        <div class="summary-objective-header">
+                            <span class="summary-objective-num" style="background-color: ${monthColors[3]}">3</span>
                             <span class="summary-objective-label">Month 3</span>
-                            <div class="summary-objective-text prose prose-sm">${e(formData.month3Goal)}</div>
                         </div>
+                        <div class="summary-objective-text prose prose-sm">${e(formData.month3Goal)}</div>
                     </div>
                 </div>
             </div>
@@ -930,7 +960,7 @@ function renderSummary() {
                 </div>
                 <div class="summary-reflection-item">
                     <div class="summary-reflection-icon" style="background-color: #FEF3C7; color: #92400E;"><i class="bi bi-bar-chart-line-fill"></i></div>
-                    <h3 class="font-bold text-base text-gray-800">Biggest Challenges & Learnings</h3>
+                    <h3 class="font-bold text-base text-gray-800">Challenges & Learnings</h3>
                     <div class="text-gray-600 prose prose-sm">${e(formData.m3s7_challenges)}</div>
                 </div>
                 <div class="summary-reflection-item">
