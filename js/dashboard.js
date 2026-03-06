@@ -93,9 +93,11 @@ export async function renderDashboard() {
         const progressColor = completion === 100 ? 'var(--gails-green)' : 'var(--gails-red)';
         const statusLabel = completion === 100 ? 'Complete' : completion > 0 ? 'In Progress' : 'Not Started';
         const statusClass = completion === 100 ? 'status-complete' : completion > 0 ? 'status-in-progress' : 'status-not-started';
+        const progressToneClass = completion === 100 ? 'progress-tone-complete' : completion > 0 ? 'progress-tone-active' : 'progress-tone-idle';
 
         dashboardHTML += `
             <div class="plan-card">
+                <div class="plan-card-accent ${progressToneClass}" aria-hidden="true"></div>
                 <div class="plan-card-actions">
                     <button class="plan-action-btn edit-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" data-plan-quarter="${plan.quarter || ''}" title="Edit Details"><i class="bi bi-pencil-square"></i></button>
                     <button class="plan-action-btn delete-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" data-plan-quarter="${plan.quarter || ''}" title="Delete Plan"><i class="bi bi-trash3-fill"></i></button>
@@ -104,8 +106,16 @@ export async function renderDashboard() {
                     <div class="plan-card-body">
                         <div class="plan-card-quarter-badge"><i class="bi bi-calendar3"></i> ${plan.quarter || 'No quarter'}</div>
                         <h3 class="plan-card-title">${planName}</h3>
+                        <div class="plan-card-quick-meta">
+                            <span class="plan-card-kpi ${progressToneClass}"><i class="bi bi-graph-up-arrow"></i> ${completion}% complete</span>
+                            <span class="plan-card-kpi"><i class="bi bi-clock-history"></i> ${editedDate}</span>
+                        </div>
                     </div>
                     <div class="plan-card-footer">
+                        <div class="plan-card-progress-label-row">
+                            <span class="plan-card-progress-label">Progress</span>
+                            <span class="plan-card-progress-label">${statusLabel}</span>
+                        </div>
                         <div class="plan-card-progress-row">
                             <div class="plan-card-progress-bar">
                                 <div class="plan-card-progress-fill" style="width: ${completion}%; background-color: ${progressColor}"></div>
@@ -114,7 +124,7 @@ export async function renderDashboard() {
                         </div>
                         <div class="plan-card-meta">
                             <span class="plan-card-status ${statusClass}">${statusLabel}</span>
-                            <span class="plan-card-edited"><i class="bi bi-clock-history"></i> ${editedDate}</span>
+                            <span class="plan-card-open-cta">Open plan <i class="bi bi-arrow-right-short"></i></span>
                         </div>
                     </div>
                 </div>
