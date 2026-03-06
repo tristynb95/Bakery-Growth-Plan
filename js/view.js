@@ -20,10 +20,47 @@ async function initializeFirebase() {
 
 function runViewScript(app) {
     const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    // Combined Conflict Resolution: Using the dynamic Admin Roles logic
+    const OWNER_EMAIL = 'tristen_bayley@gailsbread.co.uk';
+    const ADMIN_ROLES_DOC = 'adminRoles';
+
     const DOMElements = {
         headerTitle: document.getElementById('header-title'),
         headerSubtitle: document.getElementById('header-subtitle'),
         contentArea: document.getElementById('content-area'),
+    };
+
+    const normalizeEmail = (email) => (email || '').trim().toLowerCase();
+
+    const loadAdminRoles = async () => {
+        const ownerEmail = normalizeEmail(OWNER_EMAIL);
+        const docRef = db.collection('settings').doc(ADMIN_ROLES_DOC);
+        const doc = await docRef.get();
+
+        let resolvedOwner = ownerEmail;
+        let admins = [ownerEmail];
+
+        if (doc.exists) {
+            const data = doc.data() || {};
+            const configuredOwner = normalizeEmail(data.ownerEmail);
+            const configuredAdmins = Array.isArray(data.admins)
+                ? data.admins.map(normalizeEmail).filter(Boolean)
+                : [];
+
+            if (configuredOwner) {
+                resolvedOwner = configuredOwner;
+            }
+
+            admins = [...new Set([...configuredAdmins, resolvedOwner])];
+        }
+
+        if (!doc.exists) {
+            await docRef.set({ ownerEmail: resolvedOwner, admins }, { merge: true });
+        }
+
+        return { ownerEmail: resolvedOwner, admins };
     };
 
     const planTitleMap = {
@@ -90,7 +127,6 @@ function runViewScript(app) {
                     }
                 }
             }
-            // Fallback: offset from current month
             const baseDate = new Date();
             baseDate.setDate(1);
             baseDate.setMonth(baseDate.getMonth() + (Number(monthNum) - 1));
@@ -260,7 +296,6 @@ function runViewScript(app) {
         }
 
         try {
-            // 1. Get the pointer document from the 'sharedPlans' collection
             const pointerRef = db.collection('sharedPlans').doc(shareId);
             const pointerDoc = await pointerRef.get();
 
@@ -269,8 +304,6 @@ function runViewScript(app) {
             }
 
             const { originalUserId, originalPlanId } = pointerDoc.data();
-
-            // 2. Use the pointer to get the actual plan document
             const planRef = db.collection('users').doc(originalUserId).collection('plans').doc(originalPlanId);
             const planDoc = await planRef.get();
 
@@ -278,12 +311,10 @@ function runViewScript(app) {
                 throw new Error('The original plan could not be found.');
             }
             
-            // 3. Render the summary
             renderSummary(planDoc.data());
 
         } catch (error) {
             console.error("Error loading shared plan:", error);
-            // This is the updated, user-friendly error handling
             DOMElements.headerTitle.textContent = 'Plan Not Found';
             
             if (error.code === 'permission-denied') {
@@ -293,6 +324,62 @@ function runViewScript(app) {
             }
         }
     };
+
+    const loadAdminPreview = async () => {
+        const params = new URLSearchParams(window.location.search);
+        const uid = params.get('uid');
+        const planId = params.get('planId');
+
+        if (!uid || !planId) {
+            DOMElements.headerTitle.textContent = 'Invalid Preview Link';
+            DOMElements.headerSubtitle.textContent = 'This admin preview link is missing required details.';
+            return;
+        }
+
+        try {
+            await new Promise((resolve, reject) => {
+                const unsubscribe = auth.onAuthStateChanged((user) => {
+                    unsubscribe();
+                    if (!user) {
+                        reject(new Error('admin-auth-required'));
+                        return;
+                    }
+                    resolve(user);
+                }, reject);
+            });
+
+            // Security check using normalized emails and dynamic roles
+            const userEmail = normalizeEmail(auth.currentUser && auth.currentUser.email);
+            const adminRoles = await loadAdminRoles();
+            if (!adminRoles.admins.includes(userEmail)) {
+                throw new Error('admin-auth-required');
+            }
+
+            const planRef = db.collection('users').doc(uid).collection('plans').doc(planId);
+            const planDoc = await planRef.get();
+
+            if (!planDoc.exists) {
+                throw new Error('The selected plan no longer exists.');
+            }
+
+            renderSummary(planDoc.data());
+        } catch (error) {
+            console.error('Error loading admin preview:', error);
+            DOMElements.headerTitle.textContent = 'Preview Not Available';
+            if (error.message === 'admin-auth-required') {
+                DOMElements.headerSubtitle.textContent = 'Only signed-in admins can preview plans from the admin portal.';
+                return;
+            }
+            DOMElements.headerSubtitle.textContent = error.message || 'Could not load the selected plan.';
+        }
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    if (mode === 'admin') {
+        loadAdminPreview();
+        return;
+    }
 
     loadSharedPlan();
 }
