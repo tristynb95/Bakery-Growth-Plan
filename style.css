@@ -242,9 +242,9 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 .plan-card-body {
     flex-grow: 1;
     margin-bottom: 1.1rem;
-    padding-right: 3.5rem;
 }
 .plan-card-quarter-badge {
+    max-width: calc(100% - 3.5rem);
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
