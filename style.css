@@ -483,7 +483,8 @@ textarea.form-input {
     border-color: var(--gails-red);
     box-shadow: var(--shadow-focus);
 }
-.content-card { background-color: var(--gails-white); border-radius: 1.25rem; box-shadow: var(--shadow-sm); border: 1px solid #E5E7EB; padding: 2rem; /* Increased padding */ }
+.content-card { background-color: var(--gails-white); border-radius: 1.25rem; box-shadow: var(--shadow-sm); border: 1px solid #E5E7EB; padding: 2rem; }
+.content-card.plan-card-elevated:not(.plan-foundation-card) { padding: 1.5rem 2rem 2rem; }
 
 /* Character Counter Styles */
 .textarea-wrapper { position: relative; }
@@ -803,6 +804,344 @@ textarea.form-input {
     padding-bottom: 0.5rem;
 }
 
+/* 24b. Redesigned Plan Form Styles
+-------------------------------------------------- */
+
+/* Section flow layout */
+.plan-section-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Elevated card variant */
+.plan-card-elevated {
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.04);
+    transition: box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+/* Foundation card with accent strip */
+.plan-foundation-card {
+    position: relative;
+    padding: 0 !important;
+}
+.plan-section-accent {
+    height: 4px;
+    width: 100%;
+    border-radius: 1rem 1rem 0 0;
+}
+.plan-card-inner {
+    padding: 1.5rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Card header with icon */
+.plan-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+.plan-card-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    background-color: var(--gails-red-light);
+    color: var(--gails-red);
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+.plan-card-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--gails-text-primary);
+    line-height: 1.3;
+}
+.plan-card-description {
+    font-size: 0.875rem;
+    color: var(--gails-text-secondary);
+    margin-top: 0.125rem;
+    line-height: 1.4;
+}
+
+/* Mission banner */
+.plan-mission-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+    border: 1px solid #FDE68A;
+    border-radius: 1rem;
+}
+.plan-mission-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    background-color: #FEF3C7;
+    color: #92400E;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+.plan-mission-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #92400E;
+    margin-bottom: 0.25rem;
+}
+.plan-mission-text {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--gails-text-primary);
+    line-height: 1.5;
+}
+
+/* Objectives grid */
+.plan-objectives-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.plan-objective-item {
+    display: flex;
+    gap: 0;
+    border: 1px solid #E5E7EB;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background-color: var(--gails-white);
+    transition: border-color 0.2s ease;
+}
+.plan-objective-item:focus-within {
+    border-color: var(--gails-red);
+    box-shadow: var(--shadow-focus);
+}
+.plan-objective-indicator {
+    width: 4px;
+    flex-shrink: 0;
+}
+.plan-objective-content {
+    flex: 1;
+    padding: 1rem 1.25rem;
+}
+.plan-objective-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--gails-text-secondary);
+    margin-bottom: 0.5rem;
+}
+.plan-objective-content .form-input {
+    border: none !important;
+    padding: 0 !important;
+    min-height: auto;
+    box-shadow: none !important;
+    border-radius: 0;
+    background: transparent;
+}
+.plan-objective-content [contenteditable="true"].form-input.is-placeholder-showing::before {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+}
+
+/* Form section styles */
+.plan-form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.plan-form-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-bottom: 0.25rem;
+}
+.plan-form-section-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+.plan-form-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gails-text-primary);
+}
+.plan-form-inline-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gails-text-secondary);
+    margin-bottom: 0.625rem;
+}
+.plan-form-divider {
+    height: 1px;
+    background-color: #E5E7EB;
+    margin: 0.5rem 0;
+}
+
+/* Pillar grid (form version) */
+.plan-pillar-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+}
+.plan-pillars-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+.plan-pillar-form-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.plan-pillar-form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--gails-text-secondary);
+}
+.plan-pillar-form-label i {
+    font-size: 0.95rem;
+}
+
+/* Weekly tabs redesign */
+.plan-weekly-tabs-wrapper {
+    border-bottom: 2px solid #F3F4F6;
+    margin-bottom: 1.5rem;
+}
+.plan-weekly-tabs {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.plan-weekly-tabs::-webkit-scrollbar { display: none; }
+.plan-weekly-tabs .weekly-tab {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    color: var(--gails-text-secondary);
+    transition: all 0.2s ease;
+}
+.plan-weekly-tabs .weekly-tab:hover {
+    color: var(--gails-text-primary);
+    background-color: var(--gails-grey-light);
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+.plan-weekly-tabs .weekly-tab.active {
+    color: var(--gails-red);
+    border-bottom-color: var(--gails-red);
+}
+
+/* Review card */
+.plan-review-card {
+    background: linear-gradient(135deg, #FFF1F2 0%, #FFFFFF 40%);
+    border-color: #FECACA;
+}
+.plan-card-header-icon--review {
+    background-color: var(--gails-red) !important;
+    color: var(--gails-white) !important;
+}
+.plan-review-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+.plan-review-field {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+.plan-review-field-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.625rem;
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+}
+.plan-review-field-icon--win { background-color: #D1FAE5; color: #065F46; }
+.plan-review-field-icon--challenge { background-color: #FEF3C7; color: #92400E; }
+.plan-review-field-icon--next { background-color: #EFF6FF; color: #1E40AF; }
+.plan-review-field-content {
+    flex: 1;
+    min-width: 0;
+}
+.plan-review-field-label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--gails-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Quarterly reflection card */
+.plan-quarterly-card {
+    background-color: var(--review-blue-bg) !important;
+    border-color: var(--review-blue-border) !important;
+}
+.plan-card-header-icon--quarterly {
+    background-color: #DBEAFE !important;
+    color: var(--review-blue-text) !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 767px) {
+    .plan-card-inner {
+        padding: 1.25rem 1.25rem 1.5rem;
+    }
+    .plan-pillar-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .plan-pillars-form-grid {
+        grid-template-columns: 1fr;
+    }
+    .plan-objectives-grid {
+        gap: 0.75rem;
+    }
+    .plan-mission-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.25rem;
+    }
+    .plan-review-field {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .plan-review-field-icon {
+        margin-top: 0;
+    }
+}
+
 /* 25. Redesigned Summary Page Styles
 -------------------------------------------------- */
 .summary-redesigned {
@@ -815,11 +1154,13 @@ textarea.form-input {
 .summary-hero-card {
     padding: 0 !important;
     overflow: hidden;
+    border-radius: 1rem;
 }
 .summary-hero-meta {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     border-bottom: 1px solid #E5E7EB;
+    background-color: #FAFAFA;
 }
 .summary-meta-item {
     display: flex;
@@ -831,7 +1172,14 @@ textarea.form-input {
     border-right: 1px solid #E5E7EB;
 }
 .summary-meta-icon {
-    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    background-color: var(--gails-red-light);
+    font-size: 1rem;
     color: var(--gails-red);
     flex-shrink: 0;
 }
@@ -851,7 +1199,7 @@ textarea.form-input {
 }
 .summary-vision-block {
     padding: 1.5rem;
-    background-color: var(--gails-red-light);
+    background: linear-gradient(135deg, #FFF1F2 0%, #FFFFFF 100%);
     border-bottom: 1px solid #E5E7EB;
 }
 .summary-vision-label {
@@ -866,9 +1214,10 @@ textarea.form-input {
     gap: 0.5rem;
 }
 .summary-vision-text {
-    font-size: 1rem;
+    font-size: 1.05rem;
     color: var(--gails-text-primary);
-    line-height: 1.6;
+    line-height: 1.7;
+    font-weight: 500;
 }
 .summary-objectives {
     padding: 1.5rem;
@@ -884,15 +1233,20 @@ textarea.form-input {
 .summary-objectives-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+    gap: 0.75rem;
 }
 .summary-objective-card {
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
-    padding: 1rem;
-    background-color: var(--gails-grey-light);
+    padding: 1rem 1.25rem;
+    background-color: #FAFAFA;
     border-radius: 0.75rem;
+    border: 1px solid #F3F4F6;
+    transition: border-color 0.2s ease;
+}
+.summary-objective-card:hover {
+    border-color: #E5E7EB;
 }
 .summary-objective-num {
     display: flex;
@@ -918,22 +1272,23 @@ textarea.form-input {
 .summary-objective-text {
     font-size: 0.875rem;
     color: var(--gails-text-primary);
+    line-height: 1.5;
 }
 
 /* --- Month Summary Cards --- */
 .summary-month-card {
     background-color: var(--gails-white);
-    border-radius: 1.25rem;
-    box-shadow: var(--shadow-sm);
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.04);
     border: 1px solid #E5E7EB;
     overflow: hidden;
-    margin-top: 2.5rem;
+    margin-top: 1.5rem;
 }
 .summary-month-card:first-child {
     margin-top: 0;
 }
 .summary-month-header {
-    padding: 1.5rem;
+    padding: 1.25rem 1.5rem;
     border-bottom: 1px solid #E5E7EB;
     border-left: 4px solid var(--gails-red);
     background-color: #FAFAFA;
@@ -941,44 +1296,59 @@ textarea.form-input {
 .summary-month-title-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
 }
 .summary-momentum-indicator {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 0.125rem;
+    background-color: var(--gails-white);
+    border: 1px solid #E5E7EB;
+    border-radius: 0.5rem;
+    padding: 0.375rem 0.75rem;
 }
 .summary-month-body {
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.75rem;
 }
 
 /* Strategy section */
 .summary-strategy-section {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem;
 }
 .summary-strategy-card {
     display: flex;
     gap: 1rem;
     padding: 1rem 1.25rem;
-    background-color: var(--gails-grey-light);
+    background-color: #FAFAFA;
     border-radius: 0.75rem;
-    border: 1px solid #E5E7EB;
+    border: 1px solid #F3F4F6;
+    transition: background-color 0.2s ease;
+}
+.summary-strategy-card:hover {
+    background-color: var(--gails-grey-light);
 }
 .summary-strategy-card--battle {
-    background-color: var(--gails-red-light);
+    background: linear-gradient(135deg, #FFF1F2 0%, #FFFFFF 100%);
     border-color: #FECACA;
+}
+.summary-strategy-card--battle:hover {
+    background: linear-gradient(135deg, #FEE2E2 0%, #FFF1F2 100%);
 }
 .summary-strategy-icon {
     display: flex;
-    align-items: flex-start;
-    padding-top: 0.125rem;
-    font-size: 1.1rem;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    background-color: var(--gails-red-light);
+    font-size: 0.95rem;
     color: var(--gails-red);
     flex-shrink: 0;
 }
@@ -998,9 +1368,10 @@ textarea.form-input {
 
 /* Pillars grid */
 .summary-pillars-grid {
-    border: 1px solid #E5E7EB;
+    border: 1px solid #F3F4F6;
     border-radius: 0.75rem;
     overflow: hidden;
+    background-color: #FAFAFA;
 }
 .summary-pillars-title {
     font-size: 0.8rem;
@@ -1009,7 +1380,7 @@ textarea.form-input {
     letter-spacing: 0.05em;
     color: var(--gails-text-secondary);
     padding: 0.75rem 1.25rem;
-    background-color: #FAFAFA;
+    background-color: #F3F4F6;
     border-bottom: 1px solid #E5E7EB;
     display: flex;
     align-items: center;
@@ -1023,17 +1394,24 @@ textarea.form-input {
     display: flex;
     gap: 0.75rem;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid #E5E7EB;
-    border-right: 1px solid #E5E7EB;
+    border-bottom: 1px solid #F3F4F6;
+    border-right: 1px solid #F3F4F6;
     font-size: 0.875rem;
+    background-color: var(--gails-white);
 }
 .summary-pillar-item:nth-child(2n) { border-right: none; }
 .summary-pillar-item:nth-last-child(-n+2) { border-bottom: none; }
 .summary-pillar-icon {
-    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.375rem;
+    background-color: var(--gails-grey-light);
+    font-size: 0.85rem;
     color: var(--gails-text-secondary);
     flex-shrink: 0;
-    margin-top: 0.125rem;
 }
 .summary-pillar-label {
     font-size: 0.7rem;
@@ -1046,7 +1424,7 @@ textarea.form-input {
 
 /* Weekly momentum section */
 .summary-weekly-section {
-    border-top: 1px solid #E5E7EB;
+    border-top: 1px solid #F3F4F6;
     padding-top: 1.5rem;
 }
 .summary-section-title {
@@ -1060,16 +1438,23 @@ textarea.form-input {
     align-items: center;
     gap: 0.5rem;
 }
+.summary-section-title i {
+    font-size: 0.9rem;
+}
 .summary-weeks-list {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.625rem;
 }
 .summary-week-row {
-    background-color: var(--gails-grey-light);
-    border-radius: 0.75rem;
-    border: 1px solid #E5E7EB;
+    background-color: #FAFAFA;
+    border-radius: 0.625rem;
+    border: 1px solid #F3F4F6;
     overflow: hidden;
+    transition: border-color 0.2s ease;
+}
+.summary-week-row:hover {
+    border-color: #E5E7EB;
 }
 .summary-week-header {
     display: flex;
@@ -1104,18 +1489,22 @@ textarea.form-input {
 
 /* End of month review */
 .summary-review-section {
-    border-top: 1px solid #E5E7EB;
+    border-top: 1px solid #F3F4F6;
     padding-top: 1.5rem;
 }
 .summary-review-items {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.875rem;
 }
 .summary-review-item {
     display: flex;
     gap: 0.75rem;
     align-items: flex-start;
+    padding: 0.75rem;
+    border-radius: 0.625rem;
+    background-color: #FAFAFA;
+    border: 1px solid #F3F4F6;
 }
 .summary-review-icon {
     display: flex;
@@ -1134,7 +1523,8 @@ textarea.form-input {
 /* --- Quarterly Reflection --- */
 .summary-quarterly-reflection {
     border-color: var(--review-blue-border) !important;
-    background-color: var(--review-blue-bg) !important;
+    background: linear-gradient(135deg, var(--review-blue-bg) 0%, #F8FAFF 100%) !important;
+    border-radius: 1rem;
 }
 .summary-reflection-header {
     display: flex;
@@ -1147,12 +1537,16 @@ textarea.form-input {
 .summary-reflection-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    gap: 1.25rem;
 }
 .summary-reflection-item {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(147, 197, 253, 0.3);
 }
 .summary-reflection-icon {
     display: flex;
@@ -1167,12 +1561,13 @@ textarea.form-input {
 /* 26. Summary Page Status Badges
 -------------------------------------------------- */
 .summary-status-badge {
-    padding: 0.25rem 0.625rem;
+    padding: 0.25rem 0.75rem;
     border-radius: 9999px;
     font-size: 0.625rem;
     font-weight: 700;
     line-height: 1;
     text-transform: uppercase;
+    letter-spacing: 0.03em;
     border: 1px solid transparent;
 }
 .summary-status-badge.status-on-track {
@@ -1200,6 +1595,15 @@ textarea.form-input {
     .summary-pillar-item { border-right: none !important; }
     .summary-pillar-item:nth-last-child(2) { border-bottom: 1px solid #E5E7EB; }
     .summary-reflection-grid { grid-template-columns: 1fr; }
+}
+
+/* Shared view header */
+.view-shared-header {
+    padding: 2.5rem 1.5rem 1rem;
+    text-align: center;
+}
+.view-shared-title-block {
+    margin-top: 1.5rem;
 }
 
 /* Legacy summary grid (for shared view.html) */

@@ -181,9 +181,9 @@ function runViewScript(app) {
                     </div>
                     <div class="summary-month-body">
                         <div class="summary-strategy-section">
-                            <div class="summary-strategy-card summary-strategy-card--battle"><div class="summary-strategy-icon"><i class="bi bi-crosshair"></i></div><div><h3 class="summary-strategy-label">Must-Win Battle</h3><div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div></div></div>
-                            <div class="summary-strategy-card"><div class="summary-strategy-icon"><i class="bi bi-lightning-charge-fill"></i></div><div><h3 class="summary-strategy-label">Key Actions</h3><div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div></div>
-                            <div class="summary-strategy-card"><div class="summary-strategy-icon"><i class="bi bi-people-fill"></i></div><div><h3 class="summary-strategy-label">Developing Our Breadheads</h3><div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div></div></div>
+                            <div class="summary-strategy-card summary-strategy-card--battle"><div class="summary-strategy-icon"><i class="bi bi-crosshair"></i></div><div class="min-w-0"><h3 class="summary-strategy-label">Must-Win Battle</h3><div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div></div></div>
+                            <div class="summary-strategy-card"><div class="summary-strategy-icon"><i class="bi bi-lightning-charge-fill"></i></div><div class="min-w-0"><h3 class="summary-strategy-label">Key Actions</h3><div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div></div>
+                            <div class="summary-strategy-card"><div class="summary-strategy-icon"><i class="bi bi-people-fill"></i></div><div class="min-w-0"><h3 class="summary-strategy-label">Developing Our Breadheads</h3><div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div></div></div>
                         </div>
                         <div class="summary-pillars-grid">
                             <h3 class="summary-pillars-title"><i class="bi bi-columns-gap"></i> Upholding Pillars</h3>
@@ -215,9 +215,9 @@ function runViewScript(app) {
             <div class="summary-redesigned">
                 <div class="summary-hero-card content-card">
                     <div class="summary-hero-meta">
-                        <div class="summary-meta-item"><i class="bi bi-person-fill summary-meta-icon"></i><div><span class="summary-meta-label">Manager</span><span class="summary-meta-value">${formData.managerName || '...'}</span></div></div>
-                        <div class="summary-meta-item"><i class="bi bi-shop summary-meta-icon"></i><div><span class="summary-meta-label">Bakery</span><span class="summary-meta-value">${formData.bakeryLocation || '...'}</span></div></div>
-                        <div class="summary-meta-item"><i class="bi bi-calendar3 summary-meta-icon"></i><div><span class="summary-meta-label">Quarter</span><span class="summary-meta-value">${formData.quarter || '...'}</span></div></div>
+                        <div class="summary-meta-item"><div class="summary-meta-icon"><i class="bi bi-person-fill"></i></div><div><span class="summary-meta-label">Manager</span><span class="summary-meta-value">${formData.managerName || '...'}</span></div></div>
+                        <div class="summary-meta-item"><div class="summary-meta-icon"><i class="bi bi-shop"></i></div><div><span class="summary-meta-label">Bakery</span><span class="summary-meta-value">${formData.bakeryLocation || '...'}</span></div></div>
+                        <div class="summary-meta-item"><div class="summary-meta-icon"><i class="bi bi-calendar3"></i></div><div><span class="summary-meta-label">Quarter</span><span class="summary-meta-value">${formData.quarter || '...'}</span></div></div>
                     </div>
                     <div class="summary-vision-block">
                         <h3 class="summary-vision-label"><i class="bi bi-binoculars-fill"></i> Quarterly Vision</h3>
