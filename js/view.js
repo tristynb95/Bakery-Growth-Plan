@@ -21,14 +21,16 @@ async function initializeFirebase() {
 function runViewScript(app) {
     const db = firebase.firestore();
     const auth = firebase.auth();
+
+    // Combined Conflict Resolution: Using the dynamic Admin Roles logic
     const OWNER_EMAIL = 'tristen_bayley@gailsbread.co.uk';
     const ADMIN_ROLES_DOC = 'adminRoles';
+
     const DOMElements = {
         headerTitle: document.getElementById('header-title'),
         headerSubtitle: document.getElementById('header-subtitle'),
         contentArea: document.getElementById('content-area'),
     };
-
 
     const normalizeEmail = (email) => (email || '').trim().toLowerCase();
 
@@ -125,7 +127,6 @@ function runViewScript(app) {
                     }
                 }
             }
-            // Fallback: offset from current month
             const baseDate = new Date();
             baseDate.setDate(1);
             baseDate.setMonth(baseDate.getMonth() + (Number(monthNum) - 1));
@@ -295,7 +296,6 @@ function runViewScript(app) {
         }
 
         try {
-            // 1. Get the pointer document from the 'sharedPlans' collection
             const pointerRef = db.collection('sharedPlans').doc(shareId);
             const pointerDoc = await pointerRef.get();
 
@@ -304,8 +304,6 @@ function runViewScript(app) {
             }
 
             const { originalUserId, originalPlanId } = pointerDoc.data();
-
-            // 2. Use the pointer to get the actual plan document
             const planRef = db.collection('users').doc(originalUserId).collection('plans').doc(originalPlanId);
             const planDoc = await planRef.get();
 
@@ -313,12 +311,10 @@ function runViewScript(app) {
                 throw new Error('The original plan could not be found.');
             }
             
-            // 3. Render the summary
             renderSummary(planDoc.data());
 
         } catch (error) {
             console.error("Error loading shared plan:", error);
-            // This is the updated, user-friendly error handling
             DOMElements.headerTitle.textContent = 'Plan Not Found';
             
             if (error.code === 'permission-denied') {
@@ -352,6 +348,7 @@ function runViewScript(app) {
                 }, reject);
             });
 
+            // Security check using normalized emails and dynamic roles
             const userEmail = normalizeEmail(auth.currentUser && auth.currentUser.email);
             const adminRoles = await loadAdminRoles();
             if (!adminRoles.admins.includes(userEmail)) {
