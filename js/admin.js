@@ -68,6 +68,8 @@ function runAdminPortal(app) {
     function closeAdminModal() {
         modalOverlay.classList.add('hidden');
         modalActionCallback = null;
+        modalActionBtn.disabled = false;
+        modalActionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
     }
 
     modalCloseBtn.addEventListener('click', closeAdminModal);
@@ -264,6 +266,7 @@ function runAdminPortal(app) {
 
     function handleDeleteBakery(bakeryName) {
         const affectedUsers = allUsersData.filter(u => u.bakery === bakeryName);
+        const expectedPhrase = `delete ${bakeryName}`;
         let confirmMsg = `<p>Are you sure you want to delete <strong>${bakeryName}</strong>?</p>`;
         if (affectedUsers.length > 0) {
             confirmMsg += `<div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg"><p class="text-sm font-semibold text-yellow-800"><i class="bi bi-exclamation-triangle-fill mr-1"></i> ${affectedUsers.length} user${affectedUsers.length !== 1 ? 's' : ''} will be set to "No Bakery":</p><ul class="mt-2 text-sm text-yellow-700 space-y-1">`;
@@ -272,9 +275,12 @@ function runAdminPortal(app) {
             });
             confirmMsg += '</ul></div>';
         }
-        confirmMsg += '<p class="mt-3 text-sm text-gray-500">This action cannot be undone.</p>';
+        confirmMsg += `<div class="mt-3"><label class="block text-sm font-medium text-gray-700 mb-1">Type <strong class="text-red-600">delete ${bakeryName}</strong> to confirm:</label><input type="text" id="delete-confirm-input" class="form-input w-full !py-2" placeholder="delete ${bakeryName}" autocomplete="off"></div>`;
 
         openAdminModal('Delete Bakery', confirmMsg, 'Delete', 'btn-danger', async () => {
+            const input = document.getElementById('delete-confirm-input');
+            if (input.value.trim().toLowerCase() !== expectedPhrase.toLowerCase()) return;
+
             closeAdminModal();
 
             // Remove from bakery list
@@ -293,6 +299,20 @@ function runAdminPortal(app) {
             populateBakeryFilter();
             filterAndRender();
             updateStats(allUsersData);
+        });
+
+        // Disable delete button until correct phrase is typed
+        requestAnimationFrame(() => {
+            const input = document.getElementById('delete-confirm-input');
+            if (!input) return;
+            modalActionBtn.disabled = true;
+            modalActionBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            input.addEventListener('input', () => {
+                const match = input.value.trim().toLowerCase() === expectedPhrase.toLowerCase();
+                modalActionBtn.disabled = !match;
+                modalActionBtn.classList.toggle('opacity-50', !match);
+                modalActionBtn.classList.toggle('cursor-not-allowed', !match);
+            });
         });
     }
 
