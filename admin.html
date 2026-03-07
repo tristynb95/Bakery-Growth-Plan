@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="/favicon.ico" sizes="any">
 </head>
-<body class="antialiased bg-gray-50">
+<body class="antialiased bg-gray-50 admin-body">
 
     <div id="access-denied-view" class="auth-container hidden">
         <div class="auth-box text-center">
@@ -44,28 +44,28 @@
             </div>
         </header>
 
-        <main class="p-6 sm:p-8 lg:p-12 max-w-7xl mx-auto">
-            <div class="mb-8">
+        <main class="admin-shell p-5 sm:p-8 lg:p-10 max-w-7xl mx-auto">
+            <div class="mb-8 admin-hero">
                 <h1 class="text-4xl font-black text-gray-900 font-poppins">Admin Portal</h1>
                 <p class="mt-1 text-lg text-gray-500">Overview of all users and their growth plans.</p>
             </div>
 
-            <div id="admin-stats" class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-                <div class="content-card p-6 text-center">
+            <div id="admin-stats" class="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 mb-8">
+                <div class="content-card admin-stat-card p-6 text-center">
                     <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Total Users</p>
                     <p id="stat-total-users" class="text-4xl font-black font-poppins mt-2 gails-red-text">-</p>
                 </div>
-                <div class="content-card p-6 text-center">
+                <div class="content-card admin-stat-card p-6 text-center">
                     <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Total Plans</p>
                     <p id="stat-total-plans" class="text-4xl font-black font-poppins mt-2 gails-red-text">-</p>
                 </div>
-                <div class="content-card p-6 text-center">
+                <div class="content-card admin-stat-card p-6 text-center">
                     <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Bakeries Represented</p>
                     <p id="stat-total-bakeries" class="text-4xl font-black font-poppins mt-2 gails-red-text">-</p>
                 </div>
             </div>
 
-            <div class="content-card mb-8">
+            <div class="content-card admin-section-card mb-8">
                 <div class="p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h2 class="text-xl font-bold font-poppins">Manage Bakeries</h2>
                     <button id="add-bakery-btn" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Bakery</button>
@@ -82,11 +82,11 @@
                 </div>
             </div>
 
-            <div class="content-card">
+            <div class="content-card admin-section-card admin-users-section">
                 <div class="p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h2 class="text-xl font-bold font-poppins">All Users</h2>
-                    <div class="flex items-center gap-3 w-full sm:w-auto">
-                        <div class="relative flex-grow sm:flex-grow-0">
+                    <div class="flex items-center gap-3 w-full sm:w-auto admin-search-tools">
+                        <div class="relative flex-grow sm:flex-grow-0 admin-search-wrap">
                             <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                             <input type="text" id="admin-search-input" class="form-input !pl-10 !py-2" placeholder="Search users...">
                         </div>
@@ -95,7 +95,7 @@
                         </select>
                     </div>
                 </div>
-                <div id="admin-users-list" class="divide-y divide-gray-100">
+                <div id="admin-users-list" class="divide-y divide-gray-100 admin-users-list">
                 </div>
                 <div id="admin-empty-state" class="hidden p-12 text-center text-gray-500">
                     <i class="bi bi-people text-4xl mb-3"></i>
