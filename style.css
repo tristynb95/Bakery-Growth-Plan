@@ -1080,8 +1080,8 @@ textarea.form-input {
     box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
 }
 .plan-objective-item:focus-within {
-    border-color: var(--gails-red);
-    box-shadow: var(--shadow-focus);
+    border-color: #E5E7EB;
+    box-shadow: none;
 }
 .plan-objective-indicator {
     width: 100%;
@@ -1123,13 +1123,18 @@ textarea.form-input {
 }
 .plan-objective-content .form-input {
     border: none !important;
-    padding: 0 !important;
+    border-bottom: 1.5px solid transparent !important;
+    padding: 0 0 0.15rem 0 !important;
     min-height: auto;
     box-shadow: none !important;
     border-radius: 0;
     background: transparent;
     font-size: 0.9rem;
     line-height: 1.5;
+    transition: border-color 0.2s ease;
+}
+.plan-objective-content .form-input:focus {
+    border-bottom-color: var(--gails-red) !important;
 }
 .plan-objective-content [contenteditable="true"].form-input.is-placeholder-showing::before {
     position: relative;
