@@ -545,6 +545,112 @@ textarea.form-input {
 .content-card { background-color: var(--gails-white); border-radius: 1.25rem; box-shadow: var(--shadow-sm); border: 1px solid #E5E7EB; padding: 2rem; }
 .content-card.plan-card-elevated:not(.plan-foundation-card) { padding: 1.5rem 2rem 2rem; }
 
+/* Admin Portal polish */
+.admin-body {
+    background: radial-gradient(circle at top left, #fff5f5 0%, #f8fafc 35%, #f8fafc 100%);
+}
+.admin-shell {
+    width: min(1160px, 100%);
+}
+.admin-hero {
+    padding: 1.25rem 1.25rem 0;
+}
+.admin-stat-card {
+    box-shadow: 0 6px 22px -14px rgb(17 24 39 / 0.25);
+    border-color: #E6EAF0;
+}
+.admin-section-card {
+    overflow: hidden;
+    border-radius: 1.3rem;
+    box-shadow: 0 10px 30px -22px rgb(17 24 39 / 0.35);
+    border-color: #E5E7EB;
+    padding: 0;
+}
+.admin-users-section {
+    background: linear-gradient(180deg, #FFFFFF 0%, #FCFCFD 100%);
+}
+.admin-search-tools {
+    justify-content: flex-end;
+}
+.admin-search-wrap {
+    width: min(320px, 100%);
+}
+.admin-search-wrap .form-input,
+#admin-bakery-filter {
+    border-color: #D5DBE3;
+    background-color: #FBFCFE;
+}
+.admin-users-list {
+    background-color: #FFFFFF;
+}
+.admin-user-row {
+    position: relative;
+}
+.admin-user-row:hover {
+    background-color: #FAFBFF;
+}
+.admin-user-row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.9rem;
+    bottom: 0.9rem;
+    width: 3px;
+    background: linear-gradient(180deg, #F9A8A8 0%, #D10A11 100%);
+    border-radius: 999px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+.admin-user-row:hover::before {
+    opacity: 0.75;
+}
+.admin-badges {
+    row-gap: 0.5rem;
+}
+.admin-plan-list {
+    border-top: 1px solid #EEF2F7;
+    padding-top: 0.75rem;
+}
+.admin-plan-item {
+    border: 1px solid #EDF1F6;
+    background: linear-gradient(180deg, #FBFCFE 0%, #F8FAFC 100%);
+}
+.admin-plan-actions {
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .admin-shell {
+        padding-inline: 0.75rem;
+    }
+    .admin-hero {
+        padding-inline: 0.5rem;
+    }
+    .admin-search-tools {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .admin-search-wrap {
+        width: 100%;
+    }
+    #admin-bakery-filter {
+        width: 100% !important;
+    }
+    .admin-user-row {
+        padding-inline: 1rem;
+    }
+    .admin-plan-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.65rem;
+    }
+    .admin-plan-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
 /* Character Counter Styles */
 .textarea-wrapper { position: relative; }
 .char-counter {
