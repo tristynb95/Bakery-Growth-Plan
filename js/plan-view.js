@@ -86,21 +86,21 @@ const templates = {
                             <div class="plan-objective-item plan-objective-month-1">
                                 <div class="plan-objective-indicator" style="background-color: #D10A11;"></div>
                                 <div class="plan-objective-content">
-                                    <label for="month1Goal" class="plan-objective-label"><span>Month 1 · 30 Days</span> <i class="bi bi-info-circle info-icon" title="High-level goal for the first 30-day sprint."></i></label>
+                                    <label for="month1Goal" class="plan-objective-label"><span class="plan-objective-month-num">1</span><span>Month 1 · 30 Days</span> <i class="bi bi-info-circle info-icon" title="High-level goal for the first 30-day sprint."></i></label>
                                     <div id="month1Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PRODUCT: Master afternoon availability and reduce waste." data-maxlength="300"></div>
                                 </div>
                             </div>
                             <div class="plan-objective-item plan-objective-month-2">
                                 <div class="plan-objective-indicator" style="background-color: #B45309;"></div>
                                 <div class="plan-objective-content">
-                                    <label for="month2Goal" class="plan-objective-label"><span>Month 2 · 60 Days</span> <i class="bi bi-info-circle info-icon" title="High-level goal for the second 30-day sprint."></i></label>
+                                    <label for="month2Goal" class="plan-objective-label"><span class="plan-objective-month-num">2</span><span>Month 2 · 60 Days</span> <i class="bi bi-info-circle info-icon" title="High-level goal for the second 30-day sprint."></i></label>
                                     <div id="month2Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PLACE: Embed new production processes and daily checks." data-maxlength="300"></div>
                                 </div>
                             </div>
                             <div class="plan-objective-item plan-objective-month-3">
                                 <div class="plan-objective-indicator" style="background-color: #065F46;"></div>
                                 <div class="plan-objective-content">
-                                    <label for="month3Goal" class="plan-objective-label"><span>Month 3 · 90 Days</span> <i class="bi bi-info-circle info-icon" title="High-level goal for the third 30-day sprint."></i></label>
+                                    <label for="month3Goal" class="plan-objective-label"><span class="plan-objective-month-num">3</span><span>Month 3 · 90 Days</span> <i class="bi bi-info-circle info-icon" title="High-level goal for the third 30-day sprint."></i></label>
                                     <div id="month3Goal" class="form-input text-sm is-placeholder-showing" contenteditable="true" data-placeholder="e.g., PEOPLE: Develop team skills for consistent execution." data-maxlength="300"></div>
                                 </div>
                             </div>
