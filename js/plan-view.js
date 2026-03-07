@@ -61,7 +61,7 @@ const templates = {
                     </div>
                     <div class="content-card plan-card-elevated plan-vision-card">
                         <div class="plan-card-header">
-                            <div class="plan-card-header-icon"><i class="bi bi-binoculars-fill"></i></div>
+                            <div class="plan-card-header-icon"><i class="bi bi-stars"></i></div>
                             <div>
                                 <h2 class="plan-card-title">Quarterly Vision</h2>
                                 <p class="plan-card-description">The big, overarching mission for the next 90 days.</p>
@@ -909,7 +909,7 @@ function renderSummary() {
             </div>
 
             <div class="summary-vision-block">
-                <h3 class="summary-vision-label"><i class="bi bi-binoculars-fill"></i> Quarterly Vision</h3>
+                <h3 class="summary-vision-label"><i class="bi bi-stars"></i> Quarterly Vision</h3>
                 <div class="summary-vision-text prose prose-sm">${e(formData.quarterlyTheme)}</div>
             </div>
 
