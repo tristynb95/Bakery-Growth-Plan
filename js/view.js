@@ -166,6 +166,8 @@ function runViewScript(app) {
         };
 
         const monthColors = { 1: '#D10A11', 2: '#B45309', 3: '#065F46' };
+        const colorNames = { 1: 'red', 2: 'amber', 3: 'green' };
+        const dotClasses = { 'on-track': 'dot-on-track', 'issues': 'dot-issues', 'off-track': 'dot-off-track' };
 
         const renderMonthSummary = (monthNum) => {
             const planTitle = planTitleMap[monthNum] || `Month ${monthNum} Plan`;
@@ -182,12 +184,13 @@ function runViewScript(app) {
                     loggedCount++;
                     const statusText = status.replace('-', ' ').toUpperCase();
                     const statusBadgeHTML = `<span class="summary-status-badge status-${status}">${statusText}</span>`;
+                    const dotClass = dotClasses[status] || 'dot-on-track';
                     let details = '';
                     if (!isContentEmpty(win)) details += `<div class="summary-week-detail"><i class="bi bi-trophy text-amber-500"></i><div><strong>Win/Learning</strong><div class="prose prose-sm">${e(win)}</div></div></div>`;
                     if (!isContentEmpty(spotlight)) details += `<div class="summary-week-detail"><i class="bi bi-star text-purple-500"></i><div><strong>Breadhead Spotlight</strong><div class="prose prose-sm">${e(spotlight)}</div></div></div>`;
                     if (!isContentEmpty(shine)) details += `<div class="summary-week-detail"><i class="bi bi-brightness-high text-amber-500"></i><div><strong>SHINE Focus</strong><div class="prose prose-sm">${e(shine)}</div></div></div>`;
-                    if (!details) details = '<p class="text-sm text-gray-400 italic ml-1">No details logged for this week.</p>';
-                    weekRows += `<div class="summary-week-row"><div class="summary-week-header"><span class="font-semibold text-gray-700 text-sm">Week ${w}</span>${statusBadgeHTML}</div><div class="summary-week-details">${details}</div></div>`;
+                    if (!details) details = '<p class="text-sm text-gray-400 italic">No details logged.</p>';
+                    weekRows += `<div class="summary-week-row"><div class="summary-week-dot ${dotClass}"><span>${w}</span></div><div class="summary-week-content"><div class="summary-week-header"><span class="font-semibold text-gray-700 text-sm">Week ${w}</span>${statusBadgeHTML}</div><div class="summary-week-details">${details}</div></div></div>`;
                 }
             });
 
@@ -200,26 +203,34 @@ function runViewScript(app) {
 
             const hasReview = !isContentEmpty(formData[`m${monthNum}s6_win`]) || !isContentEmpty(formData[`m${monthNum}s6_challenge`]) || !isContentEmpty(formData[`m${monthNum}s6_next`]);
             const accentColor = monthColors[monthNum];
+            const totalWeeks = weeksToRender.length;
+            const pct = totalWeeks > 0 ? loggedCount / totalWeeks : 0;
+            const r = 14;
+            const circ = 2 * Math.PI * r;
+            const dashoffset = circ * (1 - pct);
 
             return `
                 <div class="summary-month-card" id="summary-month-${monthNum}">
-                    <div class="summary-month-header" style="border-left-color: ${accentColor}">
+                    <div class="summary-month-header" data-color="${colorNames[monthNum]}">
                         <div class="summary-month-title-row">
-                            <div>
-                                <h2 class="text-2xl font-bold font-poppins">${planTitle}</h2>
-                                ${pillarBadgesHTML ? `<div class="flex items-center gap-2 mt-2 flex-wrap">${pillarBadgesHTML}</div>` : ''}
+                            <div class="summary-month-title-group">
+                                <div class="summary-month-num" style="background-color: ${accentColor}">${monthNum}</div>
+                                <div class="summary-month-info">
+                                    <h2>${planTitle}</h2>
+                                    ${pillarBadgesHTML ? `<div class="summary-month-pillars">${pillarBadgesHTML}</div>` : ''}
+                                </div>
                             </div>
                             <div class="summary-momentum-indicator">
-                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Weekly Momentum</span>
-                                <span class="text-lg font-bold" style="color: ${accentColor}">${loggedCount}/${weeksToRender.length}</span>
+                                <div class="summary-momentum-ring"><svg viewBox="0 0 36 36"><circle class="ring-bg" cx="18" cy="18" r="${r}"/><circle class="ring-fill" cx="18" cy="18" r="${r}" stroke="${accentColor}" stroke-dasharray="${circ}" stroke-dashoffset="${dashoffset}"/></svg></div>
+                                <div class="summary-momentum-text"><span class="summary-momentum-label">Momentum</span><span class="summary-momentum-value" style="color: ${accentColor}">${loggedCount}/${totalWeeks}</span></div>
                             </div>
                         </div>
                     </div>
                     <div class="summary-month-body">
                         <div class="summary-strategy-section">
-                            <div class="summary-strategy-card summary-strategy-card--battle"><div class="summary-strategy-icon"><i class="bi bi-crosshair"></i></div><div><h3 class="summary-strategy-label">Must-Win Battle</h3><div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div></div></div>
-                            <div class="summary-strategy-card"><div class="summary-strategy-icon"><i class="bi bi-lightning-charge-fill"></i></div><div><h3 class="summary-strategy-label">Key Actions</h3><div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div></div>
-                            <div class="summary-strategy-card"><div class="summary-strategy-icon"><i class="bi bi-people-fill"></i></div><div><h3 class="summary-strategy-label">Developing Our Breadheads</h3><div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div></div></div>
+                            <div class="summary-strategy-card summary-strategy-card--battle"><div class="summary-strategy-icon"><i class="bi bi-crosshair"></i></div><div class="min-w-0"><h3 class="summary-strategy-label">Must-Win Battle</h3><div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s1_battle`])}</div></div></div>
+                            <div class="summary-strategy-card"><div class="summary-strategy-icon"><i class="bi bi-lightning-charge-fill"></i></div><div class="min-w-0"><h3 class="summary-strategy-label">Key Actions</h3><div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s2_levers`])}</div></div></div>
+                            <div class="summary-strategy-card"><div class="summary-strategy-icon"><i class="bi bi-people-fill"></i></div><div class="min-w-0"><h3 class="summary-strategy-label">Developing Our Breadheads</h3><div class="summary-strategy-content prose prose-sm">${e(formData[`m${monthNum}s3_people`])}</div></div></div>
                         </div>
                         <div class="summary-pillars-grid">
                             <h3 class="summary-pillars-title"><i class="bi bi-columns-gap"></i> Upholding Pillars</h3>
@@ -235,9 +246,9 @@ function runViewScript(app) {
                         <div class="summary-review-section">
                             <h3 class="summary-section-title"><i class="bi bi-journal-check"></i> End of Month Review</h3>
                             ${hasReview ? `<div class="summary-review-items">
-                                <div class="summary-review-item"><div class="summary-review-icon summary-review-icon--win"><i class="bi bi-trophy-fill"></i></div><div><h4 class="font-semibold text-sm text-gray-700">Biggest Win</h4><div class="text-sm text-gray-600 prose prose-sm">${e(formData[`m${monthNum}s6_win`])}</div></div></div>
-                                <div class="summary-review-item"><div class="summary-review-icon summary-review-icon--challenge"><i class="bi bi-lightbulb-fill"></i></div><div><h4 class="font-semibold text-sm text-gray-700">Toughest Challenge & Learning</h4><div class="text-sm text-gray-600 prose prose-sm">${e(formData[`m${monthNum}s6_challenge`])}</div></div></div>
-                                <div class="summary-review-item"><div class="summary-review-icon summary-review-icon--next"><i class="bi bi-rocket-takeoff-fill"></i></div><div><h4 class="font-semibold text-sm text-gray-700">Focus for Next Month</h4><div class="text-sm text-gray-600 prose prose-sm">${e(formData[`m${monthNum}s6_next`])}</div></div></div>
+                                <div class="summary-review-item"><div class="summary-review-icon summary-review-icon--win"><i class="bi bi-trophy-fill"></i></div><h4 class="summary-review-label">Biggest Win</h4><div class="summary-review-text prose prose-sm">${e(formData[`m${monthNum}s6_win`])}</div></div>
+                                <div class="summary-review-item"><div class="summary-review-icon summary-review-icon--challenge"><i class="bi bi-lightbulb-fill"></i></div><h4 class="summary-review-label">Challenge & Learning</h4><div class="summary-review-text prose prose-sm">${e(formData[`m${monthNum}s6_challenge`])}</div></div>
+                                <div class="summary-review-item"><div class="summary-review-icon summary-review-icon--next"><i class="bi bi-rocket-takeoff-fill"></i></div><h4 class="summary-review-label">Next Month Focus</h4><div class="summary-review-text prose prose-sm">${e(formData[`m${monthNum}s6_next`])}</div></div>
                             </div>` : '<p class="text-sm text-gray-400 italic">End of month review has not been completed yet.</p>'}
                         </div>
                     </div>
@@ -249,22 +260,26 @@ function runViewScript(app) {
 
         DOMElements.contentArea.innerHTML = `
             <div class="summary-redesigned">
-                <div class="summary-hero-card content-card">
+                <div class="summary-hero-card">
+                    <div class="summary-hero-banner">
+                        <div class="summary-hero-plan-name">${formData.planName || 'Growth Plan'}</div>
+                        <div class="summary-hero-plan-sub">${formData.quarter || 'Quarterly'} Overview</div>
+                    </div>
                     <div class="summary-hero-meta">
-                        <div class="summary-meta-item"><i class="bi bi-person-fill summary-meta-icon"></i><div><span class="summary-meta-label">Manager</span><span class="summary-meta-value">${formData.managerName || '...'}</span></div></div>
-                        <div class="summary-meta-item"><i class="bi bi-shop summary-meta-icon"></i><div><span class="summary-meta-label">Bakery</span><span class="summary-meta-value">${formData.bakeryLocation || '...'}</span></div></div>
-                        <div class="summary-meta-item"><i class="bi bi-calendar3 summary-meta-icon"></i><div><span class="summary-meta-label">Quarter</span><span class="summary-meta-value">${formData.quarter || '...'}</span></div></div>
+                        <div class="summary-meta-item"><div class="summary-meta-icon"><i class="bi bi-person-fill"></i></div><div><span class="summary-meta-label">Manager</span><span class="summary-meta-value">${formData.managerName || '...'}</span></div></div>
+                        <div class="summary-meta-item"><div class="summary-meta-icon"><i class="bi bi-shop"></i></div><div><span class="summary-meta-label">Bakery</span><span class="summary-meta-value">${formData.bakeryLocation || '...'}</span></div></div>
+                        <div class="summary-meta-item"><div class="summary-meta-icon"><i class="bi bi-calendar3"></i></div><div><span class="summary-meta-label">Quarter</span><span class="summary-meta-value">${formData.quarter || '...'}</span></div></div>
                     </div>
                     <div class="summary-vision-block">
-                        <h3 class="summary-vision-label"><i class="bi bi-binoculars-fill"></i> Quarterly Vision</h3>
+                        <h3 class="summary-vision-label"><i class="bi bi-stars"></i> Quarterly Vision</h3>
                         <div class="summary-vision-text prose prose-sm">${e(formData.quarterlyTheme)}</div>
                     </div>
                     <div class="summary-objectives">
                         <h3 class="summary-objectives-title">Key Monthly Objectives</h3>
                         <div class="summary-objectives-grid">
-                            <div class="summary-objective-card"><span class="summary-objective-num" style="background-color: #D10A11">1</span><div><span class="summary-objective-label">Month 1</span><div class="summary-objective-text prose prose-sm">${e(formData.month1Goal)}</div></div></div>
-                            <div class="summary-objective-card"><span class="summary-objective-num" style="background-color: #B45309">2</span><div><span class="summary-objective-label">Month 2</span><div class="summary-objective-text prose prose-sm">${e(formData.month2Goal)}</div></div></div>
-                            <div class="summary-objective-card"><span class="summary-objective-num" style="background-color: #065F46">3</span><div><span class="summary-objective-label">Month 3</span><div class="summary-objective-text prose prose-sm">${e(formData.month3Goal)}</div></div></div>
+                            <div class="summary-objective-card"><div class="summary-objective-header"><span class="summary-objective-num" style="background-color: #D10A11">1</span><span class="summary-objective-label">Month 1</span></div><div class="summary-objective-text prose prose-sm">${e(formData.month1Goal)}</div></div>
+                            <div class="summary-objective-card"><div class="summary-objective-header"><span class="summary-objective-num" style="background-color: #B45309">2</span><span class="summary-objective-label">Month 2</span></div><div class="summary-objective-text prose prose-sm">${e(formData.month2Goal)}</div></div>
+                            <div class="summary-objective-card"><div class="summary-objective-header"><span class="summary-objective-num" style="background-color: #065F46">3</span><span class="summary-objective-label">Month 3</span></div><div class="summary-objective-text prose prose-sm">${e(formData.month3Goal)}</div></div>
                         </div>
                     </div>
                 </div>
@@ -277,7 +292,7 @@ function runViewScript(app) {
                     <div class="summary-reflection-header"><i class="bi bi-mortarboard-fill"></i><h2 class="text-2xl font-bold font-poppins">Final Quarterly Reflection</h2></div>
                     <div class="summary-reflection-grid">
                         <div class="summary-reflection-item"><div class="summary-reflection-icon" style="background-color: #D1FAE5; color: #065F46;"><i class="bi bi-award-fill"></i></div><h3 class="font-bold text-base text-gray-800">Biggest Achievements</h3><div class="text-gray-600 prose prose-sm">${e(formData.m3s7_achievements)}</div></div>
-                        <div class="summary-reflection-item"><div class="summary-reflection-icon" style="background-color: #FEF3C7; color: #92400E;"><i class="bi bi-bar-chart-line-fill"></i></div><h3 class="font-bold text-base text-gray-800">Biggest Challenges & Learnings</h3><div class="text-gray-600 prose prose-sm">${e(formData.m3s7_challenges)}</div></div>
+                        <div class="summary-reflection-item"><div class="summary-reflection-icon" style="background-color: #FEF3C7; color: #92400E;"><i class="bi bi-bar-chart-line-fill"></i></div><h3 class="font-bold text-base text-gray-800">Challenges & Learnings</h3><div class="text-gray-600 prose prose-sm">${e(formData.m3s7_challenges)}</div></div>
                         <div class="summary-reflection-item"><div class="summary-reflection-icon" style="background-color: #EFF6FF; color: #1E40AF;"><i class="bi bi-bullseye"></i></div><h3 class="font-bold text-base text-gray-800">Performance vs Narrative</h3><div class="text-gray-600 prose prose-sm">${e(formData.m3s7_narrative)}</div></div>
                         <div class="summary-reflection-item"><div class="summary-reflection-icon" style="background-color: #FFF1F2; color: #D10A11;"><i class="bi bi-forward-fill"></i></div><h3 class="font-bold text-base text-gray-800">Focus For Next Quarter</h3><div class="text-gray-600 prose prose-sm">${e(formData.m3s7_next_quarter)}</div></div>
                     </div>
