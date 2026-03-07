@@ -647,15 +647,15 @@ function runAdminPortal(app) {
                     const quarter = plan.quarter || 'No quarter';
                     const edited = formatDate(plan.lastEdited);
                     return `
-                        <div class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg text-sm">
-                            <div class="flex items-center gap-3">
+                        <div class="admin-plan-item flex items-center justify-between py-2.5 px-3 sm:px-4 bg-gray-50 rounded-xl text-sm">
+                            <div class="flex items-center gap-3 min-w-0">
                                 <i class="bi bi-file-earmark-text text-gray-400"></i>
-                                <div>
-                                    <p class="font-semibold text-gray-700">${planName}</p>
-                                    <p class="text-xs text-gray-500">${quarter} &middot; Last edited: ${edited}</p>
+                                <div class="min-w-0">
+                                    <p class="font-semibold text-gray-700 truncate">${planName}</p>
+                                    <p class="text-xs text-gray-500 truncate">${quarter} &middot; Last edited: ${edited}</p>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="admin-plan-actions flex items-center gap-2">
                                 <a href="${getAdminPreviewUrl(user.uid, plan.id)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition-colors" title="Preview this plan as an admin">
                                     <i class="bi bi-eye-fill"></i>
                                     Preview
@@ -689,16 +689,16 @@ function runAdminPortal(app) {
                         : `<button class="promote-admin-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors" data-email="${user.email}"><i class="bi bi-person-up"></i> Make Admin</button>`;
 
             return `
-                <div class="admin-user-row p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+                <div class="admin-user-row p-4 sm:p-6 transition-colors">
                     <div class="flex items-start gap-4">
                         ${photoHTML}
                         <div class="flex-grow min-w-0">
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                                <div>
+                            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
+                                <div class="min-w-0">
                                     <h3 class="font-bold text-gray-900">${user.name}</h3>
-                                    <p class="text-sm text-gray-500">${user.email}</p>
+                                    <p class="text-sm text-gray-500 truncate">${user.email}</p>
                                 </div>
-                                <div class="flex items-center gap-2 flex-wrap sm:justify-end">
+                                <div class="admin-badges flex items-center gap-2 flex-wrap sm:justify-end">
                                     ${roleBadge}
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${bakeryBadgeClass}"><i class="bi bi-shop"></i> ${user.bakery}</span>
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600"><i class="bi bi-journal-text"></i> ${user.planCount} plan${user.planCount !== 1 ? 's' : ''}</span>
@@ -706,7 +706,7 @@ function runAdminPortal(app) {
                                     ${deleteUserBtn}
                                 </div>
                             </div>
-                            <div class="mt-3 space-y-2">
+                            <div class="mt-3 space-y-2 admin-plan-list">
                                 ${plansHTML}
                             </div>
                         </div>
