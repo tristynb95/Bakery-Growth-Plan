@@ -235,7 +235,7 @@ function runViewScript(app) {
                         <div class="summary-meta-item"><div class="summary-meta-icon"><i class="bi bi-calendar3"></i></div><div><span class="summary-meta-label">Quarter</span><span class="summary-meta-value">${formData.quarter || '...'}</span></div></div>
                     </div>
                     <div class="summary-vision-block">
-                        <h3 class="summary-vision-label"><i class="bi bi-binoculars-fill"></i> Quarterly Vision</h3>
+                        <h3 class="summary-vision-label"><i class="bi bi-stars"></i> Quarterly Vision</h3>
                         <div class="summary-vision-text prose prose-sm">${e(formData.quarterlyTheme)}</div>
                     </div>
                     <div class="summary-objectives">
