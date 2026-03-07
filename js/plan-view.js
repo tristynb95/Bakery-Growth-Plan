@@ -67,11 +67,7 @@ const templates = {
                                 <p class="plan-card-description">The big, overarching mission for the next 90 days.</p>
                             </div>
                         </div>
-                        <div class="plan-vision-meta">
-                            <span class="plan-meta-pill"><i class="bi bi-calendar3"></i> 90-Day Horizon</span>
-                            <span class="plan-meta-pill"><i class="bi bi-diagram-3"></i> People · Product · Customer · Place</span>
-                            <span class="plan-meta-pill"><i class="bi bi-graph-up-arrow"></i> Review Weekly Momentum</span>
-                        </div>
+
                         <div id="quarterlyTheme" class="form-input is-placeholder-showing" contenteditable="true" data-placeholder="e.g., Become the undisputed neighbourhood favourite by mastering our availability." data-maxlength="400"></div>
                     </div>
                     <div class="content-card plan-card-elevated plan-objectives-card">
