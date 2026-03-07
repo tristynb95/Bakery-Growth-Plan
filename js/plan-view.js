@@ -53,7 +53,7 @@ const templates = {
     vision: {
         html: `<div class="plan-section-flow">
                     <div class="plan-mission-banner">
-                        <div class="plan-mission-icon"><i class="bi bi-cake2-fill"></i></div>
+                        <div class="plan-mission-icon"><i class="bi bi-compass-fill"></i></div>
                         <div>
                             <span class="plan-mission-label">Our Mission</span>
                             <p class="plan-mission-text">"To make world-class, craft baking a part of every neighbourhood."</p>
