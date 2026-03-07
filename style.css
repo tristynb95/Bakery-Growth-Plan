@@ -1082,6 +1082,7 @@ textarea.form-input {
 .plan-objective-item:focus-within {
     border-color: #E5E7EB;
     box-shadow: none;
+    transform: none;
 }
 .plan-objective-indicator {
     width: 100%;
@@ -1122,19 +1123,19 @@ textarea.form-input {
     margin-left: auto;
 }
 .plan-objective-content .form-input {
-    border: none !important;
-    border-bottom: 1.5px solid transparent !important;
-    padding: 0 0 0.15rem 0 !important;
+    border: 1px solid transparent !important;
+    padding: 0.5rem 0.65rem !important;
     min-height: auto;
     box-shadow: none !important;
-    border-radius: 0;
+    border-radius: 0.5rem;
     background: transparent;
     font-size: 0.9rem;
     line-height: 1.5;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .plan-objective-content .form-input:focus {
-    border-bottom-color: var(--gails-red) !important;
+    border-color: var(--gails-red) !important;
+    box-shadow: var(--shadow-focus) !important;
 }
 .plan-objective-content [contenteditable="true"].form-input.is-placeholder-showing::before {
     position: relative;
