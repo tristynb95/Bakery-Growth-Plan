@@ -1186,8 +1186,9 @@ textarea.form-input {
     box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
 }
 .plan-objective-item:focus-within {
-    border-color: var(--gails-red);
-    box-shadow: var(--shadow-focus);
+    border-color: #E5E7EB;
+    box-shadow: none;
+    transform: none;
 }
 .plan-objective-indicator {
     width: 100%;
@@ -1228,14 +1229,19 @@ textarea.form-input {
     margin-left: auto;
 }
 .plan-objective-content .form-input {
-    border: none !important;
-    padding: 0 !important;
-    min-height: auto;
+    border: 1px solid transparent !important;
+    padding: 0.5rem 0.65rem !important;
+    min-height: 3.7rem;
     box-shadow: none !important;
-    border-radius: 0;
+    border-radius: 0.5rem;
     background: transparent;
     font-size: 0.9rem;
     line-height: 1.5;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.plan-objective-content .form-input:focus {
+    border-color: var(--gails-red) !important;
+    box-shadow: var(--shadow-focus) !important;
 }
 .plan-objective-content [contenteditable="true"].form-input.is-placeholder-showing::before {
     position: relative;
