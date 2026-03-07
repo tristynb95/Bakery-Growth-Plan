@@ -1125,7 +1125,7 @@ textarea.form-input {
 .plan-objective-content .form-input {
     border: 1px solid transparent !important;
     padding: 0.5rem 0.65rem !important;
-    min-height: auto;
+    min-height: 3.7rem;
     box-shadow: none !important;
     border-radius: 0.5rem;
     background: transparent;
