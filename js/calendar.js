@@ -56,7 +56,8 @@ function renderCalendar() {
         const month = date.getMonth();
         const year = date.getFullYear();
 
-        document.getElementById('calendar-month-year').textContent = date.toLocaleString('en-GB', { month: 'long', year: 'numeric' });
+        const monthFormat = window.innerWidth <= 1024 ? 'short' : 'long';
+        document.getElementById('calendar-month-year').textContent = date.toLocaleString('en-GB', { month: monthFormat, year: 'numeric' });
 
         const firstDayOfMonth = new Date(year, month, 1);
         const daysInMonth = new Date(year, month + 1, 0).getDate();
