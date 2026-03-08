@@ -626,6 +626,12 @@ textarea.form-input {
     .admin-hero {
         padding-inline: 0.5rem;
     }
+    .admin-hero h1 {
+        font-size: 1.75rem;
+    }
+    .admin-hero p {
+        font-size: 0.9rem;
+    }
     .admin-search-tools {
         width: 100%;
         flex-direction: column;
@@ -637,9 +643,51 @@ textarea.form-input {
     #admin-bakery-filter {
         width: 100% !important;
     }
-    .admin-user-row {
-        padding-inline: 1rem;
+
+    /* --- Bakery rows: stack name and actions vertically --- */
+    .bakery-row .bakery-display {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
     }
+    .bakery-row .bakery-display > div:last-child {
+        width: 100%;
+    }
+    .bakery-row .bakery-display .edit-bakery-btn,
+    .bakery-row .bakery-display .delete-bakery-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    /* Bakery edit mode: stack input and buttons */
+    .bakery-row .bakery-edit {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+    }
+    .bakery-row .bakery-edit .bakery-edit-input {
+        width: 100%;
+    }
+    .bakery-row .bakery-edit > button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* --- User rows: cleaner layout --- */
+    .admin-user-row {
+        padding: 1rem !important;
+    }
+    .admin-user-row > .flex {
+        gap: 0.75rem;
+    }
+    .admin-user-row .admin-badges {
+        gap: 0.375rem;
+    }
+    .admin-user-row .admin-badges > * {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    /* --- Plan items: stack vertically --- */
     .admin-plan-item {
         flex-direction: column;
         align-items: flex-start;
@@ -648,6 +696,52 @@ textarea.form-input {
     .admin-plan-actions {
         width: 100%;
         justify-content: space-between;
+    }
+
+    /* --- Stat cards: smaller on mobile --- */
+    .admin-stat-card {
+        padding: 1rem !important;
+    }
+    .admin-stat-card .text-4xl {
+        font-size: 1.75rem;
+    }
+
+    /* --- Section card headers --- */
+    .admin-section-card > .p-6 {
+        padding: 1rem !important;
+    }
+}
+
+/* Extra small phone tweaks */
+@media (max-width: 400px) {
+    .admin-shell {
+        padding-inline: 0.5rem;
+    }
+
+    /* Bakery rows: full-width stacked buttons */
+    .bakery-row {
+        padding: 0.75rem !important;
+    }
+    .bakery-row .bakery-display > div:last-child {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    /* Badges: wrap into 2 columns on very small screens */
+    .admin-user-row .admin-badges {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.375rem;
+        width: 100%;
+    }
+    .admin-user-row .admin-badges > * {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .admin-hero h1 {
+        font-size: 1.5rem;
     }
 }
 
