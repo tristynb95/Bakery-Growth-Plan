@@ -2219,7 +2219,7 @@ textarea.form-input {
 @media (max-width: 767px) {
     /* Overall spacing */
     .summary-redesigned { gap: 2rem; }
-    .summary-month-card + .summary-month-card { margin-top: 0.5rem; }
+    .summary-month-card + .summary-month-card { margin-top: 2rem; }
 
     /* Hero card */
     .summary-hero-meta { grid-template-columns: 1fr; }
