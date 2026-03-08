@@ -4387,36 +4387,53 @@ body:has(#app-view) {
         border-right: none;
         border-bottom: 1px solid var(--gails-grey-mid);
         padding: 1rem;
-        max-height: 50vh;
-        overflow-y: auto;
+        flex-shrink: 0;
+        overflow: visible;
     }
 
     .calendar-header {
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
         flex-wrap: wrap;
         gap: 0.5rem;
     }
 
     #calendar-month-year {
-        font-size: 1.25rem;
+        font-size: 1.1rem;
     }
 
     .calendar-grid {
-        gap: 0.25rem;
+        gap: 0.125rem;
     }
 
     .calendar-day {
-        padding: 0.25rem;
-        min-height: 2.5rem;
+        padding: 0.15rem;
+        min-height: 2rem;
     }
 
     .calendar-day-number {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
 
-    /* Day detail takes full remaining space */
+    .calendar-day-header {
+        font-size: 0.65rem;
+        padding-bottom: 0.15rem;
+    }
+
+    /* Event dots smaller on mobile */
+    .calendar-day .event-dots {
+        gap: 1px;
+    }
+
+    .calendar-day .event-dots .dot {
+        width: 4px;
+        height: 4px;
+    }
+
+    /* Day detail takes remaining space and scrolls */
     .day-detail-container {
         min-height: 0;
+        overflow-y: auto;
+        flex: 1 1 auto;
     }
 
     .day-detail-content {
