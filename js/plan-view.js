@@ -411,7 +411,7 @@ function getViewTitleConfig(viewId) {
         'month-1': { title: monthTitles[0], subtitle: monthSubtitles[0] },
         'month-2': { title: monthTitles[1], subtitle: monthSubtitles[1] },
         'month-3': { title: monthTitles[2], subtitle: monthSubtitles[2] },
-        summary: { title: `Plan Summary - ${quarterLabel}`, subtitle: planName || 'A complete overview of your quarterly plan.' },
+        summary: { title: `Plan Summary - ${quarterLabel}`, subtitle: '' },
         files: { title: 'My Files', subtitle: "Manage documents for your plan, like P&L statements and KPIs." }
     };
 
