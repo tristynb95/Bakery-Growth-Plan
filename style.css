@@ -4659,14 +4659,83 @@ body:has(#app-view) {
     .plan-weekly-tabs-wrapper {
         margin-left: -1rem;
         margin-right: -1rem;
+        padding-left: 0;
+        padding-right: 0;
+        position: relative;
+    }
+
+    /* Right-edge fade gradient to hint at more tabs */
+    .plan-weekly-tabs-wrapper::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 3rem;
+        background: linear-gradient(to right, transparent, var(--gails-white));
+        pointer-events: none;
+        z-index: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    /* Hide fade when scrolled to the end (toggled by JS) */
+    .plan-weekly-tabs-wrapper.scrolled-end::after {
+        opacity: 0;
+    }
+
+    .plan-weekly-tabs {
         padding-left: 1rem;
-        padding-right: 1rem;
+        padding-right: 2.5rem; /* Extra space so last tab isn't hidden by fade */
     }
 
     .plan-weekly-tabs .weekly-tab {
         padding: 0.75rem 0.875rem;
         font-size: 0.8rem;
     }
+
+    /* Scroll hint pill that appears on first load */
+    .weekly-tabs-scroll-hint {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.75rem;
+        margin: 0.5rem auto 0;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--gails-text-secondary);
+        background-color: var(--gails-grey-light);
+        border-radius: 999px;
+        width: fit-content;
+        animation: hintPulse 2s ease-in-out 2;
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .weekly-tabs-scroll-hint.hidden {
+        opacity: 0;
+        transform: translateY(-4px);
+        pointer-events: none;
+    }
+
+    .weekly-tabs-scroll-hint i {
+        font-size: 0.8rem;
+        animation: hintArrow 1.5s ease-in-out infinite;
+    }
+
+    @keyframes hintPulse {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+    }
+
+    @keyframes hintArrow {
+        0%, 100% { transform: translateX(0); }
+        50% { transform: translateX(3px); }
+    }
+}
+
+/* Hide the scroll hint on larger screens */
+.weekly-tabs-scroll-hint {
+    display: none;
 }
 
 /* --- 65m. Summary Page Mobile --- */
