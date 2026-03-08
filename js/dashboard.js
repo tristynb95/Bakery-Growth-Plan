@@ -6,6 +6,46 @@ import { calculatePlanCompletion } from './utils.js';
 let db, appState, openModal, handleSelectPlan;
 
 /**
+ * Returns the current fiscal quarter string (e.g., "Q1 FY27").
+ * Fiscal year starts in March: Q1=Mar-May, Q2=Jun-Aug, Q3=Sep-Nov, Q4=Dec-Feb.
+ */
+function getCurrentFiscalQuarter() {
+    const now = new Date();
+    const month = now.getMonth() + 1; // 1-12
+    const year = now.getFullYear();
+
+    let quarter, fiscalYear;
+    if (month >= 3 && month <= 5) {
+        quarter = 1;
+        fiscalYear = year + 1;
+    } else if (month >= 6 && month <= 8) {
+        quarter = 2;
+        fiscalYear = year + 1;
+    } else if (month >= 9 && month <= 11) {
+        quarter = 3;
+        fiscalYear = year + 1;
+    } else {
+        // Dec, Jan, Feb
+        quarter = 4;
+        fiscalYear = month === 12 ? year + 1 : year;
+    }
+
+    return `Q${quarter} FY${String(fiscalYear).slice(-2)}`;
+}
+
+/**
+ * Converts a quarter string like "Q3 FY26" into a numeric sort key for ordering.
+ */
+function getQuarterSortKey(quarterString) {
+    if (!quarterString) return 0;
+    const match = quarterString.match(/Q([1-4])\s*FY\s*(\d{2,4})/i);
+    if (!match) return 0;
+    let fy = parseInt(match[2], 10);
+    if (match[2].length === 2) fy += 2000;
+    return fy * 10 + parseInt(match[1], 10);
+}
+
+/**
  * Formats a Firestore timestamp into a user-friendly string like "Today at 14:30".
  * @param {object} lastEditedDate A Firestore timestamp object.
  * @returns {string} The formatted date string.
@@ -53,10 +93,26 @@ export async function renderDashboard() {
     dashboardView.classList.remove('hidden'); // Show the dashboard
     
     let plans = [];
+    const currentQ = getCurrentFiscalQuarter();
     try {
         const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
         const snapshot = await plansRef.orderBy('lastEdited', 'desc').get();
         plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Sort: current quarter first, then by quarter chronologically
+        plans.sort((a, b) => {
+            const aIsCurrent = a.quarter === currentQ;
+            const bIsCurrent = b.quarter === currentQ;
+            if (aIsCurrent && !bIsCurrent) return -1;
+            if (!aIsCurrent && bIsCurrent) return 1;
+            const aKey = getQuarterSortKey(a.quarter);
+            const bKey = getQuarterSortKey(b.quarter);
+            if (aKey !== bKey) return bKey - aKey;
+            // Same quarter: most recently edited first
+            const aTime = a.lastEdited?.toDate?.()?.getTime() || 0;
+            const bTime = b.lastEdited?.toDate?.()?.getTime() || 0;
+            return bTime - aTime;
+        });
     } catch (error) {
         console.error("Error fetching user plans:", error);
     }
@@ -94,9 +150,12 @@ export async function renderDashboard() {
         const statusLabel = completion === 100 ? 'Complete' : completion > 0 ? 'In Progress' : 'Not Started';
         const statusClass = completion === 100 ? 'status-complete' : completion > 0 ? 'status-in-progress' : 'status-not-started';
         const progressToneClass = completion === 100 ? 'progress-tone-complete' : completion > 0 ? 'progress-tone-active' : 'progress-tone-idle';
+        const isCurrentQuarter = plan.quarter === currentQ;
+        const currentQuarterClass = isCurrentQuarter ? ' current-quarter' : '';
+        const currentQuarterLabel = isCurrentQuarter ? ' <span class="current-quarter-tag">Current</span>' : '';
 
         dashboardHTML += `
-            <div class="plan-card">
+            <div class="plan-card${currentQuarterClass}">
                 <div class="plan-card-accent ${progressToneClass}" aria-hidden="true"></div>
                 <div class="plan-card-actions">
                     <button class="plan-action-btn edit-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" data-plan-quarter="${plan.quarter || ''}" title="Edit Details"><i class="bi bi-pencil-square"></i></button>
@@ -104,7 +163,7 @@ export async function renderDashboard() {
                 </div>
                 <div class="plan-card-main" data-plan-id="${plan.id}">
                     <div class="plan-card-body">
-                        <div class="plan-card-quarter-badge"><i class="bi bi-calendar3"></i> ${plan.quarter || 'No quarter'}</div>
+                        <div class="plan-card-quarter-badge"><i class="bi bi-calendar3"></i> ${plan.quarter || 'No quarter'}${currentQuarterLabel}</div>
                         <h3 class="plan-card-title">${planName}</h3>
                     </div>
                     <div class="plan-card-footer">
