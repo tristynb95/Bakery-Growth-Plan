@@ -1637,6 +1637,52 @@ export function initializeUI(database, state) {
         DOMElements.sidebar.addEventListener('touchend', e => { if (e.changedTouches[0].screenX < touchStartX - swipeThreshold) { DOMElements.appView.classList.remove('sidebar-open'); } });
     }
 
+    // Mobile Bottom Navigation
+    const mobileBottomNav = document.getElementById('mobile-bottom-nav');
+    if (mobileBottomNav) {
+        mobileBottomNav.addEventListener('click', (e) => {
+            const navItem = e.target.closest('.mobile-bottom-nav-item');
+            if (navItem) {
+                const navId = navItem.dataset.nav;
+                const sidebarLink = document.querySelector(`#nav-${navId}`);
+                if (sidebarLink) {
+                    sidebarLink.click();
+                }
+                // Update active state on bottom nav
+                mobileBottomNav.querySelectorAll('.mobile-bottom-nav-item').forEach(btn => btn.classList.remove('active'));
+                navItem.classList.add('active');
+                // Scroll to top of content
+                const mainContent = document.querySelector('#app-view main');
+                if (mainContent) mainContent.scrollTo(0, 0);
+            }
+        });
+
+        // Sync bottom nav active state when sidebar nav changes
+        const mainNav = document.getElementById('main-nav');
+        if (mainNav) {
+            const observer = new MutationObserver(() => {
+                const activeLink = mainNav.querySelector('a.active');
+                if (activeLink) {
+                    const activeId = activeLink.id.replace('nav-', '');
+                    mobileBottomNav.querySelectorAll('.mobile-bottom-nav-item').forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.nav === activeId);
+                    });
+                }
+            });
+            observer.observe(mainNav, { subtree: true, attributes: true, attributeFilter: ['class'] });
+        }
+    }
+
+    // Close sidebar after navigation on mobile
+    const mainNavEl = document.getElementById('main-nav');
+    if (mainNavEl && DOMElements.appView) {
+        mainNavEl.addEventListener('click', () => {
+            if (window.innerWidth <= 1024) {
+                DOMElements.appView.classList.remove('sidebar-open');
+            }
+        });
+    }
+
     // Radial Menu
     if (DOMElements.radialMenuContainer && DOMElements.radialMenuFab && DOMElements.radialMenuOverlay) {
         DOMElements.radialMenuFab.addEventListener('click', () => DOMElements.radialMenuContainer.classList.toggle('open'));
