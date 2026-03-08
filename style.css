@@ -626,6 +626,12 @@ textarea.form-input {
     .admin-hero {
         padding-inline: 0.5rem;
     }
+    .admin-hero h1 {
+        font-size: 1.75rem;
+    }
+    .admin-hero p {
+        font-size: 0.9rem;
+    }
     .admin-search-tools {
         width: 100%;
         flex-direction: column;
@@ -637,9 +643,51 @@ textarea.form-input {
     #admin-bakery-filter {
         width: 100% !important;
     }
-    .admin-user-row {
-        padding-inline: 1rem;
+
+    /* --- Bakery rows: stack name and actions vertically --- */
+    .bakery-row .bakery-display {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
     }
+    .bakery-row .bakery-display > div:last-child {
+        width: 100%;
+    }
+    .bakery-row .bakery-display .edit-bakery-btn,
+    .bakery-row .bakery-display .delete-bakery-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    /* Bakery edit mode: stack input and buttons */
+    .bakery-row .bakery-edit {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+    }
+    .bakery-row .bakery-edit .bakery-edit-input {
+        width: 100%;
+    }
+    .bakery-row .bakery-edit > button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* --- User rows: cleaner layout --- */
+    .admin-user-row {
+        padding: 1rem !important;
+    }
+    .admin-user-row > .flex {
+        gap: 0.75rem;
+    }
+    .admin-user-row .admin-badges {
+        gap: 0.375rem;
+    }
+    .admin-user-row .admin-badges > * {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    /* --- Plan items: stack vertically --- */
     .admin-plan-item {
         flex-direction: column;
         align-items: flex-start;
@@ -648,6 +696,52 @@ textarea.form-input {
     .admin-plan-actions {
         width: 100%;
         justify-content: space-between;
+    }
+
+    /* --- Stat cards: smaller on mobile --- */
+    .admin-stat-card {
+        padding: 1rem !important;
+    }
+    .admin-stat-card .text-4xl {
+        font-size: 1.75rem;
+    }
+
+    /* --- Section card headers --- */
+    .admin-section-card > .p-6 {
+        padding: 1rem !important;
+    }
+}
+
+/* Extra small phone tweaks */
+@media (max-width: 400px) {
+    .admin-shell {
+        padding-inline: 0.5rem;
+    }
+
+    /* Bakery rows: full-width stacked buttons */
+    .bakery-row {
+        padding: 0.75rem !important;
+    }
+    .bakery-row .bakery-display > div:last-child {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    /* Badges: wrap into 2 columns on very small screens */
+    .admin-user-row .admin-badges {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.375rem;
+        width: 100%;
+    }
+    .admin-user-row .admin-badges > * {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .admin-hero h1 {
+        font-size: 1.5rem;
     }
 }
 
@@ -759,7 +853,7 @@ textarea.form-input {
     }
 
     .summary-content { font-size: 10pt; }
-    .summary-redesigned { gap: 1rem; }
+    .summary-redesigned { gap: 2rem; }
     .summary-hero-card { box-shadow: none; border: 1px solid var(--gails-grey-mid); }
     .summary-hero-banner { background: var(--gails-red) !important; padding: 1.25rem 1.5rem; }
     .summary-hero-banner::before, .summary-hero-banner::after { display: none; }
@@ -1439,6 +1533,14 @@ textarea.form-input {
     .plan-review-field-icon {
         margin-top: 0;
     }
+    .plan-review-field-content {
+        width: 100%;
+    }
+    .plan-review-field-content .form-input,
+    .plan-review-field-content [contenteditable="true"].form-input {
+        width: 100%;
+        box-sizing: border-box;
+    }
 }
 
 /* 25. Redesigned Summary Page Styles
@@ -1446,7 +1548,7 @@ textarea.form-input {
 .summary-redesigned {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2rem;
 }
 
 /* --- Hero Card (Quarter Overview) --- */
@@ -1652,7 +1754,7 @@ textarea.form-input {
     overflow: hidden;
 }
 .summary-month-card + .summary-month-card {
-    margin-top: 1rem;
+    margin-top: 2rem;
 }
 .summary-month-header {
     padding: 1.25rem 1.5rem;
@@ -2115,20 +2217,84 @@ textarea.form-input {
 
 /* --- Mobile Responsiveness --- */
 @media (max-width: 767px) {
+    /* Overall spacing */
+    .summary-redesigned { gap: 2rem; }
+    .summary-month-card + .summary-month-card { margin-top: 2rem; }
+
+    /* Hero card */
     .summary-hero-meta { grid-template-columns: 1fr; }
     .summary-meta-item:not(:last-child)::after { display: none; }
     .summary-meta-item:not(:last-child) { border-bottom: 1px solid #F3F4F6; }
-    .summary-hero-banner { padding: 1.5rem; }
+    .summary-hero-banner { padding: 1.25rem; }
+    .summary-hero-plan-name { font-size: 1.25rem; }
+    .summary-hero-plan-sub { font-size: 0.8rem; }
+
+    /* Meta items compact */
+    .summary-meta-item { padding: 0.75rem 1rem; gap: 0.5rem; }
+    .summary-meta-icon { width: 1.75rem; height: 1.75rem; font-size: 0.85rem; border-radius: 0.5rem; }
+    .summary-meta-label { font-size: 0.6rem; }
+    .summary-meta-value { font-size: 0.8rem; }
+
+    /* Vision & Objectives */
     .summary-objectives-grid { grid-template-columns: 1fr; }
-    .summary-objectives, .summary-vision-block { padding: 1.25rem 1.25rem; }
+    .summary-objectives, .summary-vision-block { padding: 1rem; }
+    .summary-vision-text { font-size: 0.9rem; line-height: 1.6; }
+    .summary-objective-card { padding: 1rem; }
+    .summary-objective-text { font-size: 0.8rem; }
+
+    /* Pillars */
     .summary-pillars-items { grid-template-columns: 1fr; }
-    .summary-pillar-item { border-right: none !important; }
+    .summary-pillar-item { border-right: none !important; padding: 0.75rem 1rem; gap: 0.5rem; font-size: 0.8rem; }
     .summary-pillar-item:nth-last-child(2) { border-bottom: 1px solid #F5F5F5; }
-    .summary-reflection-grid { grid-template-columns: 1fr; }
-    .summary-review-items { grid-template-columns: 1fr; }
-    .summary-month-title-row { flex-wrap: wrap; }
-    .summary-strategy-section { padding: 1rem 1.25rem; }
-    .summary-weekly-section, .summary-review-section { padding: 1rem 1.25rem; }
+    .summary-pillar-icon { width: 1.5rem; height: 1.5rem; font-size: 0.75rem; }
+    .summary-pillars-title { padding: 0.75rem 1rem; font-size: 0.65rem; }
+
+    /* Month headers */
+    .summary-month-header { padding: 1rem; }
+    .summary-month-title-row { flex-wrap: wrap; gap: 0.75rem; }
+    .summary-month-title-group { gap: 0.75rem; }
+    .summary-month-num { width: 2rem; height: 2rem; font-size: 0.85rem; border-radius: 0.5rem; }
+    .summary-month-info h2 { font-size: 1rem; }
+    .summary-month-pillars .badge { font-size: 0.65rem; padding: 0.15rem 0.4rem; }
+
+    /* Momentum indicator compact */
+    .summary-momentum-indicator { padding: 0.375rem 0.5rem; gap: 0.4rem; }
+    .summary-momentum-ring { width: 1.75rem; height: 1.75rem; }
+    .summary-momentum-label { font-size: 0.55rem; }
+    .summary-momentum-value { font-size: 0.8rem; }
+
+    /* Strategy cards */
+    .summary-strategy-section { padding: 0.875rem 1rem; gap: 0.5rem; }
+    .summary-strategy-card { padding: 0.75rem; gap: 0.625rem; }
+    .summary-strategy-icon { width: 1.75rem; height: 1.75rem; font-size: 0.85rem; border-radius: 0.5rem; }
+    .summary-strategy-label { font-size: 0.65rem; }
+    .summary-strategy-content { font-size: 0.8rem; line-height: 1.5; }
+
+    /* Weekly section */
+    .summary-weekly-section, .summary-review-section { padding: 0.875rem 1rem; }
+    .summary-section-title { font-size: 0.65rem; margin-bottom: 0.75rem; }
+    .summary-week-row { gap: 0.625rem; padding: 0.375rem 0; }
+    .summary-week-dot { width: 1.75rem; height: 1.75rem; font-size: 0.6rem; }
+    .summary-weeks-list::before { left: 0.875rem; }
+    .summary-week-content { padding: 0.5rem 0.75rem; }
+    .summary-week-detail { font-size: 0.75rem; }
+    .summary-week-detail strong { font-size: 0.65rem; }
+
+    /* Review items */
+    .summary-review-items { grid-template-columns: 1fr; gap: 0.5rem; }
+    .summary-review-item { padding: 0.75rem; gap: 0.375rem; }
+    .summary-review-icon { width: 1.5rem; height: 1.5rem; font-size: 0.75rem; border-radius: 0.375rem; }
+    .summary-review-label { font-size: 0.75rem; }
+    .summary-review-text { font-size: 0.75rem; }
+
+    /* Quarterly reflection */
+    .summary-reflection-grid { grid-template-columns: 1fr; gap: 0.625rem; }
+    .summary-reflection-header { margin-bottom: 1rem; padding-bottom: 0.75rem; gap: 0.5rem; }
+    .summary-reflection-header i { font-size: 1.15rem; }
+    .summary-reflection-header h2 { font-size: 1.15rem; }
+    .summary-reflection-item { padding: 0.875rem; gap: 0.375rem; }
+    .summary-reflection-icon { width: 1.75rem; height: 1.75rem; font-size: 0.85rem; }
+    .summary-quarterly-reflection { padding: 1.25rem !important; }
 }
 
 /* Shared view header */
@@ -4148,4 +4314,853 @@ body:has(#app-view) {
     color: var(--gails-red);
     border-bottom-color: var(--gails-red);
     background-color: transparent;
+}
+
+/* ============================================================
+   65. COMPREHENSIVE MOBILE UX OPTIMIZATIONS
+   ============================================================ */
+
+/* --- 65a. Mobile Bottom Navigation Bar --- */
+.mobile-bottom-nav {
+    display: none; /* Hidden by default on desktop */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--gails-white);
+    border-top: 1px solid #E5E7EB;
+    z-index: 999;
+    padding: 0.25rem 0;
+    padding-bottom: env(safe-area-inset-bottom, 0.25rem);
+    box-shadow: 0 -2px 10px rgb(0 0 0 / 0.06);
+}
+
+.mobile-bottom-nav-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    max-width: 100%;
+}
+
+.mobile-bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    padding: 0.4rem 0.75rem;
+    color: var(--gails-text-secondary);
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: color 0.2s ease;
+    cursor: pointer;
+    border: none;
+    background: none;
+    -webkit-tap-highlight-color: transparent;
+    min-width: 3.5rem;
+}
+
+.mobile-bottom-nav-item i {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.mobile-bottom-nav-item.active {
+    color: var(--gails-red);
+}
+
+.mobile-bottom-nav-item:active {
+    transform: scale(0.92);
+}
+
+/* --- 65b. Comprehensive Mobile Responsive Overrides --- */
+@media (max-width: 1024px) {
+    /* Bottom nav visible on mobile in app view */
+    #app-view .mobile-bottom-nav {
+        display: block;
+    }
+
+    /* Add bottom padding to main content to prevent content hidden behind bottom nav */
+    #app-view main > .printable-area {
+        padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0)) !important;
+    }
+
+    /* Shift the radial menu / FAB above the bottom nav */
+    .radial-menu-container {
+        bottom: calc(5rem + env(safe-area-inset-bottom, 0));
+    }
+
+    /* Make the main header more compact on mobile */
+    .main-header {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem !important;
+        padding-left: 0.25rem;
+    }
+
+    /* Title div takes most of the row, menu button sits at the end */
+    .main-header > div:first-child {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .main-header h1 {
+        font-size: 1.5rem !important;
+        line-height: 1.25;
+    }
+
+    .main-header #header-subtitle {
+        font-size: 0.875rem !important;
+    }
+
+    /* Menu button aligns to top-right alongside title */
+    .main-header > div:last-child {
+        flex-shrink: 0;
+        align-self: flex-start;
+    }
+}
+
+/* --- 65c. Small Mobile Specific Tweaks (<=480px) --- */
+@media (max-width: 480px) {
+    /* Dashboard header */
+    .dashboard-header {
+        padding: 0.75rem 1rem;
+    }
+    .dashboard-header img {
+        height: 28px;
+    }
+    .dashboard-header-actions .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    /* Dashboard content padding */
+    #dashboard-content {
+        padding: 1rem !important;
+    }
+
+    /* Dashboard hero text */
+    .dashboard-hero-title {
+        font-size: 1.5rem;
+    }
+
+    /* Plan cards - always visible actions on touch devices */
+    .plan-card-actions {
+        opacity: 1;
+    }
+
+    /* App view main area - tighter padding */
+    .printable-area {
+        padding: 1rem !important;
+    }
+
+    /* Buttons - minimum touch target size (44px) */
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .btn-icon {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Form inputs - larger touch targets */
+    .form-input {
+        min-height: 48px;
+        font-size: 16px; /* Prevents iOS zoom on focus */
+    }
+
+    /* Plan section cards - tighter on small screens */
+    .plan-card-inner {
+        padding: 1rem 1rem 1.25rem;
+    }
+
+    /* Plan card header - stack on very small screens */
+    .plan-card-header {
+        gap: 0.75rem;
+    }
+
+    .plan-card-title {
+        font-size: 1.15rem;
+    }
+
+    /* Content cards - give titles room to breathe on small screens */
+    .content-card {
+        padding: 1.5rem 1.25rem;
+        border-radius: 1rem;
+    }
+
+    .content-card.plan-card-elevated:not(.plan-foundation-card) {
+        padding: 1.25rem 1.25rem 1.5rem;
+    }
+
+    .plan-card-header {
+        padding-top: 0.25rem;
+    }
+
+    /* Auth box - slightly less padding on small screens */
+    .auth-box {
+        padding: 1.75rem;
+    }
+
+    /* Cookie consent - stack vertically */
+    .cookie-consent-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    .cookie-consent-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Mobile topbar — hidden on desktop */
+.calendar-mobile-topbar {
+    display: none;
+}
+
+/* --- 65d. Calendar Modal Full-Screen on Mobile --- */
+@media (max-width: 1024px) {
+    .calendar-modal {
+        padding: 0;
+        align-items: stretch;
+        justify-content: stretch;
+    }
+
+    .calendar-modal-content {
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+    }
+
+    .calendar-main-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+
+    .calendar-grid-container {
+        border-right: none;
+        border-bottom: 1px solid var(--gails-grey-mid);
+        padding: 1rem;
+        padding-top: 0;
+        flex-shrink: 0;
+        overflow: visible;
+    }
+
+    /* Mobile close topbar */
+    .calendar-mobile-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--gails-grey-mid);
+        background-color: var(--gails-white);
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+
+    .calendar-mobile-topbar-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--gails-text-primary);
+    }
+
+    .calendar-mobile-close-btn {
+        width: 2.5rem;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 1.1rem;
+    }
+
+    .calendar-header {
+        margin-bottom: 0.75rem;
+        margin-top: 0.75rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    #calendar-month-year {
+        font-size: 1.1rem;
+    }
+
+    .calendar-grid {
+        gap: 0.125rem;
+    }
+
+    .calendar-day {
+        padding: 0.15rem;
+        min-height: 2rem;
+    }
+
+    .calendar-day-number {
+        font-size: 0.75rem;
+    }
+
+    .calendar-day-header {
+        font-size: 0.65rem;
+        padding-bottom: 0.15rem;
+    }
+
+    /* Event dots smaller on mobile */
+    .calendar-day .event-dots {
+        gap: 1px;
+    }
+
+    .calendar-day .event-dots .dot {
+        width: 4px;
+        height: 4px;
+    }
+
+    /* Day detail takes remaining space and scrolls */
+    .day-detail-container {
+        min-height: 0;
+        overflow-y: auto;
+        flex: 1 1 auto;
+    }
+
+    .day-detail-content {
+        padding: 1rem;
+    }
+
+    /* Event form on mobile - needs more space */
+    .add-event-form-redesigned {
+        padding: 0.5rem 1rem 1rem;
+    }
+
+    .day-detail-header {
+        padding: 0.75rem 1rem;
+    }
+
+    #day-detail-header {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* --- 65e. Chat Modal Full-Screen on Mobile --- */
+@media (max-width: 640px) {
+    #gemini-chat-modal .chat-modal-box {
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        margin: 0;
+    }
+
+    #gemini-chat-modal {
+        padding: 0;
+    }
+
+    .prompt-starters-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .chat-bubble {
+        max-width: 90%;
+    }
+
+    .chat-modal-header {
+        padding: 0.875rem 1rem;
+    }
+
+    .chat-modal-header h3 {
+        font-size: 1rem;
+    }
+
+    /* Ensure chat footer stays above keyboard area */
+    .chat-modal-footer {
+        padding-bottom: env(safe-area-inset-bottom, 1rem);
+    }
+}
+
+/* --- 65f. File Viewer Modal Full-Screen on Mobile --- */
+@media (max-width: 768px) {
+    .file-modal-box {
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+    }
+
+    #file-view-modal {
+        padding: 0;
+    }
+
+    .file-modal-header {
+        padding: 0.75rem 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    /* Hide text labels on file viewer buttons on mobile */
+    #file-modal-actions .btn span {
+        display: none;
+    }
+
+    #file-modal-actions {
+        gap: 0.25rem;
+    }
+
+    #file-modal-actions .btn {
+        padding: 0.5rem 0.65rem;
+        min-width: 40px;
+    }
+}
+
+/* --- 65g. Generic Modal Mobile Tweaks --- */
+@media (max-width: 640px) {
+    .modal-overlay {
+        padding: 0.5rem;
+    }
+
+    .modal-box {
+        max-height: 95vh;
+        border-radius: 1rem;
+    }
+
+    .modal-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .modal-content {
+        padding: 1.25rem;
+    }
+
+    .modal-footer {
+        padding: 1rem 1.25rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    /* AI Action Plan modal — full screen on mobile */
+    #modal-box[data-type="aiActionPlan"],
+    #modal-box[data-type="aiActionPlan_view"],
+    #modal-box[data-type="aiActionPlan_generate"] {
+        max-width: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+        height: 100%;
+    }
+
+    /* Header: stack title + tabs vertically */
+    #modal-box[data-type="aiActionPlan_view"] .modal-header-main,
+    #modal-box[data-type="aiActionPlan"] .modal-header-main {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    #modal-box[data-type="aiActionPlan_view"] .modal-header,
+    #modal-box[data-type="aiActionPlan"] .modal-header {
+        padding: 0.75rem 1rem;
+        align-items: flex-start;
+    }
+
+    /* Tabs row: full width, scrollable */
+    #modal-box[data-type="aiActionPlan_view"] .ai-tabs-nav.header-tabs,
+    #modal-box[data-type="aiActionPlan"] .ai-tabs-nav.header-tabs {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        border-bottom: 2px solid var(--gails-grey-light);
+    }
+    #modal-box[data-type="aiActionPlan_view"] .ai-tabs-nav.header-tabs::-webkit-scrollbar,
+    #modal-box[data-type="aiActionPlan"] .ai-tabs-nav.header-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    #modal-box[data-type="aiActionPlan_view"] .ai-tabs-nav.header-tabs .btn,
+    #modal-box[data-type="aiActionPlan"] .ai-tabs-nav.header-tabs .btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* Title smaller */
+    #modal-box[data-type="aiActionPlan_view"] #modal-title,
+    #modal-box[data-type="aiActionPlan"] #modal-title {
+        font-size: 1rem;
+    }
+
+    /* Table: card-style layout — stack each row vertically */
+    #ai-printable-area {
+        overflow-x: hidden;
+    }
+
+    #ai-printable-area table {
+        min-width: 0;
+        display: block;
+    }
+
+    #ai-printable-area thead {
+        display: none;
+    }
+
+    #ai-printable-area tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    #ai-printable-area tr {
+        display: flex;
+        flex-direction: column;
+        background-color: #FAFAFA;
+        border: 1px solid var(--gails-grey-mid);
+        border-radius: 0.75rem;
+        padding: 0.75rem;
+        gap: 0.375rem;
+    }
+
+    #ai-printable-area th,
+    #ai-printable-area td {
+        border: none;
+        padding: 0.25rem 0;
+        font-size: 0.8rem;
+        display: block;
+    }
+
+    /* Label each cell with its column name */
+    #ai-printable-area td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.6rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--gails-text-secondary);
+        margin-bottom: 0.125rem;
+    }
+
+    /* First cell (Action Step) is the primary content — make it stand out */
+    #ai-printable-area td:first-child {
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding-bottom: 0.375rem;
+        border-bottom: 1px solid #EEF2F7;
+        margin-bottom: 0.125rem;
+    }
+
+    /* Inline the secondary fields in a row */
+    #ai-printable-area td:not(:first-child):not(.actions-cell) {
+        display: inline-block;
+        width: auto;
+        margin-right: 1rem;
+    }
+
+    /* Actions cell (delete row button) */
+    #ai-printable-area td.actions-cell {
+        width: auto;
+        text-align: right;
+        padding-top: 0.25rem;
+        border-top: 1px solid #EEF2F7;
+    }
+
+    #ai-printable-area td.actions-cell .btn-remove-row {
+        opacity: 1;
+    }
+
+    /* Add row button */
+    .btn-add-row {
+        font-size: 0.8rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+    /* Footer: wrap buttons neatly */
+    #modal-box[data-type="aiActionPlan_view"] .modal-footer,
+    #modal-box[data-type="aiActionPlan"] .modal-footer {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+    }
+
+    #modal-box[data-type="aiActionPlan_view"] .modal-footer .btn,
+    #modal-box[data-type="aiActionPlan"] .modal-footer .btn {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    /* Undo/Redo container */
+    .undo-redo-container {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    /* Right-side buttons fill remaining space */
+    #modal-box[data-type="aiActionPlan_view"] .modal-footer > .flex,
+    #modal-box[data-type="aiActionPlan"] .modal-footer > .flex {
+        gap: 0.375rem;
+    }
+}
+
+/* --- 65h. Profile Page Mobile --- */
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 0.5rem;
+    }
+
+    .profile-container .content-card {
+        padding: 1.5rem;
+    }
+
+    /* Stack profile photo above form fields on mobile */
+    .profile-container .grid.grid-cols-1.md\\:grid-cols-3 {
+        display: flex;
+        flex-direction: column-reverse;
+    }
+
+    #profile-photo-section {
+        margin-top: 0 !important;
+        margin-bottom: 1rem;
+    }
+}
+
+/* --- 65i. Improved Touch Interactions --- */
+@media (hover: none) and (pointer: coarse) {
+    /* Remove hover transforms on touch devices (prevents stuck states) */
+    .plan-card:hover {
+        transform: none;
+    }
+
+    .plan-card:active {
+        transform: scale(0.98);
+    }
+
+    .stepper-item:hover {
+        transform: none;
+    }
+
+    .btn:hover {
+        transform: none;
+    }
+
+    .btn:active {
+        transform: scale(0.96);
+    }
+
+    /* Always show action buttons on touch devices */
+    .plan-card-actions {
+        opacity: 1;
+    }
+
+    /* Always show remove row buttons on touch */
+    .btn-remove-row {
+        opacity: 1;
+    }
+
+    /* Remove hover effects that don't work well on touch */
+    .plan-objective-item:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Make event items easier to tap */
+    .day-event-list .event-item {
+        padding: 1.25rem 1rem;
+    }
+
+    .day-event-list .event-item:hover {
+        transform: none;
+    }
+
+    /* Radial menu tooltips - hide on touch (users tap, not hover) */
+    .radial-menu-item::after {
+        display: none;
+    }
+}
+
+/* --- 65j. Dashboard Grid Mobile Improvements --- */
+@media (max-width: 640px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .plan-card.new-plan-card {
+        min-height: 120px;
+    }
+
+    /* Footer more compact on mobile */
+    #dashboard-view > footer,
+    #app-view footer.no-print {
+        padding: 1rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* --- 65j2. Content Card Padding on Mobile --- */
+@media (max-width: 640px) {
+    .content-card {
+        padding: 1.75rem 1.5rem;
+    }
+
+    .content-card.plan-card-elevated:not(.plan-foundation-card) {
+        padding: 1.5rem 1.5rem 1.75rem;
+    }
+}
+
+/* --- 65k. Sidebar Improvements on Mobile --- */
+@media (max-width: 1024px) {
+    #sidebar {
+        width: min(280px, 85vw);
+    }
+
+    /* Ensure sidebar has safe area padding at bottom */
+    #sidebar {
+        padding-bottom: env(safe-area-inset-bottom, 1.5rem);
+    }
+
+    /* Larger nav items for better touch targets */
+    .sidebar-nav a {
+        padding: 0.85rem 1rem;
+        min-height: 48px;
+    }
+
+    .sidebar-nav .nav-icon {
+        font-size: 1.25rem;
+    }
+
+    .sidebar-nav .nav-text {
+        font-size: 0.95rem;
+    }
+}
+
+/* --- 65l. Weekly Tabs Scrollable on Mobile --- */
+@media (max-width: 640px) {
+    .plan-weekly-tabs-wrapper {
+        margin-left: -1rem;
+        margin-right: -1rem;
+        padding-left: 0;
+        padding-right: 0;
+        position: relative;
+    }
+
+    /* Right-edge fade gradient to hint at more tabs */
+    .plan-weekly-tabs-wrapper::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 3rem;
+        background: linear-gradient(to right, transparent, var(--gails-white));
+        pointer-events: none;
+        z-index: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    /* Hide fade when scrolled to the end (toggled by JS) */
+    .plan-weekly-tabs-wrapper.scrolled-end::after {
+        opacity: 0;
+    }
+
+    .plan-weekly-tabs {
+        padding-left: 1rem;
+        padding-right: 2.5rem; /* Extra space so last tab isn't hidden by fade */
+    }
+
+    .plan-weekly-tabs .weekly-tab {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.8rem;
+    }
+
+    /* Scroll hint pill that appears on first load */
+    .weekly-tabs-scroll-hint {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.75rem;
+        margin: 0.5rem auto 0;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--gails-text-secondary);
+        background-color: var(--gails-grey-light);
+        border-radius: 999px;
+        width: fit-content;
+        animation: hintPulse 2s ease-in-out 2;
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .weekly-tabs-scroll-hint.hidden {
+        opacity: 0;
+        transform: translateY(-4px);
+        pointer-events: none;
+    }
+
+    .weekly-tabs-scroll-hint i {
+        font-size: 0.8rem;
+        animation: hintArrow 1.5s ease-in-out infinite;
+    }
+
+    @keyframes hintPulse {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+    }
+
+    @keyframes hintArrow {
+        0%, 100% { transform: translateX(0); }
+        50% { transform: translateX(3px); }
+    }
+}
+
+/* Hide the scroll hint on larger screens */
+.weekly-tabs-scroll-hint {
+    display: none;
+}
+
+/* --- 65m. Summary Page Mobile --- */
+@media (max-width: 480px) {
+    .summary-redesigned { gap: 2rem; }
+    .summary-hero-banner { padding: 1rem 0.875rem; }
+    .summary-hero-plan-name { font-size: 1.1rem; }
+    .summary-hero-card { border-radius: 0.75rem; }
+    .summary-month-card { border-radius: 0.75rem; }
+    .summary-quarterly-reflection { border-radius: 0.75rem !important; padding: 1rem !important; }
+}
+
+/* --- 65n2. Summary Header Buttons on Mobile --- */
+@media (max-width: 639px) {
+    #desktop-header-buttons:not(.hidden) {
+        display: flex;
+        gap: 0.375rem;
+    }
+    #desktop-header-buttons .summary-btn-label {
+        display: none;
+    }
+    #desktop-header-buttons .btn {
+        padding: 0.4rem 0.6rem;
+        min-width: 0;
+        min-height: 0;
+    }
+    #desktop-header-buttons #save-indicator {
+        display: none;
+    }
+    #desktop-header-buttons #print-btn {
+        display: none;
+    }
+}
+
+/* --- 65n. Safe Area Support for Notched Devices --- */
+@supports (padding: env(safe-area-inset-bottom)) {
+    .mobile-bottom-nav {
+        padding-bottom: calc(0.25rem + env(safe-area-inset-bottom));
+    }
 }

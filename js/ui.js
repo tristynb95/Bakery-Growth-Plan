@@ -373,6 +373,21 @@ function redo() {
 }
 
 
+// Add data-label attributes to table cells for mobile card layout
+function labelTableCellsForMobile(tableContainer) {
+    if (!tableContainer) return;
+    tableContainer.querySelectorAll('table').forEach(table => {
+        const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
+        table.querySelectorAll('tbody tr').forEach(row => {
+            row.querySelectorAll('td').forEach((td, i) => {
+                if (headers[i] && !td.classList.contains('actions-cell')) {
+                    td.setAttribute('data-label', headers[i]);
+                }
+            });
+        });
+    });
+}
+
 function makeTablesSortable(tableContainer) {
     if (!tableContainer) return;
     const tables = tableContainer.querySelectorAll('table');
@@ -402,6 +417,8 @@ function makeTablesSortable(tableContainer) {
             }
         });
     });
+    // Label cells for mobile card layout
+    labelTableCellsForMobile(tableContainer);
 };
 
 function setupAiModalInteractivity(container) {
@@ -467,10 +484,16 @@ function setupAiModalInteractivity(container) {
         const generateBtn = e.target.closest('.generate-month-plan-btn');
 
         if (addBtn) {
-            const tableBody = addBtn.closest('table')?.querySelector('tbody'); // Optional chaining
+            const table = addBtn.closest('table');
+            const tableBody = table?.querySelector('tbody');
             if (tableBody) {
+                const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `<td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true">To Do</td><td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-trash3"></i></button></td>`;
+                // Add data-label for mobile card layout
+                newRow.querySelectorAll('td').forEach((td, i) => {
+                    if (headers[i] && !td.classList.contains('actions-cell')) td.setAttribute('data-label', headers[i]);
+                });
                 tableBody.appendChild(newRow);
                 saveState();
                 if (debouncedSave) debouncedSave();
@@ -1623,18 +1646,72 @@ export function initializeUI(database, state) {
         DOMElements.sidebarOverlay.addEventListener('click', () => DOMElements.appView.classList.remove('sidebar-open'));
     }
 
-    // Swipe gestures
+    // Swipe gestures — open sidebar only when the swipe starts from the
+    // left edge of the screen (within 20px), matching native app behaviour.
     if (DOMElements.mainContent && DOMElements.appView) {
         let touchStartX = 0;
         const swipeThreshold = 50;
-        DOMElements.mainContent.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-        DOMElements.mainContent.addEventListener('touchend', e => { if (e.changedTouches[0].screenX > touchStartX + swipeThreshold) { DOMElements.appView.classList.add('sidebar-open'); } });
+        const edgeZone = 20; // px from left edge
+        DOMElements.mainContent.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        DOMElements.mainContent.addEventListener('touchend', e => {
+            if (touchStartX <= edgeZone && e.changedTouches[0].screenX > touchStartX + swipeThreshold) {
+                DOMElements.appView.classList.add('sidebar-open');
+            }
+        });
     }
     if (DOMElements.sidebar && DOMElements.appView) {
          let touchStartX = 0;
          const swipeThreshold = 50;
         DOMElements.sidebar.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
         DOMElements.sidebar.addEventListener('touchend', e => { if (e.changedTouches[0].screenX < touchStartX - swipeThreshold) { DOMElements.appView.classList.remove('sidebar-open'); } });
+    }
+
+    // Mobile Bottom Navigation
+    const mobileBottomNav = document.getElementById('mobile-bottom-nav');
+    if (mobileBottomNav) {
+        mobileBottomNav.addEventListener('click', (e) => {
+            const navItem = e.target.closest('.mobile-bottom-nav-item');
+            if (navItem) {
+                const navId = navItem.dataset.nav;
+                const sidebarLink = document.querySelector(`#nav-${navId}`);
+                if (sidebarLink) {
+                    sidebarLink.click();
+                }
+                // Update active state on bottom nav
+                mobileBottomNav.querySelectorAll('.mobile-bottom-nav-item').forEach(btn => btn.classList.remove('active'));
+                navItem.classList.add('active');
+                // Scroll to top of content
+                const mainContent = document.querySelector('#app-view main');
+                if (mainContent) mainContent.scrollTo(0, 0);
+            }
+        });
+
+        // Sync bottom nav active state when sidebar nav changes
+        const mainNav = document.getElementById('main-nav');
+        if (mainNav) {
+            const observer = new MutationObserver(() => {
+                const activeLink = mainNav.querySelector('a.active');
+                if (activeLink) {
+                    const activeId = activeLink.id.replace('nav-', '');
+                    mobileBottomNav.querySelectorAll('.mobile-bottom-nav-item').forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.nav === activeId);
+                    });
+                }
+            });
+            observer.observe(mainNav, { subtree: true, attributes: true, attributeFilter: ['class'] });
+        }
+    }
+
+    // Close sidebar after navigation on mobile
+    const mainNavEl = document.getElementById('main-nav');
+    if (mainNavEl && DOMElements.appView) {
+        mainNavEl.addEventListener('click', () => {
+            if (window.innerWidth <= 1024) {
+                DOMElements.appView.classList.remove('sidebar-open');
+            }
+        });
     }
 
     // Radial Menu

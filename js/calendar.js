@@ -56,7 +56,8 @@ function renderCalendar() {
         const month = date.getMonth();
         const year = date.getFullYear();
 
-        document.getElementById('calendar-month-year').textContent = date.toLocaleString('en-GB', { month: 'long', year: 'numeric' });
+        const monthFormat = window.innerWidth <= 1024 ? 'short' : 'long';
+        document.getElementById('calendar-month-year').textContent = date.toLocaleString('en-GB', { month: monthFormat, year: 'numeric' });
 
         const firstDayOfMonth = new Date(year, month, 1);
         const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -398,6 +399,15 @@ function setupCalendarEventListeners() {
     }
 
     if (calendarCloseBtn) calendarCloseBtn.addEventListener('click', () => calendarModal.classList.add('hidden'));
+
+    // Mobile close button
+    const calendarCloseBtnMobile = document.getElementById('calendar-close-btn-mobile');
+    if (calendarCloseBtnMobile) calendarCloseBtnMobile.addEventListener('click', () => calendarModal.classList.add('hidden'));
+
+    // Close on backdrop tap (clicking outside the content area)
+    if (calendarModal) calendarModal.addEventListener('click', (e) => {
+        if (e.target === calendarModal) calendarModal.classList.add('hidden');
+    });
     if (calendarPrevMonthBtn) calendarPrevMonthBtn.addEventListener('click', () => {
         appState.calendar.currentDate.setDate(1);
         appState.calendar.currentDate.setMonth(appState.calendar.currentDate.getMonth() - 1);

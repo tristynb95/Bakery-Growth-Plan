@@ -270,6 +270,7 @@ const templates = {
                         <nav id="weekly-tabs" class="plan-weekly-tabs" aria-label="Tabs">
                             ${tabsHtml}
                         </nav>
+                        <div class="weekly-tabs-scroll-hint"><span>Swipe for more weeks</span> <i class="bi bi-chevron-right"></i></div>
                     </div>
                     <div id="weekly-tab-content">
                         ${panelsHtml}
@@ -410,7 +411,7 @@ function getViewTitleConfig(viewId) {
         'month-1': { title: monthTitles[0], subtitle: monthSubtitles[0] },
         'month-2': { title: monthTitles[1], subtitle: monthSubtitles[1] },
         'month-3': { title: monthTitles[2], subtitle: monthSubtitles[2] },
-        summary: { title: `Plan Summary - ${quarterLabel}`, subtitle: planName || 'A complete overview of your quarterly plan.' },
+        summary: { title: `Plan Summary - ${quarterLabel}`, subtitle: '' },
         files: { title: 'My Files', subtitle: "Manage documents for your plan, like P&L statements and KPIs." }
     };
 
@@ -1019,6 +1020,23 @@ function switchView(viewId) {
         if (monthNum) {
             updateWeeklyTabCompletion(monthNum, appState.planData);
         }
+
+        // Re-initialize weekly tabs scroll hint for the new month view
+        const tabsNav = document.getElementById('weekly-tabs');
+        if (tabsNav) {
+            const wrapper = tabsNav.closest('.plan-weekly-tabs-wrapper');
+            const hint = wrapper?.querySelector('.weekly-tabs-scroll-hint');
+            // Reset hint visibility for new month
+            if (hint) hint.classList.remove('hidden');
+            // Reset scroll position and update fade
+            tabsNav.scrollLeft = 0;
+            requestAnimationFrame(() => {
+                if (wrapper) {
+                    const atEnd = tabsNav.scrollLeft + tabsNav.offsetWidth >= tabsNav.scrollWidth - 8;
+                    wrapper.classList.toggle('scrolled-end', atEnd);
+                }
+            });
+        }
     }
 
     document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
@@ -1233,5 +1251,36 @@ export function initializePlanView(database, state, modalFunc, charCounterFunc, 
             openChat();
             document.getElementById('radial-menu-container').classList.remove('open');
         });
+    }
+
+    // Weekly tabs scroll hint logic
+    const weeklyTabsNav = document.getElementById('weekly-tabs');
+    if (weeklyTabsNav) {
+        const wrapper = weeklyTabsNav.closest('.plan-weekly-tabs-wrapper');
+        const hint = wrapper?.querySelector('.weekly-tabs-scroll-hint');
+
+        const updateScrollFade = () => {
+            if (!wrapper) return;
+            const atEnd = weeklyTabsNav.scrollLeft + weeklyTabsNav.offsetWidth >= weeklyTabsNav.scrollWidth - 8;
+            wrapper.classList.toggle('scrolled-end', atEnd);
+        };
+
+        weeklyTabsNav.addEventListener('scroll', () => {
+            updateScrollFade();
+            // Hide the hint once the user scrolls
+            if (hint && !hint.classList.contains('hidden')) {
+                hint.classList.add('hidden');
+            }
+        }, { passive: true });
+
+        // Also hide hint when a tab is tapped
+        weeklyTabsNav.addEventListener('click', (e) => {
+            if (e.target.closest('.weekly-tab') && hint) {
+                hint.classList.add('hidden');
+            }
+        });
+
+        // Check initial state after content renders
+        requestAnimationFrame(updateScrollFade);
     }
 }
