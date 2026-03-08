@@ -5153,6 +5153,9 @@ body:has(#app-view) {
     #desktop-header-buttons #save-indicator {
         display: none;
     }
+    #desktop-header-buttons #print-btn {
+        display: none;
+    }
 }
 
 /* --- 65n. Safe Area Support for Notched Devices --- */
