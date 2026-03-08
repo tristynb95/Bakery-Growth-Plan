@@ -853,7 +853,7 @@ textarea.form-input {
     }
 
     .summary-content { font-size: 10pt; }
-    .summary-redesigned { gap: 1rem; }
+    .summary-redesigned { gap: 2.5rem; }
     .summary-hero-card { box-shadow: none; border: 1px solid var(--gails-grey-mid); }
     .summary-hero-banner { background: var(--gails-red) !important; padding: 1.25rem 1.5rem; }
     .summary-hero-banner::before, .summary-hero-banner::after { display: none; }
@@ -1548,7 +1548,7 @@ textarea.form-input {
 .summary-redesigned {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2.5rem;
 }
 
 /* --- Hero Card (Quarter Overview) --- */
@@ -1754,7 +1754,7 @@ textarea.form-input {
     overflow: hidden;
 }
 .summary-month-card + .summary-month-card {
-    margin-top: 3rem;
+    margin-top: 2.5rem;
 }
 .summary-month-header {
     padding: 1.25rem 1.5rem;
@@ -2218,7 +2218,7 @@ textarea.form-input {
 /* --- Mobile Responsiveness --- */
 @media (max-width: 767px) {
     /* Overall spacing */
-    .summary-redesigned { gap: 1rem; }
+    .summary-redesigned { gap: 2.5rem; }
     .summary-month-card + .summary-month-card { margin-top: 0.5rem; }
 
     /* Hero card */
