@@ -93,13 +93,13 @@ export async function renderDashboard() {
     dashboardView.classList.remove('hidden'); // Show the dashboard
     
     let plans = [];
+    const currentQ = getCurrentFiscalQuarter();
     try {
         const plansRef = db.collection('users').doc(appState.currentUser.uid).collection('plans');
         const snapshot = await plansRef.orderBy('lastEdited', 'desc').get();
         plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         // Sort: current quarter first, then by quarter chronologically
-        const currentQ = getCurrentFiscalQuarter();
         plans.sort((a, b) => {
             const aIsCurrent = a.quarter === currentQ;
             const bIsCurrent = b.quarter === currentQ;
@@ -150,9 +150,12 @@ export async function renderDashboard() {
         const statusLabel = completion === 100 ? 'Complete' : completion > 0 ? 'In Progress' : 'Not Started';
         const statusClass = completion === 100 ? 'status-complete' : completion > 0 ? 'status-in-progress' : 'status-not-started';
         const progressToneClass = completion === 100 ? 'progress-tone-complete' : completion > 0 ? 'progress-tone-active' : 'progress-tone-idle';
+        const isCurrentQuarter = plan.quarter === currentQ;
+        const currentQuarterClass = isCurrentQuarter ? ' current-quarter' : '';
+        const currentQuarterLabel = isCurrentQuarter ? ' <span class="current-quarter-tag">Current Quarter</span>' : '';
 
         dashboardHTML += `
-            <div class="plan-card">
+            <div class="plan-card${currentQuarterClass}">
                 <div class="plan-card-accent ${progressToneClass}" aria-hidden="true"></div>
                 <div class="plan-card-actions">
                     <button class="plan-action-btn edit-plan-btn" data-plan-id="${plan.id}" data-plan-name="${planName}" data-plan-quarter="${plan.quarter || ''}" title="Edit Details"><i class="bi bi-pencil-square"></i></button>
@@ -160,7 +163,7 @@ export async function renderDashboard() {
                 </div>
                 <div class="plan-card-main" data-plan-id="${plan.id}">
                     <div class="plan-card-body">
-                        <div class="plan-card-quarter-badge"><i class="bi bi-calendar3"></i> ${plan.quarter || 'No quarter'}</div>
+                        <div class="plan-card-quarter-badge"><i class="bi bi-calendar3"></i> ${plan.quarter || 'No quarter'}${currentQuarterLabel}</div>
                         <h3 class="plan-card-title">${planName}</h3>
                     </div>
                     <div class="plan-card-footer">
