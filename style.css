@@ -186,18 +186,19 @@ h1, h2, h3, h4, h5, h6 { color: var(--gails-text-primary); }
 
 /* Current quarter emphasis */
 .plan-card.current-quarter {
-    border-color: var(--gails-red);
-    box-shadow: 0 2px 10px rgb(209 10 17 / 0.1);
+    border-color: rgb(209 10 17 / 0.3);
+    box-shadow: 0 2px 8px rgb(209 10 17 / 0.06);
 }
 .plan-card.current-quarter:hover {
-    box-shadow: 0 16px 32px -12px rgb(209 10 17 / 0.2);
-    border-color: var(--gails-red);
+    box-shadow: 0 12px 28px -10px rgb(209 10 17 / 0.12);
+    border-color: rgb(209 10 17 / 0.4);
 }
 .current-quarter-tag {
     font-size: 0.6rem;
     font-weight: 600;
-    color: var(--gails-white);
-    background-color: var(--gails-red);
+    color: var(--gails-red);
+    background-color: rgb(209 10 17 / 0.08);
+    border: 1px solid rgb(209 10 17 / 0.2);
     padding: 0.1rem 0.45rem;
     border-radius: 999px;
     margin-left: 0.35rem;
