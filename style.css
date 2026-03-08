@@ -4149,3 +4149,552 @@ body:has(#app-view) {
     border-bottom-color: var(--gails-red);
     background-color: transparent;
 }
+
+/* ============================================================
+   65. COMPREHENSIVE MOBILE UX OPTIMIZATIONS
+   ============================================================ */
+
+/* --- 65a. Mobile Bottom Navigation Bar --- */
+.mobile-bottom-nav {
+    display: none; /* Hidden by default on desktop */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--gails-white);
+    border-top: 1px solid #E5E7EB;
+    z-index: 999;
+    padding: 0.25rem 0;
+    padding-bottom: env(safe-area-inset-bottom, 0.25rem);
+    box-shadow: 0 -2px 10px rgb(0 0 0 / 0.06);
+}
+
+.mobile-bottom-nav-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    max-width: 100%;
+}
+
+.mobile-bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    padding: 0.4rem 0.75rem;
+    color: var(--gails-text-secondary);
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: color 0.2s ease;
+    cursor: pointer;
+    border: none;
+    background: none;
+    -webkit-tap-highlight-color: transparent;
+    min-width: 3.5rem;
+}
+
+.mobile-bottom-nav-item i {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.mobile-bottom-nav-item.active {
+    color: var(--gails-red);
+}
+
+.mobile-bottom-nav-item:active {
+    transform: scale(0.92);
+}
+
+/* --- 65b. Comprehensive Mobile Responsive Overrides --- */
+@media (max-width: 1024px) {
+    /* Bottom nav visible on mobile in app view */
+    #app-view .mobile-bottom-nav {
+        display: block;
+    }
+
+    /* Add bottom padding to main content to prevent content hidden behind bottom nav */
+    #app-view main > .printable-area {
+        padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0)) !important;
+    }
+
+    /* Shift the radial menu / FAB above the bottom nav */
+    .radial-menu-container {
+        bottom: calc(5rem + env(safe-area-inset-bottom, 0));
+    }
+
+    /* Make the main header more compact on mobile */
+    .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem !important;
+    }
+
+    .main-header h1 {
+        font-size: 1.5rem !important;
+        line-height: 1.25;
+    }
+
+    .main-header #header-subtitle {
+        font-size: 0.875rem !important;
+    }
+
+    /* Stack the main header buttons row */
+    .main-header > div:last-child {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* --- 65c. Small Mobile Specific Tweaks (<=480px) --- */
+@media (max-width: 480px) {
+    /* Dashboard header */
+    .dashboard-header {
+        padding: 0.75rem 1rem;
+    }
+    .dashboard-header img {
+        height: 28px;
+    }
+    .dashboard-header-actions .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    /* Dashboard content padding */
+    #dashboard-content {
+        padding: 1rem !important;
+    }
+
+    /* Dashboard hero text */
+    .dashboard-hero-title {
+        font-size: 1.5rem;
+    }
+
+    /* Plan cards - always visible actions on touch devices */
+    .plan-card-actions {
+        opacity: 1;
+    }
+
+    /* App view main area - tighter padding */
+    .printable-area {
+        padding: 1rem !important;
+    }
+
+    /* Buttons - minimum touch target size (44px) */
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .btn-icon {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Form inputs - larger touch targets */
+    .form-input {
+        min-height: 48px;
+        font-size: 16px; /* Prevents iOS zoom on focus */
+    }
+
+    /* Plan section cards - tighter on small screens */
+    .plan-card-inner {
+        padding: 1rem 1rem 1.25rem;
+    }
+
+    /* Plan card header - stack on very small screens */
+    .plan-card-header {
+        gap: 0.75rem;
+    }
+
+    .plan-card-title {
+        font-size: 1.15rem;
+    }
+
+    /* Auth box - slightly less padding on small screens */
+    .auth-box {
+        padding: 1.75rem;
+    }
+
+    /* Cookie consent - stack vertically */
+    .cookie-consent-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    .cookie-consent-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* --- 65d. Calendar Modal Full-Screen on Mobile --- */
+@media (max-width: 1024px) {
+    .calendar-modal {
+        padding: 0;
+        align-items: stretch;
+        justify-content: stretch;
+    }
+
+    .calendar-modal-content {
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+    }
+
+    .calendar-main-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+
+    .calendar-grid-container {
+        border-right: none;
+        border-bottom: 1px solid var(--gails-grey-mid);
+        padding: 1rem;
+        max-height: 50vh;
+        overflow-y: auto;
+    }
+
+    .calendar-header {
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    #calendar-month-year {
+        font-size: 1.25rem;
+    }
+
+    .calendar-grid {
+        gap: 0.25rem;
+    }
+
+    .calendar-day {
+        padding: 0.25rem;
+        min-height: 2.5rem;
+    }
+
+    .calendar-day-number {
+        font-size: 0.8rem;
+    }
+
+    /* Day detail takes full remaining space */
+    .day-detail-container {
+        min-height: 0;
+    }
+
+    .day-detail-content {
+        padding: 1rem;
+    }
+
+    /* Event form on mobile - needs more space */
+    .add-event-form-redesigned {
+        padding: 0.5rem 1rem 1rem;
+    }
+
+    .day-detail-header {
+        padding: 0.75rem 1rem;
+    }
+
+    #day-detail-header {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* --- 65e. Chat Modal Full-Screen on Mobile --- */
+@media (max-width: 640px) {
+    #gemini-chat-modal .chat-modal-box {
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        margin: 0;
+    }
+
+    #gemini-chat-modal {
+        padding: 0;
+    }
+
+    .prompt-starters-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .chat-bubble {
+        max-width: 90%;
+    }
+
+    .chat-modal-header {
+        padding: 0.875rem 1rem;
+    }
+
+    .chat-modal-header h3 {
+        font-size: 1rem;
+    }
+
+    /* Ensure chat footer stays above keyboard area */
+    .chat-modal-footer {
+        padding-bottom: env(safe-area-inset-bottom, 1rem);
+    }
+}
+
+/* --- 65f. File Viewer Modal Full-Screen on Mobile --- */
+@media (max-width: 768px) {
+    .file-modal-box {
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+    }
+
+    #file-view-modal {
+        padding: 0;
+    }
+
+    .file-modal-header {
+        padding: 0.75rem 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    /* Hide text labels on file viewer buttons on mobile */
+    #file-modal-actions .btn span {
+        display: none;
+    }
+
+    #file-modal-actions {
+        gap: 0.25rem;
+    }
+
+    #file-modal-actions .btn {
+        padding: 0.5rem 0.65rem;
+        min-width: 40px;
+    }
+}
+
+/* --- 65g. Generic Modal Mobile Tweaks --- */
+@media (max-width: 640px) {
+    .modal-overlay {
+        padding: 0.5rem;
+    }
+
+    .modal-box {
+        max-height: 95vh;
+        border-radius: 1rem;
+    }
+
+    .modal-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .modal-content {
+        padding: 1.25rem;
+    }
+
+    .modal-footer {
+        padding: 1rem 1.25rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    /* AI Action Plan modal */
+    #modal-box[data-type="aiActionPlan"],
+    #modal-box[data-type="aiActionPlan_view"],
+    #modal-box[data-type="aiActionPlan_generate"] {
+        max-width: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+        height: 100%;
+    }
+
+    /* AI table scrolls horizontally on mobile */
+    #ai-printable-area {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #ai-printable-area table {
+        min-width: 600px;
+    }
+}
+
+/* --- 65h. Profile Page Mobile --- */
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 0.5rem;
+    }
+
+    .profile-container .content-card {
+        padding: 1.5rem;
+    }
+
+    /* Stack profile photo above form fields on mobile */
+    .profile-container .grid.grid-cols-1.md\\:grid-cols-3 {
+        display: flex;
+        flex-direction: column-reverse;
+    }
+
+    #profile-photo-section {
+        margin-top: 0 !important;
+        margin-bottom: 1rem;
+    }
+}
+
+/* --- 65i. Improved Touch Interactions --- */
+@media (hover: none) and (pointer: coarse) {
+    /* Remove hover transforms on touch devices (prevents stuck states) */
+    .plan-card:hover {
+        transform: none;
+    }
+
+    .plan-card:active {
+        transform: scale(0.98);
+    }
+
+    .stepper-item:hover {
+        transform: none;
+    }
+
+    .btn:hover {
+        transform: none;
+    }
+
+    .btn:active {
+        transform: scale(0.96);
+    }
+
+    /* Always show action buttons on touch devices */
+    .plan-card-actions {
+        opacity: 1;
+    }
+
+    /* Always show remove row buttons on touch */
+    .btn-remove-row {
+        opacity: 1;
+    }
+
+    /* Remove hover effects that don't work well on touch */
+    .plan-objective-item:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Make event items easier to tap */
+    .day-event-list .event-item {
+        padding: 1.25rem 1rem;
+    }
+
+    .day-event-list .event-item:hover {
+        transform: none;
+    }
+
+    /* Radial menu tooltips - hide on touch (users tap, not hover) */
+    .radial-menu-item::after {
+        display: none;
+    }
+}
+
+/* --- 65j. Dashboard Grid Mobile Improvements --- */
+@media (max-width: 640px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .plan-card.new-plan-card {
+        min-height: 120px;
+    }
+
+    /* Footer more compact on mobile */
+    #dashboard-view > footer,
+    #app-view footer.no-print {
+        padding: 1rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* --- 65k. Sidebar Improvements on Mobile --- */
+@media (max-width: 1024px) {
+    #sidebar {
+        width: min(280px, 85vw);
+    }
+
+    /* Ensure sidebar has safe area padding at bottom */
+    #sidebar {
+        padding-bottom: env(safe-area-inset-bottom, 1.5rem);
+    }
+
+    /* Larger nav items for better touch targets */
+    .sidebar-nav a {
+        padding: 0.85rem 1rem;
+        min-height: 48px;
+    }
+
+    .sidebar-nav .nav-icon {
+        font-size: 1.25rem;
+    }
+
+    .sidebar-nav .nav-text {
+        font-size: 0.95rem;
+    }
+}
+
+/* --- 65l. Weekly Tabs Scrollable on Mobile --- */
+@media (max-width: 640px) {
+    .plan-weekly-tabs-wrapper {
+        margin-left: -1rem;
+        margin-right: -1rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .plan-weekly-tabs .weekly-tab {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* --- 65m. Summary Page Mobile --- */
+@media (max-width: 480px) {
+    .summary-hero-banner {
+        padding: 1.25rem 1rem;
+    }
+
+    .summary-hero-plan-name {
+        font-size: 1.2rem;
+    }
+
+    .summary-meta-item {
+        padding: 0.75rem 1rem;
+    }
+
+    .summary-month-header {
+        padding: 1rem;
+    }
+
+    .summary-month-num {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.85rem;
+    }
+
+    .summary-strategy-section,
+    .summary-weekly-section,
+    .summary-review-section {
+        padding: 1rem;
+    }
+}
+
+/* --- 65n. Safe Area Support for Notched Devices --- */
+@supports (padding: env(safe-area-inset-bottom)) {
+    .mobile-bottom-nav {
+        padding-bottom: calc(0.25rem + env(safe-area-inset-bottom));
+    }
+}
