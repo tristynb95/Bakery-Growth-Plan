@@ -1623,12 +1623,30 @@ export function initializeUI(database, state) {
         DOMElements.sidebarOverlay.addEventListener('click', () => DOMElements.appView.classList.remove('sidebar-open'));
     }
 
-    // Swipe gestures
+    // Swipe gestures — open sidebar on right-swipe, but not when swiping
+    // inside a horizontally scrollable element (e.g. weekly date tabs).
     if (DOMElements.mainContent && DOMElements.appView) {
         let touchStartX = 0;
+        let swipeAllowed = true;
         const swipeThreshold = 50;
-        DOMElements.mainContent.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-        DOMElements.mainContent.addEventListener('touchend', e => { if (e.changedTouches[0].screenX > touchStartX + swipeThreshold) { DOMElements.appView.classList.add('sidebar-open'); } });
+        DOMElements.mainContent.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+            // Walk up from the touch target to see if it's inside a horizontal scroller
+            swipeAllowed = true;
+            let el = e.target;
+            while (el && el !== DOMElements.mainContent) {
+                if (el.scrollWidth > el.clientWidth + 1) {
+                    swipeAllowed = false;
+                    break;
+                }
+                el = el.parentElement;
+            }
+        }, { passive: true });
+        DOMElements.mainContent.addEventListener('touchend', e => {
+            if (swipeAllowed && e.changedTouches[0].screenX > touchStartX + swipeThreshold) {
+                DOMElements.appView.classList.add('sidebar-open');
+            }
+        });
     }
     if (DOMElements.sidebar && DOMElements.appView) {
          let touchStartX = 0;
