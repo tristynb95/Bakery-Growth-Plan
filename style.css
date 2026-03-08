@@ -1439,6 +1439,14 @@ textarea.form-input {
     .plan-review-field-icon {
         margin-top: 0;
     }
+    .plan-review-field-content {
+        width: 100%;
+    }
+    .plan-review-field-content .form-input,
+    .plan-review-field-content [contenteditable="true"].form-input {
+        width: 100%;
+        box-sizing: border-box;
+    }
 }
 
 /* 25. Redesigned Summary Page Styles
