@@ -1754,7 +1754,7 @@ textarea.form-input {
     overflow: hidden;
 }
 .summary-month-card + .summary-month-card {
-    margin-top: 1rem;
+    margin-top: 2rem;
 }
 .summary-month-header {
     padding: 1.25rem 1.5rem;
