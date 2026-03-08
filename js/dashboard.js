@@ -107,7 +107,7 @@ export async function renderDashboard() {
             if (!aIsCurrent && bIsCurrent) return 1;
             const aKey = getQuarterSortKey(a.quarter);
             const bKey = getQuarterSortKey(b.quarter);
-            if (aKey !== bKey) return aKey - bKey;
+            if (aKey !== bKey) return bKey - aKey;
             // Same quarter: most recently edited first
             const aTime = a.lastEdited?.toDate?.()?.getTime() || 0;
             const bTime = b.lastEdited?.toDate?.()?.getTime() || 0;
