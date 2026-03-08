@@ -5128,7 +5128,7 @@ body:has(#app-view) {
 
 /* --- 65m. Summary Page Mobile --- */
 @media (max-width: 480px) {
-    .summary-redesigned { gap: 0.75rem; }
+    .summary-redesigned { gap: 2rem; }
     .summary-hero-banner { padding: 1rem 0.875rem; }
     .summary-hero-plan-name { font-size: 1.1rem; }
     .summary-hero-card { border-radius: 0.75rem; }
