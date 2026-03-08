@@ -152,7 +152,7 @@ export async function renderDashboard() {
         const progressToneClass = completion === 100 ? 'progress-tone-complete' : completion > 0 ? 'progress-tone-active' : 'progress-tone-idle';
         const isCurrentQuarter = plan.quarter === currentQ;
         const currentQuarterClass = isCurrentQuarter ? ' current-quarter' : '';
-        const currentQuarterLabel = isCurrentQuarter ? ' <span class="current-quarter-tag">Current Quarter</span>' : '';
+        const currentQuarterLabel = isCurrentQuarter ? ' <span class="current-quarter-tag">Current</span>' : '';
 
         dashboardHTML += `
             <div class="plan-card${currentQuarterClass}">
