@@ -373,6 +373,21 @@ function redo() {
 }
 
 
+// Add data-label attributes to table cells for mobile card layout
+function labelTableCellsForMobile(tableContainer) {
+    if (!tableContainer) return;
+    tableContainer.querySelectorAll('table').forEach(table => {
+        const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
+        table.querySelectorAll('tbody tr').forEach(row => {
+            row.querySelectorAll('td').forEach((td, i) => {
+                if (headers[i] && !td.classList.contains('actions-cell')) {
+                    td.setAttribute('data-label', headers[i]);
+                }
+            });
+        });
+    });
+}
+
 function makeTablesSortable(tableContainer) {
     if (!tableContainer) return;
     const tables = tableContainer.querySelectorAll('table');
@@ -402,6 +417,8 @@ function makeTablesSortable(tableContainer) {
             }
         });
     });
+    // Label cells for mobile card layout
+    labelTableCellsForMobile(tableContainer);
 };
 
 function setupAiModalInteractivity(container) {
@@ -467,10 +484,16 @@ function setupAiModalInteractivity(container) {
         const generateBtn = e.target.closest('.generate-month-plan-btn');
 
         if (addBtn) {
-            const tableBody = addBtn.closest('table')?.querySelector('tbody'); // Optional chaining
+            const table = addBtn.closest('table');
+            const tableBody = table?.querySelector('tbody');
             if (tableBody) {
+                const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `<td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true">To Do</td><td class="actions-cell"><button class="btn-remove-row"><i class="bi bi-trash3"></i></button></td>`;
+                // Add data-label for mobile card layout
+                newRow.querySelectorAll('td').forEach((td, i) => {
+                    if (headers[i] && !td.classList.contains('actions-cell')) td.setAttribute('data-label', headers[i]);
+                });
                 tableBody.appendChild(newRow);
                 saveState();
                 if (debouncedSave) debouncedSave();
