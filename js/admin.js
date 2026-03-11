@@ -33,7 +33,6 @@ function runAdminPortal(app) {
     const logoutBtn = document.getElementById('admin-logout-btn');
     const searchInput = document.getElementById('admin-search-input');
     const bakeryFilter = document.getElementById('admin-bakery-filter');
-    const collapseAllPlansBtn = document.getElementById('collapse-all-plans-btn');
     const usersList = document.getElementById('admin-users-list');
     const emptyState = document.getElementById('admin-empty-state');
 
@@ -131,8 +130,6 @@ function runAdminPortal(app) {
 
     searchInput.addEventListener('input', () => filterAndRender());
     bakeryFilter.addEventListener('change', () => filterAndRender());
-    collapseAllPlansBtn.addEventListener('click', collapseAllPlanDropdowns);
-
     // --- Delete user from admin ---
     usersList.addEventListener('click', (e) => {
         const promoteBtn = e.target.closest('.promote-admin-btn');
@@ -538,13 +535,6 @@ function runAdminPortal(app) {
         renderUsers(filtered);
     }
 
-
-    function collapseAllPlanDropdowns() {
-        const openPlanDropdowns = usersList.querySelectorAll('.admin-plan-dropdown[open]');
-        openPlanDropdowns.forEach((dropdown) => {
-            dropdown.open = false;
-        });
-    }
 
     async function fetchAllUsers(db) {
         const usersSnapshot = await db.collection('users').get();

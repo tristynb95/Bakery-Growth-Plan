@@ -613,7 +613,8 @@ textarea.form-input {
     justify-content: flex-end;
 }
 .admin-search-wrap {
-    width: min(320px, 100%);
+    width: 100%;
+    max-width: 420px;
 }
 .admin-search-wrap .form-input,
 #admin-bakery-filter {
