@@ -13,6 +13,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
     "docx-preview": "^0.3.6",
+    "dompurify": "^3.3.3",
     "firebase-admin": "^12.1.0"
   },
   "devDependencies": {

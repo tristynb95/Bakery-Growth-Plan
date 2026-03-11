@@ -3,6 +3,7 @@
 import { getGeminiChatResponse } from './api.js';
 import { openModal } from './ui.js';
 import { loadCalendarData } from './calendar.js';
+import DOMPurify from 'dompurify';
 
 let appState;
 let db;
@@ -103,7 +104,7 @@ function addMessageToUI(sender, text, isLoading = false) {
         if (sender === 'user') {
             bubble.textContent = text;
         } else {
-            bubble.innerHTML = parseMarkdownToHTML(text);
+            bubble.innerHTML = DOMPurify.sanitize(parseMarkdownToHTML(text));
         }
     }
     wrapper.appendChild(bubble);
@@ -115,7 +116,7 @@ function updateLastAiMessageInUI(text) {
     const allAiBubbles = DOMElements.conversationView.querySelectorAll('.ai-bubble');
     if (allAiBubbles.length > 0) {
         const lastBubble = allAiBubbles[allAiBubbles.length - 1];
-        lastBubble.innerHTML = parseMarkdownToHTML(text);
+        lastBubble.innerHTML = DOMPurify.sanitize(parseMarkdownToHTML(text));
         lastBubble.parentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
@@ -203,7 +204,7 @@ async function loadChatHistory(conversationId) {
             if (data.role === 'user') {
                 bubble.textContent = data.text;
             } else {
-                bubble.innerHTML = parseMarkdownToHTML(data.text);
+                bubble.innerHTML = DOMPurify.sanitize(parseMarkdownToHTML(data.text));
             }
             wrapper.appendChild(bubble);
             fragment.appendChild(wrapper);
