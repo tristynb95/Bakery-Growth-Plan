@@ -33,6 +33,7 @@ function runAdminPortal(app) {
     const logoutBtn = document.getElementById('admin-logout-btn');
     const searchInput = document.getElementById('admin-search-input');
     const bakeryFilter = document.getElementById('admin-bakery-filter');
+    const collapseAllPlansBtn = document.getElementById('collapse-all-plans-btn');
     const usersList = document.getElementById('admin-users-list');
     const emptyState = document.getElementById('admin-empty-state');
 
@@ -130,6 +131,7 @@ function runAdminPortal(app) {
 
     searchInput.addEventListener('input', () => filterAndRender());
     bakeryFilter.addEventListener('change', () => filterAndRender());
+    collapseAllPlansBtn.addEventListener('click', collapseAllPlanDropdowns);
 
     // --- Delete user from admin ---
     usersList.addEventListener('click', (e) => {
@@ -536,6 +538,14 @@ function runAdminPortal(app) {
         renderUsers(filtered);
     }
 
+
+    function collapseAllPlanDropdowns() {
+        const openPlanDropdowns = usersList.querySelectorAll('.admin-plan-dropdown[open]');
+        openPlanDropdowns.forEach((dropdown) => {
+            dropdown.open = false;
+        });
+    }
+
     async function fetchAllUsers(db) {
         const usersSnapshot = await db.collection('users').get();
         const usersData = [];
@@ -713,7 +723,7 @@ function runAdminPortal(app) {
                             </div>
                             <div class="admin-user-metrics mt-3">
                                 <div class="admin-user-metric">
-                                    <span class="admin-user-metric-label">Plan coverage</span>
+                                    <span class="admin-user-metric-label">Plans</span>
                                     <strong>${user.planCount}</strong>
                                 </div>
                                 <div class="admin-user-metric">
@@ -725,9 +735,18 @@ function runAdminPortal(app) {
                                     <strong>${user.plans[0] ? formatDate(user.plans[0].lastEdited) : 'No edits yet'}</strong>
                                 </div>
                             </div>
-                            <div class="mt-3 space-y-2 admin-plan-list">
-                                ${plansHTML}
-                            </div>
+                            <details class="mt-3 admin-plan-dropdown">
+                                <summary class="admin-plan-summary">
+                                    <span class="inline-flex items-center gap-2">
+                                        <i class="bi bi-journal-text"></i>
+                                        <span>View plans (${user.planCount})</span>
+                                    </span>
+                                    <i class="bi bi-chevron-down admin-plan-summary-icon"></i>
+                                </summary>
+                                <div class="space-y-2 admin-plan-list">
+                                    ${plansHTML}
+                                </div>
+                            </details>
                         </div>
                     </div>
                 </div>`;
