@@ -2,17 +2,21 @@ const admin = require("firebase-admin");
 
 const ADMIN_EMAIL = "tristen_bayley@gailsbread.co.uk";
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
-    }),
-  });
+function getFirebaseApp() {
+  if (!admin.apps.length) {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: (process.env.FIREBASE_PRIVATE_KEY || "").replace(
+          /\\n/g,
+          "\n"
+        ),
+      }),
+    });
+  }
+  return admin;
 }
-
-const db = admin.firestore();
 
 exports.handler = async function (event) {
   if (event.httpMethod !== "POST") {
@@ -20,6 +24,9 @@ exports.handler = async function (event) {
   }
 
   try {
+    const app = getFirebaseApp();
+    const db = app.firestore();
+
     const authHeader = event.headers.authorization || "";
     const idToken = authHeader.replace("Bearer ", "");
 
@@ -31,7 +38,7 @@ exports.handler = async function (event) {
     }
 
     // Verify the caller is the admin
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const decodedToken = await app.auth().verifyIdToken(idToken);
     if (decodedToken.email !== ADMIN_EMAIL) {
       return {
         statusCode: 403,
@@ -87,10 +94,13 @@ exports.handler = async function (event) {
 
     // Delete the Firebase Auth account
     try {
-      await admin.auth().deleteUser(uid);
+      await app.auth().deleteUser(uid);
     } catch (authErr) {
       // User may not exist in Auth (e.g. already deleted) - log but don't fail
-      console.warn("Could not delete Auth user (may already be removed):", authErr.message);
+      console.warn(
+        "Could not delete Auth user (may already be removed):",
+        authErr.message
+      );
     }
 
     return {
