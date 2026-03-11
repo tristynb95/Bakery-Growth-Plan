@@ -137,7 +137,7 @@ export async function renderDashboard() {
             <div class="dashboard-hero-text">
                 <p class="dashboard-hero-greeting">${greeting}${greetName}</p>
                 <h1 class="dashboard-hero-title font-poppins">Your Growth Plans</h1>
-                <p class="dashboard-hero-subtitle">${plans.length} plan${plans.length !== 1 ? 's' : ''} &middot; Keep building momentum</p>
+                <p class="dashboard-hero-subtitle">${plans.length} plan${plans.length !== 1 ? 's' : ''}</p>
             </div>
         </div>
         <div class="dashboard-grid">`;
