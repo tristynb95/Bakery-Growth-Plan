@@ -4,7 +4,7 @@ function getFirebaseApp() {
   if (!admin.apps.length) {
     const projectId = process.env.VITE_FIREBASE_PROJECT_ID;
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
     if (!projectId || !clientEmail || !privateKey) {
       const missing = [];
@@ -12,15 +12,22 @@ function getFirebaseApp() {
       if (!clientEmail) missing.push("FIREBASE_CLIENT_EMAIL");
       if (!privateKey) missing.push("FIREBASE_PRIVATE_KEY");
       throw new Error(
-        `Missing required environment variables: ${missing.join(", ")}`
+        `Missing environment variables: ${missing.join(", ")}`
       );
     }
+
+    // Handle private key stored as JSON string (wrapped in quotes)
+    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+      privateKey = JSON.parse(privateKey);
+    }
+    // Replace escaped newlines with actual newlines
+    privateKey = privateKey.replace(/\\n/g, "\n");
 
     admin.initializeApp({
       credential: admin.credential.cert({
         projectId,
         clientEmail,
-        privateKey: privateKey.replace(/\\n/g, "\n"),
+        privateKey,
       }),
     });
   }
@@ -36,11 +43,11 @@ exports.handler = async function (event) {
   try {
     app = getFirebaseApp();
   } catch (initError) {
-    console.error("Firebase Admin init failed:", initError.message);
+    console.error("Firebase Admin init failed:", initError);
     return {
       statusCode: 500,
       body: JSON.stringify({
-        error: "Server configuration error. Check function environment variables.",
+        error: `Firebase Admin init failed: ${initError.message}`,
       }),
     };
   }
@@ -158,7 +165,7 @@ exports.handler = async function (event) {
     console.error("Error deleting user:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to delete user." }),
+      body: JSON.stringify({ error: `Delete failed: ${error.message}` }),
     };
   }
 };
