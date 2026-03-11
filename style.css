@@ -606,6 +606,9 @@ textarea.form-input {
 .admin-users-section {
     background: linear-gradient(180deg, #FFFFFF 0%, #FCFCFD 100%);
 }
+.admin-users-toolbar {
+    background: linear-gradient(180deg, #FFFFFF 0%, #FAFBFF 100%);
+}
 .admin-search-tools {
     justify-content: flex-end;
 }
@@ -622,6 +625,8 @@ textarea.form-input {
 }
 .admin-user-row {
     position: relative;
+    padding-left: 1.45rem !important;
+    padding-right: 1.45rem !important;
 }
 .admin-user-row:hover {
     background-color: #FAFBFF;
@@ -643,6 +648,35 @@ textarea.form-input {
 }
 .admin-badges {
     row-gap: 0.5rem;
+}
+.admin-user-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
+}
+.admin-user-metric {
+    border: 1px solid #E9EEF5;
+    background: #FBFCFE;
+    border-radius: 0.8rem;
+    padding: 0.55rem 0.7rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+.admin-user-metric-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6B7280;
+    font-weight: 700;
+}
+.admin-user-metric strong {
+    font-size: 0.83rem;
+    color: #1F2937;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .admin-plan-list {
     border-top: 1px solid #EEF2F7;
@@ -673,6 +707,9 @@ textarea.form-input {
         width: 100%;
         flex-direction: column;
         align-items: stretch;
+    }
+    .admin-user-metrics {
+        grid-template-columns: 1fr;
     }
     .admin-search-wrap {
         width: 100%;

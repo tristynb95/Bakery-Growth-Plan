@@ -73,7 +73,7 @@ function runApp(app) {
         if (e.detail && e.detail.isRevival) {
             const authError = document.getElementById('auth-error');
             if (authError) {
-                authError.textContent = 'For your security, please sign in again.';
+                authError.textContent = 'Your session has ended, so please sign in again to keep going.';
                 authError.style.display = 'block';
             }
         }
