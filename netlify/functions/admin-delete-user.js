@@ -2,34 +2,52 @@ const admin = require("firebase-admin");
 
 function getFirebaseApp() {
   if (!admin.apps.length) {
-    const projectId = process.env.VITE_FIREBASE_PROJECT_ID;
-    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    // Support two modes:
+    // 1. Single FIREBASE_SERVICE_ACCOUNT env var containing the full JSON
+    // 2. Separate FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY env vars
+    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
 
-    if (!projectId || !clientEmail || !privateKey) {
-      const missing = [];
-      if (!projectId) missing.push("VITE_FIREBASE_PROJECT_ID");
-      if (!clientEmail) missing.push("FIREBASE_CLIENT_EMAIL");
-      if (!privateKey) missing.push("FIREBASE_PRIVATE_KEY");
-      throw new Error(
-        `Missing environment variables: ${missing.join(", ")}`
-      );
+    let credential;
+
+    if (serviceAccountJson) {
+      try {
+        const serviceAccount = JSON.parse(serviceAccountJson);
+        credential = admin.credential.cert(serviceAccount);
+      } catch (parseErr) {
+        throw new Error(
+          `Failed to parse FIREBASE_SERVICE_ACCOUNT JSON: ${parseErr.message}`
+        );
+      }
+    } else {
+      const projectId = process.env.VITE_FIREBASE_PROJECT_ID;
+      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+      let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+
+      if (!projectId || !clientEmail || !privateKey) {
+        const missing = [];
+        if (!projectId) missing.push("VITE_FIREBASE_PROJECT_ID");
+        if (!clientEmail) missing.push("FIREBASE_CLIENT_EMAIL");
+        if (!privateKey) missing.push("FIREBASE_PRIVATE_KEY");
+        throw new Error(
+          `Missing environment variables: ${missing.join(", ")}. Alternatively, set FIREBASE_SERVICE_ACCOUNT with the full service account JSON.`
+        );
+      }
+
+      // Handle private key stored as JSON string (wrapped in quotes)
+      if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+        try {
+          privateKey = JSON.parse(privateKey);
+        } catch (_) {
+          // not valid JSON, use as-is
+        }
+      }
+      // Replace escaped newlines with actual newlines
+      privateKey = privateKey.replace(/\\n/g, "\n");
+
+      credential = admin.credential.cert({ projectId, clientEmail, privateKey });
     }
 
-    // Handle private key stored as JSON string (wrapped in quotes)
-    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-      privateKey = JSON.parse(privateKey);
-    }
-    // Replace escaped newlines with actual newlines
-    privateKey = privateKey.replace(/\\n/g, "\n");
-
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId,
-        clientEmail,
-        privateKey,
-      }),
-    });
+    admin.initializeApp({ credential });
   }
   return admin;
 }
