@@ -4,17 +4,19 @@ function getFirebaseApp() {
   if (!admin.apps.length) {
     const projectId = process.env.VITE_FIREBASE_PROJECT_ID;
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const privateKeyBase64 = process.env.FIREBASE_PRIVATE_KEY_BASE64;
+    const keyPart1 = process.env.FIREBASE_PRIVATE_KEY_1;
+    const keyPart2 = process.env.FIREBASE_PRIVATE_KEY_2;
 
-    if (!projectId || !clientEmail || !privateKeyBase64) {
+    if (!projectId || !clientEmail || !keyPart1 || !keyPart2) {
       const missing = [];
       if (!projectId) missing.push("VITE_FIREBASE_PROJECT_ID");
       if (!clientEmail) missing.push("FIREBASE_CLIENT_EMAIL");
-      if (!privateKeyBase64) missing.push("FIREBASE_PRIVATE_KEY_BASE64");
+      if (!keyPart1) missing.push("FIREBASE_PRIVATE_KEY_1");
+      if (!keyPart2) missing.push("FIREBASE_PRIVATE_KEY_2");
       throw new Error(`Missing environment variables: ${missing.join(", ")}`);
     }
 
-    const privateKey = Buffer.from(privateKeyBase64, "base64").toString("utf8");
+    const privateKey = Buffer.from(keyPart1 + keyPart2, "base64").toString("utf8");
 
     admin.initializeApp({
       credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
