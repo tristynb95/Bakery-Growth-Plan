@@ -647,8 +647,8 @@ function runAdminPortal(app) {
         usersList.innerHTML = users.map(user => {
             const initials = getInitials(user.name);
             const photoHTML = user.photoURL
-                ? `<img src="${user.photoURL}" alt="${user.name}" class="w-10 h-10 rounded-full object-cover">`
-                : `<div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center font-bold gails-red-text text-sm">${initials}</div>`;
+                ? `<img src="${user.photoURL}" alt="${user.name}" class="w-12 h-12 rounded-full object-cover">`
+                : `<div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center font-bold gails-red-text text-sm">${initials}</div>`;
 
             const plansHTML = user.plans.length > 0
                 ? user.plans.map(plan => {
@@ -691,64 +691,68 @@ function runAdminPortal(app) {
                 : userRole === 'admin'
                     ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700"><i class="bi bi-shield-lock"></i> Admin</span>'
                     : '';
+
             const canDeleteUser = userRole !== 'owner';
             const deleteUserBtn = canDeleteUser
-                ? `<button class="delete-user-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-600 hover:bg-red-200 transition-colors" data-uid="${user.uid}" data-name="${user.name}" data-email="${user.email}"><i class="bi bi-trash3"></i> Delete</button>`
+                ? `<button class="delete-user-btn inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 transition-colors" data-uid="${user.uid}" data-name="${user.name}" data-email="${user.email}"><i class="bi bi-trash3"></i> Delete</button>`
                 : '';
             const roleActionBtn = !isCurrentUserOwner
                 ? ''
                 : userRole === 'owner'
-                    ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-600"><i class="bi bi-lock-fill"></i> Protected</span>'
+                    ? ''
                     : userRole === 'admin'
-                        ? `<button class="demote-admin-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 hover:bg-orange-200 transition-colors" data-email="${user.email}"><i class="bi bi-person-dash-fill"></i> Demote Admin</button>`
-                        : `<button class="promote-admin-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors" data-email="${user.email}"><i class="bi bi-person-up"></i> Make Admin</button>`;
+                        ? `<button class="demote-admin-btn inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-orange-700 hover:bg-orange-50 transition-colors" data-email="${user.email}"><i class="bi bi-person-dash-fill"></i> Demote</button>`
+                        : `<button class="promote-admin-btn inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-emerald-700 hover:bg-emerald-50 transition-colors" data-email="${user.email}"><i class="bi bi-person-up"></i> Make Admin</button>`;
+
+            const hasActions = roleActionBtn || deleteUserBtn;
+            const actionsHTML = hasActions ? `
+                <div class="admin-user-actions">
+                    ${roleActionBtn}
+                    ${deleteUserBtn}
+                </div>` : '';
 
             return `
-                <div class="admin-user-row p-4 sm:p-6 transition-colors">
-                    <div class="flex items-start gap-4">
-                        ${photoHTML}
-                        <div class="flex-grow min-w-0">
-                            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
-                                <div class="min-w-0">
+                <div class="admin-user-card">
+                    <div class="admin-user-card-header">
+                        <div class="flex items-center gap-3 min-w-0">
+                            ${photoHTML}
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
                                     <h3 class="font-bold text-gray-900">${user.name}</h3>
-                                    <p class="text-sm text-gray-500 truncate">${user.email}</p>
-                                </div>
-                                <div class="admin-badges flex items-center gap-2 flex-wrap sm:justify-end">
                                     ${roleBadge}
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${bakeryBadgeClass}"><i class="bi bi-shop"></i> ${user.bakery}</span>
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600"><i class="bi bi-journal-text"></i> ${user.planCount} plan${user.planCount !== 1 ? 's' : ''}</span>
-                                    ${roleActionBtn}
-                                    ${deleteUserBtn}
                                 </div>
+                                <p class="text-sm text-gray-500 truncate mt-0.5">${user.email}</p>
                             </div>
-                            <div class="admin-user-metrics mt-3">
-                                <div class="admin-user-metric">
-                                    <span class="admin-user-metric-label">Plans</span>
-                                    <strong>${user.planCount}</strong>
-                                </div>
-                                <div class="admin-user-metric">
-                                    <span class="admin-user-metric-label">Avg completion</span>
-                                    <strong>${averageCompletion}%</strong>
-                                </div>
-                                <div class="admin-user-metric">
-                                    <span class="admin-user-metric-label">Latest activity</span>
-                                    <strong>${user.plans[0] ? formatDate(user.plans[0].lastEdited) : 'No edits yet'}</strong>
-                                </div>
-                            </div>
-                            <details class="mt-3 admin-plan-dropdown">
-                                <summary class="admin-plan-summary">
-                                    <span class="inline-flex items-center gap-2">
-                                        <i class="bi bi-journal-text"></i>
-                                        <span>View plans (${user.planCount})</span>
-                                    </span>
-                                    <i class="bi bi-chevron-down admin-plan-summary-icon"></i>
-                                </summary>
-                                <div class="space-y-2 admin-plan-list">
-                                    ${plansHTML}
-                                </div>
-                            </details>
+                        </div>
+                        <span class="admin-bakery-tag ${bakeryBadgeClass}"><i class="bi bi-shop"></i> ${user.bakery}</span>
+                    </div>
+                    <div class="admin-user-metrics">
+                        <div class="admin-user-metric">
+                            <span class="admin-user-metric-label">Plans</span>
+                            <strong>${user.planCount}</strong>
+                        </div>
+                        <div class="admin-user-metric">
+                            <span class="admin-user-metric-label">Avg completion</span>
+                            <strong>${averageCompletion}%</strong>
+                        </div>
+                        <div class="admin-user-metric">
+                            <span class="admin-user-metric-label">Latest activity</span>
+                            <strong>${user.plans[0] ? formatDate(user.plans[0].lastEdited) : 'No edits yet'}</strong>
                         </div>
                     </div>
+                    <details class="admin-plan-dropdown">
+                        <summary class="admin-plan-summary">
+                            <span class="inline-flex items-center gap-2">
+                                <i class="bi bi-journal-text"></i>
+                                <span>View plans (${user.planCount})</span>
+                            </span>
+                            <i class="bi bi-chevron-down admin-plan-summary-icon"></i>
+                        </summary>
+                        <div class="space-y-2 admin-plan-list">
+                            ${plansHTML}
+                        </div>
+                    </details>
+                    ${actionsHTML}
                 </div>`;
         }).join('');
     }
