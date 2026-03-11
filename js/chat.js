@@ -3,7 +3,7 @@
 import { getGeminiChatResponse } from './api.js';
 import { openModal } from './ui.js';
 import { loadCalendarData } from './calendar.js';
-import DOMPurify from 'dompurify';
+// DOMPurify is loaded via CDN script tag in index.html
 
 let appState;
 let db;
