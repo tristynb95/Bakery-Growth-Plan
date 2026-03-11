@@ -233,12 +233,23 @@ export function initializeDashboard(database, state, modalOpener, planSelector) 
             window.location.href = '/admin.html';
         });
 
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user && user.email === 'tristen_bayley@gailsbread.co.uk') {
-                dashboardAdminBtn.classList.remove('hidden');
-            } else {
-                dashboardAdminBtn.classList.add('hidden');
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+                try {
+                    const rolesDoc = await db.collection('settings').doc('adminRoles').get();
+                    if (rolesDoc.exists) {
+                        const admins = rolesDoc.data().admins || [];
+                        const userEmail = (user.email || '').trim().toLowerCase();
+                        if (admins.map(e => e.trim().toLowerCase()).includes(userEmail)) {
+                            dashboardAdminBtn.classList.remove('hidden');
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error checking admin roles:', e);
+                }
             }
+            dashboardAdminBtn.classList.add('hidden');
         });
     }
     
