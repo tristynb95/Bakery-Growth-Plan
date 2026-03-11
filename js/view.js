@@ -258,7 +258,7 @@ function runViewScript(app) {
         DOMElements.headerTitle.textContent = formData.planName || 'Growth Plan Summary';
         DOMElements.headerSubtitle.textContent = `A read-only summary for ${formData.bakeryLocation || 'the bakery'}.`;
 
-        DOMElements.contentArea.innerHTML = `
+        const rawHTML = `
             <div class="summary-redesigned">
                 <div class="summary-hero-card">
                     <div class="summary-hero-banner">
@@ -298,6 +298,17 @@ function runViewScript(app) {
                     </div>
                 </div>
             </div>`;
+
+        // Sanitize the dynamically generated HTML using DOMPurify
+        // This is crucial to prevent DOM-Based XSS vulnerabilities
+        // as formData values are injected directly into the HTML string
+        if (typeof DOMPurify !== 'undefined') {
+            DOMElements.contentArea.innerHTML = DOMPurify.sanitize(rawHTML);
+        } else {
+            // Fallback if DOMPurify failed to load
+            console.error('DOMPurify is not loaded, falling back to empty content to prevent XSS.');
+            DOMElements.contentArea.textContent = 'Error: Security library not loaded. Please refresh the page.';
+        }
     };
 
     const loadSharedPlan = async () => {
