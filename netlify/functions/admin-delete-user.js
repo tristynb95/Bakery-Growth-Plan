@@ -1,25 +1,60 @@
 const admin = require("firebase-admin");
 
-const ADMIN_EMAIL = "tristen_bayley@gailsbread.co.uk";
+function getFirebaseApp() {
+  if (!admin.apps.length) {
+    const projectId = process.env.VITE_FIREBASE_PROJECT_ID;
+    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+    let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
-    }),
-  });
+    if (!projectId || !clientEmail || !privateKey) {
+      const missing = [];
+      if (!projectId) missing.push("VITE_FIREBASE_PROJECT_ID");
+      if (!clientEmail) missing.push("FIREBASE_CLIENT_EMAIL");
+      if (!privateKey) missing.push("FIREBASE_PRIVATE_KEY");
+      throw new Error(
+        `Missing environment variables: ${missing.join(", ")}`
+      );
+    }
+
+    // Handle private key stored as JSON string (wrapped in quotes)
+    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+      privateKey = JSON.parse(privateKey);
+    }
+    // Replace escaped newlines with actual newlines
+    privateKey = privateKey.replace(/\\n/g, "\n");
+
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId,
+        clientEmail,
+        privateKey,
+      }),
+    });
+  }
+  return admin;
 }
-
-const db = admin.firestore();
 
 exports.handler = async function (event) {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
 
+  let app;
   try {
+    app = getFirebaseApp();
+  } catch (initError) {
+    console.error("Firebase Admin init failed:", initError);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: `Firebase Admin init failed: ${initError.message}`,
+      }),
+    };
+  }
+
+  try {
+    const db = app.firestore();
+
     const authHeader = event.headers.authorization || "";
     const idToken = authHeader.replace("Bearer ", "");
 
@@ -30,9 +65,21 @@ exports.handler = async function (event) {
       };
     }
 
-    // Verify the caller is the admin
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    if (decodedToken.email !== ADMIN_EMAIL) {
+    // Verify the caller's identity
+    const decodedToken = await app.auth().verifyIdToken(idToken);
+    const callerEmail = (decodedToken.email || "").trim().toLowerCase();
+
+    // Check caller is an admin using Firestore-based roles
+    const rolesDoc = await db
+      .collection("settings")
+      .doc("adminRoles")
+      .get();
+    const rolesData = rolesDoc.exists ? rolesDoc.data() : {};
+    const admins = Array.isArray(rolesData.admins)
+      ? rolesData.admins.map((e) => e.trim().toLowerCase())
+      : [];
+
+    if (!admins.includes(callerEmail)) {
       return {
         statusCode: 403,
         body: JSON.stringify({ error: "Access denied." }),
@@ -52,6 +99,20 @@ exports.handler = async function (event) {
       return {
         statusCode: 400,
         body: JSON.stringify({ error: "Cannot delete your own account." }),
+      };
+    }
+
+    // Prevent deleting the owner
+    const ownerEmail = (rolesData.ownerEmail || "").trim().toLowerCase();
+    const targetUser = await app.auth().getUser(uid).catch(() => null);
+    if (
+      targetUser &&
+      targetUser.email &&
+      targetUser.email.trim().toLowerCase() === ownerEmail
+    ) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({ error: "The owner account cannot be deleted." }),
       };
     }
 
@@ -87,10 +148,13 @@ exports.handler = async function (event) {
 
     // Delete the Firebase Auth account
     try {
-      await admin.auth().deleteUser(uid);
+      await app.auth().deleteUser(uid);
     } catch (authErr) {
       // User may not exist in Auth (e.g. already deleted) - log but don't fail
-      console.warn("Could not delete Auth user (may already be removed):", authErr.message);
+      console.warn(
+        "Could not delete Auth user (may already be removed):",
+        authErr.message
+      );
     }
 
     return {
@@ -101,7 +165,7 @@ exports.handler = async function (event) {
     console.error("Error deleting user:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to delete user." }),
+      body: JSON.stringify({ error: `Delete failed: ${error.message}` }),
     };
   }
 };
