@@ -669,6 +669,11 @@ function runAdminPortal(app) {
                 }).join('')
                 : '<p class="text-sm text-gray-400 italic px-3">No plans created yet</p>';
 
+            const completionValues = user.plans.map(plan => calculateCompletion(plan));
+            const averageCompletion = completionValues.length
+                ? Math.round(completionValues.reduce((sum, value) => sum + value, 0) / completionValues.length)
+                : 0;
+
             const bakeryBadgeClass = user.bakery === 'No Bakery' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700';
             const userRole = getRoleForEmail(user.email);
             const roleBadge = userRole === 'owner'
@@ -704,6 +709,20 @@ function runAdminPortal(app) {
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600"><i class="bi bi-journal-text"></i> ${user.planCount} plan${user.planCount !== 1 ? 's' : ''}</span>
                                     ${roleActionBtn}
                                     ${deleteUserBtn}
+                                </div>
+                            </div>
+                            <div class="admin-user-metrics mt-3">
+                                <div class="admin-user-metric">
+                                    <span class="admin-user-metric-label">Plan coverage</span>
+                                    <strong>${user.planCount}</strong>
+                                </div>
+                                <div class="admin-user-metric">
+                                    <span class="admin-user-metric-label">Avg completion</span>
+                                    <strong>${averageCompletion}%</strong>
+                                </div>
+                                <div class="admin-user-metric">
+                                    <span class="admin-user-metric-label">Latest activity</span>
+                                    <strong>${user.plans[0] ? formatDate(user.plans[0].lastEdited) : 'No edits yet'}</strong>
                                 </div>
                             </div>
                             <div class="mt-3 space-y-2 admin-plan-list">
