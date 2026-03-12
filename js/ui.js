@@ -1273,7 +1273,7 @@ export function openModal(type, context = {}) {
             break;
         case 'timeout':
             if (DOMElements.modalTitle) DOMElements.modalTitle.textContent = "Session Ended"; // Check title element
-            DOMElements.modalContent.innerHTML = `<p>Your work has been saved automatically. Your session has ended, so please sign in again to keep going.</p>`;
+            DOMElements.modalContent.innerHTML = `<p>Your work has been saved automatically. Your session has ended: Please sign in again to keep going.</p>`;
             DOMElements.modalActionBtn.textContent = "Continue";
             DOMElements.modalCancelBtn.style.display = 'none';
             // DOMElements.modalActionBtn.onclick = closeModal; // Overwrite general handler
